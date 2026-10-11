@@ -54,6 +54,7 @@ Route::prefix('v1')->group(function (): void {
 
             // Manajemen Pengguna & Statistik (Admin Only)
             Route::get('/admin/pengguna', [AdminPenggunaController::class, 'index']);
+            Route::get('/admin/pengguna/{id}', [AdminPenggunaController::class, 'show']);
             Route::patch('/admin/pengguna/{id}/status', [AdminPenggunaController::class, 'updateStatus']);
             Route::get('/admin/stats', [AdminPenggunaController::class, 'stats']);
         });
