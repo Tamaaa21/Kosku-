@@ -18,6 +18,7 @@ class PenggunaSeeder extends Seeder
             [
                 'nama' => 'Administrator',
                 'password' => Hash::make('password'),
+                'telepon' => '081234567890',
                 'role' => 'admin',
                 'aktif' => true,
             ]
@@ -28,6 +29,7 @@ class PenggunaSeeder extends Seeder
             [
                 'nama' => 'Pemilik Kos',
                 'password' => Hash::make('password'),
+                'telepon' => '081298765432',
                 'role' => 'pemilik',
                 'aktif' => true,
             ]
@@ -38,6 +40,7 @@ class PenggunaSeeder extends Seeder
             [
                 'nama' => 'Pencari Kos',
                 'password' => Hash::make('password'),
+                'telepon' => '081311223344',
                 'role' => 'pencari',
                 'aktif' => true,
             ]

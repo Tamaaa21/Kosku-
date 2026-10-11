@@ -22,6 +22,8 @@ class PenggunaResource extends JsonResource
             'id' => $this->id,
             'nama' => $this->nama,
             'email' => $this->email,
+            'telepon' => $this->telepon,
+            'no_hp' => $this->telepon,
             'role' => $this->role,
             'aktif' => (bool) $this->aktif,
             'created_at' => $this->created_at?->toISOString(),
