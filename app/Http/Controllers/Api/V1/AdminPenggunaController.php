@@ -5,10 +5,14 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\UpdatePenggunaStatusRequest;
 use App\Http\Resources\PenggunaResource;
+use App\Models\Kamar;
+use App\Models\Kos;
+use App\Models\Pemesanan;
 use App\Models\Pengguna;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Carbon;
 
 class AdminPenggunaController extends Controller
 {
@@ -54,6 +58,80 @@ class AdminPenggunaController extends Controller
         return response()->json([
             'message' => 'Status akun pengguna berhasil diperbarui.',
             'data' => new PenggunaResource($pengguna),
+        ]);
+    }
+
+    /**
+     * Get aggregated system KPIs, occupancy, revenue, and daily trends for admin dashboard.
+     */
+    public function stats(): JsonResponse
+    {
+        $totalPengguna = Pengguna::count();
+        $totalPencari = Pengguna::where('role', 'pencari')->count();
+        $totalPemilik = Pengguna::where('role', 'pemilik')->count();
+        $penggunaAktif = Pengguna::where('aktif', true)->count();
+        $penggunaNonaktif = Pengguna::where('aktif', false)->count();
+
+        $totalKos = Kos::count();
+        $totalKamar = Kamar::count();
+        $kamarTersedia = Kamar::where('status', 'tersedia')->count();
+        $kamarTerisi = Kamar::where('status', 'terisi')->count();
+        $okupansiRate = $totalKamar > 0 ? round(($kamarTerisi / $totalKamar) * 100, 1) : 0;
+
+        $totalPemesanan = Pemesanan::count();
+        $pemesananMenunggu = Pemesanan::where('status', 'menunggu')->count();
+        $pemesananDisetujui = Pemesanan::where('status', 'disetujui')->count();
+        $pemesananDitolak = Pemesanan::where('status', 'ditolak')->count();
+
+        $totalEstimasiNilai = (int) Pemesanan::where('pemesanan.status', 'disetujui')
+            ->join('kamar', 'pemesanan.kamar_id', '=', 'kamar.id')
+            ->sum('kamar.harga');
+
+        $kosJenis = [
+            'putri' => Kos::where('jenis', 'putri')->count(),
+            'putra' => Kos::where('jenis', 'putra')->count(),
+            'campur' => Kos::where('jenis', 'campur')->count(),
+        ];
+
+        // 7 days daily booking trends
+        $dailyBookings = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = Carbon::today()->subDays($i);
+            $dateStr = $date->format('Y-m-d');
+            $count = Pemesanan::whereDate('created_at', $dateStr)->count();
+            $dailyBookings[] = [
+                'tanggal' => $dateStr,
+                'label' => $date->format('d M'),
+                'count' => $count,
+            ];
+        }
+
+        $pemesananTerbaru = Pemesanan::with(['pengguna:id,nama,email', 'kos:id,nama', 'kamar:id,nama_kamar,harga'])
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+
+        return response()->json([
+            'data' => [
+                'total_pengguna' => $totalPengguna,
+                'total_pencari' => $totalPencari,
+                'total_pemilik' => $totalPemilik,
+                'pengguna_aktif' => $penggunaAktif,
+                'pengguna_nonaktif' => $penggunaNonaktif,
+                'total_kos' => $totalKos,
+                'total_kamar' => $totalKamar,
+                'kamar_tersedia' => $kamarTersedia,
+                'kamar_terisi' => $kamarTerisi,
+                'okupansi_rate' => $okupansiRate,
+                'total_pemesanan' => $totalPemesanan,
+                'pemesanan_menunggu' => $pemesananMenunggu,
+                'pemesanan_disetujui' => $pemesananDisetujui,
+                'pemesanan_ditolak' => $pemesananDitolak,
+                'total_nilai_transaksi' => $totalEstimasiNilai,
+                'distribusi_jenis' => $kosJenis,
+                'tren_harian' => $dailyBookings,
+                'pemesanan_terbaru' => $pemesananTerbaru,
+            ],
         ]);
     }
 }

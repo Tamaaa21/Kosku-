@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Fasilitas;
+use App\Models\Pemesanan;
 use App\Models\Pengguna;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -86,5 +87,39 @@ class AdminTest extends TestCase
             ->assertJsonPath('data.aktif', false);
 
         $this->assertFalse($targetUser->fresh()->aktif);
+    }
+
+    public function test_admin_can_retrieve_system_stats(): void
+    {
+        $admin = Pengguna::factory()->admin()->create();
+        Pemesanan::factory()->count(3)->create(['status' => 'disetujui']);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/v1/admin/stats');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'data' => [
+                    'total_pengguna',
+                    'total_pencari',
+                    'total_pemilik',
+                    'pengguna_aktif',
+                    'pengguna_nonaktif',
+                    'total_kos',
+                    'total_kamar',
+                    'kamar_tersedia',
+                    'kamar_terisi',
+                    'okupansi_rate',
+                    'total_pemesanan',
+                    'pemesanan_menunggu',
+                    'pemesanan_disetujui',
+                    'pemesanan_ditolak',
+                    'total_nilai_transaksi',
+                    'distribusi_jenis',
+                    'tren_harian',
+                    'pemesanan_terbaru',
+                ],
+            ]);
     }
 }
