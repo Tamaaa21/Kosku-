@@ -105,16 +105,16 @@
 ---
 
 ### Phase 6: Web Client (Vue 3 SPA)
-- [ ] **Setup HTTP Client & Global State:**
+- [x] **Setup HTTP Client & Global State:**
   - Configure `axios` instance with base URL `/api/v1` and request interceptor injecting `Bearer ${token}`.
   - Pinia `useAuthStore` handling user state, token persistence (`localStorage`), login, and logout.
-- [ ] **Routing & Route Guards:**
+- [x] **Routing & Route Guards:**
   - Configure `vue-router` with meta fields (`requiresAuth: true`, `roles: ['pemilik', 'admin']`).
   - Implement navigation guard (`router.beforeEach`) checking authentication and authorized roles.
-- [ ] **Public Views:**
+- [x] **Public Views:**
   - `HomeView.vue`: Search bar and interactive filter drawer.
   - `KosDetailView.vue`: Room availability table, amenities tags, and Leaflet map displaying coordinates.
-- [ ] **Role Dashboards:**
+- [x] **Role Dashboards:**
   - `Pencari`: Booking status history list with cancel button.
   - `Pemilik`: Kos CRUD, Room management, Booking approval inbox.
   - `Admin`: User account management and amenity master data editor.
@@ -146,8 +146,8 @@ cd frontend && npm run build
 
 ## 4. Definition of Done (DoD) Checklist
 
-- [ ] All 23 endpoints implemented under `/api/v1` returning uniform JSON envelopes.
-- [ ] Authorization strictly guarded: Unauthorized roles receive 403, missing tokens receive 401.
-- [ ] Geocoding service automatically resolves coordinates on Kos creation/update without blocking if external API fails.
-- [ ] Concurrency handled on bookings using database transactions preventing double reservations.
-- [ ] Web client connects seamlessly with Axios, renders interactive maps with Leaflet, and enforces role access.
+- [x] All 23 endpoints implemented under `/api/v1` returning uniform JSON envelopes.
+- [x] Authorization strictly guarded: Unauthorized roles receive 403, missing tokens receive 401.
+- [x] Geocoding service automatically resolves coordinates on Kos creation/update without blocking if external API fails.
+- [x] Concurrency handled on bookings using database transactions preventing double reservations.
+- [x] Web client connects seamlessly with Axios, renders interactive maps with Leaflet, and enforces role access.
