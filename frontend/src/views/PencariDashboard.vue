@@ -234,6 +234,29 @@
                 </button>
               </template>
 
+              <!-- WhatsApp Action Button -->
+              <button
+                v-if="!auth.isPemilik && item.kos?.pemilik"
+                @click="chatPemilikWA(item)"
+                type="button"
+                class="text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5"
+                title="Hubungi Pemilik Kos via WhatsApp"
+              >
+                <span class="material-symbols-outlined text-[16px]">chat</span>
+                <span>Chat WA</span>
+              </button>
+
+              <button
+                v-else-if="auth.isPemilik && item.pengguna"
+                @click="chatPenyewaWA(item)"
+                type="button"
+                class="text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5"
+                title="Hubungi Calon Penyewa via WhatsApp"
+              >
+                <span class="material-symbols-outlined text-[16px]">chat</span>
+                <span>Chat WA</span>
+              </button>
+
               <router-link
                 v-if="item.kos"
                 :to="`/kos/${item.kos.id}`"
@@ -253,6 +276,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import api from '../services/api'
+import { openWhatsAppChat, buildTenantInquiryTemplate, buildOwnerContactTenantTemplate } from '../utils/whatsapp'
 
 const auth = useAuthStore()
 
@@ -376,6 +400,28 @@ const formatDateOnly = (dateStr) => {
     month: 'short',
     year: 'numeric',
   })
+}
+
+const chatPemilikWA = (item) => {
+  const phone = item.kos?.pemilik?.telepon || item.kos?.pemilik?.no_hp
+  const message = buildTenantInquiryTemplate({
+    ownerName: item.kos?.pemilik?.nama || 'Pemilik Kos',
+    kosName: item.kos?.nama || 'Kos',
+    roomName: item.kamar?.nama_kamar || '',
+    bookingId: item.id,
+  })
+  openWhatsAppChat(phone, message)
+}
+
+const chatPenyewaWA = (item) => {
+  const phone = item.pengguna?.telepon || item.pengguna?.no_hp
+  const message = buildOwnerContactTenantTemplate({
+    tenantName: item.pengguna?.nama || 'Calon Penyewa',
+    kosName: item.kos?.nama || 'Kos',
+    roomName: item.kamar?.nama_kamar || '',
+    bookingId: item.id,
+  })
+  openWhatsAppChat(phone, message)
 }
 
 onMounted(() => {

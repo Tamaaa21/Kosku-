@@ -153,6 +153,34 @@ class AuthTest extends TestCase
             ]);
     }
 
+    public function test_authenticated_user_can_update_own_profile(): void
+    {
+        $user = Pengguna::factory()->create(['nama' => 'Nama Lama', 'telepon' => '08111111111']);
+        Sanctum::actingAs($user);
+
+        $response = $this->putJson('/api/v1/me', [
+            'nama' => 'Nama Baru',
+            'no_hp' => '08999999999',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Profil berhasil diperbarui.',
+                'user' => [
+                    'id' => $user->id,
+                    'nama' => 'Nama Baru',
+                    'telepon' => '08999999999',
+                    'no_hp' => '08999999999',
+                ],
+            ]);
+
+        $this->assertDatabaseHas('pengguna', [
+            'id' => $user->id,
+            'nama' => 'Nama Baru',
+            'telepon' => '08999999999',
+        ]);
+    }
+
     public function test_authenticated_user_can_logout(): void
     {
         $user = Pengguna::factory()->create();

@@ -26,6 +26,8 @@ class RegisterRequest extends FormRequest
             'nama' => ['required', 'string', 'max:150'],
             'email' => ['required', 'string', 'email', 'max:191', 'unique:pengguna,email'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'telepon' => ['nullable', 'string', 'max:30'],
+            'no_hp' => ['nullable', 'string', 'max:30'],
             'role' => ['nullable', 'in:pencari,pemilik'],
         ];
     }

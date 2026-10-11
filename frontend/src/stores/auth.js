@@ -73,6 +73,22 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async updateProfile(data) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await api.put('/me', data)
+        this.user = response.data.user
+        localStorage.setItem('user', JSON.stringify(this.user))
+        return response.data
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Gagal memperbarui profil.'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
     async logout() {
       try {
         if (this.token) {

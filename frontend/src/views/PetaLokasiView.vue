@@ -123,18 +123,31 @@
                 </div>
               </div>
 
-              <div class="mt-2 pt-1.5 border-t border-slate-100 flex items-baseline justify-between">
+              <div class="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between gap-2">
                 <div>
                   <span class="text-xs font-bold text-primary">{{ formatRupiah(kos.harga) }}</span>
                   <span class="text-[10px] text-on-surface-variant">/ bln</span>
                 </div>
-                <router-link
-                  :to="`/kos/${kos.id}`"
-                  class="text-[11px] font-semibold text-primary hover:underline flex items-center"
-                  @click.stop
-                >
-                  Detail <span class="material-symbols-outlined text-[12px]">chevron_right</span>
-                </router-link>
+                <div class="flex items-center gap-2.5">
+                  <a
+                    :href="getGoogleMapsUrl(kos)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-0.5 hover:underline"
+                    @click.stop
+                    title="Buka rute navigasi di Google Maps"
+                  >
+                    <span class="material-symbols-outlined text-[13px]">near_me</span>
+                    <span>Maps</span>
+                  </a>
+                  <router-link
+                    :to="`/kos/${kos.id}`"
+                    class="text-[11px] font-semibold text-primary hover:underline flex items-center"
+                    @click.stop
+                  >
+                    Detail <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                  </router-link>
+                </div>
               </div>
             </div>
           </div>
@@ -153,6 +166,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import L from 'leaflet'
 import api from '../services/api'
+import { getGoogleMapsUrl } from '../utils/whatsapp'
 
 const kosList = ref([])
 const loading = ref(false)
@@ -224,12 +238,16 @@ const renderMarkers = () => {
       const lng = parseFloat(kos.longitude)
 
       const marker = L.marker([lat, lng]).addTo(map)
+      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
       marker.bindPopup(`
-        <div style="font-family: Inter, sans-serif; padding: 2px;">
-          <strong style="color: #004ac6; font-size: 13px;">${kos.nama}</strong><br/>
-          <span style="font-size: 11px; color: #585f67;">${kos.alamat}</span><br/>
-          <strong style="color: #0b1c30; font-size: 12px; margin-top: 4px; display: block;">${formatRupiah(kos.harga)} / bln</strong>
-          <a href="/kos/${kos.id}" style="display: inline-block; margin-top: 6px; font-size: 11px; color: #2563eb; font-weight: bold; text-decoration: underline;">Lihat Detail &rarr;</a>
+        <div style="font-family: Inter, sans-serif; padding: 4px; max-width: 200px;">
+          <strong style="color: #004ac6; font-size: 13px; display: block; line-height: 1.2;">${kos.nama}</strong>
+          <span style="font-size: 11px; color: #585f67; display: block; margin-top: 3px;">${kos.alamat}</span>
+          <strong style="color: #0b1c30; font-size: 12px; margin-top: 5px; display: block;">${formatRupiah(kos.harga)} / bln</strong>
+          <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #e2e8f0;">
+            <a href="/kos/${kos.id}" style="font-size: 11px; color: #004ac6; font-weight: bold; text-decoration: underline;">Detail &rarr;</a>
+            <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; color: #16a34a; font-weight: bold; text-decoration: underline;">Buka di Maps &nearr;</a>
+          </div>
         </div>
       `)
 

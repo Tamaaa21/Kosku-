@@ -28,6 +28,7 @@ Route::prefix('v1')->group(function (): void {
         // Profil Akun
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
+        Route::put('/me', [AuthController::class, 'updateProfile']);
 
         // Manajemen Kos (Pemilik & Admin)
         Route::post('/kos', [KosController::class, 'store'])->middleware('role:pemilik');

@@ -199,10 +199,22 @@
                     <span class="font-semibold text-on-surface leading-tight">
                       {{ booking.user?.nama || 'Calon Penghuni' }}
                     </span>
-                    <span class="text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5">
-                      <span class="material-symbols-outlined text-[13px] text-tertiary">call</span>
-                      <span>{{ booking.user?.telepon || booking.user?.email || '-' }}</span>
-                    </span>
+                    <div class="flex items-center gap-2 mt-0.5">
+                      <span class="text-[11px] text-on-surface-variant flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[13px] text-tertiary">call</span>
+                        <span>{{ booking.user?.telepon || booking.user?.email || '-' }}</span>
+                      </span>
+                      <button
+                        v-if="booking.user?.telepon"
+                        type="button"
+                        @click.stop="chatPenyewa(booking)"
+                        class="text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded transition flex items-center gap-0.5"
+                        title="Hubungi Calon Penghuni via WhatsApp"
+                      >
+                        <span class="material-symbols-outlined text-[12px]">chat</span>
+                        <span>WA</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
               </td>
@@ -337,7 +349,18 @@
         <div class="space-y-4 text-xs">
           <!-- Calon Penghuni Info -->
           <div class="p-4 rounded-xl bg-surface-container-low/50 border border-slate-100 space-y-2">
-            <h4 class="font-bold text-on-surface uppercase tracking-wider text-[11px] text-primary">Informasi Calon Penghuni</h4>
+            <div class="flex items-center justify-between">
+              <h4 class="font-bold text-on-surface uppercase tracking-wider text-[11px] text-primary">Informasi Calon Penghuni</h4>
+              <button
+                type="button"
+                @click="chatPenyewa(selectedBooking)"
+                class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition"
+                title="Hubungi Calon Penghuni via WhatsApp"
+              >
+                <span class="material-symbols-outlined text-[14px]">chat</span>
+                <span>Chat WA</span>
+              </button>
+            </div>
             <div class="flex items-center justify-between">
               <span class="text-secondary">Nama:</span>
               <span class="font-semibold text-on-surface">{{ selectedBooking.user?.nama }}</span>
@@ -415,6 +438,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import api from '../services/api'
+import { openWhatsAppChat, buildOwnerContactTenantTemplate } from '../utils/whatsapp'
 
 const loading = ref(false)
 const successMsg = ref('')
@@ -516,5 +540,17 @@ const updateStatus = async (booking, newStatus) => {
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Gagal mengubah status pemesanan.'
   }
+}
+
+const chatPenyewa = (booking) => {
+  if (!booking) return
+  const phone = booking.user?.telepon || booking.user?.no_hp
+  const message = buildOwnerContactTenantTemplate({
+    tenantName: booking.user?.nama || 'Calon Penyewa',
+    kosName: booking.kos?.nama || 'Kos',
+    roomName: booking.kamar?.nama_kamar || '',
+    bookingId: booking.id,
+  })
+  openWhatsAppChat(phone, message)
 }
 </script>

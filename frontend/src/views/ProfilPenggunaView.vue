@@ -363,14 +363,22 @@ const refreshData = async () => {
   toastMsg.value = 'Data akun berhasil disinkronkan!'
 }
 
-const saveProfile = () => {
-  // Update local cache
-  if (auth.user) {
-    auth.user.nama = profileForm.nama
-    auth.user.no_hp = profileForm.no_hp
-    localStorage.setItem('user', JSON.stringify(auth.user))
+const saving = ref(false)
+
+const saveProfile = async () => {
+  saving.value = true
+  try {
+    await auth.updateProfile({
+      nama: profileForm.nama,
+      no_hp: profileForm.no_hp,
+      telepon: profileForm.no_hp,
+    })
+    toastMsg.value = 'Informasi profil dan nomor WhatsApp berhasil disimpan ke database!'
+  } catch (err) {
+    toastMsg.value = err.response?.data?.message || 'Gagal menyimpan profil, periksa kembali data Anda.'
+  } finally {
+    saving.value = false
   }
-  toastMsg.value = 'Informasi profil berhasil diperbarui!'
 }
 
 const handleLogout = async () => {

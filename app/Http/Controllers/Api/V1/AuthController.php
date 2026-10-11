@@ -24,6 +24,7 @@ class AuthController extends Controller
         $pengguna = Pengguna::create([
             'nama' => $validated['nama'],
             'email' => $validated['email'],
+            'telepon' => $validated['telepon'] ?? $validated['no_hp'] ?? null,
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'] ?? 'pencari',
             'aktif' => true,
@@ -87,6 +88,36 @@ class AuthController extends Controller
     {
         return response()->json([
             'user' => new PenggunaResource($request->user()),
+        ]);
+    }
+
+    /**
+     * Update current authenticated user's profile information.
+     */
+    public function updateProfile(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'nama' => ['sometimes', 'required', 'string', 'max:150'],
+            'telepon' => ['nullable', 'string', 'max:30'],
+            'no_hp' => ['nullable', 'string', 'max:30'],
+        ]);
+
+        /** @var Pengguna $pengguna */
+        $pengguna = $request->user();
+
+        if (isset($validated['nama'])) {
+            $pengguna->nama = $validated['nama'];
+        }
+
+        if (array_key_exists('telepon', $validated) || array_key_exists('no_hp', $validated)) {
+            $pengguna->telepon = $validated['telepon'] ?? $validated['no_hp'] ?? null;
+        }
+
+        $pengguna->save();
+
+        return response()->json([
+            'message' => 'Profil berhasil diperbarui.',
+            'user' => new PenggunaResource($pengguna),
         ]);
     }
 }

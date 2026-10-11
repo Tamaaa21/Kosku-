@@ -164,12 +164,27 @@
 
             <!-- Tab Content: Lokasi -->
             <div v-else-if="activeTab === 'lokasi'" class="space-y-space-md">
-              <div>
-                <h3 class="text-base font-bold text-on-surface mb-1">Titik Lokasi Properti</h3>
-                <p class="text-xs text-on-surface-variant flex items-center gap-1">
-                  <span class="material-symbols-outlined text-sm text-primary">location_on</span>
-                  {{ kos.alamat }}
-                </p>
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <h3 class="text-base font-bold text-on-surface mb-1">Titik Lokasi Properti</h3>
+                  <p class="text-xs text-on-surface-variant flex items-center gap-1">
+                    <span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                    {{ kos.alamat }}
+                  </p>
+                </div>
+
+                <!-- Open in Google Maps button -->
+                <a
+                  :href="getGoogleMapsUrl(kos)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 transition shadow-xs self-start sm:self-auto shrink-0"
+                  title="Buka rute navigasi di Google Maps"
+                >
+                  <span class="material-symbols-outlined text-[16px]">near_me</span>
+                  <span>Buka di Google Maps</span>
+                  <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                </a>
               </div>
 
               <!-- Interactive Leaflet Map -->
@@ -180,29 +195,58 @@
                   :title="kos.nama"
                 />
               </div>
+
+              <!-- Navigation Directions Callout -->
+              <div class="p-3 bg-surface-container-low/70 rounded-xl border border-slate-100 flex items-center justify-between gap-3 text-xs">
+                <div class="flex items-center gap-2 text-on-surface-variant">
+                  <span class="material-symbols-outlined text-emerald-600 text-[18px]">directions</span>
+                  <span>Ingin survei langsung ke lokasi kos ini? Buka rute panduan di Google Maps.</span>
+                </div>
+                <a
+                  :href="getGoogleMapsUrl(kos)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="font-bold text-emerald-700 hover:underline flex items-center gap-0.5 shrink-0"
+                >
+                  <span>Petunjuk Arah</span>
+                  <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                </a>
+              </div>
             </div>
 
             <!-- Tab Content: Pemilik -->
             <div v-else-if="activeTab === 'pemilik'" class="space-y-space-md">
               <h3 class="text-base font-bold text-on-surface">Pengelola / Pemilik Properti</h3>
-              <div class="p-4 rounded-xl bg-surface-container-low flex items-center gap-4">
-                <div class="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg">
-                  {{ kos.pemilik?.nama ? kos.pemilik.nama.charAt(0).toUpperCase() : 'P' }}
-                </div>
-                <div class="space-y-1">
-                  <div class="flex items-center gap-2">
-                    <span class="font-bold text-sm text-on-surface">{{ kos.pemilik?.nama || 'Pemilik Kos' }}</span>
-                    <span class="text-[10px] bg-tertiary-fixed text-on-tertiary-fixed-variant px-2 py-0.5 rounded-full font-semibold">
-                      Pemilik Resmi
-                    </span>
+              <div class="p-4 rounded-xl bg-surface-container-low flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="w-14 h-14 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-lg shrink-0">
+                    {{ kos.pemilik?.nama ? kos.pemilik.nama.charAt(0).toUpperCase() : 'P' }}
                   </div>
-                  <p class="text-xs text-on-surface-variant">
-                    Nomor WhatsApp / HP: <span class="font-semibold text-on-surface">{{ kos.pemilik?.no_hp || '-' }}</span>
-                  </p>
-                  <p class="text-xs text-on-surface-variant">
-                    Email: <span class="font-semibold text-on-surface">{{ kos.pemilik?.email || '-' }}</span>
-                  </p>
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-sm text-on-surface">{{ kos.pemilik?.nama || 'Pemilik Kos' }}</span>
+                      <span class="text-[10px] bg-tertiary-fixed text-on-tertiary-fixed-variant px-2 py-0.5 rounded-full font-semibold">
+                        Pemilik Resmi
+                      </span>
+                    </div>
+                    <p class="text-xs text-on-surface-variant">
+                      Nomor WhatsApp / HP: <span class="font-semibold text-on-surface">{{ kos.pemilik?.telepon || kos.pemilik?.no_hp || '-' }}</span>
+                    </p>
+                    <p class="text-xs text-on-surface-variant">
+                      Email: <span class="font-semibold text-on-surface">{{ kos.pemilik?.email || '-' }}</span>
+                    </p>
+                  </div>
                 </div>
+
+                <!-- Direct WhatsApp button in owner tab -->
+                <button
+                  type="button"
+                  @click="handleWhatsAppInquiry"
+                  class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition active:scale-95 shrink-0"
+                >
+                  <span class="material-symbols-outlined text-[18px]">chat</span>
+                  <span>Chat WhatsApp</span>
+                </button>
               </div>
             </div>
           </div>
@@ -290,15 +334,27 @@
               </div>
             </div>
 
-            <!-- Action Button -->
-            <button
-              @click="handleProceedBooking"
-              :disabled="!selectedKamar"
-              class="w-full bg-primary-container hover:bg-primary text-white py-3 rounded-lg text-sm font-bold shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              <span class="material-symbols-outlined text-lg">receipt_long</span>
-              <span>Ajukan Sewa Sekarang</span>
-            </button>
+            <!-- Action Buttons: Sewa & WhatsApp Inquiry -->
+            <div class="space-y-2">
+              <button
+                @click="handleProceedBooking"
+                :disabled="!selectedKamar"
+                class="w-full bg-primary-container hover:bg-primary text-white py-3 rounded-lg text-sm font-bold shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                <span class="material-symbols-outlined text-lg">receipt_long</span>
+                <span>Ajukan Sewa Sekarang</span>
+              </button>
+
+              <button
+                type="button"
+                @click="handleWhatsAppInquiry"
+                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-2"
+                title="Tanya ketersediaan atau jadwal survei langsung ke pemilik via WhatsApp"
+              >
+                <span class="material-symbols-outlined text-base">chat</span>
+                <span>Tanya Pemilik via WhatsApp</span>
+              </button>
+            </div>
 
             <p class="text-[11px] text-on-surface-variant text-center flex items-center justify-center gap-1">
               <span class="material-symbols-outlined text-xs text-tertiary">lock</span>
@@ -317,6 +373,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import LeafletMap from '../components/LeafletMap.vue'
 import api from '../services/api'
+import { openWhatsAppChat, buildInquiryTemplate, getGoogleMapsUrl } from '../utils/whatsapp'
 
 const route = useRoute()
 const router = useRouter()
@@ -387,6 +444,20 @@ const handleProceedBooking = () => {
   }
 
   router.push(`/pesan/${kos.value.id}/${selectedKamar.value.id}`)
+}
+
+const handleWhatsAppInquiry = () => {
+  const phone = kos.value?.pemilik?.telepon || kos.value?.pemilik?.no_hp
+  const ownerName = kos.value?.pemilik?.nama || 'Pemilik Kos'
+  const roomName = selectedKamar.value ? selectedKamar.value.nama_kamar : ''
+  const message = buildInquiryTemplate({
+    ownerName,
+    kosName: kos.value?.nama || 'Kos',
+    roomName,
+    kosUrl: window.location.href,
+  })
+
+  openWhatsAppChat(phone, message)
 }
 
 const fetchKosDetail = async () => {
