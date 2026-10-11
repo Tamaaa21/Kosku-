@@ -13,6 +13,8 @@ import PencariDashboard from '../views/PencariDashboard.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
 import PemilikDashboard from '../views/PemilikDashboard.vue'
 import KelolaKosView from '../views/KelolaKosView.vue'
+import KelolaKamarView from '../views/KelolaKamarView.vue'
+import KelolaPermintaanPemesananView from '../views/KelolaPermintaanPemesananView.vue'
 
 const routes = [
   {
@@ -81,6 +83,18 @@ const routes = [
     path: '/dashboard/pemilik/kos',
     name: 'kelola-kos',
     component: KelolaKosView,
+    meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
+  },
+  {
+    path: '/dashboard/pemilik/kamar',
+    name: 'kelola-kamar',
+    component: KelolaKamarView,
+    meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
+  },
+  {
+    path: '/dashboard/pemilik/pemesanan',
+    name: 'kelola-pemesanan',
+    component: KelolaPermintaanPemesananView,
     meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
   },
   {
