@@ -10,8 +10,9 @@ import ProfilPenggunaView from '../views/ProfilPenggunaView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import PencariDashboard from '../views/PencariDashboard.vue'
-import PemilikDashboard from '../views/PemilikDashboard.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
+import PemilikDashboard from '../views/PemilikDashboard.vue'
+import KelolaKosView from '../views/KelolaKosView.vue'
 
 const routes = [
   {
@@ -46,7 +47,7 @@ const routes = [
     path: '/pesanan',
     name: 'riwayat-pemesanan',
     component: PencariDashboard,
-    meta: { requiresAuth: true, roles: ['pencari', 'admin'] },
+    meta: { requiresAuth: true, roles: ['pencari', 'pemilik', 'admin'] },
   },
   {
     path: '/profil',
@@ -68,15 +69,19 @@ const routes = [
   },
   {
     path: '/dashboard/pencari',
-    name: 'pencari-dashboard',
-    component: PencariDashboard,
-    meta: { requiresAuth: true, roles: ['pencari'] },
+    redirect: '/pesanan',
   },
   {
     path: '/dashboard/pemilik',
     name: 'pemilik-dashboard',
     component: PemilikDashboard,
-    meta: { requiresAuth: true, roles: ['pemilik'] },
+    meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
+  },
+  {
+    path: '/dashboard/pemilik/kos',
+    name: 'kelola-kos',
+    component: KelolaKosView,
+    meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
   },
   {
     path: '/dashboard/admin',
@@ -102,9 +107,8 @@ router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
   if (to.meta.guestOnly && authStore.isAuthenticated) {
-    if (authStore.isPemilik) return next({ name: 'pemilik-dashboard' })
     if (authStore.isAdmin) return next({ name: 'admin-dashboard' })
-    return next({ name: 'home' })
+    return next({ name: 'riwayat-pemesanan' })
   }
 
   if (to.meta.requiresAuth) {
