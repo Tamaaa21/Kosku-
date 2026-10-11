@@ -118,7 +118,7 @@
               <div>
                 <h3 class="text-base font-bold text-on-surface mb-2">Tentang Kos Ini</h3>
                 <p class="text-xs text-on-surface-variant leading-relaxed whitespace-pre-line">
-                  {{ kos.deskripsi || 'Kos nyaman dengan lokasi strategis di Kota Tegal. Cocok untuk mahasiswa dan pekerja yang mendambakan suasana hunian tenang dan kondusif.' }}
+                  {{ kos.deskripsi || 'Kos nyaman dengan lokasi strategis. Cocok untuk mahasiswa dan pekerja yang mendambakan suasana hunian tenang dan kondusif.' }}
                 </p>
               </div>
 

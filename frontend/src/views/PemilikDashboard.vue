@@ -12,7 +12,7 @@
           Selamat Datang, {{ auth.user?.nama }}! 👋
         </h1>
         <p class="text-xs text-on-surface-variant mt-1">
-          Berikut adalah ringkasan performa dan aktivitas properti kos Anda di Kota Tegal.
+          Berikut adalah ringkasan performa dan aktivitas properti kos Anda.
         </p>
       </div>
 

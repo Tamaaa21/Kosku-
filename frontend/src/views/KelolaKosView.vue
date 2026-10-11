@@ -9,7 +9,7 @@
         </div>
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">Data Kos</h1>
         <p class="text-xs text-on-surface-variant mt-0.5">
-          Kelola informasi kos, ketersediaan unit, dan detail operasional properti Anda di Kota Tegal.
+          Kelola informasi kos, ketersediaan unit, dan detail operasional properti Anda di seluruh Indonesia.
         </p>
       </div>
 
@@ -203,7 +203,7 @@
               <td class="py-4 px-space-md">
                 <div class="flex flex-col">
                   <span class="text-xs font-medium text-on-surface">{{ kos.alamat }}</span>
-                  <span class="text-[11px] text-secondary">Kota Tegal</span>
+                  <span class="text-[11px] text-secondary">Indonesia</span>
                 </div>
               </td>
 
@@ -295,7 +295,7 @@
                 {{ isEditing ? 'Edit Data Properti Kos' : 'Tambah Properti Kos Baru' }}
               </h3>
               <p class="text-xs text-on-surface-variant">
-                Lengkapi formulir informasi properti untuk dipublikasikan di Kota Tegal.
+                Lengkapi formulir informasi properti untuk dipublikasikan di platform KosKu.
               </p>
             </div>
           </div>
@@ -346,17 +346,17 @@
           <!-- Alamat Lengkap -->
           <div class="flex flex-col gap-1.5">
             <label class="text-xs font-semibold text-on-surface">
-              Alamat Lengkap (Kota Tegal) <span class="text-rose-500">*</span>
+              Alamat Lengkap (Beserta Kota & Provinsi) <span class="text-rose-500">*</span>
             </label>
             <input
               v-model="formData.alamat"
               type="text"
               required
-              placeholder="Jl. Melati No. 12, Kel. Randugunting, Tegal Selatan"
+              placeholder="Contoh: Jl. Melati No. 12, Kelurahan, Kecamatan, Kota..."
               class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
             />
             <span class="text-[10px] text-slate-400">
-              * Koordinat peta (latitude & longitude) akan otomatis dihitung berdasarkan alamat di Kota Tegal.
+              * Koordinat peta (latitude & longitude) akan otomatis dihitung berdasarkan alamat yang dimasukkan.
             </span>
           </div>
 

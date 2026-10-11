@@ -95,6 +95,18 @@
           />
         </div>
 
+        <div>
+          <label class="block text-xs font-semibold text-on-surface mb-1">Konfirmasi Kata Sandi</label>
+          <input
+            type="password"
+            v-model="form.password_confirmation"
+            required
+            minlength="8"
+            class="w-full text-xs rounded-lg border-slate-200 focus:ring-primary focus:border-primary p-2.5"
+            placeholder="Ulangi kata sandi Anda"
+          />
+        </div>
+
         <button
           type="submit"
           :disabled="auth.loading"
@@ -130,11 +142,18 @@ const form = reactive({
   email: '',
   no_hp: '',
   password: '',
+  password_confirmation: '',
   role: 'pencari',
 })
 
 const handleRegister = async () => {
   errorMsg.value = null
+
+  if (form.password !== form.password_confirmation) {
+    errorMsg.value = 'Konfirmasi kata sandi tidak cocok dengan kata sandi yang dimasukkan.'
+    return
+  }
+
   try {
     const user = await auth.register(form)
     if (user?.role === 'pemilik') {

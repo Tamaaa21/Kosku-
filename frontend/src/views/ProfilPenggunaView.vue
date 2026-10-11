@@ -10,7 +10,7 @@
         </div>
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">Profil Saya</h1>
         <p class="text-xs text-on-surface-variant mt-0.5">
-          Kelola informasi akun pengguna, kontak, dan akses sistem KosKu di Kota Tegal.
+          Kelola informasi akun pengguna, kontak, dan akses sistem KosKu.
         </p>
       </div>
 
@@ -62,7 +62,7 @@
               {{ auth.role }}
             </span>
             <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold">
-              Kota Tegal
+              Indonesia
             </span>
           </div>
 
@@ -157,7 +157,7 @@
               class="flex items-center gap-space-sm px-space-md py-2.5 rounded-xl text-secondary hover:bg-surface-container-low hover:text-on-surface text-xs font-medium transition"
             >
               <span class="material-symbols-outlined text-[18px]">search</span>
-              <span class="flex-1">Cari Kos di Tegal</span>
+              <span class="flex-1">Cari Kos di Indonesia</span>
               <span class="material-symbols-outlined text-[16px]">chevron_right</span>
             </router-link>
           </template>
