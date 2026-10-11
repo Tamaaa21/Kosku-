@@ -14,59 +14,96 @@
 
       <!-- Main Navigation Menu -->
       <nav class="hidden md:flex items-center gap-space-lg">
-        <router-link
-          to="/"
-          class="text-sm font-medium transition-colors"
-          :class="$route.path === '/' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
-        >
-          Beranda
-        </router-link>
+        <template v-if="auth.isPemilik">
+          <router-link
+            to="/dashboard/pemilik"
+            class="text-sm font-medium transition-colors"
+            :class="$route.path === '/dashboard/pemilik' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+          >
+            Dashboard
+          </router-link>
+          <router-link
+            to="/dashboard/pemilik/kos"
+            class="text-sm font-medium transition-colors"
+            :class="$route.path === '/dashboard/pemilik/kos' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+          >
+            Data Kos
+          </router-link>
+          <router-link
+            to="/dashboard/pemilik/kamar"
+            class="text-sm font-medium transition-colors"
+            :class="$route.path === '/dashboard/pemilik/kamar' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+          >
+            Kamar
+          </router-link>
+          <router-link
+            to="/dashboard/pemilik/pemesanan"
+            class="text-sm font-medium transition-colors"
+            :class="$route.path === '/dashboard/pemilik/pemesanan' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+          >
+            Pemesanan
+          </router-link>
+          <router-link
+            to="/profil"
+            class="text-sm font-medium transition-colors"
+            :class="$route.path === '/profil' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+          >
+            Profil
+          </router-link>
+        </template>
 
-        <router-link
-          to="/kos"
-          class="text-sm font-medium transition-colors"
-          :class="$route.path === '/kos' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
-        >
-          Cari Kos
-        </router-link>
-
-        <router-link
-          to="/peta"
-          class="text-sm font-medium transition-colors"
-          :class="$route.path === '/peta' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
-        >
-          Peta Lokasi
-        </router-link>
-
-        <router-link
-          v-if="auth.isAuthenticated && (auth.isPencari || auth.isAdmin)"
-          to="/pesanan"
-          class="text-sm font-medium transition-colors"
-          :class="$route.path.startsWith('/pesanan') || $route.path === '/dashboard/pencari' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
-        >
-          Pesanan
-        </router-link>
-
-        <router-link
-          v-if="auth.isAuthenticated"
-          to="/profil"
-          class="text-sm font-medium transition-colors"
-          :class="$route.path === '/profil' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
-        >
-          Profil
-        </router-link>
+        <template v-else>
+          <router-link
+            to="/"
+            class="text-sm font-medium transition-colors"
+            :class="$route.path === '/' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+          >
+            Beranda
+          </router-link>
+          <router-link
+            to="/kos"
+            class="text-sm font-medium transition-colors"
+            :class="$route.path === '/kos' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+          >
+            Cari Kos
+          </router-link>
+          <router-link
+            to="/peta"
+            class="text-sm font-medium transition-colors"
+            :class="$route.path === '/peta' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+          >
+            Peta Lokasi
+          </router-link>
+          <router-link
+            v-if="auth.isAuthenticated"
+            to="/pesanan"
+            class="text-sm font-medium transition-colors"
+            :class="$route.path.startsWith('/pesanan') ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+          >
+            Riwayat Pesanan
+          </router-link>
+          <router-link
+            v-if="auth.isAuthenticated"
+            to="/profil"
+            class="text-sm font-medium transition-colors"
+            :class="$route.path === '/profil' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+          >
+            Profil
+          </router-link>
+        </template>
       </nav>
 
       <!-- Right Action / User Profile -->
       <div class="flex items-center gap-space-sm">
         <template v-if="auth.isAuthenticated">
-          <!-- Role Dashboard Quick Button -->
+          <!-- Admin Panel Shortcut Only -->
           <router-link
-            :to="dashboardRoute"
+            v-if="auth.isAdmin"
+            to="/dashboard/admin"
             class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-fixed text-on-primary-fixed hover:bg-primary-fixed-dim transition"
           >
-            <span class="material-symbols-outlined text-[16px]">dashboard</span>
-            <span>Dashboard {{ formatRole(auth.role) }}</span>
+            <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span>
+            <span>Panel Admin</span>
           </router-link>
 
           <!-- User Avatar & Dropdown / Profile Link -->

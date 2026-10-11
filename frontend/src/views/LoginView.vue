@@ -110,10 +110,10 @@ const handleLogin = async () => {
 
     if (redirectUrl) {
       router.push(redirectUrl)
-    } else if (user.role === 'pemilik') {
-      router.push('/dashboard/pemilik')
     } else if (user.role === 'admin') {
       router.push('/dashboard/admin')
+    } else if (user.role === 'pemilik') {
+      router.push('/dashboard/pemilik')
     } else {
       router.push('/pesanan')
     }
