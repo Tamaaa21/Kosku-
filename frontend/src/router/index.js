@@ -122,6 +122,7 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta.guestOnly && authStore.isAuthenticated) {
     if (authStore.isAdmin) return next({ name: 'admin-dashboard' })
+    if (authStore.isPemilik) return next({ name: 'pemilik-dashboard' })
     return next({ name: 'riwayat-pemesanan' })
   }
 

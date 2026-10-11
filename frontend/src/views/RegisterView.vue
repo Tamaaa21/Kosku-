@@ -137,7 +137,7 @@ const handleRegister = async () => {
   errorMsg.value = null
   try {
     const user = await auth.register(form)
-    if (user.role === 'pemilik') {
+    if (user?.role === 'pemilik') {
       router.push('/dashboard/pemilik')
     } else {
       router.push('/pesanan')

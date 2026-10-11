@@ -4,7 +4,9 @@
     <div class="flex items-center gap-space-xs text-on-surface-variant text-xs mb-space-md">
       <router-link to="/" class="hover:text-primary transition-colors">Beranda</router-link>
       <span class="material-symbols-outlined text-sm">chevron_right</span>
-      <span class="text-on-surface font-semibold">Riwayat Pemesanan</span>
+      <span class="text-on-surface font-semibold">
+        {{ auth.isPemilik ? 'Kelola Pemesanan' : 'Riwayat Pemesanan' }}
+      </span>
     </div>
 
     <!-- Header Section -->
@@ -12,11 +14,16 @@
       <div class="space-y-space-xs">
         <div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container text-[11px] text-primary font-semibold">
           <span class="material-symbols-outlined text-sm">receipt_long</span>
-          Aktivitas Sewa
+          {{ auth.isPemilik ? 'Pemesanan Masuk' : 'Aktivitas Sewa' }}
         </div>
-        <h1 class="text-2xl font-bold text-on-surface tracking-tight">Riwayat Pemesanan</h1>
+        <h1 class="text-2xl font-bold text-on-surface tracking-tight">
+          {{ auth.isPemilik ? 'Kelola Pemesanan Masuk' : 'Riwayat Pemesanan' }}
+        </h1>
         <p class="text-xs text-on-surface-variant max-w-2xl">
-          Pantau status pengajuan sewa, detail kamar, dan riwayat hunian kos yang pernah Anda ajukan di Kota Tegal.
+          {{ auth.isPemilik
+            ? 'Pantau dan konfirmasi permohonan sewa kamar dari calon penyewa pada properti kos Anda.'
+            : 'Pantau status pengajuan sewa, detail kamar, dan riwayat hunian kos yang pernah Anda ajukan di Kota Tegal.'
+          }}
         </p>
       </div>
 
@@ -66,7 +73,7 @@
         <input
           v-model="searchFilter"
           type="text"
-          placeholder="Cari nama kos..."
+          :placeholder="auth.isPemilik ? 'Cari nama penyewa / kos...' : 'Cari nama kos...'"
           class="bg-transparent text-xs text-on-surface placeholder:text-outline focus:outline-none w-36 lg:w-48 border-none p-0"
         />
       </div>
@@ -83,8 +90,11 @@
         <span class="material-symbols-outlined text-3xl">receipt</span>
       </div>
       <h3 class="text-base font-bold text-on-surface">Tidak ada data pemesanan</h3>
-      <p class="text-xs text-on-surface-variant mt-1">Anda belum memiliki riwayat pemesanan pada kategori ini.</p>
+      <p class="text-xs text-on-surface-variant mt-1">
+        {{ auth.isPemilik ? 'Belum ada permohonan sewa masuk pada kategori ini.' : 'Anda belum memiliki riwayat pemesanan pada kategori ini.' }}
+      </p>
       <router-link
+        v-if="!auth.isPemilik"
         to="/kos"
         class="inline-block mt-4 text-xs font-semibold bg-primary-container text-white px-4 py-2 rounded-lg hover:bg-primary transition"
       >
@@ -159,8 +169,12 @@
                 </div>
               </div>
 
-              <!-- Pemilik Contact -->
-              <div v-if="item.kos?.pemilik" class="text-[11px] text-on-surface-variant pt-1">
+              <!-- Contact Info: Pemilik or Penyewa depending on current role -->
+              <div v-if="auth.isPemilik && item.pengguna" class="text-[11px] text-on-surface-variant pt-1 bg-surface-container-low p-2 rounded-lg">
+                Pemohon Sewa: <strong class="text-on-surface">{{ item.pengguna.nama }}</strong> &bull;
+                HP/WA: <a :href="'https://wa.me/' + item.pengguna.no_hp" target="_blank" class="text-primary font-semibold hover:underline">{{ item.pengguna.no_hp || '-' }}</a>
+              </div>
+              <div v-else-if="!auth.isPemilik && item.kos?.pemilik" class="text-[11px] text-on-surface-variant pt-1">
                 Kontak Pemilik: <span class="font-semibold text-on-surface">{{ item.kos.pemilik.nama }} ({{ item.kos.pemilik.no_hp || '-' }})</span>
               </div>
             </div>
@@ -186,15 +200,40 @@
               <span class="text-[11px] text-on-surface-variant"> / bulan</span>
             </div>
 
+            <!-- Action Buttons -->
             <div class="flex items-center gap-2">
-              <button
-                v-if="item.status === 'menunggu'"
-                @click="cancelBooking(item.id)"
-                :disabled="actionLoading === item.id"
-                class="text-xs font-semibold text-error hover:bg-error-container/40 border border-error/30 px-3 py-1.5 rounded-lg transition"
-              >
-                {{ actionLoading === item.id ? 'Membatalkan...' : 'Batalkan Pesanan' }}
-              </button>
+              <!-- If PEMILIK: Approve / Reject buttons for pending bookings -->
+              <template v-if="auth.isPemilik">
+                <div v-if="item.status === 'menunggu'" class="flex items-center gap-2">
+                  <button
+                    @click="updateBookingStatus(item.id, 'disetujui')"
+                    :disabled="actionLoading === item.id"
+                    class="text-xs font-semibold bg-tertiary-container hover:bg-tertiary text-white px-3 py-1.5 rounded-lg transition shadow-sm"
+                  >
+                    {{ actionLoading === item.id ? 'Memproses...' : 'Setujui' }}
+                  </button>
+                  <button
+                    @click="updateBookingStatus(item.id, 'ditolak')"
+                    :disabled="actionLoading === item.id"
+                    class="text-xs font-semibold text-error hover:bg-error-container/40 border border-error/30 px-3 py-1.5 rounded-lg transition"
+                  >
+                    Tolak
+                  </button>
+                </div>
+              </template>
+
+              <!-- If PENCARI: Cancel button for pending bookings -->
+              <template v-else>
+                <button
+                  v-if="item.status === 'menunggu'"
+                  @click="cancelBooking(item.id)"
+                  :disabled="actionLoading === item.id"
+                  class="text-xs font-semibold text-error hover:bg-error-container/40 border border-error/30 px-3 py-1.5 rounded-lg transition"
+                >
+                  {{ actionLoading === item.id ? 'Membatalkan...' : 'Batalkan Pesanan' }}
+                </button>
+              </template>
+
               <router-link
                 v-if="item.kos"
                 :to="`/kos/${item.kos.id}`"
@@ -212,7 +251,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useAuthStore } from '../stores/auth'
 import api from '../services/api'
+
+const auth = useAuthStore()
 
 const bookings = ref([])
 const loading = ref(false)
@@ -236,7 +278,8 @@ const filteredBookings = computed(() => {
   return bookings.value.filter((b) => {
     const matchesStatus = activeFilter.value === 'semua' || b.status === activeFilter.value
     const matchesSearch = !searchFilter.value ||
-      (b.kos?.nama && b.kos.nama.toLowerCase().includes(searchFilter.value.toLowerCase()))
+      (b.kos?.nama && b.kos.nama.toLowerCase().includes(searchFilter.value.toLowerCase())) ||
+      (b.pengguna?.nama && b.pengguna.nama.toLowerCase().includes(searchFilter.value.toLowerCase()))
     return matchesStatus && matchesSearch
   })
 })
@@ -253,6 +296,7 @@ const fetchBookings = async () => {
   }
 }
 
+// Pencari cancel action
 const cancelBooking = async (id) => {
   if (!confirm('Apakah Anda yakin ingin membatalkan pengajuan sewa ini?')) return
 
@@ -263,6 +307,23 @@ const cancelBooking = async (id) => {
     await fetchBookings()
   } catch (err) {
     alert(err.response?.data?.message || 'Gagal membatalkan pemesanan.')
+  } finally {
+    actionLoading.value = null
+  }
+}
+
+// Pemilik approve/reject action
+const updateBookingStatus = async (id, status) => {
+  const label = status === 'disetujui' ? 'menyetujui' : 'menolak'
+  if (!confirm(`Apakah Anda yakin ingin ${label} permohonan sewa ini?`)) return
+
+  actionLoading.value = id
+  try {
+    await api.patch(`/pemesanan/${id}/status`, { status })
+    alert(`Permohonan sewa berhasil di-${status}!`)
+    await fetchBookings()
+  } catch (err) {
+    alert(err.response?.data?.message || 'Gagal memperbarui status pemesanan.')
   } finally {
     actionLoading.value = null
   }
