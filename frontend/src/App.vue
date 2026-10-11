@@ -29,18 +29,26 @@
       </div>
     </footer>
 
-    <!-- Floating Customer Service WhatsApp Support -->
-    <FloatingWhatsAppSupport />
+    <!-- Floating Customer Service WhatsApp Support (Disembunyikan di Panel Admin) -->
+    <FloatingWhatsAppSupport v-if="showFloatingSupport" />
   </div>
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { onMounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import Navbar from './components/Navbar.vue'
 import FloatingWhatsAppSupport from './components/FloatingWhatsAppSupport.vue'
 import { useAuthStore } from './stores/auth'
 
 const auth = useAuthStore()
+const route = useRoute()
+
+const showFloatingSupport = computed(() => {
+  if (auth.isAdmin) return false
+  if (route.path.startsWith('/dashboard/admin') || route.name === 'admin-dashboard') return false
+  return true
+})
 
 onMounted(async () => {
   if (auth.token) {

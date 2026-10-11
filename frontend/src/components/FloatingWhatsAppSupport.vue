@@ -1,5 +1,5 @@
 <template>
-  <div class="fixed bottom-6 right-6 z-40 select-none" ref="widgetRef">
+  <div v-if="!isHidden" class="fixed bottom-6 right-6 z-40 select-none" ref="widgetRef">
     <!-- Popover Card -->
     <transition
       enter-active-class="transition duration-200 ease-out"
@@ -137,14 +137,20 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { openWhatsAppChat, buildCustomerServiceTemplate } from '../utils/whatsapp'
 
 const auth = useAuthStore()
+const route = useRoute()
 const isOpen = ref(false)
 const showPill = ref(true)
 const widgetRef = ref(null)
+
+const isHidden = computed(() => {
+  return auth.isAdmin || route?.path?.startsWith('/dashboard/admin') || route?.name === 'admin-dashboard'
+})
 
 // Default Official KosKu Customer Service WhatsApp number
 const csPhoneNumber = '081234567890'
