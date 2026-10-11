@@ -22,7 +22,7 @@
         <p class="text-xs text-on-surface-variant max-w-2xl">
           {{ auth.isPemilik
             ? 'Pantau dan konfirmasi permohonan sewa kamar dari calon penyewa pada properti kos Anda.'
-            : 'Pantau status pengajuan sewa, detail kamar, dan riwayat hunian kos yang pernah Anda ajukan di Kota Tegal.'
+            : 'Pantau status pengajuan sewa, detail kamar, dan riwayat hunian kos yang pernah Anda ajukan.'
           }}
         </p>
       </div>

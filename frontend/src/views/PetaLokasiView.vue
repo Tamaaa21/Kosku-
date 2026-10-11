@@ -196,10 +196,10 @@ const filteredKosList = computed(() => {
 })
 
 const initMap = () => {
-  // Center: Kota Tegal default [-6.8694, 109.1402]
+  // Center Indonesia default [-2.5489, 118.0149] zoom 5
   map = L.map('full-screen-map', {
     zoomControl: true,
-  }).setView([-6.8694, 109.1402], 13)
+  }).setView([-2.5489, 118.0149], 5)
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,

@@ -14,7 +14,7 @@
             Cari Kos Jadi Lebih Mudah
           </h1>
           <p class="text-base sm:text-lg text-surface-container-low max-w-2xl mt-space-sm mb-space-lg leading-relaxed">
-            Temukan kos terbaik sesuai kebutuhanmu. Dengan lokasi yang akurat, fasilitas lengkap, dan harga yang transparan di seluruh wilayah Kota Tegal.
+            Temukan kos terbaik sesuai kebutuhanmu. Dengan lokasi yang akurat, fasilitas lengkap, dan harga yang transparan di seluruh wilayah Indonesia.
           </p>
 
           <!-- Floating Search Bar -->
@@ -26,7 +26,7 @@
                 v-model="searchQuery"
                 type="text"
                 class="w-full bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant/70 border-none focus:ring-0 p-0"
-                placeholder="Cari nama kos, jalan, atau area di Tegal..."
+                placeholder="Cari nama kos, jalan, atau kota di Indonesia..."
                 @keyup.enter="handleSearch"
               />
             </div>
@@ -78,14 +78,17 @@
           <!-- Quick Sub-tags -->
           <div class="flex flex-wrap items-center justify-center gap-space-xs mt-space-md text-white/80 text-xs">
             <span class="text-surface-container-high">Pencarian populer:</span>
-            <button @click="quickSearch('UPS Tegal')" class="bg-white/15 hover:bg-white/30 px-2.5 py-1 rounded backdrop-blur-sm transition text-white">
-              Dekat UPS Tegal
+            <button @click="quickSearch('Jakarta')" class="bg-white/15 hover:bg-white/30 px-2.5 py-1 rounded backdrop-blur-sm transition text-white">
+              Jakarta
             </button>
-            <button @click="quickSearch('Stasiun Tegal')" class="bg-white/15 hover:bg-white/30 px-2.5 py-1 rounded backdrop-blur-sm transition text-white">
-              Stasiun Tegal
+            <button @click="quickSearch('Yogyakarta')" class="bg-white/15 hover:bg-white/30 px-2.5 py-1 rounded backdrop-blur-sm transition text-white">
+              Yogyakarta
             </button>
-            <button @click="quickSearch('Poltek Harber')" class="bg-white/15 hover:bg-white/30 px-2.5 py-1 rounded backdrop-blur-sm transition text-white">
-              Poltek Harber
+            <button @click="quickSearch('Bandung')" class="bg-white/15 hover:bg-white/30 px-2.5 py-1 rounded backdrop-blur-sm transition text-white">
+              Bandung
+            </button>
+            <button @click="quickSearch('Surabaya')" class="bg-white/15 hover:bg-white/30 px-2.5 py-1 rounded backdrop-blur-sm transition text-white">
+              Surabaya
             </button>
           </div>
         </div>
@@ -142,7 +145,7 @@
       <div class="flex items-center justify-between gap-space-md mb-space-lg">
         <div class="space-y-1">
           <h2 class="text-2xl font-bold text-on-surface tracking-tight">Kos Populer</h2>
-          <p class="text-xs text-on-surface-variant">Paling banyak diminati dan berlokasi strategis di Kota Tegal</p>
+          <p class="text-xs text-on-surface-variant">Paling banyak diminati dan berlokasi strategis di berbagai kota di Indonesia</p>
         </div>
         <router-link
           to="/kos"

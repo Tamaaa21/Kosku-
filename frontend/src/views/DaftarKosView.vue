@@ -5,7 +5,7 @@
       <div class="flex items-center gap-space-xs text-on-surface-variant text-xs">
         <router-link to="/" class="hover:text-primary transition-colors">Beranda</router-link>
         <span class="material-symbols-outlined text-sm">chevron_right</span>
-        <span class="text-on-surface font-semibold">Daftar Kos di Tegal</span>
+        <span class="text-on-surface font-semibold">Daftar Kos di Indonesia</span>
       </div>
 
       <div class="flex items-center gap-space-sm self-start sm:self-auto">
@@ -183,7 +183,7 @@
           <div>
             <h1 class="text-lg font-bold text-on-surface">Hasil Pencarian Kos</h1>
             <p class="text-xs text-on-surface-variant">
-              Menampilkan <span class="font-bold text-primary">{{ kosList.length }}</span> hunian di Kota Tegal
+              Menampilkan <span class="font-bold text-primary">{{ kosList.length }}</span> hunian di Indonesia
             </p>
           </div>
 
