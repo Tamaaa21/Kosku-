@@ -51,29 +51,62 @@
 
         <!-- Navigation Links -->
         <nav class="flex-1 px-3 space-y-1 overflow-y-auto">
-          <!-- 1. Dashboard Admin -->
+          <!-- 1. Ringkasan & Analitik -->
           <router-link
-            to="/dashboard/admin"
+            :to="{ path: '/dashboard/admin', query: { tab: 'ringkasan' } }"
             @click="isMobileOpen = false"
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="$route.path === '/dashboard/admin' ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+            :class="($route.path === '/dashboard/admin' && (!$route.query.tab || $route.query.tab === 'ringkasan')) ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
             <span class="material-symbols-outlined text-[20px]">dashboard</span>
-            <span class="flex-1">Dashboard Admin</span>
+            <span class="flex-1">Ringkasan & Analitik</span>
           </router-link>
 
-          <!-- 2. Log Seluruh Pemesanan -->
+          <!-- 2. Kelola Pencari Kos -->
           <router-link
-            to="/pesanan"
+            :to="{ path: '/dashboard/admin', query: { tab: 'pencari' } }"
             @click="isMobileOpen = false"
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="$route.path === '/pesanan' ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+            :class="($route.path === '/dashboard/admin' && $route.query.tab === 'pencari') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            <span class="material-symbols-outlined text-[20px]">person_search</span>
+            <span class="flex-1">Kelola Pencari Kos</span>
+          </router-link>
+
+          <!-- 3. Kelola Mitra Pemilik -->
+          <router-link
+            :to="{ path: '/dashboard/admin', query: { tab: 'pemilik' } }"
+            @click="isMobileOpen = false"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="($route.path === '/dashboard/admin' && $route.query.tab === 'pemilik') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            <span class="material-symbols-outlined text-[20px]">real_estate_agent</span>
+            <span class="flex-1">Kelola Mitra Pemilik</span>
+          </router-link>
+
+          <!-- 4. Master Fasilitas -->
+          <router-link
+            :to="{ path: '/dashboard/admin', query: { tab: 'fasilitas' } }"
+            @click="isMobileOpen = false"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="($route.path === '/dashboard/admin' && $route.query.tab === 'fasilitas') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            <span class="material-symbols-outlined text-[20px]">pool</span>
+            <span class="flex-1">Master Fasilitas</span>
+          </router-link>
+
+          <!-- 5. Log Seluruh Pemesanan -->
+          <router-link
+            :to="{ path: '/dashboard/admin', query: { tab: 'pemesanan' } }"
+            @click="isMobileOpen = false"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="($route.path === '/dashboard/admin' && $route.query.tab === 'pemesanan') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
             <span class="material-symbols-outlined text-[20px]">receipt_long</span>
             <span class="flex-1">Log Pemesanan</span>
           </router-link>
 
-          <!-- 3. Katalog Kos -->
+          <!-- 6. Katalog Kos Publik -->
           <router-link
             to="/kos"
             @click="isMobileOpen = false"
@@ -84,7 +117,7 @@
             <span class="flex-1">Katalog Data Kos</span>
           </router-link>
 
-          <!-- 4. Peta Interaktif -->
+          <!-- 7. Peta Lokasi Interaktif -->
           <router-link
             to="/peta"
             @click="isMobileOpen = false"
@@ -95,7 +128,7 @@
             <span class="flex-1">Peta Lokasi</span>
           </router-link>
 
-          <!-- 5. Profil Admin -->
+          <!-- 8. Profil Admin -->
           <router-link
             to="/profil"
             @click="isMobileOpen = false"

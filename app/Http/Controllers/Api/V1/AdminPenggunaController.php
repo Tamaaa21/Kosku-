@@ -21,7 +21,9 @@ class AdminPenggunaController extends Controller
      */
     public function index(Request $request): AnonymousResourceCollection
     {
-        $query = Pengguna::query()->latest();
+        $query = Pengguna::query()
+            ->withCount(['kos', 'pemesanan'])
+            ->latest();
 
         if ($request->filled('role')) {
             $query->where('role', $request->input('role'));
@@ -31,18 +33,56 @@ class AdminPenggunaController extends Controller
             $keyword = (string) $request->input('q');
             $query->where(function ($q) use ($keyword) {
                 $q->where('nama', 'like', "%{$keyword}%")
-                    ->orWhere('email', 'like', "%{$keyword}%");
+                    ->orWhere('email', 'like', "%{$keyword}%")
+                    ->orWhere('telepon', 'like', "%{$keyword}%");
             });
         }
 
-        if ($request->has('aktif')) {
+        if ($request->has('aktif') && $request->input('aktif') !== '' && $request->input('aktif') !== 'all') {
             $query->where('aktif', $request->boolean('aktif'));
         }
 
-        $perPage = min(max((int) $request->input('per_page', 15), 1), 100);
+        if ($request->input('sort') === 'unit_terbanyak') {
+            $query->orderByDesc('kos_count');
+        } elseif ($request->input('sort') === 'nama_asc') {
+            $query->reorder()->orderBy('nama', 'asc');
+        }
+
+        $perPage = min(max((int) $request->input('per_page', 50), 1), 100);
         $users = $query->paginate($perPage);
 
         return PenggunaResource::collection($users);
+    }
+
+    /**
+     * Display the specified user details with their related kos or pemesanan for admin inspection.
+     */
+    public function show(int $id): JsonResponse
+    {
+        $pengguna = Pengguna::withCount(['kos', 'pemesanan'])
+            ->with([
+                'kos' => fn ($q) => $q->withCount('kamar')->latest(),
+                'pemesanan' => fn ($q) => $q->with(['kos:id,nama', 'kamar:id,nama_kamar,harga'])->latest()->limit(10),
+            ])
+            ->findOrFail($id);
+
+        return response()->json([
+            'data' => [
+                'id' => $pengguna->id,
+                'nama' => $pengguna->nama,
+                'email' => $pengguna->email,
+                'telepon' => $pengguna->telepon,
+                'no_hp' => $pengguna->telepon,
+                'role' => $pengguna->role,
+                'aktif' => (bool) $pengguna->aktif,
+                'kos_count' => $pengguna->kos_count,
+                'pemesanan_count' => $pengguna->pemesanan_count,
+                'daftar_kos' => $pengguna->kos,
+                'riwayat_pemesanan' => $pengguna->pemesanan,
+                'created_at' => $pengguna->created_at?->toISOString(),
+                'updated_at' => $pengguna->updated_at?->toISOString(),
+            ],
+        ]);
     }
 
     /**

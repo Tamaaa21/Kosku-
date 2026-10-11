@@ -8,7 +8,7 @@
           <span class="bg-primary-fixed text-on-primary-fixed text-xs font-bold px-2.5 py-0.5 rounded-full">System Admin</span>
         </div>
         <p class="text-sm text-slate-500 mt-1">
-          Ringkasan eksekutif, analitik platform, kelola pengguna, master data fasilitas, dan log transaksi pemesanan.
+          Ringkasan eksekutif, kelola akun pencari, kemitraan pemilik kos, master fasilitas, dan audit transaksi.
         </p>
       </div>
       <div class="flex items-center gap-3">
@@ -23,6 +23,31 @@
           </svg>
           Segarkan Data
         </button>
+
+        <button
+          v-if="activeTab === 'pencari'"
+          @click="fetchPencari"
+          :disabled="loadingPencari"
+          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
+        >
+          <svg class="w-4 h-4" :class="{ 'animate-spin': loadingPencari }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Segarkan Pencari
+        </button>
+
+        <button
+          v-if="activeTab === 'pemilik'"
+          @click="fetchPemilik"
+          :disabled="loadingPemilik"
+          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
+        >
+          <svg class="w-4 h-4" :class="{ 'animate-spin': loadingPemilik }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Segarkan Mitra
+        </button>
+
         <button
           v-if="activeTab === 'fasilitas'"
           @click="openCreateFasilitasModal"
@@ -48,8 +73,9 @@
 
     <!-- Navigation Tabs -->
     <div class="flex items-center gap-2 mb-6 border-b border-slate-200 pb-3 overflow-x-auto">
+      <!-- 1. Ringkasan & Analitik (Modul 1) -->
       <button
-        @click="activeTab = 'ringkasan'"
+        @click="switchTab('ringkasan')"
         :class="[
           'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
           activeTab === 'ringkasan' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
@@ -61,21 +87,37 @@
         Ringkasan & Analitik
       </button>
 
+      <!-- 2. Kelola Pencari Kos (Modul 2) -->
       <button
-        @click="activeTab = 'pengguna'"
+        @click="switchTab('pencari')"
         :class="[
           'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
-          activeTab === 'pengguna' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+          activeTab === 'pencari' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
         ]"
       >
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
         </svg>
-        Manajemen Pengguna ({{ usersList.length }})
+        Pencari Kos ({{ pencariList.length }})
       </button>
 
+      <!-- 3. Kelola Mitra Pemilik (Modul 3) -->
       <button
-        @click="activeTab = 'fasilitas'"
+        @click="switchTab('pemilik')"
+        :class="[
+          'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
+          activeTab === 'pemilik' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
+        ]"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        Mitra Pemilik Kos ({{ pemilikList.length }})
+      </button>
+
+      <!-- 4. Master Data Fasilitas -->
+      <button
+        @click="switchTab('fasilitas')"
         :class="[
           'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
           activeTab === 'fasilitas' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
@@ -87,8 +129,9 @@
         Master Data Fasilitas ({{ fasilitasList.length }})
       </button>
 
+      <!-- 5. Log Seluruh Pemesanan -->
       <button
-        @click="activeTab = 'pemesanan'"
+        @click="switchTab('pemesanan')"
         :class="[
           'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
           activeTab === 'pemesanan' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
@@ -427,114 +470,295 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- TAB 1: MANAJEMEN PENGGUNA -->
+    <!-- TAB 1: KELOLA PENCARI KOS (MODUL 2) -->
     <!-- ================================================================= -->
-    <div v-if="activeTab === 'pengguna'" class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-      <!-- Search & Role Filter -->
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
-        <div class="relative w-full sm:w-80">
-          <input
-            type="text"
-            v-model="userSearchQuery"
-            placeholder="Cari nama atau email..."
-            class="w-full text-xs rounded-xl border-slate-200 pl-9 pr-4 py-2.5"
-            @input="debounceUserSearch"
-          />
-          <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-        </div>
-
-        <div class="flex items-center gap-2 w-full sm:w-auto">
-          <select
-            v-model="userRoleFilter"
-            @change="fetchUsers"
-            class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white"
-          >
-            <option value="">Semua Peran</option>
-            <option value="pencari">Pencari</option>
-            <option value="pemilik">Pemilik</option>
-            <option value="admin">Admin</option>
-          </select>
-          <button
-            @click="fetchUsers"
-            class="p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200"
-            title="Segarkan Data"
-          >
-            <svg class="w-4 h-4" :class="{ 'animate-spin': loadingUsers }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+    <div v-if="activeTab === 'pencari'" class="space-y-6">
+      <!-- Search & Status Filter Bar -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="relative w-full sm:w-88">
+            <input
+              type="text"
+              v-model="pencariSearchQuery"
+              placeholder="Cari nama, email, atau nomor HP pencari..."
+              class="w-full text-xs rounded-xl border-slate-200 pl-9 pr-4 py-2.5"
+              @input="debouncePencariSearch"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
-          </button>
+          </div>
+
+          <div class="flex items-center gap-2.5 w-full sm:w-auto">
+            <select
+              v-model="pencariStatusFilter"
+              @change="fetchPencari"
+              class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white font-medium text-slate-700"
+            >
+              <option value="all">Semua Status Akun</option>
+              <option value="1">Akun Aktif</option>
+              <option value="0">Akun Nonaktif</option>
+            </select>
+
+            <button
+              @click="fetchPencari"
+              class="p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition"
+              title="Segarkan Data Pencari"
+            >
+              <svg class="w-4 h-4" :class="{ 'animate-spin': loadingPencari }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
-      <!-- Users Table -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-600">
-          <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-y border-slate-200">
-            <tr>
-              <th class="py-3 px-4">Pengguna</th>
-              <th class="py-3 px-4">Kontak / HP</th>
-              <th class="py-3 px-4">Peran (Role)</th>
-              <th class="py-3 px-4">Status Akun</th>
-              <th class="py-3 px-4">Terdaftar</th>
-              <th class="py-3 px-4 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-if="loadingUsers">
-              <td colspan="6" class="py-8 text-center text-slate-400">Memuat data pengguna...</td>
-            </tr>
-            <tr v-else-if="usersList.length === 0">
-              <td colspan="6" class="py-8 text-center text-slate-400">Tidak ada pengguna ditemukan.</td>
-            </tr>
-            <tr v-for="user in usersList" :key="user.id" class="hover:bg-slate-50/60 transition">
-              <td class="py-3 px-4">
-                <div class="font-bold text-slate-900">{{ user.nama }}</div>
-                <div class="text-slate-400 text-[11px]">{{ user.email }}</div>
-              </td>
-              <td class="py-3 px-4 font-mono">{{ user.no_hp || '-' }}</td>
-              <td class="py-3 px-4">
-                <span
-                  :class="[
-                    'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border',
-                    user.role === 'admin' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
-                    user.role === 'pemilik' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                    'bg-emerald-50 text-emerald-700 border-emerald-200'
-                  ]"
-                >
-                  {{ user.role }}
-                </span>
-              </td>
-              <td class="py-3 px-4">
-                <span
-                  :class="[
-                    'inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full',
-                    user.aktif ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
-                  ]"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full" :class="user.aktif ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                  {{ user.aktif ? 'Aktif' : 'Nonaktif' }}
-                </span>
-              </td>
-              <td class="py-3 px-4 text-slate-400">{{ formatDate(user.created_at) }}</td>
-              <td class="py-3 px-4 text-right">
-                <button
-                  @click="toggleUserActive(user)"
-                  :disabled="togglingUserId === user.id"
-                  :class="[
-                    'text-[11px] font-bold px-3 py-1.5 rounded-xl border transition',
-                    user.aktif
-                      ? 'border-rose-200 text-rose-600 hover:bg-rose-50'
-                      : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
-                  ]"
-                >
-                  {{ user.aktif ? 'Nonaktifkan' : 'Aktifkan' }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <!-- Pencari Table Card -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th class="py-3.5 px-4 w-12 text-center">No</th>
+                <th class="py-3.5 px-4">Pencari Kos</th>
+                <th class="py-3.5 px-4">Kontak WhatsApp</th>
+                <th class="py-3.5 px-4 text-center">Riwayat Pesanan</th>
+                <th class="py-3.5 px-4 text-center">Status Akun</th>
+                <th class="py-3.5 px-4">Terdaftar</th>
+                <th class="py-3.5 px-4 text-right pr-6">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-if="loadingPencari">
+                <td colspan="7" class="py-10 text-center text-slate-400">Memuat data pencari kos...</td>
+              </tr>
+              <tr v-else-if="pencariList.length === 0">
+                <td colspan="7" class="py-10 text-center text-slate-400">Tidak ada data pencari kos yang sesuai.</td>
+              </tr>
+              <tr v-for="(user, idx) in pencariList" :key="user.id" class="hover:bg-slate-50/70 transition">
+                <td class="py-4 px-4 text-center font-mono text-slate-400">{{ idx + 1 }}</td>
+                <td class="py-4 px-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-extrabold flex items-center justify-center text-xs shrink-0">
+                      {{ getInitials(user.nama) }}
+                    </div>
+                    <div>
+                      <div class="font-bold text-slate-900">{{ user.nama }}</div>
+                      <div class="text-[11px] text-slate-400 font-mono">#USR-{{ user.id }} &bull; {{ user.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-4">
+                  <div v-if="user.telepon" class="flex items-center gap-2">
+                    <span class="font-mono text-slate-700 font-semibold">{{ user.telepon }}</span>
+                    <button
+                      @click="chatUserWhatsApp(user)"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[10px] font-bold border border-emerald-200 transition"
+                      title="Hubungi Pencari lewat WhatsApp"
+                    >
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.053-1.018-.073-.615-.2-1.397-.577-2.316-1.493-.923-.92-1.294-1.696-1.496-2.314-.125-.385-.119-.705-.074-1.018.05-.333.418-1.026.823-1.17.135-.048.281-.035.405.029.135.07.247.202.321.36.197.42.502 1.155.539 1.246.037.091.042.186.005.281-.036.096-.073.185-.143.255-.07.07-.151.139-.214.195-.064.056-.128.117-.064.227.148.256.45 1.019 1.156 1.649.914.814 1.616.994 1.872 1.111.11.05.185.04.24-.037.056-.077.24-.287.327-.406.087-.119.176-.101.272-.065.096.036.83.392 1.25.59.42.197.552.31.6.446.048.136.048.421-.096.826z"/>
+                      </svg>
+                      Chat WA
+                    </button>
+                  </div>
+                  <span v-else class="text-slate-400 italic text-[11px]">Belum diisi</span>
+                </td>
+                <td class="py-4 px-4 text-center">
+                  <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 font-bold text-[11px]">
+                    {{ user.pemesanan_count || 0 }} Pesanan
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-center">
+                  <span
+                    :class="[
+                      'inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full',
+                      user.aktif ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                    ]"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" :class="user.aktif ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                    {{ user.aktif ? 'Aktif' : 'Nonaktif' }}
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-slate-500 text-[11px]">{{ formatDate(user.created_at) }}</td>
+                <td class="py-4 px-4 text-right pr-6 space-x-1.5 whitespace-nowrap">
+                  <button
+                    @click="viewUserDetail(user.id)"
+                    class="px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+                    title="Lihat Detail Profil & Riwayat"
+                  >
+                    Detail
+                  </button>
+                  <button
+                    @click="toggleUserActive(user)"
+                    :disabled="togglingUserId === user.id"
+                    :class="[
+                      'px-2.5 py-1.5 text-[11px] font-bold rounded-xl border transition',
+                      user.aktif
+                        ? 'border-rose-200 text-rose-600 hover:bg-rose-50'
+                        : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
+                    ]"
+                  >
+                    {{ user.aktif ? 'Tangguhkan' : 'Aktifkan' }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: KELOLA MITRA PEMILIK KOS (MODUL 3) -->
+    <!-- ================================================================= -->
+    <div v-else-if="activeTab === 'pemilik'" class="space-y-6">
+      <!-- Search, Status Filter & Sorting Bar -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="relative w-full sm:w-80">
+            <input
+              type="text"
+              v-model="pemilikSearchQuery"
+              placeholder="Cari nama pemilik, email, atau nomor HP..."
+              class="w-full text-xs rounded-xl border-slate-200 pl-9 pr-4 py-2.5"
+              @input="debouncePemilikSearch"
+            />
+            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+
+          <div class="flex items-center gap-2.5 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+            <select
+              v-model="pemilikStatusFilter"
+              @change="fetchPemilik"
+              class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white font-medium text-slate-700"
+            >
+              <option value="all">Semua Status Kemitraan</option>
+              <option value="1">Terverifikasi (Aktif)</option>
+              <option value="0">Ditangguhkan (Nonaktif)</option>
+            </select>
+
+            <select
+              v-model="pemilikSort"
+              @change="fetchPemilik"
+              class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white font-medium text-slate-700"
+            >
+              <option value="latest">Terbaru</option>
+              <option value="unit_terbanyak">Properti Kos Terbanyak</option>
+              <option value="nama_asc">Nama A-Z</option>
+            </select>
+
+            <button
+              @click="fetchPemilik"
+              class="p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition"
+              title="Segarkan Data Mitra Pemilik"
+            >
+              <svg class="w-4 h-4" :class="{ 'animate-spin': loadingPemilik }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pemilik Table Card -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600">
+            <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+              <tr>
+                <th class="py-3.5 px-4 w-12 text-center">No</th>
+                <th class="py-3.5 px-4">Mitra Pemilik Kos</th>
+                <th class="py-3.5 px-4">Kontak WhatsApp</th>
+                <th class="py-3.5 px-4 text-center">Unit Properti Kos</th>
+                <th class="py-3.5 px-4 text-center">Status Kemitraan</th>
+                <th class="py-3.5 px-4">Bergabung</th>
+                <th class="py-3.5 px-4 text-right pr-6">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-if="loadingPemilik">
+                <td colspan="7" class="py-10 text-center text-slate-400">Memuat data mitra pemilik kos...</td>
+              </tr>
+              <tr v-else-if="pemilikList.length === 0">
+                <td colspan="7" class="py-10 text-center text-slate-400">Tidak ada mitra pemilik kos yang ditemukan.</td>
+              </tr>
+              <tr v-for="(user, idx) in pemilikList" :key="user.id" class="hover:bg-slate-50/70 transition">
+                <td class="py-4 px-4 text-center font-mono text-slate-400">{{ idx + 1 }}</td>
+                <td class="py-4 px-4">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-800 font-extrabold flex items-center justify-center text-xs shrink-0">
+                      {{ getInitials(user.nama) }}
+                    </div>
+                    <div>
+                      <div class="font-bold text-slate-900">{{ user.nama }}</div>
+                      <div class="text-[11px] text-slate-400 font-mono">#PMK-{{ user.id }} &bull; {{ user.email }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="py-4 px-4">
+                  <div v-if="user.telepon" class="flex items-center gap-2">
+                    <span class="font-mono text-slate-700 font-semibold">{{ user.telepon }}</span>
+                    <button
+                      @click="chatUserWhatsApp(user)"
+                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[10px] font-bold border border-emerald-200 transition"
+                      title="Koordinasi dengan Mitra via WhatsApp"
+                    >
+                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.053-1.018-.073-.615-.2-1.397-.577-2.316-1.493-.923-.92-1.294-1.696-1.496-2.314-.125-.385-.119-.705-.074-1.018.05-.333.418-1.026.823-1.17.135-.048.281-.035.405.029.135.07.247.202.321.36.197.42.502 1.155.539 1.246.037.091.042.186.005.281-.036.096-.073.185-.143.255-.07.07-.151.139-.214.195-.064.056-.128.117-.064.227.148.256.45 1.019 1.156 1.649.914.814 1.616.994 1.872 1.111.11.05.185.04.24-.037.056-.077.24-.287.327-.406.087-.119.176-.101.272-.065.096.036.83.392 1.25.59.42.197.552.31.6.446.048.136.048.421-.096.826z"/>
+                      </svg>
+                      Chat WA
+                    </button>
+                  </div>
+                  <span v-else class="text-slate-400 italic text-[11px]">Belum diisi</span>
+                </td>
+                <td class="py-4 px-4 text-center">
+                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-bold text-[11px] border border-emerald-200">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    {{ user.kos_count || 0 }} Properti
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-center">
+                  <span
+                    :class="[
+                      'inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full',
+                      user.aktif ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
+                    ]"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" :class="user.aktif ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                    {{ user.aktif ? 'Terverifikasi' : 'Ditangguhkan' }}
+                  </span>
+                </td>
+                <td class="py-4 px-4 text-slate-500 text-[11px]">{{ formatDate(user.created_at) }}</td>
+                <td class="py-4 px-4 text-right pr-6 space-x-1.5 whitespace-nowrap">
+                  <button
+                    @click="viewUserDetail(user.id)"
+                    class="px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+                    title="Lihat Detail Profil & Daftar Kos"
+                  >
+                    Detail
+                  </button>
+                  <button
+                    @click="toggleUserActive(user)"
+                    :disabled="togglingUserId === user.id"
+                    :class="[
+                      'px-2.5 py-1.5 text-[11px] font-bold rounded-xl border transition',
+                      user.aktif
+                        ? 'border-rose-200 text-rose-600 hover:bg-rose-50'
+                        : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
+                    ]"
+                  >
+                    {{ user.aktif ? 'Tangguhkan' : 'Aktifkan' }}
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -687,29 +911,234 @@
         </form>
       </div>
     </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: DETAIL PENGGUNA (PENCARI / MITRA PEMILIK) -->
+    <!-- ================================================================= -->
+    <div
+      v-if="showUserDetailModal"
+      class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+    >
+      <div class="bg-white rounded-3xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 my-8">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
+          <div class="flex items-center gap-3">
+            <div
+              :class="[
+                'w-12 h-12 rounded-2xl flex items-center justify-center font-black text-base',
+                selectedUserDetail?.role === 'pemilik' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
+              ]"
+            >
+              {{ getInitials(selectedUserDetail?.nama) }}
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-bold text-slate-900">{{ selectedUserDetail?.nama }}</h3>
+                <span
+                  :class="[
+                    'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full border',
+                    selectedUserDetail?.role === 'pemilik' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200'
+                  ]"
+                >
+                  {{ selectedUserDetail?.role === 'pemilik' ? 'Mitra Pemilik' : 'Pencari Kos' }}
+                </span>
+                <span
+                  :class="[
+                    'text-[10px] font-extrabold px-2 py-0.5 rounded-full',
+                    selectedUserDetail?.aktif ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'
+                  ]"
+                >
+                  {{ selectedUserDetail?.aktif ? 'Aktif' : 'Nonaktif' }}
+                </span>
+              </div>
+              <p class="text-xs text-slate-400 mt-0.5 font-mono">
+                ID: {{ selectedUserDetail?.role === 'pemilik' ? '#PMK-' : '#USR-' }}{{ selectedUserDetail?.id }} &bull; Bergabung: {{ formatDate(selectedUserDetail?.created_at) }}
+              </p>
+            </div>
+          </div>
+          <button @click="showUserDetailModal = false" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
+        </div>
+
+        <div v-if="loadingUserDetail" class="py-12 text-center text-slate-400">
+          <svg class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Memuat rincian informasi pengguna...
+        </div>
+
+        <div v-else class="space-y-6">
+          <!-- Contact & Info Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100">
+              <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Email Terdaftar</span>
+              <span class="text-xs font-semibold text-slate-800">{{ selectedUserDetail?.email }}</span>
+            </div>
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+              <div>
+                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1">Kontak WhatsApp</span>
+                <span class="text-xs font-mono font-bold text-slate-800">{{ selectedUserDetail?.telepon || 'Belum diisi' }}</span>
+              </div>
+              <button
+                v-if="selectedUserDetail?.telepon"
+                @click="chatUserWhatsApp(selectedUserDetail)"
+                class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center gap-1 shadow-sm"
+              >
+                Chat WA
+              </button>
+            </div>
+          </div>
+
+          <!-- Section: If Pemilik Kos -> Daftar Properti Kos -->
+          <div v-if="selectedUserDetail?.role === 'pemilik'">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                Daftar Properti Kos ({{ (selectedUserDetail?.daftar_kos || []).length }} Properti)
+              </h4>
+            </div>
+            <div v-if="(selectedUserDetail?.daftar_kos || []).length === 0" class="p-4 rounded-2xl bg-slate-50 text-center text-xs text-slate-400">
+              Mitra ini belum mendaftarkan properti kos.
+            </div>
+            <div v-else class="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div
+                v-for="kos in selectedUserDetail?.daftar_kos"
+                :key="kos.id"
+                class="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between"
+              >
+                <div>
+                  <div class="font-bold text-xs text-slate-900">{{ kos.nama }}</div>
+                  <div class="text-[11px] text-slate-500">{{ kos.alamat }}</div>
+                  <div class="text-[10px] text-emerald-700 font-bold mt-0.5">
+                    {{ kos.kamar_count || 0 }} Kamar &bull; {{ formatRupiah(kos.harga) }}/bln
+                  </div>
+                </div>
+                <router-link
+                  :to="`/kos/${kos.id}`"
+                  target="_blank"
+                  class="text-[11px] font-bold text-emerald-600 hover:text-emerald-700 px-3 py-1 bg-white rounded-xl border border-slate-200 transition"
+                >
+                  Lihat Kos &rarr;
+                </router-link>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section: If Pencari Kos -> Riwayat Reservasi -->
+          <div v-else-if="selectedUserDetail?.role === 'pencari'">
+            <div class="flex items-center justify-between mb-3">
+              <h4 class="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                Riwayat Transaksi Pemesanan ({{ (selectedUserDetail?.riwayat_pemesanan || []).length }})
+              </h4>
+            </div>
+            <div v-if="(selectedUserDetail?.riwayat_pemesanan || []).length === 0" class="p-4 rounded-2xl bg-slate-50 text-center text-xs text-slate-400">
+              Belum ada riwayat transaksi pemesanan untuk pencari ini.
+            </div>
+            <div v-else class="space-y-2 max-h-56 overflow-y-auto pr-1">
+              <div
+                v-for="pesan in selectedUserDetail?.riwayat_pemesanan"
+                :key="pesan.id"
+                class="p-3 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between"
+              >
+                <div>
+                  <div class="font-bold text-xs text-slate-900">{{ pesan.kos?.nama || 'Properti Kos' }}</div>
+                  <div class="text-[11px] text-slate-500">
+                    Kamar: {{ pesan.kamar?.nama_kamar || '-' }} &bull; Tanggal: {{ formatDateOnly(pesan.tanggal_pemesanan) }}
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span
+                    :class="[
+                      'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border block mb-1',
+                      statusBadgeClass(pesan.status)
+                    ]"
+                  >
+                    {{ pesan.status }}
+                  </span>
+                  <span class="text-[11px] font-mono font-bold text-slate-700">
+                    {{ pesan.kamar?.harga ? formatRupiah(pesan.kamar.harga) : '-' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Action Footer -->
+          <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+            <button
+              @click="toggleUserActive(selectedUserDetail)"
+              :class="[
+                'px-4 py-2 text-xs font-bold rounded-xl border transition',
+                selectedUserDetail?.aktif
+                  ? 'border-rose-200 text-rose-600 hover:bg-rose-50'
+                  : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
+              ]"
+            >
+              {{ selectedUserDetail?.aktif ? 'Tangguhkan Akun Ini' : 'Aktifkan Akun Ini' }}
+            </button>
+            <button
+              type="button"
+              @click="showUserDetailModal = false"
+              class="px-5 py-2 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition"
+            >
+              Tutup
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, computed } from 'vue'
+import { ref, onMounted, reactive, computed, watch } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import api from '../services/api'
+import { openWhatsAppChat } from '../utils/whatsapp'
 
-const activeTab = ref('ringkasan')
+const route = useRoute()
+const router = useRouter()
+
+const initialTab = ['ringkasan', 'pencari', 'pemilik', 'fasilitas', 'pemesanan'].includes(route.query.tab)
+  ? route.query.tab
+  : 'ringkasan'
+const activeTab = ref(initialTab)
+
+const switchTab = (tabName) => {
+  activeTab.value = tabName
+  router.replace({ query: { ...route.query, tab: tabName } })
+}
+
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab && ['ringkasan', 'pencari', 'pemilik', 'fasilitas', 'pemesanan'].includes(newTab)) {
+      activeTab.value = newTab
+    }
+  }
+)
 
 const stats = ref({})
 const loadingStats = ref(false)
 
-const usersList = ref([])
+const pencariList = ref([])
+const loadingPencari = ref(false)
+const pencariSearchQuery = ref('')
+const pencariStatusFilter = ref('all')
+
+const pemilikList = ref([])
+const loadingPemilik = ref(false)
+const pemilikSearchQuery = ref('')
+const pemilikStatusFilter = ref('all')
+const pemilikSort = ref('latest')
+
 const fasilitasList = ref([])
 const allBookings = ref([])
 
-const loadingUsers = ref(false)
 const loadingFasilitas = ref(false)
 const loadingBookings = ref(false)
 const togglingUserId = ref(null)
 
-const userSearchQuery = ref('')
-const userRoleFilter = ref('')
+const showUserDetailModal = ref(false)
+const loadingUserDetail = ref(false)
+const selectedUserDetail = ref(null)
 
 const successMsg = ref(null)
 const errorMsg = ref(null)
@@ -776,52 +1205,111 @@ const formatRupiah = (val) => {
   }).format(val || 0)
 }
 
-// Fasilitas Modal State
-const showFasilitasModal = ref(false)
-const isEditingFasilitas = ref(false)
-const editingFasilitasId = ref(null)
-const savingFasilitas = ref(false)
-const fasilitasForm = reactive({
-  nama: '',
-  icon: '',
-})
-
-let searchTimeout = null
-const debounceUserSearch = () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    fetchUsers()
+let pencariSearchTimeout = null
+const debouncePencariSearch = () => {
+  clearTimeout(pencariSearchTimeout)
+  pencariSearchTimeout = setTimeout(() => {
+    fetchPencari()
   }, 350)
 }
 
-const fetchUsers = async () => {
-  loadingUsers.value = true
+const fetchPencari = async () => {
+  loadingPencari.value = true
   try {
-    const params = {}
-    if (userSearchQuery.value) params.q = userSearchQuery.value
-    if (userRoleFilter.value) params.role = userRoleFilter.value
+    const params = { role: 'pencari' }
+    if (pencariSearchQuery.value) params.q = pencariSearchQuery.value
+    if (pencariStatusFilter.value !== 'all') params.aktif = pencariStatusFilter.value
 
     const res = await api.get('/admin/pengguna', { params })
-    usersList.value = res.data.data || []
+    pencariList.value = res.data.data || []
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Gagal memuat pengguna.'
+    errorMsg.value = err.response?.data?.message || 'Gagal memuat daftar pencari kos.'
   } finally {
-    loadingUsers.value = false
+    loadingPencari.value = false
+  }
+}
+
+let pemilikSearchTimeout = null
+const debouncePemilikSearch = () => {
+  clearTimeout(pemilikSearchTimeout)
+  pemilikSearchTimeout = setTimeout(() => {
+    fetchPemilik()
+  }, 350)
+}
+
+const fetchPemilik = async () => {
+  loadingPemilik.value = true
+  try {
+    const params = { role: 'pemilik' }
+    if (pemilikSearchQuery.value) params.q = pemilikSearchQuery.value
+    if (pemilikStatusFilter.value !== 'all') params.aktif = pemilikStatusFilter.value
+    if (pemilikSort.value) params.sort = pemilikSort.value
+
+    const res = await api.get('/admin/pengguna', { params })
+    pemilikList.value = res.data.data || []
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || 'Gagal memuat daftar mitra pemilik kos.'
+  } finally {
+    loadingPemilik.value = false
+  }
+}
+
+const viewUserDetail = async (userId) => {
+  loadingUserDetail.value = true
+  showUserDetailModal.value = true
+  try {
+    const res = await api.get(`/admin/pengguna/${userId}`)
+    selectedUserDetail.value = res.data.data || null
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || 'Gagal memuat rincian informasi pengguna.'
+    showUserDetailModal.value = false
+  } finally {
+    loadingUserDetail.value = false
   }
 }
 
 const toggleUserActive = async (user) => {
+  if (!user) return
   togglingUserId.value = user.id
   try {
     const nextStatus = !user.aktif
     await api.patch(`/admin/pengguna/${user.id}/status`, { aktif: nextStatus })
     user.aktif = nextStatus
-    successMsg.value = `Status akun ${user.nama} berhasil diubah.`
+    if (selectedUserDetail.value && selectedUserDetail.value.id === user.id) {
+      selectedUserDetail.value.aktif = nextStatus
+    }
+    successMsg.value = `Status akun ${user.nama} berhasil diperbarui.`
+    fetchStats()
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Gagal memperbarui status akun.'
   } finally {
     togglingUserId.value = null
   }
+}
+
+const chatUserWhatsApp = (user) => {
+  if (!user) return
+  const phone = user.telepon || user.no_hp
+  if (!phone) {
+    alert('Pengguna ini belum melengkapi nomor telepon / WhatsApp.')
+    return
+  }
+
+  const message =
+    user.role === 'pemilik'
+      ? `Halo Bapak/Ibu Mitra KosKu ${user.nama},\n\nKami dari Manajemen Layanan KosKu ingin berkoordinasi mengenai operasional dan data properti kos Anda di platform KosKu.\n\nTerima kasih!`
+      : `Halo Kak ${user.nama},\n\nKami dari tim Layanan Pelanggan KosKu ingin mengonfirmasi terkait akun dan aktivitas pemesanan sewa Anda di KosKu. Apakah ada hal yang membutuhkan bantuan kami?\n\nTerima kasih!`
+
+  openWhatsAppChat(phone, message)
+}
+
+const getInitials = (name) => {
+  if (!name) return 'U'
+  const parts = name.trim().split(' ')
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[1][0]).toUpperCase()
+  }
+  return name.slice(0, 2).toUpperCase()
 }
 
 const fetchFasilitas = async () => {
@@ -929,7 +1417,8 @@ const formatDateOnly = (dateStr) => {
 
 onMounted(() => {
   fetchStats()
-  fetchUsers()
+  fetchPencari()
+  fetchPemilik()
   fetchFasilitas()
   fetchAllBookings()
 })

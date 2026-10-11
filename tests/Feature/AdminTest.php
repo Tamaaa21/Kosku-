@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Fasilitas;
+use App\Models\Kos;
 use App\Models\Pemesanan;
 use App\Models\Pengguna;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -70,6 +71,35 @@ class AdminTest extends TestCase
 
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data');
+    }
+
+    public function test_admin_can_retrieve_single_user_detail_with_relations(): void
+    {
+        $admin = Pengguna::factory()->admin()->create();
+        $pemilik = Pengguna::factory()->pemilik()->create();
+        Kos::factory()->count(2)->create(['pemilik_id' => $pemilik->id]);
+
+        Sanctum::actingAs($admin);
+
+        $response = $this->getJson('/api/v1/admin/pengguna/'.$pemilik->id);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.id', $pemilik->id)
+            ->assertJsonPath('data.kos_count', 2)
+            ->assertJsonStructure([
+                'data' => [
+                    'id',
+                    'nama',
+                    'email',
+                    'telepon',
+                    'role',
+                    'aktif',
+                    'kos_count',
+                    'pemesanan_count',
+                    'daftar_kos',
+                    'riwayat_pemesanan',
+                ],
+            ]);
     }
 
     public function test_admin_can_toggle_user_active_status(): void
