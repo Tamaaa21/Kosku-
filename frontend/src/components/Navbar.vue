@@ -1,59 +1,112 @@
 <template>
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <!-- Logo -->
-      <router-link to="/" class="flex items-center gap-2 group">
-        <div class="w-10 h-10 bg-emerald-600 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-md group-hover:bg-emerald-700 transition">
-          K
+  <header class="fixed top-0 left-0 right-0 z-50 h-16 bg-surface-container-lowest/95 backdrop-blur-md shadow-[0_1px_8px_rgba(0,0,0,0.04)] border-b border-surface-container-high/40">
+    <div class="h-16 max-w-7xl mx-auto px-margin flex items-center justify-between gap-space-md">
+      <!-- Logo Brand -->
+      <router-link to="/" class="flex items-center gap-space-sm group">
+        <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm group-hover:bg-primary-container transition">
+          <span class="material-symbols-outlined text-[22px]">home_work</span>
         </div>
-        <div>
-          <span class="font-extrabold text-xl text-slate-800 tracking-tight">Kos<span class="text-emerald-600">Hub</span></span>
-          <span class="hidden sm:inline-block text-xs bg-emerald-100 text-emerald-800 font-semibold px-2 py-0.5 rounded ml-2">REST API v1</span>
+        <div class="flex items-center gap-1.5">
+          <span class="text-xl font-bold text-primary tracking-tight">KosKu</span>
+          <span class="hidden sm:inline-block text-[11px] font-semibold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">Tegal</span>
         </div>
       </router-link>
 
-      <!-- Nav Links -->
-      <nav class="flex items-center gap-3 sm:gap-6">
-        <router-link to="/" class="text-slate-600 hover:text-emerald-600 font-medium transition text-sm sm:text-base">
+      <!-- Main Navigation Menu -->
+      <nav class="hidden md:flex items-center gap-space-lg">
+        <router-link
+          to="/"
+          class="text-sm font-medium transition-colors"
+          :class="$route.path === '/' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+        >
+          Beranda
+        </router-link>
+
+        <router-link
+          to="/kos"
+          class="text-sm font-medium transition-colors"
+          :class="$route.path === '/kos' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+        >
           Cari Kos
         </router-link>
 
+        <router-link
+          to="/peta"
+          class="text-sm font-medium transition-colors"
+          :class="$route.path === '/peta' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+        >
+          Peta Lokasi
+        </router-link>
+
+        <router-link
+          v-if="auth.isAuthenticated && (auth.isPencari || auth.isAdmin)"
+          to="/pesanan"
+          class="text-sm font-medium transition-colors"
+          :class="$route.path.startsWith('/pesanan') || $route.path === '/dashboard/pencari' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+        >
+          Pesanan
+        </router-link>
+
+        <router-link
+          v-if="auth.isAuthenticated"
+          to="/profil"
+          class="text-sm font-medium transition-colors"
+          :class="$route.path === '/profil' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
+        >
+          Profil
+        </router-link>
+      </nav>
+
+      <!-- Right Action / User Profile -->
+      <div class="flex items-center gap-space-sm">
         <template v-if="auth.isAuthenticated">
-          <!-- Role Dashboard Link -->
+          <!-- Role Dashboard Quick Button -->
           <router-link
             :to="dashboardRoute"
-            class="text-sm font-semibold px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition"
+            class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-primary-fixed text-on-primary-fixed hover:bg-primary-fixed-dim transition"
           >
-            Dashboard {{ formatRole(auth.role) }}
+            <span class="material-symbols-outlined text-[16px]">dashboard</span>
+            <span>Dashboard {{ formatRole(auth.role) }}</span>
           </router-link>
 
-          <div class="hidden sm:flex items-center gap-2 pl-2 border-l border-slate-200 text-sm text-slate-600">
-            <span class="font-medium text-slate-800">{{ auth.user?.nama }}</span>
-          </div>
+          <!-- User Avatar & Dropdown / Profile Link -->
+          <router-link
+            to="/profil"
+            class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-surface-container transition group"
+            title="Profil Pengguna"
+          >
+            <div class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs uppercase overflow-hidden">
+              <span class="material-symbols-outlined text-[18px]">person</span>
+            </div>
+            <span class="text-xs font-semibold text-on-surface hidden lg:inline max-w-[100px] truncate">
+              {{ auth.user?.nama }}
+            </span>
+          </router-link>
 
           <button
             @click="handleLogout"
-            class="text-sm text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-3 py-1.5 rounded-lg font-medium transition border border-transparent hover:border-rose-200"
+            class="text-xs text-error hover:bg-error-container/40 p-2 rounded-lg font-medium transition flex items-center justify-center"
+            title="Keluar"
           >
-            Keluar
+            <span class="material-symbols-outlined text-[18px]">logout</span>
           </button>
         </template>
 
         <template v-else>
           <router-link
             to="/login"
-            class="text-sm font-semibold text-slate-700 hover:text-emerald-600 px-3 py-1.5 rounded-lg transition"
+            class="hidden sm:inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-on-surface-variant hover:text-primary transition"
           >
             Masuk
           </router-link>
           <router-link
             to="/register"
-            class="text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 px-4 py-2 rounded-xl shadow-sm transition"
+            class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary-container hover:bg-primary text-white text-sm font-semibold transition shadow-sm"
           >
             Daftar
           </router-link>
         </template>
-      </nav>
+      </div>
     </div>
   </header>
 </template>

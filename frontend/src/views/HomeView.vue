@@ -1,368 +1,329 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Hero / Header -->
-    <div class="mb-8 text-center max-w-2xl mx-auto">
-      <h1 class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight">
-        Temukan Kos Nyaman & Strategis
-      </h1>
-      <p class="text-slate-600 mt-2 text-sm sm:text-base">
-        Jelajahi pilihan hunian kos dengan informasi ketersediaan kamar dan fasilitas terlengkap.
-      </p>
+  <div class="w-full">
+    <!-- Hero Section -->
+    <section class="relative w-full overflow-hidden pt-16">
+      <div
+        class="relative w-full min-h-[520px] lg:min-h-[580px] bg-cover bg-center flex items-center justify-center px-margin py-space-xl"
+        style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAuxX9rhUIqskAHsOQuGOG_bIw28TdVEZZqZJYbCEyyKVNen8W7vHD5Na3XRNyv_VX49pIw4lTGVOYQRilL3WL7ZJ_0_sJs4gtMHLS4VDAIczLtBi65wMFCSKl5M_HKm-iGLPGX22UEgiDygZJppjal4fN-7qoh6R_3V3r4xXZMu0dA0GFaiFw_auXRxOz0sTpMSqJ8iMdXT1UPsArttAUJTv57SVsfWyOEarTJ-R2Iz3U3vjNLRwlv3Q');"
+      >
+        <!-- Dark scrim overlay for high legibility -->
+        <div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/90 via-inverse-surface/65 to-inverse-surface/40 backdrop-blur-[1px]"></div>
 
-      <!-- Main Search Bar -->
-      <div class="mt-6 flex items-center bg-white rounded-2xl shadow-sm border border-slate-200 p-2 focus-within:ring-2 focus-within:ring-emerald-500 focus-within:border-emerald-500">
-        <svg class="w-5 h-5 text-slate-400 ml-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-        </svg>
-        <input
-          v-model="filters.q"
-          @keyup.enter="applyFilters"
-          type="text"
-          placeholder="Cari nama kos, daerah, atau alamat kampus..."
-          class="w-full border-0 focus:ring-0 px-3 py-2 text-sm sm:text-base text-slate-800 placeholder-slate-400"
-        />
-        <button
-          @click="applyFilters"
-          class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium px-5 py-2.5 rounded-xl transition text-sm shrink-0"
-        >
-          Cari
-        </button>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-      <!-- Sidebar Filters -->
-      <aside class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm h-fit">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-100">
-          <h2 class="font-bold text-slate-800 text-base">Filter Pencarian</h2>
-          <button @click="resetFilters" class="text-xs text-emerald-600 hover:underline">
-            Reset
-          </button>
-        </div>
-
-        <!-- Tipe Penghuni -->
-        <div class="mt-4">
-          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Tipe Kos</label>
-          <div class="space-y-1.5">
-            <label v-for="type in typeOptions" :key="type.value" class="flex items-center text-sm text-slate-700 cursor-pointer">
-              <input
-                type="radio"
-                name="jenis"
-                :value="type.value"
-                v-model="filters.jenis"
-                @change="applyFilters"
-                class="text-emerald-600 focus:ring-emerald-500 h-4 w-4 mr-2"
-              />
-              {{ type.label }}
-            </label>
-          </div>
-        </div>
-
-        <!-- Rentang Harga -->
-        <div class="mt-6">
-          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Rentang Harga (Rp)</label>
-          <div class="space-y-2">
-            <input
-              type="number"
-              v-model.number="filters.harga_min"
-              placeholder="Harga Min"
-              class="w-full text-xs rounded-xl border-slate-200 p-2.5 focus:border-emerald-500 focus:ring-emerald-500"
-            />
-            <input
-              type="number"
-              v-model.number="filters.harga_max"
-              placeholder="Harga Max"
-              class="w-full text-xs rounded-xl border-slate-200 p-2.5 focus:border-emerald-500 focus:ring-emerald-500"
-            />
-          </div>
-        </div>
-
-        <!-- Fasilitas -->
-        <div class="mt-6" v-if="availableFacilities.length > 0">
-          <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Fasilitas</label>
-          <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-            <label
-              v-for="item in availableFacilities"
-              :key="item.id"
-              class="flex items-center text-sm text-slate-700 cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                :value="item.id"
-                v-model="filters.fasilitas"
-                @change="applyFilters"
-                class="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4 mr-2"
-              />
-              {{ item.nama }}
-            </label>
-          </div>
-        </div>
-
-        <!-- Hanya Kamar Tersedia -->
-        <div class="mt-6 pt-4 border-t border-slate-100">
-          <label class="flex items-center text-sm text-slate-700 cursor-pointer">
-            <input
-              type="checkbox"
-              v-model="filters.tersedia"
-              @change="applyFilters"
-              class="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4 mr-2"
-            />
-            <span class="font-medium text-emerald-700">Hanya Kamar Tersedia</span>
-          </label>
-        </div>
-
-        <!-- Tombol Terapkan -->
-        <button
-          @click="applyFilters"
-          class="w-full mt-6 bg-slate-900 text-white font-medium py-2.5 rounded-xl hover:bg-slate-800 transition text-sm"
-        >
-          Terapkan Filter
-        </button>
-      </aside>
-
-      <!-- Main Content / Catalog -->
-      <section class="lg:col-span-3">
-        <!-- Top Toolbar -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <p class="text-sm text-slate-600">
-            Menampilkan <span class="font-bold text-slate-900">{{ meta.total || kosList.length }}</span> properti kos
+        <div class="relative z-10 max-w-5xl mx-auto w-full flex flex-col items-center text-center mt-6 lg:mt-10">
+          <h1 class="text-3xl sm:text-5xl font-bold text-white tracking-tight max-w-3xl drop-shadow-sm">
+            Cari Kos Jadi Lebih Mudah
+          </h1>
+          <p class="text-base sm:text-lg text-surface-container-low max-w-2xl mt-space-sm mb-space-lg leading-relaxed">
+            Temukan kos terbaik sesuai kebutuhanmu. Dengan lokasi yang akurat, fasilitas lengkap, dan harga yang transparan di seluruh wilayah Kota Tegal.
           </p>
 
-          <!-- Sorting -->
-          <div class="flex items-center gap-2">
-            <span class="text-xs text-slate-500 font-medium">Urutkan:</span>
-            <select
-              v-model="filters.sort"
-              @change="applyFilters"
-              class="text-xs rounded-xl border-slate-200 py-1.5 pl-3 pr-8 focus:border-emerald-500 focus:ring-emerald-500"
-            >
-              <option value="terbaru">Terbaru</option>
-              <option value="harga_asc">Harga Termurah</option>
-              <option value="harga_desc">Harga Termahal</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Loading State -->
-        <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div v-for="i in 4" :key="i" class="bg-white p-6 rounded-2xl border border-slate-200 animate-pulse h-64"></div>
-        </div>
-
-        <!-- Empty State -->
-        <div v-else-if="kosList.length === 0" class="bg-white rounded-2xl p-12 text-center border border-slate-200">
-          <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4 text-slate-400">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-            </svg>
-          </div>
-          <h3 class="font-bold text-slate-800 text-lg">Tidak ada kos yang cocok</h3>
-          <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">
-            Coba ubah kata kunci pencarian atau sesuaikan rentang filter harga Anda.
-          </p>
-          <button @click="resetFilters" class="mt-4 inline-block text-xs font-semibold text-emerald-600 hover:underline">
-            Bersihkan semua filter
-          </button>
-        </div>
-
-        <!-- Kos Cards Grid -->
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div
-            v-for="kos in kosList"
-            :key="kos.id"
-            class="bg-white rounded-2xl border border-slate-200 hover:border-emerald-300 hover:shadow-md transition overflow-hidden flex flex-col group"
-          >
-            <!-- Card Header / Image Placeholder -->
-            <div class="h-40 bg-gradient-to-br from-emerald-100 to-slate-100 relative p-4 flex flex-col justify-between">
-              <div class="flex items-center justify-between">
-                <span
-                  :class="badgeClass(kos.jenis)"
-                  class="text-xs font-bold uppercase tracking-wider px-2.5 py-1 rounded-lg shadow-sm"
-                >
-                  {{ kos.jenis }}
-                </span>
-                <span
-                  v-if="kos.kamar_tersedia_count > 0"
-                  class="text-xs font-semibold bg-emerald-600 text-white px-2.5 py-0.5 rounded-full shadow-sm"
-                >
-                  {{ kos.kamar_tersedia_count }} Kamar Tersedia
-                </span>
-                <span v-else class="text-xs font-semibold bg-rose-500 text-white px-2.5 py-0.5 rounded-full shadow-sm">
-                  Penuh
-                </span>
-              </div>
-              <div class="text-emerald-950 font-extrabold text-xl tracking-tight">
-                Rp {{ Number(kos.harga).toLocaleString('id-ID') }}
-                <span class="text-xs font-normal text-slate-600">/ bulan</span>
-              </div>
+          <!-- Floating Search Bar -->
+          <div class="w-full max-w-4xl bg-surface-container-lowest rounded-xl shadow-xl p-space-xs sm:p-space-sm flex flex-col lg:flex-row items-stretch lg:items-center gap-space-xs sm:gap-space-sm">
+            <!-- Text Search -->
+            <div class="flex-1 flex items-center gap-space-xs px-space-sm py-2 bg-surface-container-low rounded-lg focus-within:bg-surface-container-lowest focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+              <span class="material-symbols-outlined text-primary text-xl select-none">search</span>
+              <input
+                v-model="searchQuery"
+                type="text"
+                class="w-full bg-transparent text-sm text-on-surface placeholder:text-on-surface-variant/70 border-none focus:ring-0 p-0"
+                placeholder="Cari nama kos, jalan, atau area di Tegal..."
+                @keyup.enter="handleSearch"
+              />
             </div>
 
-            <!-- Card Body -->
-            <div class="p-5 flex-1 flex flex-col justify-between">
-              <div>
-                <h3 class="font-bold text-slate-900 text-lg group-hover:text-emerald-600 transition">
-                  {{ kos.nama }}
-                </h3>
-                <p class="text-xs text-slate-500 mt-1 flex items-start gap-1 line-clamp-2">
-                  <svg class="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                  {{ kos.alamat }}
-                </p>
+            <!-- Divider Desktop -->
+            <div class="hidden lg:block w-px h-8 bg-surface-container-high"></div>
 
-                <!-- Facilities Chips -->
-                <div class="mt-4 flex flex-wrap gap-1.5" v-if="kos.fasilitas?.length">
-                  <span
-                    v-for="fas in kos.fasilitas.slice(0, 3)"
-                    :key="fas.id"
-                    class="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded-md font-medium"
-                  >
-                    {{ fas.nama }}
-                  </span>
-                  <span v-if="kos.fasilitas.length > 3" class="text-[11px] text-slate-400 font-medium self-center">
-                    +{{ kos.fasilitas.length - 3 }} lainnya
-                  </span>
+            <!-- Jenis Kos Dropdown -->
+            <div class="flex items-center gap-space-xs px-space-sm py-2 bg-surface-container-low rounded-lg min-w-[160px]">
+              <span class="material-symbols-outlined text-secondary text-lg select-none">group</span>
+              <select
+                v-model="selectedJenis"
+                class="w-full bg-transparent text-sm text-on-surface border-none focus:ring-0 p-0 cursor-pointer"
+              >
+                <option value="">Semua Jenis</option>
+                <option value="putra">Putra</option>
+                <option value="putri">Putri</option>
+                <option value="campur">Campur</option>
+              </select>
+            </div>
+
+            <!-- Divider Desktop -->
+            <div class="hidden lg:block w-px h-8 bg-surface-container-high"></div>
+
+            <!-- Rentang Harga Dropdown -->
+            <div class="flex items-center gap-space-xs px-space-sm py-2 bg-surface-container-low rounded-lg min-w-[170px]">
+              <span class="material-symbols-outlined text-secondary text-lg select-none">payments</span>
+              <select
+                v-model="selectedPriceRange"
+                class="w-full bg-transparent text-sm text-on-surface border-none focus:ring-0 p-0 cursor-pointer"
+              >
+                <option value="">Semua Harga</option>
+                <option value="under500">&lt; Rp 500rb</option>
+                <option value="500-1000">Rp 500rb - 1jt</option>
+                <option value="above1000">&gt; Rp 1jt</option>
+              </select>
+            </div>
+
+            <!-- Search Button -->
+            <button
+              @click="handleSearch"
+              class="bg-primary-container hover:bg-primary text-white px-space-lg py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-space-xs transition-all shadow-md hover:shadow-lg active:scale-[0.99] whitespace-nowrap"
+            >
+              <span class="material-symbols-outlined text-lg select-none">search</span>
+              <span>Cari</span>
+            </button>
+          </div>
+
+          <!-- Quick Sub-tags -->
+          <div class="flex flex-wrap items-center justify-center gap-space-xs mt-space-md text-white/80 text-xs">
+            <span class="text-surface-container-high">Pencarian populer:</span>
+            <button @click="quickSearch('UPS Tegal')" class="bg-white/15 hover:bg-white/30 px-2.5 py-1 rounded backdrop-blur-sm transition text-white">
+              Dekat UPS Tegal
+            </button>
+            <button @click="quickSearch('Stasiun Tegal')" class="bg-white/15 hover:bg-white/30 px-2.5 py-1 rounded backdrop-blur-sm transition text-white">
+              Stasiun Tegal
+            </button>
+            <button @click="quickSearch('Poltek Harber')" class="bg-white/15 hover:bg-white/30 px-2.5 py-1 rounded backdrop-blur-sm transition text-white">
+              Poltek Harber
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Platform Advantages Section -->
+    <section class="max-w-7xl mx-auto w-full px-margin py-space-xl">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+        <!-- Card 1 -->
+        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-space-md group border border-slate-100">
+          <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors flex-shrink-0">
+            <span class="material-symbols-outlined text-2xl select-none" style="font-variation-settings: 'FILL' 1;">location_on</span>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-base font-bold text-on-surface">Lokasi Akurat</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+              Terintegrasi dengan peta presisi OpenStreetMap dan Geocoding API untuk memastikan titik lokasi kos tepat tanpa tersesat.
+            </p>
+          </div>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-space-md group border border-slate-100">
+          <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors flex-shrink-0">
+            <span class="material-symbols-outlined text-2xl select-none" style="font-variation-settings: 'FILL' 1;">checklist</span>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-base font-bold text-on-surface">Fasilitas Lengkap</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+              Lihat ketersediaan kamar, kamar mandi dalam, WiFi, dan parkir kendaraan secara transparan dan detail.
+            </p>
+          </div>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-space-md group border border-slate-100">
+          <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors flex-shrink-0">
+            <span class="material-symbols-outlined text-2xl select-none" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-base font-bold text-on-surface">Aman & Terpercaya</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+              Seluruh data listing dikelola langsung oleh pemilik properti resmi dengan proteksi akun terverifikasi.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Popular Kos Section -->
+    <section class="max-w-7xl mx-auto w-full px-margin pb-space-xl">
+      <!-- Section Header -->
+      <div class="flex items-center justify-between gap-space-md mb-space-lg">
+        <div class="space-y-1">
+          <h2 class="text-2xl font-bold text-on-surface tracking-tight">Kos Populer</h2>
+          <p class="text-xs text-on-surface-variant">Paling banyak diminati dan berlokasi strategis di Kota Tegal</p>
+        </div>
+        <router-link
+          to="/kos"
+          class="text-xs font-semibold text-primary hover:text-primary-container flex items-center gap-1 group"
+        >
+          <span>Lihat Semua</span>
+          <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform select-none">arrow_forward</span>
+        </router-link>
+      </div>
+
+      <!-- Loading State -->
+      <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
+        <div v-for="i in 6" :key="i" class="h-80 bg-white rounded-xl border border-slate-100 animate-pulse"></div>
+      </div>
+
+      <!-- Cards Grid -->
+      <div v-else-if="kosList.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
+        <article
+          v-for="kos in kosList"
+          :key="kos.id"
+          class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden group border border-slate-100"
+        >
+          <!-- Thumbnail Image -->
+          <div class="relative w-full aspect-[4/3] overflow-hidden bg-surface-container">
+            <img
+              :src="getImageForKos(kos.id)"
+              :alt="kos.nama"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            />
+            <div class="absolute top-3 left-3 flex items-center gap-1.5">
+              <span class="bg-primary text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm tracking-wide">
+                Populer
+              </span>
+              <span
+                :class="[
+                  'text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm',
+                  kos.jenis === 'putri' ? 'bg-[#FCE7F3] text-[#BE185D]' :
+                  kos.jenis === 'putra' ? 'bg-[#E0F2FE] text-[#0369A1]' :
+                  'bg-[#EDE9FE] text-[#6D28D9]'
+                ]"
+              >
+                {{ formatJenis(kos.jenis) }}
+              </span>
+            </div>
+            <button
+              class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-secondary hover:text-error flex items-center justify-center shadow-sm transition-colors"
+              title="Simpan Kos"
+            >
+              <span class="material-symbols-outlined text-lg select-none">favorite</span>
+            </button>
+          </div>
+
+          <!-- Card Body -->
+          <div class="p-space-md flex-1 flex flex-col justify-between space-y-space-sm">
+            <div>
+              <div class="flex items-center justify-between gap-space-xs mb-1">
+                <router-link :to="`/kos/${kos.id}`" class="text-base font-bold text-on-surface group-hover:text-primary transition-colors truncate">
+                  {{ kos.nama }}
+                </router-link>
+                <div class="flex items-center gap-1 text-on-surface text-xs">
+                  <span class="material-symbols-outlined text-amber-500 text-sm select-none" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span class="font-semibold">4.8</span>
                 </div>
               </div>
 
-              <!-- Action Link -->
-              <div class="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between">
-                <span class="text-xs text-slate-400">Pemilik: {{ kos.pemilik?.nama }}</span>
-                <router-link
-                  :to="`/kos/${kos.id}`"
-                  class="inline-flex items-center text-xs font-bold text-emerald-600 hover:text-emerald-700 group-hover:translate-x-0.5 transition"
+              <div class="flex items-center gap-1 text-on-surface-variant text-xs mb-space-sm">
+                <span class="material-symbols-outlined text-sm text-primary select-none">location_on</span>
+                <span class="truncate">{{ kos.alamat }}</span>
+              </div>
+
+              <!-- Facilities Badges -->
+              <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                <span
+                  v-for="fas in (kos.fasilitas || []).slice(0, 3)"
+                  :key="fas.id"
+                  class="inline-flex items-center gap-1 bg-surface-container-low text-primary text-[11px] font-semibold px-2.5 py-1 rounded-full"
                 >
-                  Lihat Detail &rarr;
-                </router-link>
+                  <span class="material-symbols-outlined text-[13px] select-none">check_circle</span>
+                  <span>{{ fas.nama }}</span>
+                </span>
+                <span v-if="(kos.fasilitas || []).length > 3" class="text-[11px] text-on-surface-variant">
+                  +{{ kos.fasilitas.length - 3 }} lainnya
+                </span>
               </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Pagination -->
-        <div v-if="meta.last_page > 1" class="mt-8 flex justify-center items-center gap-2">
-          <button
-            @click="changePage(meta.current_page - 1)"
-            :disabled="meta.current_page <= 1"
-            class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium disabled:opacity-40"
-          >
-            Sebelumnya
-          </button>
-          <span class="text-xs text-slate-600 font-medium px-2">
-            Halaman {{ meta.current_page }} dari {{ meta.last_page }}
-          </span>
-          <button
-            @click="changePage(meta.current_page + 1)"
-            :disabled="meta.current_page >= meta.last_page"
-            class="px-3 py-1.5 rounded-lg border border-slate-200 text-xs font-medium disabled:opacity-40"
-          >
-            Selanjutnya
-          </button>
-        </div>
-      </section>
-    </div>
+            <!-- Price & Action -->
+            <div class="pt-space-sm border-t border-slate-100 flex items-center justify-between">
+              <div>
+                <span class="text-base font-bold text-primary">{{ formatRupiah(kos.harga) }}</span>
+                <span class="text-xs text-on-surface-variant font-normal"> / bln</span>
+              </div>
+              <router-link
+                :to="`/kos/${kos.id}`"
+                class="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container text-primary text-xs font-semibold rounded-lg transition"
+              >
+                Lihat Detail
+              </router-link>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <!-- Empty State -->
+      <div v-else class="text-center py-12 bg-white rounded-xl border border-slate-100">
+        <p class="text-sm text-on-surface-variant">Belum ada properti kos yang tersedia.</p>
+      </div>
+    </section>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '../services/api'
 
-const kosList = ref([])
-const availableFacilities = ref([])
-const loading = ref(false)
-const meta = ref({})
+const router = useRouter()
 
-const typeOptions = [
-  { label: 'Semua Kategori', value: '' },
-  { label: 'Putra', value: 'putra' },
-  { label: 'Putri', value: 'putri' },
-  { label: 'Campur', value: 'campur' },
+const searchQuery = ref('')
+const selectedJenis = ref('')
+const selectedPriceRange = ref('')
+const kosList = ref([])
+const loading = ref(false)
+
+// Sample default cover photos from Stitch design assets
+const samplePhotos = [
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuBtAMGcNImL28Wkcksd1pB136MBTXtxAeUZZdLwny2E0TfcGGRkdrMA_JR6pVnktaHUu8Ffua13FdN3HdgZd29vhkeFDWM4WJtQJFMuZndi8o1HB2GXyn8ikhIgK45eAlZmqqiEVYkjMe7_m-Cvw0nxPY6cKLGKCrWp2Ch2dtBIlIqQb5pKjNVS1WaRhbnQPFyDftN7_uvVGXkv3Z_JUnsJpPxReDktVkZYw0eJ1YRW7caBLYvFdhslDw',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuCOitClHgLDKT01wozYNVTlNFfj9k7oJNfa4q2kNrDk86lv3RxjjBUoPS6XVwSRz1fJt2Njq_q5ULmoPtKJ6tl88vke1gmGCs0RASAks5YEI7qsJO_F2vpf0H79xaVOLcj6daJIZt4_vYQD98RpawFS-fn8uc4Gg8SAZ6U1phc_LSoddYK5bxVMFELhOTo3bzl4rS6xJsZs6VtkRf6E9koZW5_wbWiwXvorevgASvvlZRP5P-63L62c2Q',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuCq7lWrhImOr_FOsjNzINLkTN7b_5naoC4qeVNpyv6ugH4fnh9cc_IfxyVcenUHoVsykW_bUzYT96tFdwcpt9ghlRd6ji-wQjUfun67OQOq3T1S6XB2tOmVgvzykn_ra-KV7mRpZLQ09KBeHgpQj_rkik9wD8A8tT5piCUPOvWmwULPLmec2WUaeEHWcK2rVuT-D0jdYE8LleRBoUP8Vwlz6LcasWJw3DEPRxzciDC7dsnsgoobvasOfw',
+  'https://lh3.googleusercontent.com/aida-public/AB6AXuBTwXv4Xzishf0BXTnGXeJGpf3six-aec8DUjhun4L1wAl49mDNbV4PPm9M7tACxaznDsA8efSHLFZXYg2Y2tqKbz4LG-PnJ_Izg77boMl0DFoZjIyMPJsP7f1m1TOy7WRSf9P9KWaENTrx0Q8oiX4WyyJUG--tFfpvnEr55wG2VWex3vG3bk3Oe7VB2DDfVDL3Hrqc01BGrDlFUw8nmuMIrr03zc8cscfCplekhP_8NAdixMSnIyhjFQ',
 ]
 
-const filters = reactive({
-  q: '',
-  jenis: '',
-  harga_min: null,
-  harga_max: null,
-  fasilitas: [],
-  tersedia: false,
-  sort: 'terbaru',
-  page: 1,
-})
-
-const badgeClass = (jenis) => {
-  switch (jenis) {
-    case 'putra':
-      return 'bg-blue-100 text-blue-700'
-    case 'putri':
-      return 'bg-pink-100 text-pink-700'
-    default:
-      return 'bg-purple-100 text-purple-700'
-  }
+const getImageForKos = (id) => {
+  return samplePhotos[(id - 1) % samplePhotos.length]
 }
 
-const fetchFacilities = async () => {
-  try {
-    const res = await api.get('/fasilitas')
-    availableFacilities.value = res.data.data || []
-  } catch (err) {
-    console.error('Failed to load facilities', err)
-  }
+const formatJenis = (jenis) => {
+  if (!jenis) return '-'
+  return jenis.charAt(0).toUpperCase() + jenis.slice(1)
 }
 
-const fetchKos = async () => {
+const formatRupiah = (val) => {
+  if (!val) return 'Rp 0'
+  return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val)
+}
+
+const handleSearch = () => {
+  const query = {}
+  if (searchQuery.value) query.q = searchQuery.value
+  if (selectedJenis.value) query.jenis = selectedJenis.value
+
+  if (selectedPriceRange.value === 'under500') {
+    query.harga_max = 500000
+  } else if (selectedPriceRange.value === '500-1000') {
+    query.harga_min = 500000
+    query.harga_max = 1000000
+  } else if (selectedPriceRange.value === 'above1000') {
+    query.harga_min = 1000000
+  }
+
+  router.push({ path: '/kos', query })
+}
+
+const quickSearch = (keyword) => {
+  searchQuery.value = keyword
+  handleSearch()
+}
+
+const fetchPopularKos = async () => {
   loading.value = true
   try {
-    const params = {
-      page: filters.page,
-      sort: filters.sort,
-    }
-    if (filters.q) params.q = filters.q
-    if (filters.jenis) params.jenis = filters.jenis
-    if (filters.harga_min) params.harga_min = filters.harga_min
-    if (filters.harga_max) params.harga_max = filters.harga_max
-    if (filters.tersedia) params.tersedia = 1
-    if (filters.fasilitas?.length) {
-      params.fasilitas = filters.fasilitas
-    }
-
-    const res = await api.get('/kos', { params })
+    const res = await api.get('/kos', { params: { per_page: 6 } })
     kosList.value = res.data.data || []
-    meta.value = res.data.meta || {}
   } catch (err) {
-    console.error('Failed to fetch kos', err)
+    // Abaikan error saat fetch
   } finally {
     loading.value = false
   }
 }
 
-const applyFilters = () => {
-  filters.page = 1
-  fetchKos()
-}
-
-const resetFilters = () => {
-  filters.q = ''
-  filters.jenis = ''
-  filters.harga_min = null
-  filters.harga_max = null
-  filters.fasilitas = []
-  filters.tersedia = false
-  filters.sort = 'terbaru'
-  filters.page = 1
-  fetchKos()
-}
-
-const changePage = (newPage) => {
-  if (newPage >= 1 && newPage <= meta.value.last_page) {
-    filters.page = newPage
-    fetchKos()
-  }
-}
-
 onMounted(() => {
-  fetchFacilities()
-  fetchKos()
+  fetchPopularKos()
 })
 </script>

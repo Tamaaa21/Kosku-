@@ -1,21 +1,19 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
       <div>
-        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard Pemilik Kos</h1>
-        <p class="text-sm text-slate-500 mt-1">
+        <h1 class="text-2xl font-bold text-on-surface tracking-tight">Dashboard Pemilik Kos</h1>
+        <p class="text-xs text-on-surface-variant mt-1">
           Kelola properti kos, inventaris kamar, dan konfirmasi pemesanan dari calon penyewa.
         </p>
       </div>
       <div class="flex items-center gap-3">
         <button
           @click="openCreateKosModal"
-          class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition shadow-sm"
+          class="inline-flex items-center gap-2 bg-primary-container hover:bg-primary text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-sm"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
+          <span class="material-symbols-outlined text-base">add</span>
           Tambah Kos Baru
         </button>
       </div>

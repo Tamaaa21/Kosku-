@@ -2,7 +2,11 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 import HomeView from '../views/HomeView.vue'
+import DaftarKosView from '../views/DaftarKosView.vue'
 import KosDetailView from '../views/KosDetailView.vue'
+import PetaLokasiView from '../views/PetaLokasiView.vue'
+import PengajuanPemesananView from '../views/PengajuanPemesananView.vue'
+import ProfilPenggunaView from '../views/ProfilPenggunaView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
 import PencariDashboard from '../views/PencariDashboard.vue'
@@ -16,10 +20,39 @@ const routes = [
     component: HomeView,
   },
   {
+    path: '/kos',
+    name: 'daftar-kos',
+    component: DaftarKosView,
+  },
+  {
     path: '/kos/:id',
     name: 'kos-detail',
     component: KosDetailView,
     props: true,
+  },
+  {
+    path: '/peta',
+    name: 'peta-lokasi',
+    component: PetaLokasiView,
+  },
+  {
+    path: '/pesan/:kosId/:kamarId',
+    name: 'pengajuan-pemesanan',
+    component: PengajuanPemesananView,
+    meta: { requiresAuth: true, roles: ['pencari'] },
+    props: true,
+  },
+  {
+    path: '/pesanan',
+    name: 'riwayat-pemesanan',
+    component: PencariDashboard,
+    meta: { requiresAuth: true, roles: ['pencari', 'admin'] },
+  },
+  {
+    path: '/profil',
+    name: 'profil-pengguna',
+    component: ProfilPenggunaView,
+    meta: { requiresAuth: true },
   },
   {
     path: '/login',
@@ -69,10 +102,9 @@ router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
   if (to.meta.guestOnly && authStore.isAuthenticated) {
-    // Redirect logged in user to their dashboard or home
     if (authStore.isPemilik) return next({ name: 'pemilik-dashboard' })
     if (authStore.isAdmin) return next({ name: 'admin-dashboard' })
-    return next({ name: 'pencari-dashboard' })
+    return next({ name: 'home' })
   }
 
   if (to.meta.requiresAuth) {
