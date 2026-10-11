@@ -1,93 +1,96 @@
 <template>
-  <div class="min-h-[85vh] flex items-center justify-center px-4 py-12">
-    <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm max-w-lg w-full">
+  <div class="min-h-[85vh] flex items-center justify-center px-4 py-12 pt-20">
+    <div class="bg-surface-container-lowest p-8 rounded-2xl border border-slate-100 shadow-md max-w-md w-full">
       <div class="text-center mb-8">
-        <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Daftar Akun Baru</h2>
-        <p class="text-xs text-slate-500 mt-1">Bergabunglah sebagai pencari kos atau pemilik kos.</p>
+        <div class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mx-auto mb-3">
+          <span class="material-symbols-outlined text-3xl">person_add</span>
+        </div>
+        <h2 class="text-2xl font-bold text-on-surface tracking-tight">Daftar Akun KosKu</h2>
+        <p class="text-xs text-on-surface-variant mt-1">Bergabunglah sebagai pencari kos atau pemilik kos.</p>
       </div>
 
-      <div v-if="errorMsg" class="mb-5 p-3 rounded-xl bg-rose-50 text-rose-700 text-xs border border-rose-200">
+      <div v-if="errorMsg" class="mb-5 p-3 rounded-xl bg-error-container text-on-error-container text-xs border border-error/20">
         {{ errorMsg }}
       </div>
 
       <form @submit.prevent="handleRegister" class="space-y-4">
         <!-- Role Selection -->
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-2">Daftar Sebagai:</label>
+          <label class="block text-xs font-semibold text-on-surface mb-2">Daftar Sebagai:</label>
           <div class="grid grid-cols-2 gap-3">
             <label
               :class="[
-                'border rounded-2xl p-3 flex items-center gap-3 cursor-pointer transition select-none',
+                'border rounded-xl p-3 flex items-center gap-2.5 cursor-pointer transition select-none',
                 form.role === 'pencari'
-                  ? 'border-emerald-500 bg-emerald-50/60 ring-2 ring-emerald-500/20'
-                  : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                  ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                  : 'border-slate-200 hover:border-slate-300 bg-surface-container-low/50'
               ]"
             >
-              <input type="radio" v-model="form.role" value="pencari" class="text-emerald-600 focus:ring-emerald-500" />
+              <input type="radio" v-model="form.role" value="pencari" class="text-primary focus:ring-primary" />
               <div>
-                <div class="text-xs font-bold text-slate-800">Pencari Kos</div>
-                <div class="text-[11px] text-slate-500">Mencari & memesan kamar</div>
+                <div class="text-xs font-bold text-on-surface">Pencari Kos</div>
+                <div class="text-[10px] text-on-surface-variant">Sewa kamar</div>
               </div>
             </label>
 
             <label
               :class="[
-                'border rounded-2xl p-3 flex items-center gap-3 cursor-pointer transition select-none',
+                'border rounded-xl p-3 flex items-center gap-2.5 cursor-pointer transition select-none',
                 form.role === 'pemilik'
-                  ? 'border-emerald-500 bg-emerald-50/60 ring-2 ring-emerald-500/20'
-                  : 'border-slate-200 hover:border-slate-300 bg-slate-50/50'
+                  ? 'border-primary bg-primary/5 ring-1 ring-primary'
+                  : 'border-slate-200 hover:border-slate-300 bg-surface-container-low/50'
               ]"
             >
-              <input type="radio" v-model="form.role" value="pemilik" class="text-emerald-600 focus:ring-emerald-500" />
+              <input type="radio" v-model="form.role" value="pemilik" class="text-primary focus:ring-primary" />
               <div>
-                <div class="text-xs font-bold text-slate-800">Pemilik Kos</div>
-                <div class="text-[11px] text-slate-500">Iklankan properti & kamar</div>
+                <div class="text-xs font-bold text-on-surface">Pemilik Kos</div>
+                <div class="text-[10px] text-on-surface-variant">Iklankan properti</div>
               </div>
             </label>
           </div>
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap</label>
+          <label class="block text-xs font-semibold text-on-surface mb-1">Nama Lengkap</label>
           <input
             type="text"
             v-model="form.nama"
             required
-            class="w-full text-sm rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500 p-2.5"
-            placeholder="cth. Budi Pratama"
+            class="w-full text-xs rounded-lg border-slate-200 focus:ring-primary focus:border-primary p-2.5"
+            placeholder="cth. Sigit Pratama"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+          <label class="block text-xs font-semibold text-on-surface mb-1">Email</label>
           <input
             type="email"
             v-model="form.email"
             required
-            class="w-full text-sm rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500 p-2.5"
+            class="w-full text-xs rounded-lg border-slate-200 focus:ring-primary focus:border-primary p-2.5"
             placeholder="nama@example.com"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Nomor Telepon / WhatsApp</label>
+          <label class="block text-xs font-semibold text-on-surface mb-1">Nomor Telepon / WhatsApp</label>
           <input
             type="tel"
             v-model="form.no_hp"
             required
-            class="w-full text-sm rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500 p-2.5"
+            class="w-full text-xs rounded-lg border-slate-200 focus:ring-primary focus:border-primary p-2.5"
             placeholder="081234567890"
           />
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-slate-600 mb-1">Kata Sandi</label>
+          <label class="block text-xs font-semibold text-on-surface mb-1">Kata Sandi</label>
           <input
             type="password"
             v-model="form.password"
             required
             minlength="8"
-            class="w-full text-sm rounded-xl border-slate-200 focus:ring-emerald-500 focus:border-emerald-500 p-2.5"
+            class="w-full text-xs rounded-lg border-slate-200 focus:ring-primary focus:border-primary p-2.5"
             placeholder="Minimal 8 karakter"
           />
         </div>
@@ -95,15 +98,16 @@
         <button
           type="submit"
           :disabled="auth.loading"
-          class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl transition text-sm shadow-sm disabled:opacity-50 mt-4"
+          class="w-full bg-primary-container hover:bg-primary text-white font-bold py-2.5 rounded-lg transition text-xs shadow-md disabled:opacity-50 mt-4 flex items-center justify-center gap-1.5"
         >
-          {{ auth.loading ? 'Mendaftarkan Akun...' : 'Daftar Sekarang' }}
+          <span class="material-symbols-outlined text-base">how_to_reg</span>
+          <span>{{ auth.loading ? 'Mendaftarkan Akun...' : 'Daftar Sekarang' }}</span>
         </button>
       </form>
 
-      <p class="text-center text-xs text-slate-500 mt-6">
+      <p class="text-center text-xs text-on-surface-variant mt-6">
         Sudah memiliki akun?
-        <router-link to="/login" class="text-emerald-600 font-bold hover:underline">
+        <router-link to="/login" class="text-primary font-bold hover:underline">
           Masuk di Sini
         </router-link>
       </p>
@@ -136,7 +140,7 @@ const handleRegister = async () => {
     if (user.role === 'pemilik') {
       router.push('/dashboard/pemilik')
     } else {
-      router.push('/dashboard/pencari')
+      router.push('/pesanan')
     }
   } catch (err) {
     if (err.response?.data?.errors) {

@@ -1,181 +1,208 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-      <div>
-        <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard Pencari Kos</h1>
-        <p class="text-sm text-slate-500 mt-1">
-          Selamat datang kembali, <span class="font-bold text-slate-700">{{ auth.user?.nama }}</span>. Pantau riwayat pemesanan kamar Anda di sini.
+  <div class="w-full max-w-5xl mx-auto px-margin py-space-xl pt-20">
+    <!-- Breadcrumb -->
+    <div class="flex items-center gap-space-xs text-on-surface-variant text-xs mb-space-md">
+      <router-link to="/" class="hover:text-primary transition-colors">Beranda</router-link>
+      <span class="material-symbols-outlined text-sm">chevron_right</span>
+      <span class="text-on-surface font-semibold">Riwayat Pemesanan</span>
+    </div>
+
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pb-space-lg">
+      <div class="space-y-space-xs">
+        <div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container text-[11px] text-primary font-semibold">
+          <span class="material-symbols-outlined text-sm">receipt_long</span>
+          Aktivitas Sewa
+        </div>
+        <h1 class="text-2xl font-bold text-on-surface tracking-tight">Riwayat Pemesanan</h1>
+        <p class="text-xs text-on-surface-variant max-w-2xl">
+          Pantau status pengajuan sewa, detail kamar, dan riwayat hunian kos yang pernah Anda ajukan di Kota Tegal.
         </p>
       </div>
-      <div class="flex items-center gap-3">
-        <router-link
-          to="/"
-          class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition shadow-sm"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          Cari Kos Lainnya
-        </router-link>
+
+      <!-- Quick Metrics Summary -->
+      <div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-sm rounded-xl border border-slate-100">
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></div>
+          <span class="text-xs text-on-surface-variant font-medium">{{ countStatus('menunggu') }} Menunggu</span>
+        </div>
+        <div class="w-px h-4 bg-outline-variant"></div>
+        <div class="flex items-center gap-2">
+          <div class="w-2.5 h-2.5 rounded-full bg-tertiary"></div>
+          <span class="text-xs text-on-surface-variant font-medium">{{ countStatus('disetujui') }} Disetujui</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab Filter Status & Mini Search -->
+    <div class="flex items-center justify-between gap-space-md overflow-x-auto pb-space-md no-scrollbar">
+      <div class="flex items-center gap-space-xs bg-surface-container-low p-1.5 rounded-xl border border-slate-100">
         <button
-          @click="fetchBookings"
-          :disabled="loading"
-          class="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold p-2.5 rounded-xl transition"
-          title="Segarkan Data"
+          v-for="tab in filterTabs"
+          :key="tab.value"
+          @click="activeFilter = tab.value"
+          :class="[
+            'px-space-md py-1.5 rounded-lg text-xs transition-all whitespace-nowrap',
+            activeFilter === tab.value
+              ? 'bg-primary-container text-white shadow-sm font-semibold'
+              : 'text-on-surface-variant hover:text-on-surface font-medium'
+          ]"
         >
-          <svg class="w-4 h-4" :class="{ 'animate-spin': loading }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
+          {{ tab.label }}
+          <span
+            :class="[
+              'ml-1 text-[10px] px-1.5 py-0.5 rounded-full',
+              activeFilter === tab.value ? 'bg-white/20 text-white' : 'bg-surface-container text-on-surface-variant'
+            ]"
+          >
+            {{ tab.value === 'semua' ? bookings.length : countStatus(tab.value) }}
+          </span>
         </button>
       </div>
-    </div>
 
-    <!-- Alert / Toast -->
-    <div v-if="successMsg" class="mb-6 p-4 rounded-2xl bg-emerald-50 text-emerald-800 text-sm border border-emerald-200 flex items-center justify-between">
-      <span>{{ successMsg }}</span>
-      <button @click="successMsg = null" class="text-emerald-700 font-bold ml-4">&times;</button>
-    </div>
-    <div v-if="errorMsg" class="mb-6 p-4 rounded-2xl bg-rose-50 text-rose-800 text-sm border border-rose-200 flex items-center justify-between">
-      <span>{{ errorMsg }}</span>
-      <button @click="errorMsg = null" class="text-rose-700 font-bold ml-4">&times;</button>
-    </div>
-
-    <!-- Summary Stats -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Total Pemesanan</span>
-        <span class="text-2xl font-black text-slate-900 mt-1 block">{{ bookings.length }}</span>
-      </div>
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-        <span class="text-xs font-semibold text-amber-600 uppercase tracking-wider block">Menunggu Konfirmasi</span>
-        <span class="text-2xl font-black text-amber-600 mt-1 block">{{ countStatus('menunggu') }}</span>
-      </div>
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-        <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wider block">Disetujui</span>
-        <span class="text-2xl font-black text-emerald-600 mt-1 block">{{ countStatus('disetujui') }}</span>
-      </div>
-      <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-        <span class="text-xs font-semibold text-slate-500 uppercase tracking-wider block">Selesai / Batal</span>
-        <span class="text-2xl font-black text-slate-500 mt-1 block">{{ countStatus('ditolak') + countStatus('dibatalkan') }}</span>
+      <!-- Search mini input -->
+      <div class="hidden sm:flex items-center gap-2 bg-surface-container-lowest px-3 py-1.5 rounded-lg shadow-sm border border-slate-200">
+        <span class="material-symbols-outlined text-outline text-base">search</span>
+        <input
+          v-model="searchFilter"
+          type="text"
+          placeholder="Cari nama kos..."
+          class="bg-transparent text-xs text-on-surface placeholder:text-outline focus:outline-none w-36 lg:w-48 border-none p-0"
+        />
       </div>
     </div>
 
-    <!-- Filter Tabs -->
-    <div class="flex items-center gap-2 mb-6 border-b border-slate-200 pb-3 overflow-x-auto">
-      <button
-        v-for="tab in filterTabs"
-        :key="tab.value"
-        @click="activeFilter = tab.value"
-        :class="[
-          'px-4 py-2 rounded-xl text-xs font-bold transition whitespace-nowrap',
-          activeFilter === tab.value
-            ? 'bg-slate-900 text-white'
-            : 'text-slate-600 hover:bg-slate-100'
-        ]"
-      >
-        {{ tab.label }}
-      </button>
-    </div>
-
-    <!-- Loading Skeleton -->
-    <div v-if="loading" class="space-y-4">
-      <div v-for="i in 3" :key="i" class="h-28 bg-white border border-slate-200 rounded-2xl animate-pulse"></div>
+    <!-- Loading State -->
+    <div v-if="loading" class="space-y-4 mt-space-sm">
+      <div v-for="i in 3" :key="i" class="h-32 bg-white rounded-xl border border-slate-100 animate-pulse"></div>
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="filteredBookings.length === 0" class="text-center py-16 bg-white rounded-3xl border border-slate-200">
-      <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto text-slate-400 mb-4">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
+    <div v-else-if="filteredBookings.length === 0" class="text-center py-16 bg-surface-container-lowest rounded-xl border border-slate-100 mt-space-sm">
+      <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mx-auto text-primary mb-4">
+        <span class="material-symbols-outlined text-3xl">receipt</span>
       </div>
-      <h3 class="text-base font-bold text-slate-800">Tidak ada data pemesanan</h3>
-      <p class="text-xs text-slate-500 mt-1">Anda belum memiliki pemesanan kamar pada kategori ini.</p>
+      <h3 class="text-base font-bold text-on-surface">Tidak ada data pemesanan</h3>
+      <p class="text-xs text-on-surface-variant mt-1">Anda belum memiliki riwayat pemesanan pada kategori ini.</p>
       <router-link
-        to="/"
-        class="inline-block mt-4 text-xs font-bold bg-emerald-600 text-white px-4 py-2 rounded-xl hover:bg-emerald-700 transition"
+        to="/kos"
+        class="inline-block mt-4 text-xs font-semibold bg-primary-container text-white px-4 py-2 rounded-lg hover:bg-primary transition"
       >
-        Eksplorasi Kos Sekarang
+        Cari Kos Sekarang
       </router-link>
     </div>
 
-    <!-- Bookings List -->
-    <div v-else class="space-y-4">
+    <!-- Daftar Pemesanan (Cards Stack) -->
+    <div v-else class="space-y-space-md mt-space-sm">
       <div
         v-for="item in filteredBookings"
         :key="item.id"
-        class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition flex flex-col md:flex-row md:items-center justify-between gap-6"
+        class="group relative bg-surface-container-lowest rounded-xl p-space-md shadow-sm hover:shadow-md transition-all duration-200 border border-slate-100 overflow-hidden"
       >
-        <div class="flex-1 space-y-2">
-          <div class="flex items-center gap-3 flex-wrap">
-            <span
-              :class="[
-                'text-[11px] font-extrabold uppercase px-2.5 py-1 rounded-md border tracking-wider',
-                statusBadgeClass(item.status)
-              ]"
-            >
-              {{ item.status }}
-            </span>
-            <span class="text-xs text-slate-400">ID Pesanan #{{ item.id }}</span>
-            <span class="text-xs text-slate-400">&bull; Diajukan: {{ formatDate(item.created_at) }}</span>
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md">
+          <!-- Image and Main Info -->
+          <div class="flex items-start sm:items-center gap-space-md">
+            <div class="relative w-28 h-24 sm:w-36 sm:h-28 rounded-lg overflow-hidden shrink-0 bg-surface-container">
+              <img
+                src="https://lh3.googleusercontent.com/aida-public/AB6AXuCnt30LyyZlzU1QOvcSRRMGiQ3FJsh4luIKXJX7aqXOjUPxTvMhrxNQRDu2wjgg4Zpze-wPO3sbwBrOI44NhDD87XEhVTvk5o_vsvzP99EXjgB9OByNEwSGlVuxniCRLUSPZIunX09fElg0VYOLRGJNUgIQrE1_i1Zt4qVTrSIufxO97mIpXR4tQt4Mu40AZyAY0adO3qIwZwuU5OhcpZtu1tB57ewE6-lcC8hcwoE_ux6yIt44hm8NQA"
+                :alt="item.kos?.nama"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+              />
+              <div
+                v-if="item.kos?.jenis"
+                :class="[
+                  'absolute top-1.5 left-1.5 text-[10px] font-semibold px-2 py-0.5 rounded-full',
+                  item.kos.jenis === 'putri' ? 'bg-[#FCE7F3] text-[#BE185D]' :
+                  item.kos.jenis === 'putra' ? 'bg-[#E0F2FE] text-[#0369A1]' :
+                  'bg-[#EDE9FE] text-[#6D28D9]'
+                ]"
+              >
+                {{ formatJenis(item.kos.jenis) }}
+              </div>
+            </div>
+
+            <div class="space-y-1 min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <router-link
+                  v-if="item.kos"
+                  :to="`/kos/${item.kos.id}`"
+                  class="text-base font-bold text-on-surface group-hover:text-primary transition-colors truncate"
+                >
+                  {{ item.kos.nama }}
+                </router-link>
+                <span v-else class="text-base font-bold text-slate-400">Kos Tidak Tersedia</span>
+
+                <span
+                  :class="[
+                    'inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border md:hidden',
+                    statusBadgeClass(item.status)
+                  ]"
+                >
+                  {{ formatStatus(item.status) }}
+                </span>
+              </div>
+
+              <div class="flex items-center gap-1 text-on-surface-variant text-xs">
+                <span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                <span>{{ item.kos?.alamat || '-' }}</span>
+              </div>
+
+              <!-- Schedule & Details -->
+              <div class="flex flex-wrap items-center gap-y-1 gap-x-3 pt-1 text-on-surface-variant text-xs">
+                <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded">
+                  <span class="material-symbols-outlined text-xs text-outline">calendar_today</span>
+                  <span>Masuk: <strong class="text-on-surface font-semibold">{{ formatDateOnly(item.tanggal_pemesanan) }}</strong></span>
+                </div>
+                <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded">
+                  <span class="material-symbols-outlined text-xs text-outline">meeting_room</span>
+                  <span>Kamar: <strong class="text-on-surface font-semibold">{{ item.kamar?.nama_kamar || '-' }}</strong></span>
+                </div>
+              </div>
+
+              <!-- Pemilik Contact -->
+              <div v-if="item.kos?.pemilik" class="text-[11px] text-on-surface-variant pt-1">
+                Kontak Pemilik: <span class="font-semibold text-on-surface">{{ item.kos.pemilik.nama }} ({{ item.kos.pemilik.no_hp || '-' }})</span>
+              </div>
+            </div>
           </div>
 
-          <div class="flex flex-col sm:flex-row sm:items-baseline gap-2">
-            <h3 class="text-lg font-bold text-slate-900">
-              <router-link v-if="item.kos" :to="`/kos/${item.kos.id}`" class="hover:text-emerald-600 transition">
-                {{ item.kos.nama }}
+          <!-- Price & Actions Right Desktop -->
+          <div class="flex flex-col md:items-end justify-between border-t md:border-t-0 pt-3 md:pt-0 gap-3">
+            <div class="hidden md:block">
+              <span
+                :class="[
+                  'inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border',
+                  statusBadgeClass(item.status)
+                ]"
+              >
+                <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(item.status)"></span>
+                {{ formatStatus(item.status) }}
+              </span>
+            </div>
+
+            <div class="text-left md:text-right">
+              <span class="text-[11px] text-on-surface-variant block">Total Biaya:</span>
+              <span class="text-lg font-black text-primary">{{ formatRupiah(item.kamar?.harga || item.kos?.harga) }}</span>
+              <span class="text-[11px] text-on-surface-variant"> / bulan</span>
+            </div>
+
+            <div class="flex items-center gap-2">
+              <button
+                v-if="item.status === 'menunggu'"
+                @click="cancelBooking(item.id)"
+                :disabled="actionLoading === item.id"
+                class="text-xs font-semibold text-error hover:bg-error-container/40 border border-error/30 px-3 py-1.5 rounded-lg transition"
+              >
+                {{ actionLoading === item.id ? 'Membatalkan...' : 'Batalkan Pesanan' }}
+              </button>
+              <router-link
+                v-if="item.kos"
+                :to="`/kos/${item.kos.id}`"
+                class="text-xs font-semibold bg-surface-container-low hover:bg-surface-container text-primary px-3 py-1.5 rounded-lg transition"
+              >
+                Lihat Kos
               </router-link>
-              <span v-else class="text-slate-400">Kos Tidak Tersedia</span>
-            </h3>
-            <span class="text-sm font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-              Kamar: {{ item.kamar?.nama_kamar || 'Kamar Tidak Diketahui' }}
-            </span>
-          </div>
-
-          <p v-if="item.kos?.alamat" class="text-xs text-slate-500 flex items-center gap-1">
-            <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            {{ item.kos.alamat }}
-          </p>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2 text-xs text-slate-600">
-            <div>
-              <span class="text-slate-400">Mulai Masuk:</span>
-              <span class="font-bold text-slate-800 ml-1">{{ formatDateOnly(item.tanggal_pemesanan) }}</span>
             </div>
-            <div v-if="item.kos?.pemilik">
-              <span class="text-slate-400">Kontak Pemilik:</span>
-              <span class="font-bold text-slate-800 ml-1">{{ item.kos.pemilik.nama }} ({{ item.kos.pemilik.no_hp || item.kos.pemilik.email }})</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex flex-col sm:items-end justify-between border-t md:border-t-0 pt-4 md:pt-0 gap-3">
-          <div class="text-left sm:text-right">
-            <span class="text-xs text-slate-400 block">Biaya Sewa / Bulan:</span>
-            <span class="text-lg font-black text-slate-900">{{ formatRupiah(item.kamar?.harga || item.kos?.harga) }}</span>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <!-- Cancel Action if status is menunggu -->
-            <button
-              v-if="item.status === 'menunggu'"
-              @click="cancelBooking(item.id)"
-              :disabled="actionLoading === item.id"
-              class="text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-2 rounded-xl transition"
-            >
-              {{ actionLoading === item.id ? 'Membatalkan...' : 'Batalkan Pesanan' }}
-            </button>
-            <router-link
-              v-if="item.kos"
-              :to="`/kos/${item.kos.id}`"
-              class="text-xs font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition"
-            >
-              Lihat Kos
-            </router-link>
           </div>
         </div>
       </div>
@@ -185,20 +212,16 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import { useAuthStore } from '../stores/auth'
 import api from '../services/api'
-
-const auth = useAuthStore()
 
 const bookings = ref([])
 const loading = ref(false)
 const actionLoading = ref(null)
-const errorMsg = ref(null)
-const successMsg = ref(null)
 const activeFilter = ref('semua')
+const searchFilter = ref('')
 
 const filterTabs = [
-  { label: 'Semua Status', value: 'semua' },
+  { label: 'Semua', value: 'semua' },
   { label: 'Menunggu', value: 'menunggu' },
   { label: 'Disetujui', value: 'disetujui' },
   { label: 'Ditolak', value: 'ditolak' },
@@ -210,52 +233,73 @@ const countStatus = (status) => {
 }
 
 const filteredBookings = computed(() => {
-  if (activeFilter.value === 'semua') return bookings.value
-  return bookings.value.filter((b) => b.status === activeFilter.value)
+  return bookings.value.filter((b) => {
+    const matchesStatus = activeFilter.value === 'semua' || b.status === activeFilter.value
+    const matchesSearch = !searchFilter.value ||
+      (b.kos?.nama && b.kos.nama.toLowerCase().includes(searchFilter.value.toLowerCase()))
+    return matchesStatus && matchesSearch
+  })
 })
 
 const fetchBookings = async () => {
   loading.value = true
-  errorMsg.value = null
   try {
     const res = await api.get('/pemesanan')
     bookings.value = res.data.data || []
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Gagal memuat daftar pemesanan.'
+    // Abaikan
   } finally {
     loading.value = false
   }
 }
 
 const cancelBooking = async (id) => {
-  if (!confirm('Apakah Anda yakin ingin membatalkan pemesanan ini?')) return
+  if (!confirm('Apakah Anda yakin ingin membatalkan pengajuan sewa ini?')) return
 
   actionLoading.value = id
-  errorMsg.value = null
-  successMsg.value = null
   try {
     await api.patch(`/pemesanan/${id}/status`, { status: 'dibatalkan' })
-    successMsg.value = 'Pemesanan berhasil dibatalkan.'
+    alert('Pengajuan sewa berhasil dibatalkan.')
     await fetchBookings()
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Gagal membatalkan pemesanan.'
+    alert(err.response?.data?.message || 'Gagal membatalkan pemesanan.')
   } finally {
     actionLoading.value = null
   }
 }
 
+const formatJenis = (jenis) => {
+  if (!jenis) return '-'
+  return jenis.charAt(0).toUpperCase() + jenis.slice(1)
+}
+
+const formatStatus = (status) => {
+  switch (status) {
+    case 'menunggu': return 'Menunggu Konfirmasi'
+    case 'disetujui': return 'Disetujui'
+    case 'ditolak': return 'Ditolak'
+    case 'dibatalkan': return 'Dibatalkan'
+    default: return status
+  }
+}
+
 const statusBadgeClass = (status) => {
   switch (status) {
-    case 'menunggu':
-      return 'bg-amber-50 text-amber-700 border-amber-200'
-    case 'disetujui':
-      return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-    case 'ditolak':
-      return 'bg-rose-50 text-rose-700 border-rose-200'
-    case 'dibatalkan':
-      return 'bg-slate-100 text-slate-600 border-slate-300'
-    default:
-      return 'bg-slate-100 text-slate-700 border-slate-200'
+    case 'menunggu': return 'bg-amber-50 text-amber-700 border-amber-200'
+    case 'disetujui': return 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    case 'ditolak': return 'bg-rose-50 text-rose-700 border-rose-200'
+    case 'dibatalkan': return 'bg-slate-100 text-slate-600 border-slate-200'
+    default: return 'bg-slate-100 text-slate-700 border-slate-200'
+  }
+}
+
+const statusDotClass = (status) => {
+  switch (status) {
+    case 'menunggu': return 'bg-amber-500 animate-pulse'
+    case 'disetujui': return 'bg-emerald-500'
+    case 'ditolak': return 'bg-rose-500'
+    case 'dibatalkan': return 'bg-slate-400'
+    default: return 'bg-slate-400'
   }
 }
 
@@ -264,22 +308,11 @@ const formatRupiah = (val) => {
   return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val)
 }
 
-const formatDate = (isoStr) => {
-  if (!isoStr) return '-'
-  return new Date(isoStr).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
-}
-
 const formatDateOnly = (dateStr) => {
   if (!dateStr) return '-'
   return new Date(dateStr).toLocaleDateString('id-ID', {
     day: 'numeric',
-    month: 'long',
+    month: 'short',
     year: 'numeric',
   })
 }

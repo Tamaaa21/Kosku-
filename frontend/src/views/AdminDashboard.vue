@@ -1,11 +1,11 @@
 <template>
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
       <div>
         <div class="flex items-center gap-2">
-          <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight">Dashboard Administrator</h1>
-          <span class="bg-indigo-100 text-indigo-800 text-xs font-bold px-2.5 py-0.5 rounded-full">System Admin</span>
+          <h1 class="text-2xl font-bold text-on-surface tracking-tight">Dashboard Administrator</h1>
+          <span class="bg-primary-fixed text-on-primary-fixed text-xs font-bold px-2.5 py-0.5 rounded-full">System Admin</span>
         </div>
         <p class="text-sm text-slate-500 mt-1">
           Kelola seluruh akun pengguna, master data fasilitas umum, dan pantau transaksi pemesanan sistem.
