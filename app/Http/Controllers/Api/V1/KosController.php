@@ -121,6 +121,8 @@ class KosController extends Controller
             'harga' => $validated['harga'],
             'latitude' => $latitude,
             'longitude' => $longitude,
+            'peraturan' => $validated['peraturan'] ?? null,
+            'foto' => $validated['foto'] ?? null,
         ]);
 
         if (! empty($validated['fasilitas_ids'])) {

@@ -138,7 +138,7 @@
               <th class="py-3.5 px-space-md">Alamat</th>
               <th class="py-3.5 px-space-md">Jenis</th>
               <th class="py-3.5 px-space-md text-center">Kamar</th>
-              <th class="py-3.5 px-space-md text-center w-36">Aksi</th>
+              <th class="py-3.5 px-space-md text-center w-52">Aksi</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100 text-xs text-on-surface">
@@ -228,7 +228,16 @@
               </td>
 
               <td class="py-4 px-space-md text-center">
-                <div class="inline-flex items-center justify-center gap-1">
+                <div class="inline-flex items-center justify-center gap-1.5">
+                  <router-link
+                    :to="`/dashboard/pemilik/kamar?kos_id=${kos.id}`"
+                    class="h-8 px-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition flex items-center gap-1 text-[11px] font-semibold"
+                    title="Kelola Kamar Kos Ini"
+                  >
+                    <span class="material-symbols-outlined text-[16px]">meeting_room</span>
+                    <span>Kamar</span>
+                  </router-link>
+
                   <router-link
                     :to="`/kos/${kos.id}`"
                     class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition"
@@ -280,170 +289,274 @@
     <!-- Modal Form Tambah / Edit Kos -->
     <div
       v-if="showModal"
-      class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-y-auto"
     >
-      <div class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl border border-slate-100 my-8">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-6">
+      <div class="bg-surface-container-lowest rounded-2xl max-w-3xl w-full shadow-2xl border border-slate-100 my-auto flex flex-col max-h-[90vh] overflow-hidden">
+        <!-- 1. Fixed Header -->
+        <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 bg-surface-container-lowest shrink-0">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <span class="material-symbols-outlined text-[24px]">
                 {{ isEditing ? 'edit_note' : 'add_business' }}
               </span>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-on-surface">
+              <h3 class="text-base sm:text-lg font-bold text-on-surface">
                 {{ isEditing ? 'Edit Data Properti Kos' : 'Tambah Properti Kos Baru' }}
               </h3>
               <p class="text-xs text-on-surface-variant">
-                Lengkapi formulir informasi properti untuk dipublikasikan di platform KosKu.
+                Lengkapi formulir informasi properti, galeri foto, titik lokasi peta, dan tata tertib kos.
               </p>
             </div>
           </div>
           <button
             @click="closeModal"
-            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shrink-0"
+            type="button"
           >
             <span class="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
-        <form @submit.prevent="saveKos" class="space-y-4">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <!-- Nama Kos -->
-            <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-on-surface">
-                Nama Kos <span class="text-rose-500">*</span>
-              </label>
-              <input
-                v-model="formData.nama"
-                type="text"
-                required
-                placeholder="Contoh: Kos Melati Indah"
-                class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-
-            <!-- Jenis Kos -->
-            <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-on-surface">
-                Kategori Penghuni <span class="text-rose-500">*</span>
-              </label>
-              <div class="relative">
-                <select
-                  v-model="formData.jenis"
+        <!-- 2. Scrollable Body & 3. Fixed Footer inside form -->
+        <form @submit.prevent="saveKos" class="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <!-- Scrollable Body -->
+          <div class="overflow-y-auto p-5 sm:p-6 space-y-5 flex-1">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <!-- Nama Kos -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-on-surface">
+                  Nama Kos <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  v-model="formData.nama"
+                  type="text"
                   required
-                  class="w-full h-11 pl-3.5 pr-9 bg-surface-container-low/40 rounded-lg text-xs text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20"
-                >
-                  <option value="putri">Putri (Khusus Wanita)</option>
-                  <option value="putra">Putra (Khusus Pria)</option>
-                  <option value="campur">Campur</option>
-                </select>
-                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">arrow_drop_down</span>
+                  placeholder="Contoh: Kos Melati Indah"
+                  class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <!-- Jenis Kos -->
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-on-surface">
+                  Kategori Penghuni <span class="text-rose-500">*</span>
+                </label>
+                <div class="relative">
+                  <select
+                    v-model="formData.jenis"
+                    required
+                    class="w-full h-11 pl-3.5 pr-9 bg-surface-container-low/40 rounded-lg text-xs text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="putri">Putri (Khusus Wanita)</option>
+                    <option value="putra">Putra (Khusus Pria)</option>
+                    <option value="campur">Campur</option>
+                  </select>
+                  <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">arrow_drop_down</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Alamat Lengkap -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-on-surface">
-              Alamat Lengkap (Beserta Kota & Provinsi) <span class="text-rose-500">*</span>
-            </label>
-            <input
-              v-model="formData.alamat"
-              type="text"
-              required
-              placeholder="Contoh: Jl. Melati No. 12, Kelurahan, Kecamatan, Kota..."
-              class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-            <span class="text-[10px] text-slate-400">
-              * Koordinat peta (latitude & longitude) akan otomatis dihitung berdasarkan alamat yang dimasukkan.
-            </span>
-          </div>
-
-          <!-- Harga Mulai & Deskripsi -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Alamat Lengkap -->
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-on-surface">
-                Harga Mulai / Bulan (Rp) <span class="text-rose-500">*</span>
+                Alamat Lengkap (Beserta Kota & Provinsi) <span class="text-rose-500">*</span>
               </label>
               <input
-                v-model.number="formData.harga"
-                type="number"
-                min="100000"
-                step="50000"
-                required
-                placeholder="750000"
-                class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-
-            <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-on-surface">Deskripsi Singkat</label>
-              <input
-                v-model="formData.deskripsi"
+                v-model="formData.alamat"
                 type="text"
-                placeholder="Lingkungan tenang, aman, dekat kampus..."
+                required
+                placeholder="Contoh: Jl. Melati No. 12, Kelurahan, Kecamatan, Sleman, Yogyakarta"
                 class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
               />
             </div>
-          </div>
 
-          <!-- Fasilitas Utama -->
-          <div class="flex flex-col gap-1.5 pt-2">
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-semibold text-on-surface">Fasilitas Properti yang Disediakan</label>
-              <button
-                type="button"
-                @click="showAddCustomFasilitas = !showAddCustomFasilitas"
-                class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
-              >
-                <span class="material-symbols-outlined text-[15px]">{{ showAddCustomFasilitas ? 'remove' : 'add' }}</span>
-                {{ showAddCustomFasilitas ? 'Tutup' : 'Tambah Fasilitas Lain' }}
-              </button>
+            <!-- Peta Lokasi Responsif -->
+            <div class="p-3 bg-surface-container-low/40 rounded-xl border border-slate-200">
+              <LocationPickerMap
+                ref="locationPickerRef"
+                :latitude="formData.latitude"
+                :longitude="formData.longitude"
+                :address="formData.alamat"
+                @update:latitude="(val) => (formData.latitude = val)"
+                @update:longitude="(val) => (formData.longitude = val)"
+              />
             </div>
 
-            <!-- Inline Add Custom Facility Input -->
-            <div v-if="showAddCustomFasilitas" class="p-3 bg-surface-container-low/60 rounded-xl border border-slate-200 space-y-2 mt-1">
-              <span class="text-[11px] text-slate-500 font-medium">Daftarkan fasilitas baru yang belum ada di katalog:</span>
-              <div class="flex items-center gap-2">
+            <!-- Harga Mulai & Deskripsi -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-on-surface">
+                  Harga Mulai / Bulan (Rp) <span class="text-rose-500">*</span>
+                </label>
                 <input
-                  v-model="customFasilitasName"
+                  v-model.number="formData.harga"
+                  type="number"
+                  min="100000"
+                  step="50000"
+                  required
+                  placeholder="750000"
+                  class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-on-surface">Deskripsi Singkat</label>
+                <input
+                  v-model="formData.deskripsi"
                   type="text"
-                  placeholder="Contoh: Dapur Pribadi, CCTV 24 Jam, Water Heater..."
+                  placeholder="Lingkungan tenang, aman, dekat kampus..."
+                  class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <!-- Unggah Foto Kos (Maksimal 5 Foto, Maksimal 2MB per Foto) -->
+            <div class="p-3.5 bg-surface-container-low/40 rounded-xl border border-slate-200">
+              <ImageUploader
+                v-model="formData.foto"
+                label="Galeri Foto Kos"
+                :max-files="5"
+                :max-size-mb="2"
+              />
+            </div>
+
+            <!-- Tata Tertib / Peraturan Kos -->
+            <div class="flex flex-col gap-2 p-3.5 bg-surface-container-low/40 rounded-xl border border-slate-200">
+              <div class="flex items-center justify-between">
+                <div>
+                  <label class="text-xs font-semibold text-on-surface flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px] text-primary">policy</span>
+                    <span>Tata Tertib & Peraturan Kos</span>
+                  </label>
+                  <p class="text-[11px] text-on-surface-variant">
+                    Pilih aturan umum atau tambahkan peraturan khusus untuk penghuni kos Anda.
+                  </p>
+                </div>
+                <span class="text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                  {{ formData.peraturan.length }} Aturan Ditentukan
+                </span>
+              </div>
+
+              <!-- Standard Rules Chips -->
+              <div class="flex flex-wrap gap-1.5 pt-1">
+                <button
+                  v-for="rule in standardRules"
+                  :key="rule"
+                  type="button"
+                  @click="toggleRule(rule)"
+                  :class="[
+                    'px-2.5 py-1 rounded-full text-[11px] font-medium transition flex items-center gap-1 border',
+                    formData.peraturan.includes(rule)
+                      ? 'bg-primary text-white border-primary shadow-xs'
+                      : 'bg-white text-slate-700 border-slate-200 hover:border-primary/50'
+                  ]"
+                >
+                  <span class="material-symbols-outlined text-[13px]">
+                    {{ formData.peraturan.includes(rule) ? 'check' : 'add' }}
+                  </span>
+                  <span>{{ rule }}</span>
+                </button>
+              </div>
+
+              <!-- Custom Rule Input -->
+              <div class="flex items-center gap-2 pt-2">
+                <input
+                  v-model="customRuleInput"
+                  type="text"
+                  placeholder="Ketik peraturan khusus lainnya..."
                   class="flex-1 h-9 px-3 bg-white rounded-lg text-xs text-on-surface border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  @keydown.enter.prevent="createCustomFasilitas"
+                  @keydown.enter.prevent="addCustomRule"
                 />
                 <button
                   type="button"
-                  @click="createCustomFasilitas"
-                  :disabled="creatingCustomFasilitas || !customFasilitasName.trim()"
+                  @click="addCustomRule"
+                  :disabled="!customRuleInput.trim()"
                   class="h-9 px-3.5 bg-primary-container text-white text-xs font-semibold rounded-lg hover:bg-primary transition disabled:opacity-50 flex items-center gap-1 shrink-0"
                 >
-                  <span v-if="creatingCustomFasilitas" class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span>
-                  <span>Tambah</span>
+                  <span class="material-symbols-outlined text-[15px]">add</span>
+                  <span>Tambah Aturan</span>
                 </button>
+              </div>
+
+              <!-- Selected Rules Tag List -->
+              <div v-if="formData.peraturan.length > 0" class="flex flex-wrap gap-1.5 pt-2 border-t border-slate-200/80">
+                <span
+                  v-for="(rule, idx) in formData.peraturan"
+                  :key="idx"
+                  class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-medium"
+                >
+                  <span class="material-symbols-outlined text-emerald-600 text-[13px]">verified_user</span>
+                  <span>{{ rule }}</span>
+                  <button
+                    type="button"
+                    @click="removeRule(idx)"
+                    class="text-emerald-700 hover:text-emerald-950 font-bold ml-1 text-xs"
+                    title="Hapus peraturan ini"
+                  >
+                    &times;
+                  </button>
+                </span>
               </div>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
-              <label
-                v-for="item in availableFasilitas"
-                :key="item.id"
-                class="inline-flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition"
-              >
-                <input
-                  type="checkbox"
-                  :value="item.id"
-                  v-model="formData.fasilitas_ids"
-                  class="rounded text-primary focus:ring-primary h-4 w-4"
-                />
-                <span class="text-xs font-medium text-slate-700">{{ item.nama }}</span>
-              </label>
+            <!-- Fasilitas Utama -->
+            <div class="flex flex-col gap-1.5 pt-1">
+              <div class="flex items-center justify-between">
+                <label class="text-xs font-semibold text-on-surface">Fasilitas Properti yang Disediakan</label>
+                <button
+                  type="button"
+                  @click="showAddCustomFasilitas = !showAddCustomFasilitas"
+                  class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
+                >
+                  <span class="material-symbols-outlined text-[15px]">{{ showAddCustomFasilitas ? 'remove' : 'add' }}</span>
+                  {{ showAddCustomFasilitas ? 'Tutup' : 'Tambah Fasilitas Lain' }}
+                </button>
+              </div>
+
+              <!-- Inline Add Custom Facility Input -->
+              <div v-if="showAddCustomFasilitas" class="p-3 bg-surface-container-low/60 rounded-xl border border-slate-200 space-y-2 mt-1">
+                <span class="text-[11px] text-slate-500 font-medium">Daftarkan fasilitas baru yang belum ada di katalog:</span>
+                <div class="flex items-center gap-2">
+                  <input
+                    v-model="customFasilitasName"
+                    type="text"
+                    placeholder="Contoh: Dapur Pribadi, CCTV 24 Jam, Water Heater..."
+                    class="flex-1 h-9 px-3 bg-white rounded-lg text-xs text-on-surface border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    @keydown.enter.prevent="createCustomFasilitas"
+                  />
+                  <button
+                    type="button"
+                    @click="createCustomFasilitas"
+                    :disabled="creatingCustomFasilitas || !customFasilitasName.trim()"
+                    class="h-9 px-3.5 bg-primary-container text-white text-xs font-semibold rounded-lg hover:bg-primary transition disabled:opacity-50 flex items-center gap-1 shrink-0"
+                  >
+                    <span v-if="creatingCustomFasilitas" class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span>
+                    <span>Tambah</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
+                <label
+                  v-for="item in availableFasilitas"
+                  :key="item.id"
+                  class="inline-flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition"
+                >
+                  <input
+                    type="checkbox"
+                    :value="item.id"
+                    v-model="formData.fasilitas_ids"
+                    class="rounded text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <span class="text-xs font-medium text-slate-700">{{ item.nama }}</span>
+                </label>
+              </div>
             </div>
           </div>
 
-          <!-- Actions -->
-          <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+          <!-- 3. Fixed Footer Actions -->
+          <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-surface-container-low/50 shrink-0">
             <button
               type="button"
               @click="closeModal"
@@ -467,9 +580,11 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { useAuthStore } from '../stores/auth'
 import api from '../services/api'
+import ImageUploader from '../components/ImageUploader.vue'
+import LocationPickerMap from '../components/LocationPickerMap.vue'
 
 const auth = useAuthStore()
 
@@ -486,6 +601,20 @@ const selectedJenis = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
 const editKosId = ref(null)
+const locationPickerRef = ref(null)
+
+const standardRules = [
+  'Dilarang merokok di dalam kamar',
+  'Batas jam malam pukul 23.00 WIB',
+  'Tamu lawan jenis dilarang menginap',
+  'Wajib menjaga kebersihan bersama',
+  'Dilarang membawa hewan peliharaan',
+  'Dilarang membuat kegaduhan / suara bising',
+  'Hemat penggunaan listrik dan air',
+  'Tamu menginap wajib izin pengelola'
+]
+
+const customRuleInput = ref('')
 
 const formData = ref({
   nama: '',
@@ -493,8 +622,43 @@ const formData = ref({
   alamat: '',
   deskripsi: '',
   harga: 750000,
+  latitude: null,
+  longitude: null,
+  peraturan: [],
+  foto: [],
   fasilitas_ids: []
 })
+
+const toggleRule = (rule) => {
+  const idx = formData.value.peraturan.indexOf(rule)
+  if (idx > -1) {
+    formData.value.peraturan.splice(idx, 1)
+  } else {
+    formData.value.peraturan.push(rule)
+  }
+}
+
+const addCustomRule = () => {
+  const text = customRuleInput.value.trim()
+  if (!text) return
+  if (!formData.value.peraturan.includes(text)) {
+    formData.value.peraturan.push(text)
+  }
+  customRuleInput.value = ''
+}
+
+const removeRule = (idx) => {
+  formData.value.peraturan.splice(idx, 1)
+}
+
+const resolveImageUrl = (url) => {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  const baseBackend = import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace(/\/api\/v1\/?$/, '')
+    : 'https://backend-kos.ddev.site'
+  return `${baseBackend}${url.startsWith('/') ? '' : '/'}${url}`
+}
 
 const fetchKos = async () => {
   loading.value = true
@@ -606,6 +770,9 @@ const formatRupiah = (val) => {
 }
 
 const getImageForKos = (kos) => {
+  if (kos.foto && kos.foto.length > 0) {
+    return resolveImageUrl(kos.foto[0])
+  }
   if (kos.foto_utama) return kos.foto_utama
   const placeholders = [
     'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=600&q=80',
@@ -630,9 +797,20 @@ const openAddModal = () => {
     alamat: '',
     deskripsi: '',
     harga: 750000,
+    latitude: null,
+    longitude: null,
+    peraturan: [
+      'Dilarang merokok di dalam kamar',
+      'Batas jam malam pukul 23.00 WIB',
+      'Wajib menjaga kebersihan bersama'
+    ],
+    foto: [],
     fasilitas_ids: []
   }
   showModal.value = true
+  nextTick(() => {
+    setTimeout(() => locationPickerRef.value?.invalidateSize(), 300)
+  })
 }
 
 const openEditModal = (kos) => {
@@ -644,9 +822,16 @@ const openEditModal = (kos) => {
     alamat: kos.alamat,
     deskripsi: kos.deskripsi || '',
     harga: kos.harga,
+    latitude: kos.latitude || null,
+    longitude: kos.longitude || null,
+    peraturan: Array.isArray(kos.peraturan) ? [...kos.peraturan] : [],
+    foto: Array.isArray(kos.foto) ? [...kos.foto] : [],
     fasilitas_ids: (kos.fasilitas || []).map((f) => f.id)
   }
   showModal.value = true
+  nextTick(() => {
+    setTimeout(() => locationPickerRef.value?.invalidateSize(), 300)
+  })
 }
 
 const closeModal = () => {

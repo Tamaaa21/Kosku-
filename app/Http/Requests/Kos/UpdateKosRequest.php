@@ -32,6 +32,10 @@ class UpdateKosRequest extends FormRequest
             'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'fasilitas_ids' => ['nullable', 'array'],
             'fasilitas_ids.*' => ['integer', 'exists:fasilitas,id'],
+            'peraturan' => ['nullable', 'array'],
+            'peraturan.*' => ['string', 'max:255'],
+            'foto' => ['nullable', 'array', 'max:5'],
+            'foto.*' => ['string', 'max:500'],
         ];
     }
 }

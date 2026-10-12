@@ -39,6 +39,9 @@ class KamarController extends Controller
             'nama_kamar' => $validated['nama_kamar'],
             'harga' => $validated['harga'],
             'status' => $validated['status'] ?? 'tersedia',
+            'ukuran' => $validated['ukuran'] ?? null,
+            'foto' => $validated['foto'] ?? null,
+            'fasilitas_kamar' => $validated['fasilitas_kamar'] ?? null,
         ]);
 
         return response()->json([

@@ -29,6 +29,8 @@ class Kos extends Model
             'harga' => 'integer',
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
+            'peraturan' => 'array',
+            'foto' => 'array',
         ];
     }
 

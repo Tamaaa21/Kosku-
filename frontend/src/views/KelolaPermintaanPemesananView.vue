@@ -323,16 +323,17 @@
     <!-- Modal Detail Pemesanan -->
     <div
       v-if="selectedBooking"
-      class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-y-auto"
     >
-      <div class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 my-8">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-6">
+      <div class="bg-surface-container-lowest rounded-2xl max-w-lg w-full shadow-2xl border border-slate-100 my-auto flex flex-col max-h-[90vh] overflow-hidden">
+        <!-- 1. Fixed Header -->
+        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-surface-container-lowest shrink-0">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <span class="material-symbols-outlined text-[24px]">receipt_long</span>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-on-surface">Detail Reservasi #{{ selectedBooking.id }}</h3>
+              <h3 class="text-base sm:text-lg font-bold text-on-surface">Detail Reservasi #{{ selectedBooking.id }}</h3>
               <p class="text-xs text-on-surface-variant">
                 Dibuat pada {{ formatDate(selectedBooking.created_at) }}
               </p>
@@ -340,17 +341,19 @@
           </div>
           <button
             @click="selectedBooking = null"
-            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shrink-0"
+            type="button"
           >
             <span class="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
-        <div class="space-y-4 text-xs">
+        <!-- 2. Scrollable Body -->
+        <div class="overflow-y-auto p-6 space-y-4 text-xs flex-1">
           <!-- Calon Penghuni Info -->
           <div class="p-4 rounded-xl bg-surface-container-low/50 border border-slate-100 space-y-2">
             <div class="flex items-center justify-between">
-              <h4 class="font-bold text-on-surface uppercase tracking-wider text-[11px] text-primary">Informasi Calon Penghuni</h4>
+              <h4 class="font-bold uppercase tracking-wider text-[11px] text-primary">Informasi Calon Penghuni</h4>
               <button
                 type="button"
                 @click="chatPenyewa(selectedBooking)"
@@ -377,7 +380,7 @@
 
           <!-- Unit Kos & Kamar -->
           <div class="p-4 rounded-xl bg-surface-container-low/50 border border-slate-100 space-y-2">
-            <h4 class="font-bold text-on-surface uppercase tracking-wider text-[11px] text-primary">Unit Properti</h4>
+            <h4 class="font-bold uppercase tracking-wider text-[11px] text-primary">Unit Properti</h4>
             <div class="flex items-center justify-between">
               <span class="text-secondary">Kos:</span>
               <span class="font-semibold text-on-surface">{{ selectedBooking.kos?.nama }}</span>
@@ -405,30 +408,33 @@
             <span class="text-secondary block font-semibold mb-1">Catatan dari Pemesan:</span>
             <p class="text-slate-700 italic">"{{ selectedBooking.catatan }}"</p>
           </div>
+        </div>
 
-          <!-- Actions -->
-          <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100">
+        <!-- 3. Fixed Footer Actions -->
+        <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-surface-container-low/50 shrink-0">
+          <button
+            type="button"
+            @click="selectedBooking = null"
+            class="h-10 px-5 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition text-xs font-semibold"
+          >
+            Tutup
+          </button>
+          <template v-if="selectedBooking.status === 'menunggu'">
             <button
-              @click="selectedBooking = null"
-              class="h-10 px-5 rounded-lg text-secondary hover:text-on-surface hover:bg-surface-container transition text-xs font-semibold"
+              type="button"
+              @click="updateStatus(selectedBooking, 'ditolak')"
+              class="h-10 px-4 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition"
             >
-              Tutup
+              Tolak Reservasi
             </button>
-            <template v-if="selectedBooking.status === 'menunggu'">
-              <button
-                @click="updateStatus(selectedBooking, 'ditolak')"
-                class="h-10 px-4 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 text-xs font-semibold hover:bg-rose-100 transition"
-              >
-                Tolak Reservasi
-              </button>
-              <button
-                @click="updateStatus(selectedBooking, 'disetujui')"
-                class="h-10 px-5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 shadow-sm transition"
-              >
-                Setujui Reservasi
-              </button>
-            </template>
-          </div>
+            <button
+              type="button"
+              @click="updateStatus(selectedBooking, 'disetujui')"
+              class="h-10 px-5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 shadow-sm transition"
+            >
+              Setujui Reservasi
+            </button>
+          </template>
         </div>
       </div>
     </div>

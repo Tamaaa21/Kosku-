@@ -26,6 +26,11 @@ class UpdateKamarRequest extends FormRequest
             'nama_kamar' => ['sometimes', 'required', 'string', 'max:50'],
             'harga' => ['sometimes', 'required', 'integer', 'min:0'],
             'status' => ['sometimes', 'required', 'in:tersedia,terisi'],
+            'ukuran' => ['nullable', 'string', 'max:30'],
+            'foto' => ['nullable', 'array', 'max:5'],
+            'foto.*' => ['string', 'max:500'],
+            'fasilitas_kamar' => ['nullable', 'array'],
+            'fasilitas_kamar.*' => ['string', 'max:100'],
         ];
     }
 }

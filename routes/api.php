@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\FasilitasController;
 use App\Http\Controllers\Api\V1\KamarController;
 use App\Http\Controllers\Api\V1\KosController;
 use App\Http\Controllers\Api\V1\PemesananController;
+use App\Http\Controllers\Api\V1\UploadController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function (): void {
@@ -30,6 +31,9 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
         Route::put('/me', [AuthController::class, 'updateProfile']);
+
+        // Upload Gambar (Maks 5 berkas, maks 2MB per berkas)
+        Route::post('/upload/images', [UploadController::class, 'uploadImages'])->middleware('role:pemilik,admin');
 
         // Manajemen Kos (Pemilik & Admin)
         Route::post('/kos', [KosController::class, 'store'])->middleware('role:pemilik');

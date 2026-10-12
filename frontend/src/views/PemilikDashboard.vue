@@ -49,12 +49,12 @@
       </div>
     </div>
 
-    <!-- 4 Stats Cards in Row -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-8">
+    <!-- 5 Stats Cards in Row -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-space-md mb-8">
       <!-- Card 1: Total Kos -->
       <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-slate-100 flex flex-col justify-between">
         <div class="flex items-center justify-between">
-          <span class="text-xs font-medium text-on-surface-variant">Total Properti Kos</span>
+          <span class="text-xs font-medium text-on-surface-variant">Total Kos</span>
           <div class="w-10 h-10 rounded-lg bg-surface-container-low flex items-center justify-center text-primary">
             <span class="material-symbols-outlined text-[22px]">apartment</span>
           </div>
@@ -78,12 +78,26 @@
         <div class="mt-4 flex items-baseline justify-between">
           <span class="text-3xl font-black text-on-surface">{{ totalRoomsCount }}</span>
           <span class="text-xs text-on-surface-variant">
-            <strong class="text-tertiary">{{ totalAvailableRooms }}</strong> Tersedia / <strong class="text-primary">{{ totalFilledRooms }}</strong> Terisi
+            <strong class="text-tertiary">{{ totalAvailableRooms }}</strong> Tersedia
           </span>
         </div>
       </div>
 
-      <!-- Card 3: Permintaan Baru -->
+      <!-- Card 3: Estimasi Pendapatan Sewa Bulanan -->
+      <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-slate-100 flex flex-col justify-between">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-medium text-on-surface-variant">Estimasi Omset</span>
+          <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+            <span class="material-symbols-outlined text-[22px]">payments</span>
+          </div>
+        </div>
+        <div class="mt-4 flex items-baseline justify-between">
+          <span class="text-xl font-black text-emerald-700">{{ formatRupiah(monthlyRevenueEstimate) }}</span>
+          <span class="text-[10px] text-on-surface-variant font-medium">/ bulan</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Permintaan Baru -->
       <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-slate-100 flex flex-col justify-between">
         <div class="flex items-center justify-between">
           <span class="text-xs font-medium text-on-surface-variant">Permintaan Baru</span>
@@ -97,12 +111,12 @@
             Perlu Respon
           </span>
           <span v-else class="text-[11px] text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">
-            Semua Ditinjau
+            Ditinjau
           </span>
         </div>
       </div>
 
-      <!-- Card 4: Total Pemesanan -->
+      <!-- Card 5: Total Pemesanan -->
       <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm border border-slate-100 flex flex-col justify-between">
         <div class="flex items-center justify-between">
           <span class="text-xs font-medium text-on-surface-variant">Total Transaksi</span>
@@ -112,7 +126,7 @@
         </div>
         <div class="mt-4 flex items-baseline justify-between">
           <span class="text-3xl font-black text-on-surface">{{ bookingsList.length }}</span>
-          <span class="text-[11px] text-on-surface-variant">Sepanjang Waktu</span>
+          <span class="text-[11px] text-on-surface-variant">Riwayat</span>
         </div>
       </div>
     </div>
@@ -290,6 +304,19 @@ const totalAvailableRooms = computed(() => {
 
 const totalFilledRooms = computed(() => {
   return totalRoomsCount.value - totalAvailableRooms.value
+})
+
+const monthlyRevenueEstimate = computed(() => {
+  return myKosList.value.reduce((acc, k) => {
+    if (!k.kamar || k.kamar.length === 0) return acc
+    return (
+      acc +
+      k.kamar.reduce((kAcc, room) => {
+        // Calculate based on filled rooms; if 0 filled, show active room potential
+        return kAcc + (room.status === 'terisi' ? (room.harga || k.harga || 0) : 0)
+      }, 0)
+    )
+  }, 0)
 })
 
 const pendingCount = computed(() => {

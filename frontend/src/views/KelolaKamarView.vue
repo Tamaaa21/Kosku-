@@ -235,21 +235,25 @@
                   <div class="min-w-0">
                     <div class="flex items-center gap-2">
                       <span class="text-sm font-semibold text-on-surface">{{ kamar.nama_kamar }}</span>
-                      <span class="px-2 py-0.5 rounded bg-surface-container text-primary text-[10px] font-semibold">
-                        3 x 4 m
+                      <span
+                        v-if="kamar.ukuran"
+                        class="px-2 py-0.5 rounded bg-surface-container text-primary text-[10px] font-semibold flex items-center gap-0.5"
+                      >
+                        <span class="material-symbols-outlined text-[12px]">aspect_ratio</span>
+                        <span>{{ kamar.ukuran }}</span>
                       </span>
                     </div>
                     <div class="flex items-center gap-1.5 text-on-surface-variant text-[11px] mt-0.5">
                       <span class="material-symbols-outlined text-[16px] text-outline">apartment</span>
-                      <span>{{ currentKos?.nama || 'Unit Kos' }} • Tipe Standar</span>
+                      <span>{{ currentKos?.nama || 'Unit Kos' }} &bull; {{ (kamar.foto || []).length }} Foto</span>
                     </div>
                   </div>
                 </div>
               </td>
 
-              <!-- Fasilitas Kamar (Integrated directly into room as requested) -->
+              <!-- Fasilitas Kamar (Integrated directly into room) -->
               <td class="py-4 px-space-md">
-                <div class="flex flex-wrap gap-1.5 max-w-xs">
+                <div v-if="(kamar.fasilitas_kamar || []).length > 0" class="flex flex-wrap gap-1.5 max-w-xs">
                   <span
                     v-for="amenity in getRoomAmenities(kamar)"
                     :key="amenity.name"
@@ -259,6 +263,7 @@
                     <span>{{ amenity.name }}</span>
                   </span>
                 </div>
+                <span v-else class="text-[11px] text-slate-400 italic">Standar kos</span>
               </td>
 
               <td class="py-4 px-space-md">
@@ -333,105 +338,165 @@
     <!-- Modal Form Tambah / Edit Kamar -->
     <div
       v-if="showModal"
-      class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+      class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 md:p-6 overflow-y-auto"
     >
-      <div class="bg-surface-container-lowest rounded-2xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-100 my-8">
-        <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-6">
+      <div class="bg-surface-container-lowest rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 my-auto flex flex-col max-h-[90vh] overflow-hidden">
+        <!-- 1. Fixed Header -->
+        <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 bg-surface-container-lowest shrink-0">
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
               <span class="material-symbols-outlined text-[24px]">meeting_room</span>
             </div>
             <div>
-              <h3 class="text-lg font-bold text-on-surface">
+              <h3 class="text-base sm:text-lg font-bold text-on-surface">
                 {{ isEditing ? 'Edit Data Kamar' : 'Tambah Unit Kamar' }}
               </h3>
               <p class="text-xs text-on-surface-variant">
-                Properti: {{ currentKos?.nama }}
+                Properti: <strong class="text-primary">{{ currentKos?.nama }}</strong>
               </p>
             </div>
           </div>
           <button
             @click="closeModal"
-            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shrink-0"
+            type="button"
           >
             <span class="material-symbols-outlined text-[20px]">close</span>
           </button>
         </div>
 
-        <form @submit.prevent="saveKamar" class="space-y-4">
-          <!-- Nama Kamar -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-on-surface">
-              Nomor / Nama Kamar <span class="text-rose-500">*</span>
-            </label>
-            <input
-              v-model="formData.nama_kamar"
-              type="text"
-              required
-              placeholder="Contoh: Kamar 1, Kamar 2 (Lt. 1)"
-              class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-
-          <!-- Harga Sewa -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-on-surface">
-              Harga Sewa per Bulan (Rp) <span class="text-rose-500">*</span>
-            </label>
-            <input
-              v-model.number="formData.harga"
-              type="number"
-              min="100000"
-              step="25000"
-              required
-              placeholder="750000"
-              class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-            />
-          </div>
-
-          <!-- Status Kamar -->
-          <div class="flex flex-col gap-1.5">
-            <label class="text-xs font-semibold text-on-surface">Status Ketersediaan</label>
-            <div class="relative">
-              <select
-                v-model="formData.status"
-                class="w-full h-11 pl-3.5 pr-9 bg-surface-container-low/40 rounded-lg text-xs text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <option value="tersedia">Tersedia (Siap Huni)</option>
-                <option value="terisi">Terisi</option>
-              </select>
-              <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">arrow_drop_down</span>
-            </div>
-          </div>
-
-          <!-- Fasilitas Terpadu Kamar -->
-          <div class="flex flex-col gap-1.5 pt-2">
-            <label class="text-xs font-semibold text-on-surface">
-              Fasilitas Kamar (Terintegrasi)
-            </label>
-            <p class="text-[11px] text-slate-400">
-              Pilih fasilitas yang tersedia langsung di dalam unit kamar ini:
-            </p>
-            <div class="grid grid-cols-2 gap-2 pt-1">
-              <label
-                v-for="f in defaultAmenities"
-                :key="f.name"
-                class="inline-flex items-center gap-2 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition"
-              >
+        <!-- 2. Scrollable Body & 3. Fixed Footer inside form -->
+        <form @submit.prevent="saveKamar" class="flex flex-col flex-1 min-h-0 overflow-hidden">
+          <!-- Scrollable Body -->
+          <div class="overflow-y-auto p-5 sm:p-6 space-y-4 flex-1">
+            <!-- Nama Kamar & Ukuran -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-on-surface">
+                  Nomor / Nama Kamar <span class="text-rose-500">*</span>
+                </label>
                 <input
-                  type="checkbox"
-                  :value="f.name"
-                  v-model="selectedAmenities"
-                  class="rounded text-primary focus:ring-primary h-4 w-4"
+                  v-model="formData.nama_kamar"
+                  type="text"
+                  required
+                  placeholder="Contoh: Kamar 1, Kamar A-02"
+                  class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
                 />
-                <span class="material-symbols-outlined text-[16px] text-primary">{{ f.icon }}</span>
-                <span class="text-xs text-slate-700 font-medium">{{ f.name }}</span>
-              </label>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-on-surface">
+                  Ukuran Kamar (P x L)
+                </label>
+                <input
+                  v-model="formData.ukuran"
+                  type="text"
+                  placeholder="Contoh: 3 x 4 m, 3.5 x 4 m"
+                  class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+            </div>
+
+            <!-- Harga Sewa & Status -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-on-surface">
+                  Harga Sewa per Bulan (Rp) <span class="text-rose-500">*</span>
+                </label>
+                <input
+                  v-model.number="formData.harga"
+                  type="number"
+                  min="100000"
+                  step="25000"
+                  required
+                  placeholder="750000"
+                  class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-xs font-semibold text-on-surface">Status Ketersediaan</label>
+                <div class="relative">
+                  <select
+                    v-model="formData.status"
+                    class="w-full h-11 pl-3.5 pr-9 bg-surface-container-low/40 rounded-lg text-xs text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  >
+                    <option value="tersedia">Tersedia (Siap Huni)</option>
+                    <option value="terisi">Terisi</option>
+                  </select>
+                  <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">arrow_drop_down</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Unggah Foto Kamar (Maksimal 5 Foto, Maksimal 2MB per Foto) -->
+            <div class="p-3.5 bg-surface-container-low/40 rounded-xl border border-slate-200">
+              <ImageUploader
+                v-model="formData.foto"
+                label="Foto Kamar"
+                :max-files="5"
+                :max-size-mb="2"
+              />
+            </div>
+
+            <!-- Fasilitas Terpadu Kamar -->
+            <div class="flex flex-col gap-2 p-3.5 bg-surface-container-low/40 rounded-xl border border-slate-200">
+              <div class="flex items-center justify-between">
+                <div>
+                  <label class="text-xs font-semibold text-on-surface flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[16px] text-primary">bed</span>
+                    <span>Fasilitas Kamar (Terintegrasi)</span>
+                  </label>
+                  <p class="text-[11px] text-on-surface-variant">
+                    Centang fasilitas yang tersedia di dalam unit kamar ini:
+                  </p>
+                </div>
+                <span class="text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                  {{ formData.fasilitas_kamar.length }} Fasilitas Dipilih
+                </span>
+              </div>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
+                <label
+                  v-for="f in defaultAmenities"
+                  :key="f.name"
+                  class="inline-flex items-center gap-2 p-2 rounded-lg border border-slate-200 cursor-pointer hover:bg-slate-50 transition"
+                >
+                  <input
+                    type="checkbox"
+                    :value="f.name"
+                    v-model="formData.fasilitas_kamar"
+                    class="rounded text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <span class="material-symbols-outlined text-[16px] text-primary">{{ f.icon }}</span>
+                  <span class="text-xs text-slate-700 font-medium">{{ f.name }}</span>
+                </label>
+              </div>
+
+              <!-- Custom Room Amenity Input -->
+              <div class="flex items-center gap-2 pt-1">
+                <input
+                  v-model="customAmenityInput"
+                  type="text"
+                  placeholder="Tambah fasilitas kamar lainnya..."
+                  class="flex-1 h-9 px-3 bg-white rounded-lg text-xs text-on-surface border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  @keydown.enter.prevent="addCustomAmenity"
+                />
+                <button
+                  type="button"
+                  @click="addCustomAmenity"
+                  :disabled="!customAmenityInput.trim()"
+                  class="h-9 px-3.5 bg-primary-container text-white text-xs font-semibold rounded-lg hover:bg-primary transition disabled:opacity-50 flex items-center gap-1 shrink-0"
+                >
+                  <span class="material-symbols-outlined text-[15px]">add</span>
+                  <span>Tambah</span>
+                </button>
+              </div>
             </div>
           </div>
 
-          <!-- Actions -->
-          <div class="flex items-center justify-end gap-3 pt-6 border-t border-slate-100">
+          <!-- 3. Fixed Footer Actions -->
+          <div class="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-100 bg-surface-container-low/50 shrink-0">
             <button
               type="button"
               @click="closeModal"
@@ -456,9 +521,12 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import api from '../services/api'
+import ImageUploader from '../components/ImageUploader.vue'
 
+const route = useRoute()
 const auth = useAuthStore()
 
 const loading = ref(false)
@@ -479,20 +547,43 @@ const editKamarId = ref(null)
 
 const defaultAmenities = [
   { name: 'Kasur', icon: 'bed' },
-  { name: 'KM Dalam', icon: 'shower' },
+  { name: 'Kamar Mandi Dalam', icon: 'shower' },
   { name: 'AC', icon: 'ac_unit' },
   { name: 'WiFi', icon: 'wifi' },
-  { name: 'Lemari', icon: 'shelves' },
-  { name: 'Meja Belajar', icon: 'desk' }
+  { name: 'Lemari Pakaian', icon: 'shelves' },
+  { name: 'Meja Belajar', icon: 'desk' },
+  { name: 'Water Heater', icon: 'hot_tub' },
+  { name: 'Jendela / Ventilasi', icon: 'window' }
 ]
 
-const selectedAmenities = ref(['Kasur', 'KM Dalam', 'AC', 'WiFi'])
+const customAmenityInput = ref('')
 
 const formData = ref({
   nama_kamar: '',
+  ukuran: '3 x 4 m',
   harga: 750000,
-  status: 'tersedia'
+  status: 'tersedia',
+  foto: [],
+  fasilitas_kamar: ['Kasur', 'Kamar Mandi Dalam', 'AC', 'WiFi']
 })
+
+const addCustomAmenity = () => {
+  const val = customAmenityInput.value.trim()
+  if (!val) return
+  if (!formData.value.fasilitas_kamar.includes(val)) {
+    formData.value.fasilitas_kamar.push(val)
+  }
+  customAmenityInput.value = ''
+}
+
+const resolveImageUrl = (url) => {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  const baseBackend = import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace(/\/api\/v1\/?$/, '')
+    : 'https://backend-kos.ddev.site'
+  return `${baseBackend}${url.startsWith('/') ? '' : '/'}${url}`
+}
 
 const fetchKosList = async () => {
   try {
@@ -500,8 +591,15 @@ const fetchKosList = async () => {
       params: { pemilik_id: auth.user?.id, per_page: 50 }
     })
     myKosList.value = res.data?.data || []
-    if (myKosList.value.length > 0 && !selectedKosId.value) {
+
+    const queryKosId = Number(route.query.kos_id)
+    if (queryKosId && myKosList.value.some((k) => k.id === queryKosId)) {
+      selectedKosId.value = queryKosId
+    } else if (myKosList.value.length > 0 && !selectedKosId.value) {
       selectedKosId.value = myKosList.value[0].id
+    }
+
+    if (selectedKosId.value) {
       await fetchKamar()
     }
   } catch (err) {
@@ -569,6 +667,9 @@ const formatRupiah = (val) => {
 }
 
 const getRoomImage = (kamar) => {
+  if (kamar.foto && kamar.foto.length > 0) {
+    return resolveImageUrl(kamar.foto[0])
+  }
   const images = [
     'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=400&q=80',
     'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=400&q=80',
@@ -577,13 +678,26 @@ const getRoomImage = (kamar) => {
   return images[(kamar.id || 0) % images.length]
 }
 
+const amenityIconMap = {
+  'Kasur': 'bed',
+  'KM Dalam': 'shower',
+  'Kamar Mandi Dalam': 'shower',
+  'AC': 'ac_unit',
+  'WiFi': 'wifi',
+  'Lemari': 'shelves',
+  'Lemari Pakaian': 'shelves',
+  'Meja Belajar': 'desk',
+  'Water Heater': 'hot_tub',
+  'Jendela': 'window',
+  'Jendela / Ventilasi': 'window'
+}
+
 const getRoomAmenities = (kamar) => {
-  // Directly provides integrated room amenities as requested
-  return [
-    { name: 'Kasur', icon: 'bed' },
-    { name: 'KM Dalam', icon: 'shower' },
-    { name: 'WiFi', icon: 'wifi' }
-  ]
+  const list = kamar.fasilitas_kamar || []
+  return list.map((name) => ({
+    name,
+    icon: amenityIconMap[name] || 'check_circle'
+  }))
 }
 
 const toggleKamarStatus = async (kamar) => {
@@ -604,10 +718,12 @@ const openAddModal = () => {
   editKamarId.value = null
   formData.value = {
     nama_kamar: `Kamar ${kamarList.value.length + 1}`,
+    ukuran: '3 x 4 m',
     harga: currentKos.value?.harga || 750000,
-    status: 'tersedia'
+    status: 'tersedia',
+    foto: [],
+    fasilitas_kamar: ['Kasur', 'Kamar Mandi Dalam', 'AC', 'WiFi']
   }
-  selectedAmenities.value = ['Kasur', 'KM Dalam', 'AC', 'WiFi']
   showModal.value = true
 }
 
@@ -616,10 +732,14 @@ const openEditModal = (kamar) => {
   editKamarId.value = kamar.id
   formData.value = {
     nama_kamar: kamar.nama_kamar,
+    ukuran: kamar.ukuran || '3 x 4 m',
     harga: kamar.harga,
-    status: kamar.status
+    status: kamar.status,
+    foto: Array.isArray(kamar.foto) ? [...kamar.foto] : [],
+    fasilitas_kamar: Array.isArray(kamar.fasilitas_kamar) && kamar.fasilitas_kamar.length > 0
+      ? [...kamar.fasilitas_kamar]
+      : ['Kasur', 'Kamar Mandi Dalam', 'AC', 'WiFi']
   }
-  selectedAmenities.value = ['Kasur', 'KM Dalam', 'AC', 'WiFi']
   showModal.value = true
 }
 
