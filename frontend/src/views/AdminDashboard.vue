@@ -1,173 +1,93 @@
 <template>
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
-    <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-      <div>
-        <div class="flex items-center gap-2">
-          <h1 class="text-2xl font-bold text-on-surface tracking-tight">Dashboard Administrator</h1>
-          <span class="bg-primary-fixed text-on-primary-fixed text-xs font-bold px-2.5 py-0.5 rounded-full">System Admin</span>
-        </div>
-        <p class="text-sm text-slate-500 mt-1">
-          Ringkasan eksekutif, kelola akun pencari, kemitraan pemilik kos, master fasilitas, dan audit transaksi.
-        </p>
-      </div>
+    <!-- Context Subheader & Quick Action Toolbar -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
+          <span class="material-symbols-outlined text-[20px]">{{ activeTabMeta.icon }}</span>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h2 class="text-xl font-bold text-slate-900 tracking-tight">{{ activeTabMeta.title }}</h2>
+            <span v-if="activeTabMeta.badge !== null" class="bg-slate-100 text-slate-700 text-xs font-bold px-2.5 py-0.5 rounded-full border border-slate-200">
+              {{ activeTabMeta.badge }}
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 mt-0.5">
+            {{ activeTabMeta.description }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Action Toolbar (Dynamic per active tab) -->
+      <div class="flex items-center gap-2.5">
         <button
           v-if="activeTab === 'ringkasan'"
           @click="fetchStats"
           :disabled="loadingStats"
-          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
+          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
         >
-          <svg class="w-4 h-4" :class="{ 'animate-spin': loadingStats }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': loadingStats }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           Segarkan Data
         </button>
 
         <button
-          v-if="activeTab === 'pencari'"
-          @click="fetchPencari"
-          :disabled="loadingPencari"
-          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
+          v-if="activeTab === 'pengguna'"
+          @click="fetchUsers"
+          :disabled="loadingUsers"
+          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
         >
-          <svg class="w-4 h-4" :class="{ 'animate-spin': loadingPencari }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': loadingUsers }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Segarkan Pencari
-        </button>
-
-        <button
-          v-if="activeTab === 'pemilik'"
-          @click="fetchPemilik"
-          :disabled="loadingPemilik"
-          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
-        >
-          <svg class="w-4 h-4" :class="{ 'animate-spin': loadingPemilik }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-          </svg>
-          Segarkan Mitra
+          Segarkan Pengguna
         </button>
 
         <button
           v-if="activeTab === 'kos'"
           @click="fetchKos"
           :disabled="loadingKos"
-          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-semibold px-4 py-2.5 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
+          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
         >
-          <svg class="w-4 h-4" :class="{ 'animate-spin': loadingKos }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': loadingKos }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
           Segarkan Data Kos
         </button>
 
         <button
-          v-if="activeTab === 'fasilitas'"
-          @click="openCreateFasilitasModal"
-          class="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold px-4 py-2.5 rounded-xl transition shadow-sm"
+          v-if="activeTab === 'pemesanan'"
+          @click="exportBookingsToCSV"
+          :disabled="allBookings.length === 0"
+          class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
         >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          <span class="material-symbols-outlined text-[16px] text-emerald-600">table_view</span>
+          Ekspor CSV
+        </button>
+        <button
+          v-if="activeTab === 'pemesanan'"
+          @click="fetchAllBookings"
+          :disabled="loadingBookings"
+          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
+        >
+          <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': loadingBookings }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          Tambah Fasilitas Baru
+          Segarkan Data
         </button>
       </div>
     </div>
 
     <!-- Alert / Toast -->
-    <div v-if="successMsg" class="mb-6 p-4 rounded-2xl bg-emerald-50 text-emerald-800 text-sm border border-emerald-200 flex items-center justify-between">
+    <div v-if="successMsg" class="mb-6 p-4 rounded-2xl bg-emerald-50 text-emerald-800 text-xs font-medium border border-emerald-200 flex items-center justify-between">
       <span>{{ successMsg }}</span>
-      <button @click="successMsg = null" class="text-emerald-700 font-bold ml-4">&times;</button>
+      <button @click="successMsg = null" class="text-emerald-700 font-bold ml-4 text-base">&times;</button>
     </div>
-    <div v-if="errorMsg" class="mb-6 p-4 rounded-2xl bg-rose-50 text-rose-800 text-sm border border-rose-200 flex items-center justify-between">
+    <div v-if="errorMsg" class="mb-6 p-4 rounded-2xl bg-rose-50 text-rose-800 text-xs font-medium border border-rose-200 flex items-center justify-between">
       <span>{{ errorMsg }}</span>
-      <button @click="errorMsg = null" class="text-rose-700 font-bold ml-4">&times;</button>
-    </div>
-
-    <!-- Navigation Tabs -->
-    <div class="flex items-center gap-2 mb-6 border-b border-slate-200 pb-3 overflow-x-auto">
-      <!-- 1. Ringkasan & Analitik (Modul 1) -->
-      <button
-        @click="switchTab('ringkasan')"
-        :class="[
-          'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
-          activeTab === 'ringkasan' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-        ]"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-        </svg>
-        Ringkasan & Analitik
-      </button>
-
-      <!-- 2. Kelola Pencari Kos (Modul 2) -->
-      <button
-        @click="switchTab('pencari')"
-        :class="[
-          'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
-          activeTab === 'pencari' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-        ]"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-        </svg>
-        Pencari Kos ({{ pencariList.length }})
-      </button>
-
-      <!-- 3. Kelola Mitra Pemilik (Modul 3) -->
-      <button
-        @click="switchTab('pemilik')"
-        :class="[
-          'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
-          activeTab === 'pemilik' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-        ]"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-        </svg>
-        Mitra Pemilik Kos ({{ pemilikList.length }})
-      </button>
-
-      <!-- 4. Data & Moderasi Kos (Modul 4) -->
-      <button
-        @click="switchTab('kos')"
-        :class="[
-          'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
-          activeTab === 'kos' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-        ]"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-        </svg>
-        Data & Moderasi Kos ({{ kosList.length }})
-      </button>
-
-      <!-- 5. Master Data Fasilitas -->
-      <button
-        @click="switchTab('fasilitas')"
-        :class="[
-          'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
-          activeTab === 'fasilitas' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-        ]"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-        </svg>
-        Master Data Fasilitas ({{ fasilitasList.length }})
-      </button>
-
-      <!-- 5. Log Seluruh Pemesanan -->
-      <button
-        @click="switchTab('pemesanan')"
-        :class="[
-          'px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shrink-0',
-          activeTab === 'pemesanan' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:bg-slate-100'
-        ]"
-      >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-        Log Seluruh Pemesanan ({{ allBookings.length }})
-      </button>
+      <button @click="errorMsg = null" class="text-rose-700 font-bold ml-4 text-base">&times;</button>
     </div>
 
     <!-- ================================================================= -->
@@ -267,7 +187,7 @@
         <!-- Card 4: Estimasi Transaksi -->
         <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm hover:shadow-md transition">
           <div class="flex items-center justify-between mb-4">
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Perputaran Nilai Sewa</span>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Estimasi GMV Sewa</span>
             <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -278,9 +198,9 @@
             {{ formatRupiah(stats.total_nilai_transaksi || 0) }}
           </div>
           <div class="mt-3 flex items-center justify-between text-xs text-slate-500 pt-3 border-t border-slate-100">
-            <span class="text-[11px] text-slate-500">Estimasi sewa terkonfirmasi</span>
+            <span class="text-[11px] text-slate-500">Nilai transaksi pesanan disetujui</span>
             <span class="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-full">
-              Sewa Disetujui
+              Gross Booking
             </span>
           </div>
         </div>
@@ -430,95 +350,86 @@
         </div>
       </div>
 
-      <!-- Recent Reservations Activity Log -->
-      <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-          <div>
-            <h2 class="text-base font-bold text-slate-900">Aktivitas Reservasi Terbaru</h2>
-            <p class="text-xs text-slate-500 mt-0.5">5 transaksi pemesanan terkini yang masuk ke dalam sistem</p>
-          </div>
-          <button
-            @click="activeTab = 'pemesanan'"
-            class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition"
-          >
-            Lihat Semua Log Pemesanan
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-600">
-            <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-y border-slate-200">
-              <tr>
-                <th class="py-3 px-4">ID</th>
-                <th class="py-3 px-4">Penyewa</th>
-                <th class="py-3 px-4">Kos & Kamar</th>
-                <th class="py-3 px-4">Tarif Sewa</th>
-                <th class="py-3 px-4">Tanggal Pesan</th>
-                <th class="py-3 px-4">Status</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr v-if="(stats.pemesanan_terbaru || []).length === 0">
-                <td colspan="6" class="py-8 text-center text-slate-400">Belum ada transaksi pemesanan terkini.</td>
-              </tr>
-              <tr v-for="b in stats.pemesanan_terbaru || []" :key="b.id" class="hover:bg-slate-50/60 transition">
-                <td class="py-3 px-4 font-mono font-bold text-slate-900">#{{ b.id }}</td>
-                <td class="py-3 px-4">
-                  <div class="font-bold text-slate-900">{{ b.pengguna?.nama || '-' }}</div>
-                  <div class="text-slate-400 text-[11px]">{{ b.pengguna?.email || '-' }}</div>
-                </td>
-                <td class="py-3 px-4">
-                  <div class="font-semibold text-slate-900">{{ b.kos?.nama || '-' }}</div>
-                  <div class="text-emerald-700 font-bold text-[11px]">Kamar: {{ b.kamar?.nama_kamar || '-' }}</div>
-                </td>
-                <td class="py-3 px-4 font-bold text-slate-900 font-mono">
-                  {{ b.kamar?.harga ? formatRupiah(b.kamar.harga) : '-' }}
-                </td>
-                <td class="py-3 px-4">{{ formatDateOnly(b.tanggal_pemesanan) }}</td>
-                <td class="py-3 px-4">
-                  <span
-                    :class="[
-                      'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border',
-                      statusBadgeClass(b.status)
-                    ]"
-                  >
-                    {{ b.status }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
     </div>
 
     <!-- ================================================================= -->
-    <!-- TAB 1: KELOLA PENCARI KOS (MODUL 2) -->
+    <!-- TAB 1: MANAJEMEN PENGGUNA TERPADU (MODUL 2) -->
     <!-- ================================================================= -->
-    <div v-if="activeTab === 'pencari'" class="space-y-6">
-      <!-- Search & Status Filter Bar -->
+    <div v-else-if="activeTab === 'pengguna'" class="space-y-6">
+      <!-- 3 Quick Metric Highlights Strip -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Terdaftar</p>
+            <h4 class="text-2xl font-black text-slate-900 mt-1">{{ userList.length }}</h4>
+            <span class="inline-flex items-center text-slate-500 text-[11px] font-semibold mt-1">
+              Seluruh Pengguna
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">group</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Mitra Pemilik Kos</p>
+            <h4 class="text-2xl font-black text-amber-600 mt-1">{{ pemilikCount }}</h4>
+            <span class="inline-flex items-center text-amber-700 text-[11px] font-semibold mt-1">
+              Mitra Penyedia Properti
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">real_estate_agent</span>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pencari Kos</p>
+            <h4 class="text-2xl font-black text-sky-600 mt-1">{{ pencariCount }}</h4>
+            <span class="inline-flex items-center text-sky-700 text-[11px] font-semibold mt-1">
+              Calon / Penghuni Kos
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">person_search</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Search & Filters Toolbar -->
       <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div class="relative w-full sm:w-88">
             <input
               type="text"
-              v-model="pencariSearchQuery"
-              placeholder="Cari nama, email, atau nomor HP pencari..."
+              v-model="userSearchQuery"
+              placeholder="Cari nama, email, atau nomor HP pengguna..."
               class="w-full text-xs rounded-xl border-slate-200 pl-9 pr-4 py-2.5"
-              @input="debouncePencariSearch"
+              @input="debounceUserSearch"
             />
             <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
 
-          <div class="flex items-center gap-2.5 w-full sm:w-auto">
+          <div class="flex items-center gap-2.5 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+            <!-- Filter Role -->
             <select
-              v-model="pencariStatusFilter"
-              @change="fetchPencari"
+              v-model="userRoleFilter"
+              @change="fetchUsers"
+              class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white font-medium text-slate-700"
+            >
+              <option value="all">Semua Peran / Role</option>
+              <option value="pemilik">Mitra Pemilik Kos</option>
+              <option value="pencari">Pencari Kos</option>
+            </select>
+
+            <!-- Filter Status -->
+            <select
+              v-model="userStatusFilter"
+              @change="fetchUsers"
               class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white font-medium text-slate-700"
             >
               <option value="all">Semua Status Akun</option>
@@ -526,12 +437,23 @@
               <option value="0">Akun Nonaktif</option>
             </select>
 
-            <button
-              @click="fetchPencari"
-              class="p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition"
-              title="Segarkan Data Pencari"
+            <!-- Sort -->
+            <select
+              v-model="userSort"
+              @change="fetchUsers"
+              class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white font-medium text-slate-700"
             >
-              <svg class="w-4 h-4" :class="{ 'animate-spin': loadingPencari }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <option value="latest">Terbaru</option>
+              <option value="unit_terbanyak">Properti Terbanyak</option>
+              <option value="nama_asc">Nama A-Z</option>
+            </select>
+
+            <button
+              @click="fetchUsers"
+              class="p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition"
+              title="Segarkan Data Pengguna"
+            >
+              <svg class="w-4 h-4" :class="{ 'animate-spin': loadingUsers }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
               </svg>
             </button>
@@ -539,59 +461,71 @@
         </div>
       </div>
 
-      <!-- Pencari Table Card -->
+      <!-- Users Table Card -->
       <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs text-slate-600">
             <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
               <tr>
                 <th class="py-3.5 px-4 w-12 text-center">No</th>
-                <th class="py-3.5 px-4">Pencari Kos</th>
+                <th class="py-3.5 px-4">Pengguna</th>
+                <th class="py-3.5 px-4 text-center">Peran / Role</th>
                 <th class="py-3.5 px-4">Kontak WhatsApp</th>
-                <th class="py-3.5 px-4 text-center">Riwayat Pesanan</th>
+                <th class="py-3.5 px-4 text-center">Aktivitas / Entitas</th>
                 <th class="py-3.5 px-4 text-center">Status Akun</th>
                 <th class="py-3.5 px-4">Terdaftar</th>
                 <th class="py-3.5 px-4 text-right pr-6">Aksi</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-              <tr v-if="loadingPencari">
-                <td colspan="7" class="py-10 text-center text-slate-400">Memuat data pencari kos...</td>
+              <tr v-if="loadingUsers">
+                <td colspan="8" class="py-10 text-center text-slate-400">Memuat data pengguna...</td>
               </tr>
-              <tr v-else-if="pencariList.length === 0">
-                <td colspan="7" class="py-10 text-center text-slate-400">Tidak ada data pencari kos yang sesuai.</td>
+              <tr v-else-if="userList.length === 0">
+                <td colspan="8" class="py-10 text-center text-slate-400">Tidak ada data pengguna yang sesuai dengan filter.</td>
               </tr>
-              <tr v-for="(user, idx) in pencariList" :key="user.id" class="hover:bg-slate-50/70 transition">
+              <tr v-for="(user, idx) in userList" :key="user.id" class="hover:bg-slate-50/70 transition">
                 <td class="py-4 px-4 text-center font-mono text-slate-400">{{ idx + 1 }}</td>
                 <td class="py-4 px-4">
                   <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-extrabold flex items-center justify-center text-xs shrink-0">
+                    <div
+                      :class="[
+                        'w-9 h-9 rounded-full font-extrabold flex items-center justify-center text-xs shrink-0',
+                        user.role === 'pemilik' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-700'
+                      ]"
+                    >
                       {{ getInitials(user.nama) }}
                     </div>
                     <div>
                       <div class="font-bold text-slate-900">{{ user.nama }}</div>
-                      <div class="text-[11px] text-slate-400 font-mono">#USR-{{ user.id }} &bull; {{ user.email }}</div>
+                      <div class="text-[11px] text-slate-400 font-mono">
+                        {{ user.role === 'pemilik' ? '#PMK-' : '#USR-' }}{{ user.id }} &bull; {{ user.email }}
+                      </div>
                     </div>
                   </div>
                 </td>
-                <td class="py-4 px-4">
-                  <div v-if="user.telepon" class="flex items-center gap-2">
-                    <span class="font-mono text-slate-700 font-semibold">{{ user.telepon }}</span>
-                    <button
-                      @click="chatUserWhatsApp(user)"
-                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[10px] font-bold border border-emerald-200 transition"
-                      title="Hubungi Pencari lewat WhatsApp"
-                    >
-                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.053-1.018-.073-.615-.2-1.397-.577-2.316-1.493-.923-.92-1.294-1.696-1.496-2.314-.125-.385-.119-.705-.074-1.018.05-.333.418-1.026.823-1.17.135-.048.281-.035.405.029.135.07.247.202.321.36.197.42.502 1.155.539 1.246.037.091.042.186.005.281-.036.096-.073.185-.143.255-.07.07-.151.139-.214.195-.064.056-.128.117-.064.227.148.256.45 1.019 1.156 1.649.914.814 1.616.994 1.872 1.111.11.05.185.04.24-.037.056-.077.24-.287.327-.406.087-.119.176-.101.272-.065.096.036.83.392 1.25.59.42.197.552.31.6.446.048.136.048.421-.096.826z"/>
-                      </svg>
-                      Chat WA
-                    </button>
-                  </div>
+                <td class="py-4 px-4 text-center">
+                  <span
+                    :class="[
+                      'inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-bold border',
+                      user.role === 'pemilik' ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-sky-50 text-sky-800 border-sky-200'
+                    ]"
+                  >
+                    {{ user.role === 'pemilik' ? 'Mitra Pemilik' : 'Pencari Kos' }}
+                  </span>
+                </td>
+                <td class="py-4 px-4 font-mono font-medium text-slate-700">
+                  <span v-if="user.telepon">{{ user.telepon }}</span>
                   <span v-else class="text-slate-400 italic text-[11px]">Belum diisi</span>
                 </td>
                 <td class="py-4 px-4 text-center">
-                  <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 font-bold text-[11px]">
+                  <span v-if="user.role === 'pemilik'" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-bold text-[11px] border border-emerald-200">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                    {{ user.kos_count || 0 }} Properti
+                  </span>
+                  <span v-else class="inline-flex items-center px-2.5 py-1 rounded-full bg-slate-100 text-slate-800 font-bold text-[11px]">
                     {{ user.pemesanan_count || 0 }} Pesanan
                   </span>
                 </td>
@@ -603,7 +537,7 @@
                     ]"
                   >
                     <span class="w-1.5 h-1.5 rounded-full" :class="user.aktif ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                    {{ user.aktif ? 'Aktif' : 'Nonaktif' }}
+                    {{ user.aktif ? (user.role === 'pemilik' ? 'Terverifikasi' : 'Aktif') : 'Nonaktif' }}
                   </span>
                 </td>
                 <td class="py-4 px-4 text-slate-500 text-[11px]">{{ formatDate(user.created_at) }}</td>
@@ -611,160 +545,7 @@
                   <button
                     @click="viewUserDetail(user.id)"
                     class="px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
-                    title="Lihat Detail Profil & Riwayat"
-                  >
-                    Detail
-                  </button>
-                  <button
-                    @click="toggleUserActive(user)"
-                    :disabled="togglingUserId === user.id"
-                    :class="[
-                      'px-2.5 py-1.5 text-[11px] font-bold rounded-xl border transition',
-                      user.aktif
-                        ? 'border-rose-200 text-rose-600 hover:bg-rose-50'
-                        : 'border-emerald-200 text-emerald-600 hover:bg-emerald-50'
-                    ]"
-                  >
-                    {{ user.aktif ? 'Tangguhkan' : 'Aktifkan' }}
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- TAB 2: KELOLA MITRA PEMILIK KOS (MODUL 3) -->
-    <!-- ================================================================= -->
-    <div v-else-if="activeTab === 'pemilik'" class="space-y-6">
-      <!-- Search, Status Filter & Sorting Bar -->
-      <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
-        <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div class="relative w-full sm:w-80">
-            <input
-              type="text"
-              v-model="pemilikSearchQuery"
-              placeholder="Cari nama pemilik, email, atau nomor HP..."
-              class="w-full text-xs rounded-xl border-slate-200 pl-9 pr-4 py-2.5"
-              @input="debouncePemilikSearch"
-            />
-            <svg class="w-4 h-4 text-slate-400 absolute left-3 top-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-
-          <div class="flex items-center gap-2.5 w-full sm:w-auto flex-wrap sm:flex-nowrap">
-            <select
-              v-model="pemilikStatusFilter"
-              @change="fetchPemilik"
-              class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white font-medium text-slate-700"
-            >
-              <option value="all">Semua Status Kemitraan</option>
-              <option value="1">Terverifikasi (Aktif)</option>
-              <option value="0">Ditangguhkan (Nonaktif)</option>
-            </select>
-
-            <select
-              v-model="pemilikSort"
-              @change="fetchPemilik"
-              class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white font-medium text-slate-700"
-            >
-              <option value="latest">Terbaru</option>
-              <option value="unit_terbanyak">Properti Kos Terbanyak</option>
-              <option value="nama_asc">Nama A-Z</option>
-            </select>
-
-            <button
-              @click="fetchPemilik"
-              class="p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition"
-              title="Segarkan Data Mitra Pemilik"
-            >
-              <svg class="w-4 h-4" :class="{ 'animate-spin': loadingPemilik }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Pemilik Table Card -->
-      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs text-slate-600">
-            <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
-              <tr>
-                <th class="py-3.5 px-4 w-12 text-center">No</th>
-                <th class="py-3.5 px-4">Mitra Pemilik Kos</th>
-                <th class="py-3.5 px-4">Kontak WhatsApp</th>
-                <th class="py-3.5 px-4 text-center">Unit Properti Kos</th>
-                <th class="py-3.5 px-4 text-center">Status Kemitraan</th>
-                <th class="py-3.5 px-4">Bergabung</th>
-                <th class="py-3.5 px-4 text-right pr-6">Aksi</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr v-if="loadingPemilik">
-                <td colspan="7" class="py-10 text-center text-slate-400">Memuat data mitra pemilik kos...</td>
-              </tr>
-              <tr v-else-if="pemilikList.length === 0">
-                <td colspan="7" class="py-10 text-center text-slate-400">Tidak ada mitra pemilik kos yang ditemukan.</td>
-              </tr>
-              <tr v-for="(user, idx) in pemilikList" :key="user.id" class="hover:bg-slate-50/70 transition">
-                <td class="py-4 px-4 text-center font-mono text-slate-400">{{ idx + 1 }}</td>
-                <td class="py-4 px-4">
-                  <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-800 font-extrabold flex items-center justify-center text-xs shrink-0">
-                      {{ getInitials(user.nama) }}
-                    </div>
-                    <div>
-                      <div class="font-bold text-slate-900">{{ user.nama }}</div>
-                      <div class="text-[11px] text-slate-400 font-mono">#PMK-{{ user.id }} &bull; {{ user.email }}</div>
-                    </div>
-                  </div>
-                </td>
-                <td class="py-4 px-4">
-                  <div v-if="user.telepon" class="flex items-center gap-2">
-                    <span class="font-mono text-slate-700 font-semibold">{{ user.telepon }}</span>
-                    <button
-                      @click="chatUserWhatsApp(user)"
-                      class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 text-[10px] font-bold border border-emerald-200 transition"
-                      title="Koordinasi dengan Mitra via WhatsApp"
-                    >
-                      <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.053-1.018-.073-.615-.2-1.397-.577-2.316-1.493-.923-.92-1.294-1.696-1.496-2.314-.125-.385-.119-.705-.074-1.018.05-.333.418-1.026.823-1.17.135-.048.281-.035.405.029.135.07.247.202.321.36.197.42.502 1.155.539 1.246.037.091.042.186.005.281-.036.096-.073.185-.143.255-.07.07-.151.139-.214.195-.064.056-.128.117-.064.227.148.256.45 1.019 1.156 1.649.914.814 1.616.994 1.872 1.111.11.05.185.04.24-.037.056-.077.24-.287.327-.406.087-.119.176-.101.272-.065.096.036.83.392 1.25.59.42.197.552.31.6.446.048.136.048.421-.096.826z"/>
-                      </svg>
-                      Chat WA
-                    </button>
-                  </div>
-                  <span v-else class="text-slate-400 italic text-[11px]">Belum diisi</span>
-                </td>
-                <td class="py-4 px-4 text-center">
-                  <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 font-bold text-[11px] border border-emerald-200">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                    {{ user.kos_count || 0 }} Properti
-                  </span>
-                </td>
-                <td class="py-4 px-4 text-center">
-                  <span
-                    :class="[
-                      'inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-1 rounded-full',
-                      user.aktif ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-rose-50 text-rose-700 border border-rose-200'
-                    ]"
-                  >
-                    <span class="w-1.5 h-1.5 rounded-full" :class="user.aktif ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                    {{ user.aktif ? 'Terverifikasi' : 'Ditangguhkan' }}
-                  </span>
-                </td>
-                <td class="py-4 px-4 text-slate-500 text-[11px]">{{ formatDate(user.created_at) }}</td>
-                <td class="py-4 px-4 text-right pr-6 space-x-1.5 whitespace-nowrap">
-                  <button
-                    @click="viewUserDetail(user.id)"
-                    class="px-2.5 py-1.5 text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
-                    title="Lihat Detail Profil & Daftar Kos"
+                    title="Lihat Detail Profil"
                   >
                     Detail
                   </button>
@@ -907,476 +688,643 @@
         </div>
       </div>
 
-      <!-- Main Content Layout (Table + Side Preview Panel) -->
-      <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-        <!-- Left Table Container -->
-        <div class="xl:col-span-7 2xl:col-span-8 bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col">
-          <div class="p-4 border-b border-slate-100 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <h3 class="font-bold text-sm text-slate-900">Daftar Seluruh Kos Nasional</h3>
-              <span class="text-xs text-slate-400">({{ kosList.length }} listing)</span>
-            </div>
-            <p class="text-[11px] text-slate-400 hidden sm:block">Klik baris untuk pratinjau detail properti</p>
+      <!-- Full-Width Kos Moderation Table -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden flex flex-col">
+        <div class="p-4 border-b border-slate-100 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <h3 class="font-bold text-sm text-slate-900">Daftar Seluruh Properti Kos Nasional</h3>
+            <span class="text-xs text-slate-400">({{ kosList.length }} listing)</span>
+          </div>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Klik baris atau ikon pratinjau untuk melihat rincian properti</p>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600 border-collapse">
+            <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+              <tr>
+                <th class="py-3.5 px-4 text-center w-12">No</th>
+                <th class="py-3.5 px-4 w-20">Foto</th>
+                <th class="py-3.5 px-4">Properti Kos</th>
+                <th class="py-3.5 px-4">Pemilik & Kontak</th>
+                <th class="py-3.5 px-4">Alamat</th>
+                <th class="py-3.5 px-4 text-center">Jenis</th>
+                <th class="py-3.5 px-4 text-center">Kamar</th>
+                <th class="py-3.5 px-4 text-right pr-6 w-32">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-if="loadingKos">
+                <td colspan="8" class="py-12 text-center text-slate-400">
+                  <svg class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Memuat data kos untuk moderasi...
+                </td>
+              </tr>
+              <tr v-else-if="kosList.length === 0">
+                <td colspan="8" class="py-12 text-center text-slate-400">
+                  Tidak ada data properti kos yang sesuai dengan filter pencarian.
+                </td>
+              </tr>
+              <tr
+                v-for="(kos, idx) in kosList"
+                :key="kos.id"
+                @click="openKosPreview(kos)"
+                class="hover:bg-slate-50/80 transition cursor-pointer"
+              >
+                <td class="py-3.5 px-4 text-center font-mono text-slate-400">{{ idx + 1 }}</td>
+                <td class="py-3.5 px-4">
+                  <div class="w-14 h-11 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
+                    <img
+                      :src="getKosThumbnail(kos)"
+                      :alt="kos.nama"
+                      class="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                  </div>
+                </td>
+                <td class="py-3.5 px-4">
+                  <div class="font-bold text-slate-900 group-hover:text-primary transition line-clamp-1">{{ kos.nama }}</div>
+                  <div class="flex items-center gap-2 mt-0.5">
+                    <span class="text-[10px] font-mono text-slate-400">#KOS-{{ kos.id }}</span>
+                    <span class="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                      {{ formatRupiah(kos.harga) }}/bln
+                    </span>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4">
+                  <div v-if="kos.pemilik" class="flex flex-col">
+                    <span class="font-semibold text-slate-800 line-clamp-1">{{ kos.pemilik.nama }}</span>
+                    <span class="text-[10px] text-slate-400 font-mono mt-0.5">{{ kos.pemilik.telepon || '-' }}</span>
+                  </div>
+                  <span v-else class="text-slate-400 italic text-[11px]">-</span>
+                </td>
+                <td class="py-3.5 px-4 max-w-xs">
+                  <span class="text-slate-600 line-clamp-1 text-[11px]" :title="kos.alamat">{{ kos.alamat }}</span>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <span
+                    :class="[
+                      'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border capitalize',
+                      kos.jenis === 'putri' ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                      kos.jenis === 'putra' ? 'bg-sky-50 text-sky-700 border-sky-200' :
+                      'bg-indigo-50 text-indigo-700 border-indigo-200'
+                    ]"
+                  >
+                    {{ kos.jenis }}
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <span class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 font-mono">
+                    {{ kos.kamar_tersedia_count ?? 0 }} / {{ kos.kamar_count || (kos.kamar || []).length }}
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right pr-6 space-x-1 whitespace-nowrap">
+                  <button
+                    @click.stop="openKosPreview(kos)"
+                    class="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition"
+                    title="Pratinjau Detail"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </button>
+                  <router-link
+                    :to="`/kos/${kos.id}`"
+                    target="_blank"
+                    class="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition inline-block align-middle"
+                    title="Buka Listing Publik"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </router-link>
+                  <button
+                    @click.stop="deleteKosModerasi(kos)"
+                    :disabled="deletingKosId === kos.id"
+                    class="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition"
+                    title="Hapus Moderasi Admin"
+                  >
+                    <svg class="w-4 h-4" :class="{ 'animate-spin': deletingKosId === kos.id }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: AUDIT TRAIL & LOG SELURUH PEMESANAN (MODUL 4) -->
+    <!-- ================================================================= -->
+    <div v-else-if="activeTab === 'pemesanan'" class="space-y-6">
+      <!-- 4 Key Metrics Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Total Pemesanan -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Transaksi</p>
+            <h4 class="text-2xl font-black text-slate-900 mt-1">{{ allBookings.length }}</h4>
+            <span class="inline-flex items-center text-slate-500 text-[11px] font-semibold mt-1">
+              Seluruh Waktu
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">receipt_long</span>
+          </div>
+        </div>
+
+        <!-- Pemesanan Disetujui -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pesanan Disetujui</p>
+            <h4 class="text-2xl font-black text-emerald-600 mt-1">{{ bookingsDisetujuiCount }}</h4>
+            <span class="inline-flex items-center text-emerald-600 text-[11px] font-bold mt-1">
+              Tervalidasi Masuk
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">check_circle</span>
+          </div>
+        </div>
+
+        <!-- Menunggu Verifikasi -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Menunggu Konfirmasi</p>
+            <h4 class="text-2xl font-black text-amber-600 mt-1">{{ bookingsMenungguCount }}</h4>
+            <span class="inline-flex items-center text-amber-600 text-[11px] font-bold mt-1">
+              Perlu Tindakan
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">hourglass_top</span>
+          </div>
+        </div>
+
+        <!-- Nilai Transaksi Disetujui -->
+        <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
+          <div>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Nilai Transaksi Sah</p>
+            <h4 class="text-lg font-black text-slate-900 mt-1 truncate max-w-[170px]" :title="formatRupiah(totalNilaiTransaksiDisetujui)">
+              {{ formatRupiah(totalNilaiTransaksiDisetujui) }}
+            </h4>
+            <span class="inline-flex items-center text-emerald-600 text-[11px] font-bold mt-1">
+              Estimasi Perolehan Sewa
+            </span>
+          </div>
+          <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
+            <span class="material-symbols-outlined text-[24px]">payments</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Time Pills & Search Bar -->
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-4">
+        <!-- Time Filter Pills -->
+        <div class="flex items-center gap-1.5 flex-wrap w-full lg:w-auto">
+          <button
+            type="button"
+            @click="setBookingPeriode('all')"
+            :class="[
+              'px-3.5 py-1.5 rounded-xl text-xs font-bold transition',
+              bookingPeriodeFilter === 'all' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+            ]"
+          >
+            Semua Waktu
+          </button>
+          <button
+            type="button"
+            @click="setBookingPeriode('today')"
+            :class="[
+              'px-3.5 py-1.5 rounded-xl text-xs font-bold transition',
+              bookingPeriodeFilter === 'today' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+            ]"
+          >
+            Hari Ini
+          </button>
+          <button
+            type="button"
+            @click="setBookingPeriode('7d')"
+            :class="[
+              'px-3.5 py-1.5 rounded-xl text-xs font-bold transition',
+              bookingPeriodeFilter === '7d' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+            ]"
+          >
+            7 Hari Terakhir
+          </button>
+          <button
+            type="button"
+            @click="setBookingPeriode('30d')"
+            :class="[
+              'px-3.5 py-1.5 rounded-xl text-xs font-bold transition',
+              bookingPeriodeFilter === '30d' ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
+            ]"
+          >
+            30 Hari Terakhir
+          </button>
+        </div>
+
+        <!-- Search Input & Status Filter -->
+        <div class="flex items-center gap-2.5 w-full lg:w-auto flex-1 lg:max-w-md">
+          <div class="relative flex-1">
+            <svg class="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              v-model="bookingSearchQuery"
+              @input="debounceBookingSearch"
+              type="text"
+              placeholder="Cari ID pesanan, nama penyewa, kos..."
+              class="w-full pl-10 pr-4 py-2 text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
+            />
           </div>
 
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600 border-collapse">
-              <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
-                <tr>
-                  <th class="py-3.5 px-4 text-center w-12">No</th>
-                  <th class="py-3.5 px-4 w-20">Foto</th>
-                  <th class="py-3.5 px-4">Properti Kos</th>
-                  <th class="py-3.5 px-4">Pemilik & Kontak</th>
-                  <th class="py-3.5 px-4">Alamat</th>
-                  <th class="py-3.5 px-4 text-center">Jenis</th>
-                  <th class="py-3.5 px-4 text-center">Kamar</th>
-                  <th class="py-3.5 px-4 text-right pr-4 w-32">Aksi</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                <tr v-if="loadingKos">
-                  <td colspan="8" class="py-12 text-center text-slate-400">
-                    <svg class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    Memuat data kos untuk moderasi...
-                  </td>
-                </tr>
-                <tr v-else-if="kosList.length === 0">
-                  <td colspan="8" class="py-12 text-center text-slate-400">
-                    Tidak ada data properti kos yang sesuai dengan filter pencarian.
-                  </td>
-                </tr>
-                <tr
-                  v-for="(kos, idx) in kosList"
-                  :key="kos.id"
-                  @click="selectKosPreview(kos)"
-                  :class="[
-                    'hover:bg-slate-50/80 transition cursor-pointer',
-                    selectedKosPreview?.id === kos.id ? 'bg-primary-fixed/20 border-l-4 border-l-primary' : ''
-                  ]"
-                >
-                  <td class="py-3.5 px-4 text-center font-mono text-slate-400">{{ idx + 1 }}</td>
-                  <td class="py-3.5 px-4">
-                    <div class="w-14 h-11 rounded-xl overflow-hidden bg-slate-100 shrink-0 border border-slate-200">
-                      <img
-                        :src="getKosThumbnail(kos)"
-                        :alt="kos.nama"
-                        class="w-full h-full object-cover"
-                        loading="lazy"
-                      />
+          <select
+            v-model="bookingStatusFilter"
+            @change="fetchAllBookings"
+            class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-700 font-semibold cursor-pointer"
+          >
+            <option value="all">Semua Status</option>
+            <option value="menunggu">Menunggu</option>
+            <option value="disetujui">Disetujui</option>
+            <option value="ditolak">Ditolak</option>
+            <option value="dibatalkan">Dibatalkan</option>
+          </select>
+
+          <button
+            @click="resetBookingFilters"
+            title="Reset Filter"
+            class="p-2 text-slate-400 hover:text-slate-600 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Nationwide Booking Audit Table -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-600 border-collapse">
+            <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-100">
+              <tr>
+                <th class="py-3.5 px-4 text-center w-16">ID Order</th>
+                <th class="py-3.5 px-4">Penyewa (Pencari Kos)</th>
+                <th class="py-3.5 px-4">Properti Kos & Pemilik</th>
+                <th class="py-3.5 px-4">Kamar & Tarif</th>
+                <th class="py-3.5 px-4">Tanggal Masuk</th>
+                <th class="py-3.5 px-4 text-center">Status</th>
+                <th class="py-3.5 px-4 text-right pr-6 w-36">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-if="loadingBookings">
+                <td colspan="7" class="py-12 text-center text-slate-400">
+                  <svg class="w-6 h-6 animate-spin mx-auto mb-2 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Memuat log seluruh pemesanan...
+                </td>
+              </tr>
+              <tr v-else-if="allBookings.length === 0">
+                <td colspan="7" class="py-12 text-center text-slate-400">
+                  Tidak ada data aktivitas pemesanan yang sesuai dengan filter.
+                </td>
+              </tr>
+              <tr
+                v-for="b in allBookings"
+                :key="b.id"
+                class="hover:bg-slate-50/70 transition"
+              >
+                <td class="py-3.5 px-4 text-center font-mono font-black text-slate-900">
+                  #ORD-{{ b.id }}
+                </td>
+                <td class="py-3.5 px-4">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-blue-100 text-blue-800 font-extrabold flex items-center justify-center text-xs shrink-0">
+                      {{ getInitials(b.pengguna?.nama) }}
                     </div>
-                  </td>
-                  <td class="py-3.5 px-4">
-                    <div class="font-bold text-slate-900 group-hover:text-primary transition line-clamp-1">{{ kos.nama }}</div>
-                    <div class="flex items-center gap-2 mt-0.5">
-                      <span class="text-[10px] font-mono text-slate-400">#KOS-{{ kos.id }}</span>
-                      <span class="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
-                        {{ formatRupiah(kos.harga) }}/bln
-                      </span>
-                    </div>
-                  </td>
-                  <td class="py-3.5 px-4">
-                    <div v-if="kos.pemilik" class="flex flex-col">
-                      <span class="font-semibold text-slate-800 line-clamp-1">{{ kos.pemilik.nama }}</span>
-                      <div class="flex items-center gap-1.5 mt-0.5">
-                        <span class="text-[10px] text-slate-400 font-mono">{{ kos.pemilik.telepon || '-' }}</span>
-                        <button
-                          v-if="kos.pemilik.telepon"
-                          @click.stop="chatKosPemilik(kos)"
-                          class="p-1 rounded text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 transition"
-                          title="Chat Pemilik Kos via WhatsApp"
-                        >
-                          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.053-1.018-.073-.615-.2-1.397-.577-2.316-1.493-.923-.92-1.294-1.696-1.496-2.314-.125-.385-.119-.705-.074-1.018.05-.333.418-1.026.823-1.17.135-.048.281-.035.405.029.135.07.247.202.321.36.197.42.502 1.155.539 1.246.037.091.042.186.005.281-.036.096-.073.185-.143.255-.07.07-.151.139-.214.195-.064.056-.128.117-.064.227.148.256.45 1.019 1.156 1.649.914.814 1.616.994 1.872 1.111.11.05.185.04.24-.037.056-.077.24-.287.327-.406.087-.119.176-.101.272-.065.096.036.83.392 1.25.59.42.197.552.31.6.446.048.136.048.421-.096.826z"/>
-                          </svg>
-                        </button>
+                    <div>
+                      <div class="font-bold text-slate-900">{{ b.pengguna?.nama || '-' }}</div>
+                      <div class="text-[10px] text-slate-400">
+                        {{ b.pengguna?.email || '-' }} <span v-if="b.pengguna?.telepon">&bull; {{ b.pengguna.telepon }}</span>
                       </div>
                     </div>
-                    <span v-else class="text-slate-400 italic text-[11px]">-</span>
-                  </td>
-                  <td class="py-3.5 px-4 max-w-[180px]">
-                    <span class="text-slate-600 line-clamp-1 text-[11px]" :title="kos.alamat">{{ kos.alamat }}</span>
-                  </td>
-                  <td class="py-3.5 px-4 text-center">
-                    <span
-                      :class="[
-                        'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border capitalize',
-                        kos.jenis === 'putri' ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                        kos.jenis === 'putra' ? 'bg-sky-50 text-sky-700 border-sky-200' :
-                        'bg-indigo-50 text-indigo-700 border-indigo-200'
-                      ]"
-                    >
-                      {{ kos.jenis }}
-                    </span>
-                  </td>
-                  <td class="py-3.5 px-4 text-center">
-                    <span class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 font-mono">
-                      {{ kos.kamar_tersedia_count ?? 0 }} / {{ kos.kamar_count || (kos.kamar || []).length }}
-                    </span>
-                  </td>
-                  <td class="py-3.5 px-4 text-right pr-4 space-x-1 whitespace-nowrap">
-                    <button
-                      @click.stop="selectKosPreview(kos)"
-                      class="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition"
-                      title="Pratinjau Detail"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                      </svg>
-                    </button>
-                    <router-link
-                      :to="`/kos/${kos.id}`"
-                      target="_blank"
-                      class="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition inline-block align-middle"
-                      title="Buka Listing Publik"
-                    >
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </router-link>
-                    <button
-                      @click.stop="deleteKosModerasi(kos)"
-                      :disabled="deletingKosId === kos.id"
-                      class="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg transition"
-                      title="Hapus Moderasi Admin"
-                    >
-                      <svg class="w-4 h-4" :class="{ 'animate-spin': deletingKosId === kos.id }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                      </svg>
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                  </div>
+                </td>
+                <td class="py-3.5 px-4">
+                  <div class="font-bold text-slate-800 line-clamp-1">{{ b.kos?.nama || 'Properti Kos' }}</div>
+                  <div class="text-[10px] text-slate-400 line-clamp-1 mt-0.5">
+                    Mitra: {{ b.kos?.pemilik?.nama || '-' }} &bull; {{ b.kos?.alamat || '-' }}
+                  </div>
+                </td>
+                <td class="py-3.5 px-4">
+                  <div class="font-bold text-emerald-700 text-xs">{{ b.kamar?.nama_kamar || '-' }}</div>
+                  <div class="text-[11px] font-mono font-semibold text-slate-600 mt-0.5">
+                    {{ b.kamar?.harga ? formatRupiah(b.kamar.harga) : '-' }}/bln
+                  </div>
+                </td>
+                <td class="py-3.5 px-4">
+                  <div class="text-xs font-semibold text-slate-800">{{ formatDateOnly(b.tanggal_pemesanan) }}</div>
+                  <div class="text-[10px] text-slate-400 mt-0.5">Diajukan: {{ formatDate(b.created_at) }}</div>
+                </td>
+                <td class="py-3.5 px-4 text-center">
+                  <span
+                    :class="[
+                      'inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase border',
+                      statusBadgeClass(b.status)
+                    ]"
+                  >
+                    {{ b.status }}
+                  </span>
+                </td>
+                <td class="py-3.5 px-4 text-right pr-6 space-x-1 whitespace-nowrap">
+                  <button
+                    @click="openBookingDetail(b)"
+                    class="px-2.5 py-1 text-[11px] font-bold text-slate-700 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 rounded-xl transition"
+                    title="Audit Rincian Pemesanan"
+                  >
+                    Audit Detail
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: PRATINJAU DETAIL KOS (MODUL 4) -->
+    <!-- ================================================================= -->
+    <div
+      v-if="showKosPreviewModal"
+      class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+    >
+      <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 my-8">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+              <span class="material-symbols-outlined text-[22px]">domain_verification</span>
+            </div>
+            <div>
+              <h3 class="text-base font-black text-slate-900">
+                Pratinjau Listing Kos
+              </h3>
+              <p class="text-[11px] text-slate-400 font-mono">
+                ID: #KOS-{{ selectedKosPreview?.id }}
+              </p>
+            </div>
           </div>
+          <button @click="showKosPreviewModal = false" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
         </div>
 
-        <!-- Right Side Sticky Preview Panel -->
-        <div class="xl:col-span-5 2xl:col-span-4 flex flex-col">
-          <div
-            v-if="selectedKosPreview"
-            class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm sticky top-24 space-y-5"
-          >
-            <!-- Panel Header -->
-            <div class="flex items-center justify-between pb-3 border-b border-slate-100">
-              <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-[20px]">domain_verification</span>
-                <h3 class="font-bold text-sm text-slate-900">Pratinjau Listing Kos</h3>
+        <div v-if="selectedKosPreview" class="space-y-4">
+          <!-- Hero Image with Gender Badge & Title Overlay -->
+          <div class="relative w-full h-48 rounded-2xl overflow-hidden shadow-inner bg-slate-100 group">
+            <img
+              :src="getKosThumbnail(selectedKosPreview)"
+              :alt="selectedKosPreview.nama"
+              class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent flex flex-col justify-end p-4">
+              <span
+                :class="[
+                  'inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white uppercase tracking-wider mb-1 w-max shadow-sm',
+                  selectedKosPreview.jenis === 'putri' ? 'bg-rose-600' :
+                  selectedKosPreview.jenis === 'putra' ? 'bg-sky-600' :
+                  'bg-indigo-600'
+                ]"
+              >
+                Khusus {{ selectedKosPreview.jenis }}
+              </span>
+              <h4 class="text-base font-bold text-white line-clamp-1 drop-shadow-sm">{{ selectedKosPreview.nama }}</h4>
+            </div>
+          </div>
+
+          <!-- Price & Occupancy Metrics -->
+          <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tarif Sewa</p>
+              <p class="text-sm font-extrabold text-primary mt-0.5">
+                {{ formatRupiah(selectedKosPreview.harga) }}<span class="text-[10px] text-slate-400 font-normal">/bln</span>
+              </p>
+            </div>
+            <div>
+              <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ketersediaan Kamar</p>
+              <p class="text-sm font-extrabold text-emerald-600 mt-0.5">
+                {{ selectedKosPreview.kamar_tersedia_count ?? 0 }} <span class="text-[10px] text-slate-500 font-normal">/ {{ selectedKosPreview.kamar_count || (selectedKosPreview.kamar || []).length }} Tersedia</span>
+              </p>
+            </div>
+          </div>
+
+          <!-- Address & Geocoding -->
+          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2 text-xs">
+            <div class="flex items-start gap-2">
+              <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">pin_drop</span>
+              <div>
+                <p class="font-bold text-slate-800 text-[11px]">Alamat Lengkap</p>
+                <p class="text-slate-500 leading-relaxed text-[11px] mt-0.5">{{ selectedKosPreview.alamat }}</p>
               </div>
-              <span class="text-[10px] font-mono font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
-                #KOS-{{ selectedKosPreview.id }}
+            </div>
+            <div class="flex items-center justify-between pt-2 border-t border-slate-200/60">
+              <span class="text-[10px] font-mono text-slate-500">
+                Lat: {{ selectedKosPreview.latitude || '-' }} &bull; Lng: {{ selectedKosPreview.longitude || '-' }}
+              </span>
+              <a
+                v-if="selectedKosPreview.latitude && selectedKosPreview.longitude"
+                :href="`https://www.google.com/maps/search/?api=1&query=${selectedKosPreview.latitude},${selectedKosPreview.longitude}`"
+                target="_blank"
+                class="text-[10px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              >
+                Buka Peta Google Maps &rarr;
+              </a>
+            </div>
+          </div>
+
+          <!-- Owner Information Card -->
+          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-amber-100 text-amber-800 font-extrabold flex items-center justify-center text-xs shrink-0">
+                {{ getInitials(selectedKosPreview.pemilik?.nama) }}
+              </div>
+              <div>
+                <p class="font-bold text-slate-800 text-xs">{{ selectedKosPreview.pemilik?.nama || 'Tanpa Pemilik' }}</p>
+                <p class="text-[10px] text-slate-400 font-mono">{{ selectedKosPreview.pemilik?.email }} &bull; {{ selectedKosPreview.pemilik?.telepon || '-' }}</p>
+              </div>
+            </div>
+            <button
+              v-if="selectedKosPreview.pemilik?.telepon"
+              @click="chatKosPemilik(selectedKosPreview)"
+              class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-sm shrink-0"
+            >
+              Chat WA Pemilik
+            </button>
+          </div>
+
+          <!-- Facilities Badges -->
+          <div v-if="(selectedKosPreview.fasilitas || []).length > 0">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">Fasilitas Terdaftar</span>
+            <div class="flex flex-wrap gap-1.5">
+              <span
+                v-for="fas in selectedKosPreview.fasilitas"
+                :key="fas.id"
+                class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold"
+              >
+                <span class="material-symbols-outlined text-[13px] text-primary">check_small</span>
+                {{ fas.nama }}
               </span>
             </div>
-
-            <!-- Hero Image with Gender Badge & Title Overlay -->
-            <div class="relative w-full h-44 rounded-2xl overflow-hidden shadow-inner bg-slate-100 group">
-              <img
-                :src="getKosThumbnail(selectedKosPreview)"
-                :alt="selectedKosPreview.nama"
-                class="w-full h-full object-cover group-hover:scale-105 transition duration-500"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent flex flex-col justify-end p-4">
-                <span
-                  :class="[
-                    'inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold text-white uppercase tracking-wider mb-1 w-max shadow-sm',
-                    selectedKosPreview.jenis === 'putri' ? 'bg-rose-600' :
-                    selectedKosPreview.jenis === 'putra' ? 'bg-sky-600' :
-                    'bg-indigo-600'
-                  ]"
-                >
-                  Khusus {{ selectedKosPreview.jenis }}
-                </span>
-                <h4 class="text-base font-bold text-white line-clamp-1 drop-shadow-sm">{{ selectedKosPreview.nama }}</h4>
-              </div>
-            </div>
-
-            <!-- Price & Occupancy Metrics -->
-            <div class="grid grid-cols-2 gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-100">
-              <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Tarif Sewa</p>
-                <p class="text-sm font-extrabold text-primary mt-0.5">
-                  {{ formatRupiah(selectedKosPreview.harga) }}<span class="text-[10px] text-slate-400 font-normal">/bln</span>
-                </p>
-              </div>
-              <div>
-                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Ketersediaan Kamar</p>
-                <p class="text-sm font-extrabold text-emerald-600 mt-0.5">
-                  {{ selectedKosPreview.kamar_tersedia_count ?? 0 }} <span class="text-[10px] text-slate-500 font-normal">/ {{ selectedKosPreview.kamar_count || (selectedKosPreview.kamar || []).length }} Tersedia</span>
-                </p>
-              </div>
-            </div>
-
-            <!-- Address & Location Details -->
-            <div class="space-y-3 text-xs">
-              <div class="flex items-start gap-2.5">
-                <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">pin_drop</span>
-                <div>
-                  <p class="font-bold text-slate-800 text-[11px]">Alamat Lengkap</p>
-                  <p class="text-slate-500 leading-relaxed text-[11px] mt-0.5">{{ selectedKosPreview.alamat }}</p>
-                </div>
-              </div>
-
-              <!-- Geocoding & GPS Coordinates -->
-              <div class="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                <div class="flex items-center justify-between mb-1">
-                  <span class="text-[10px] font-bold uppercase text-slate-400">Koordinat Geocoding</span>
-                  <a
-                    v-if="selectedKosPreview.latitude && selectedKosPreview.longitude"
-                    :href="`https://www.google.com/maps/search/?api=1&query=${selectedKosPreview.latitude},${selectedKosPreview.longitude}`"
-                    target="_blank"
-                    class="text-[10px] font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
-                  >
-                    Buka Peta &rarr;
-                  </a>
-                </div>
-                <div class="font-mono text-[11px] text-slate-700 flex items-center gap-2">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  Lat: {{ selectedKosPreview.latitude || '-' }} &bull; Lng: {{ selectedKosPreview.longitude || '-' }}
-                </div>
-              </div>
-
-              <!-- Owner Information Card -->
-              <div class="p-3 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
-                <span class="text-[10px] font-bold uppercase text-slate-400 block">Pemilik Properti</span>
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-amber-100 text-amber-800 font-extrabold flex items-center justify-center text-xs shrink-0">
-                    {{ getInitials(selectedKosPreview.pemilik?.nama) }}
-                  </div>
-                  <div class="min-w-0 flex-1">
-                    <p class="font-bold text-slate-800 text-xs truncate">{{ selectedKosPreview.pemilik?.nama || 'Tanpa Pemilik' }}</p>
-                    <p class="text-[10px] text-slate-400 font-mono truncate">{{ selectedKosPreview.pemilik?.email || '-' }}</p>
-                  </div>
-                </div>
-
-                <div v-if="selectedKosPreview.pemilik?.telepon" class="pt-1">
-                  <button
-                    @click="chatKosPemilik(selectedKosPreview)"
-                    class="w-full py-1.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm"
-                  >
-                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.634.053-1.018-.073-.615-.2-1.397-.577-2.316-1.493-.923-.92-1.294-1.696-1.496-2.314-.125-.385-.119-.705-.074-1.018.05-.333.418-1.026.823-1.17.135-.048.281-.035.405.029.135.07.247.202.321.36.197.42.502 1.155.539 1.246.037.091.042.186.005.281-.036.096-.073.185-.143.255-.07.07-.151.139-.214.195-.064.056-.128.117-.064.227.148.256.45 1.019 1.156 1.649.914.814 1.616.994 1.872 1.111.11.05.185.04.24-.037.056-.077.24-.287.327-.406.087-.119.176-.101.272-.065.096.036.83.392 1.25.59.42.197.552.31.6.446.048.136.048.421-.096.826z"/>
-                    </svg>
-                    Chat Pemilik via WhatsApp
-                  </button>
-                </div>
-              </div>
-
-              <!-- Facilities Badges -->
-              <div v-if="(selectedKosPreview.fasilitas || []).length > 0">
-                <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1.5">Fasilitas Terdaftar</span>
-                <div class="flex flex-wrap gap-1.5">
-                  <span
-                    v-for="fas in selectedKosPreview.fasilitas"
-                    :key="fas.id"
-                    class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold"
-                  >
-                    <span class="material-symbols-outlined text-[13px] text-primary">check_small</span>
-                    {{ fas.nama }}
-                  </span>
-                </div>
-              </div>
-
-              <!-- Description -->
-              <div v-if="selectedKosPreview.deskripsi" class="pt-1">
-                <span class="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Deskripsi Properti</span>
-                <p class="text-[11px] text-slate-500 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                  {{ selectedKosPreview.deskripsi }}
-                </p>
-              </div>
-            </div>
-
-            <!-- Actions Footer -->
-            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-              <router-link
-                :to="`/kos/${selectedKosPreview.id}`"
-                target="_blank"
-                class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm text-center"
-              >
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-                Listing Publik
-              </router-link>
-
-              <button
-                @click="deleteKosModerasi(selectedKosPreview)"
-                :disabled="deletingKosId === selectedKosPreview.id"
-                class="w-full py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition flex items-center justify-center gap-1.5"
-              >
-                <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': deletingKosId === selectedKosPreview.id }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-                Hapus Moderasi
-              </button>
-            </div>
           </div>
 
-          <!-- Empty Preview Placeholder -->
-          <div
-            v-else
-            class="bg-white rounded-3xl border border-dashed border-slate-200 p-8 text-center sticky top-24 flex flex-col items-center justify-center text-slate-400 min-h-[350px]"
-          >
-            <div class="w-14 h-14 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 mb-3">
-              <span class="material-symbols-outlined text-[28px]">home_work</span>
-            </div>
-            <h4 class="font-bold text-sm text-slate-700 mb-1">Pratinjau Kos</h4>
-            <p class="text-xs text-slate-400 max-w-xs leading-relaxed">
-              Pilih salah satu properti kos pada tabel di samping untuk melihat rincian pratinjau, fasilitas, koordinat peta, dan kontak pemilik.
+          <!-- Description -->
+          <div v-if="selectedKosPreview.deskripsi">
+            <span class="text-[10px] font-bold uppercase text-slate-400 block mb-0.5">Deskripsi Properti</span>
+            <p class="text-[11px] text-slate-500 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100">
+              {{ selectedKosPreview.deskripsi }}
             </p>
+          </div>
+
+          <!-- Actions Footer -->
+          <div class="grid grid-cols-2 gap-2 pt-3 border-t border-slate-100">
+            <router-link
+              :to="`/kos/${selectedKosPreview.id}`"
+              target="_blank"
+              class="w-full py-2 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm text-center"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
+              Listing Publik
+            </router-link>
+
+            <button
+              @click="deleteKosModerasi(selectedKosPreview); showKosPreviewModal = false;"
+              :disabled="deletingKosId === selectedKosPreview.id"
+              class="w-full py-2 px-3 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition flex items-center justify-center gap-1.5"
+            >
+              <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': deletingKosId === selectedKosPreview.id }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              Hapus Moderasi
+            </button>
           </div>
         </div>
       </div>
     </div>
 
     <!-- ================================================================= -->
-    <!-- TAB 2: MASTER FASILITAS -->
+    <!-- MODAL: AUDIT DETAIL PEMESANAN (MODUL 4) -->
     <!-- ================================================================= -->
-    <div v-else-if="activeTab === 'fasilitas'" class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-600">
-          <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-y border-slate-200">
-            <tr>
-              <th class="py-3 px-4">ID</th>
-              <th class="py-3 px-4">Nama Fasilitas</th>
-              <th class="py-3 px-4">Icon Identifier</th>
-              <th class="py-3 px-4 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-if="loadingFasilitas">
-              <td colspan="4" class="py-8 text-center text-slate-400">Memuat data fasilitas...</td>
-            </tr>
-            <tr v-else-if="fasilitasList.length === 0">
-              <td colspan="4" class="py-8 text-center text-slate-400">Belum ada master fasilitas.</td>
-            </tr>
-            <tr v-for="fas in fasilitasList" :key="fas.id" class="hover:bg-slate-50/60 transition">
-              <td class="py-3 px-4 font-mono font-bold text-slate-400">#{{ fas.id }}</td>
-              <td class="py-3 px-4 font-bold text-slate-900">{{ fas.nama }}</td>
-              <td class="py-3 px-4 font-mono text-slate-500">{{ fas.icon || '-' }}</td>
-              <td class="py-3 px-4 text-right space-x-2">
-                <button
-                  @click="openEditFasilitasModal(fas)"
-                  class="text-[11px] font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-xl transition"
-                >
-                  Edit
-                </button>
-                <button
-                  @click="deleteFasilitas(fas.id)"
-                  class="text-[11px] font-bold bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 px-3 py-1.5 rounded-xl transition"
-                >
-                  Hapus
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- TAB 3: SELURUH PEMESANAN SISTEM -->
-    <!-- ================================================================= -->
-    <div v-else-if="activeTab === 'pemesanan'" class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs text-slate-600">
-          <thead class="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-y border-slate-200">
-            <tr>
-              <th class="py-3 px-4">ID Pesanan</th>
-              <th class="py-3 px-4">Penyewa (Pencari)</th>
-              <th class="py-3 px-4">Properti Kos</th>
-              <th class="py-3 px-4">Kamar</th>
-              <th class="py-3 px-4">Tanggal Masuk</th>
-              <th class="py-3 px-4">Status</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-if="loadingBookings">
-              <td colspan="6" class="py-8 text-center text-slate-400">Memuat log pemesanan...</td>
-            </tr>
-            <tr v-else-if="allBookings.length === 0">
-              <td colspan="6" class="py-8 text-center text-slate-400">Belum ada aktivitas transaksi pemesanan.</td>
-            </tr>
-            <tr v-for="b in allBookings" :key="b.id" class="hover:bg-slate-50/60 transition">
-              <td class="py-3 px-4 font-mono font-bold text-slate-900">#{{ b.id }}</td>
-              <td class="py-3 px-4">
-                <div class="font-bold text-slate-900">{{ b.pengguna?.nama || '-' }}</div>
-                <div class="text-slate-400 text-[11px]">{{ b.pengguna?.email || '-' }}</div>
-              </td>
-              <td class="py-3 px-4 font-semibold text-slate-800">{{ b.kos?.nama || '-' }}</td>
-              <td class="py-3 px-4 text-emerald-700 font-bold">{{ b.kamar?.nama_kamar || '-' }}</td>
-              <td class="py-3 px-4">{{ formatDateOnly(b.tanggal_pemesanan) }}</td>
-              <td class="py-3 px-4">
+    <div
+      v-if="showBookingDetailModal"
+      class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+    >
+      <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-200 my-8">
+        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+              <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-base font-black text-slate-900">
+                  Audit Pemesanan #ORD-{{ selectedBookingDetail?.id }}
+                </h3>
                 <span
                   :class="[
                     'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded border',
-                    statusBadgeClass(b.status)
+                    statusBadgeClass(selectedBookingDetail?.status)
                   ]"
                 >
-                  {{ b.status }}
+                  {{ selectedBookingDetail?.status }}
                 </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- ================================================================= -->
-    <!-- MODAL: CREATE / EDIT FASILITAS -->
-    <!-- ================================================================= -->
-    <div
-      v-if="showFasilitasModal"
-      class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4"
-    >
-      <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200">
-        <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
-          <h3 class="text-base font-black text-slate-900">
-            {{ isEditingFasilitas ? 'Edit Master Fasilitas' : 'Tambah Fasilitas Baru' }}
-          </h3>
-          <button @click="showFasilitasModal = false" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
+              </div>
+              <p class="text-[11px] text-slate-400 mt-0.5">
+                Dibuat pada: {{ formatDate(selectedBookingDetail?.created_at) }}
+              </p>
+            </div>
+          </div>
+          <button @click="showBookingDetailModal = false" class="text-slate-400 hover:text-slate-600 text-2xl font-bold">&times;</button>
         </div>
 
-        <form @submit.prevent="saveFasilitas" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Fasilitas</label>
-            <input
-              type="text"
-              v-model="fasilitasForm.nama"
-              required
-              class="w-full text-xs rounded-xl border-slate-200 p-2.5"
-              placeholder="Cth: WiFi Cepat 50 Mbps"
-            />
+        <div class="space-y-4">
+          <!-- Seeker Info Card -->
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-bold uppercase text-slate-400">Penyewa (Pencari Kos)</span>
+              <button
+                v-if="selectedBookingDetail?.pengguna?.telepon"
+                @click="chatPenyewaWhatsApp(selectedBookingDetail)"
+                class="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition flex items-center gap-1 shadow-sm"
+              >
+                Chat WA Penyewa
+              </button>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-800 font-extrabold flex items-center justify-center text-xs shrink-0">
+                {{ getInitials(selectedBookingDetail?.pengguna?.nama) }}
+              </div>
+              <div>
+                <p class="font-bold text-slate-900 text-xs">{{ selectedBookingDetail?.pengguna?.nama || '-' }}</p>
+                <p class="text-[11px] text-slate-500 font-mono">{{ selectedBookingDetail?.pengguna?.email }} &bull; {{ selectedBookingDetail?.pengguna?.telepon || 'Tanpa No. HP' }}</p>
+              </div>
+            </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 mb-1">Icon Key (Opsional)</label>
-            <input
-              type="text"
-              v-model="fasilitasForm.icon"
-              class="w-full text-xs rounded-xl border-slate-200 p-2.5"
-              placeholder="Cth: wifi, ac, parking"
-            />
+          <!-- Kos & Room Info -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+              <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Properti Kos</span>
+              <p class="font-bold text-slate-900 text-xs line-clamp-1">{{ selectedBookingDetail?.kos?.nama || '-' }}</p>
+              <p class="text-[10px] text-slate-500 line-clamp-2 mt-0.5">{{ selectedBookingDetail?.kos?.alamat || '-' }}</p>
+              <router-link
+                v-if="selectedBookingDetail?.kos_id"
+                :to="`/kos/${selectedBookingDetail.kos_id}`"
+                target="_blank"
+                class="inline-block text-[10px] font-bold text-blue-600 hover:text-blue-700 mt-2"
+              >
+                Buka Listing Kos &rarr;
+              </router-link>
+            </div>
+
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
+              <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Kamar & Tarif Sewa</span>
+              <p class="font-bold text-emerald-700 text-xs">{{ selectedBookingDetail?.kamar?.nama_kamar || '-' }}</p>
+              <p class="text-sm font-extrabold text-slate-900 mt-0.5">
+                {{ selectedBookingDetail?.kamar?.harga ? formatRupiah(selectedBookingDetail.kamar.harga) : '-' }}<span class="text-[10px] text-slate-400 font-normal">/bln</span>
+              </p>
+              <p class="text-[10px] text-slate-500 mt-2">
+                Rencana Masuk: <span class="font-semibold text-slate-700">{{ formatDateOnly(selectedBookingDetail?.tanggal_pemesanan) }}</span>
+              </p>
+            </div>
           </div>
 
-          <div class="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+          <!-- Audit Governance Information -->
+          <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-3">
+            <span class="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">verified_user</span>
+            <div class="text-xs text-slate-600 leading-relaxed">
+              <span class="font-bold text-slate-800 block mb-0.5">Tata Kelola Persetujuan Sewa:</span>
+              Status konfirmasi sewa dikelola secara mandiri oleh <span class="font-semibold text-slate-800">Pemilik Kos</span> melalui Dashboard Mitra Pemilik. Administrator memantau seluruh transaksi untuk kebutuhan audit trail, verifikasi, dan ekspor pelaporan nasional.
+            </div>
+          </div>
+
+          <div class="pt-3 border-t border-slate-100 flex justify-end">
             <button
               type="button"
-              @click="showFasilitasModal = false"
-              class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition"
+              @click="showBookingDetailModal = false"
+              class="px-5 py-2 text-xs font-bold bg-slate-900 hover:bg-slate-800 text-white rounded-xl transition"
             >
-              Batal
-            </button>
-            <button
-              type="submit"
-              :disabled="savingFasilitas"
-              class="px-5 py-2 text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl transition disabled:opacity-50 shadow-sm"
-            >
-              {{ savingFasilitas ? 'Menyimpan...' : 'Simpan Fasilitas' }}
+              Tutup
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
 
@@ -1564,10 +1512,14 @@ import { openWhatsAppChat } from '../utils/whatsapp'
 const route = useRoute()
 const router = useRouter()
 
-const initialTab = ['ringkasan', 'pencari', 'pemilik', 'kos', 'fasilitas', 'pemesanan'].includes(route.query.tab)
-  ? route.query.tab
-  : 'ringkasan'
-const activeTab = ref(initialTab)
+const validTabs = ['ringkasan', 'pengguna', 'kos', 'pemesanan']
+let startTab = 'ringkasan'
+if (route.query.tab === 'pencari' || route.query.tab === 'pemilik') {
+  startTab = 'pengguna'
+} else if (validTabs.includes(route.query.tab)) {
+  startTab = route.query.tab
+}
+const activeTab = ref(startTab)
 
 const switchTab = (tabName) => {
   activeTab.value = tabName
@@ -1577,7 +1529,12 @@ const switchTab = (tabName) => {
 watch(
   () => route.query.tab,
   (newTab) => {
-    if (newTab && ['ringkasan', 'pencari', 'pemilik', 'kos', 'fasilitas', 'pemesanan'].includes(newTab)) {
+    if (newTab === 'pencari' || newTab === 'pemilik') {
+      activeTab.value = 'pengguna'
+      if (newTab === 'pencari') userRoleFilter.value = 'pencari'
+      if (newTab === 'pemilik') userRoleFilter.value = 'pemilik'
+      fetchUsers()
+    } else if (newTab && validTabs.includes(newTab)) {
       activeTab.value = newTab
     }
   }
@@ -1586,16 +1543,55 @@ watch(
 const stats = ref({})
 const loadingStats = ref(false)
 
-const pencariList = ref([])
-const loadingPencari = ref(false)
-const pencariSearchQuery = ref('')
-const pencariStatusFilter = ref('all')
+const activeTabMeta = computed(() => {
+  switch (activeTab.value) {
+    case 'ringkasan':
+      return {
+        icon: 'dashboard',
+        title: 'Ringkasan & Analitik',
+        badge: null,
+        description: 'Statistik performa real-time dan ringkasan eksekutif platform kos.',
+      }
+    case 'pengguna':
+      return {
+        icon: 'manage_accounts',
+        title: 'Manajemen Pengguna Terpadu',
+        badge: `${userList.value.length} Pengguna`,
+        description: 'Kelola akun mitra pemilik kos, pencari kos, dan verifikasi kepatuhan sistem.',
+      }
+    case 'kos':
+      return {
+        icon: 'home_work',
+        title: 'Data & Moderasi Properti Kos',
+        badge: `${kosList.value.length} Listing`,
+        description: 'Katalog data seluruh kos nasional dan pengawasan listing properti.',
+      }
+    case 'pemesanan':
+      return {
+        icon: 'receipt_long',
+        title: 'Audit Log Pemesanan (Audit Trail)',
+        badge: `${allBookings.value.length} Transaksi`,
+        description: 'Rekapitulasi dan audit transaksi reservasi sewa kos seluruh Indonesia.',
+      }
+    default:
+      return {
+        icon: 'dashboard',
+        title: 'Dashboard Administrator',
+        badge: null,
+        description: 'Panel tata kelola sistem platform kos.',
+      }
+  }
+})
 
-const pemilikList = ref([])
-const loadingPemilik = ref(false)
-const pemilikSearchQuery = ref('')
-const pemilikStatusFilter = ref('all')
-const pemilikSort = ref('latest')
+const userList = ref([])
+const loadingUsers = ref(false)
+const userSearchQuery = ref('')
+const userRoleFilter = ref(route.query.tab === 'pemilik' ? 'pemilik' : (route.query.tab === 'pencari' ? 'pencari' : 'all'))
+const userStatusFilter = ref('all')
+const userSort = ref('latest')
+
+const pemilikCount = computed(() => userList.value.filter(u => u.role === 'pemilik').length)
+const pencariCount = computed(() => userList.value.filter(u => u.role === 'pencari').length)
 
 const kosList = ref([])
 const loadingKos = ref(false)
@@ -1603,7 +1599,13 @@ const kosSearchQuery = ref('')
 const kosJenisFilter = ref('all')
 const kosSort = ref('latest')
 const selectedKosPreview = ref(null)
+const showKosPreviewModal = ref(false)
 const deletingKosId = ref(null)
+
+const openKosPreview = (kos) => {
+  selectedKosPreview.value = kos
+  showKosPreviewModal.value = true
+}
 
 const kosPutriCount = computed(() => kosList.value.filter(k => k.jenis === 'putri').length)
 const kosPutraCount = computed(() => kosList.value.filter(k => k.jenis === 'putra').length)
@@ -1623,12 +1625,32 @@ const getKosThumbnail = (kos) => {
   return defaultKosImages[idx]
 }
 
-const fasilitasList = ref([])
-const allBookings = ref([])
 
-const loadingFasilitas = ref(false)
+const allBookings = ref([])
 const loadingBookings = ref(false)
+const bookingSearchQuery = ref('')
+const bookingStatusFilter = ref('all')
+const bookingPeriodeFilter = ref('all')
+const showBookingDetailModal = ref(false)
+const selectedBookingDetail = ref(null)
+const updatingBookingId = ref(null)
 const togglingUserId = ref(null)
+
+
+const bookingsDisetujuiCount = computed(() => {
+  return allBookings.value.filter(b => b.status === 'disetujui').length
+})
+
+const bookingsMenungguCount = computed(() => {
+  return allBookings.value.filter(b => b.status === 'menunggu').length
+})
+
+const totalNilaiTransaksiDisetujui = computed(() => {
+  return allBookings.value
+    .filter(b => b.status === 'disetujui')
+    .reduce((acc, b) => acc + (b.kamar?.harga || 0), 0)
+})
+
 
 const showUserDetailModal = ref(false)
 const loadingUserDetail = ref(false)
@@ -1699,52 +1721,29 @@ const formatRupiah = (val) => {
   }).format(val || 0)
 }
 
-let pencariSearchTimeout = null
-const debouncePencariSearch = () => {
-  clearTimeout(pencariSearchTimeout)
-  pencariSearchTimeout = setTimeout(() => {
-    fetchPencari()
+let userSearchTimeout = null
+const debounceUserSearch = () => {
+  clearTimeout(userSearchTimeout)
+  userSearchTimeout = setTimeout(() => {
+    fetchUsers()
   }, 350)
 }
 
-const fetchPencari = async () => {
-  loadingPencari.value = true
+const fetchUsers = async () => {
+  loadingUsers.value = true
   try {
-    const params = { role: 'pencari' }
-    if (pencariSearchQuery.value) params.q = pencariSearchQuery.value
-    if (pencariStatusFilter.value !== 'all') params.aktif = pencariStatusFilter.value
+    const params = {}
+    if (userRoleFilter.value !== 'all') params.role = userRoleFilter.value
+    if (userSearchQuery.value) params.q = userSearchQuery.value
+    if (userStatusFilter.value !== 'all') params.aktif = userStatusFilter.value
+    if (userSort.value) params.sort = userSort.value
 
     const res = await api.get('/admin/pengguna', { params })
-    pencariList.value = res.data.data || []
+    userList.value = res.data.data || []
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Gagal memuat daftar pencari kos.'
+    errorMsg.value = err.response?.data?.message || 'Gagal memuat daftar pengguna.'
   } finally {
-    loadingPencari.value = false
-  }
-}
-
-let pemilikSearchTimeout = null
-const debouncePemilikSearch = () => {
-  clearTimeout(pemilikSearchTimeout)
-  pemilikSearchTimeout = setTimeout(() => {
-    fetchPemilik()
-  }, 350)
-}
-
-const fetchPemilik = async () => {
-  loadingPemilik.value = true
-  try {
-    const params = { role: 'pemilik' }
-    if (pemilikSearchQuery.value) params.q = pemilikSearchQuery.value
-    if (pemilikStatusFilter.value !== 'all') params.aktif = pemilikStatusFilter.value
-    if (pemilikSort.value) params.sort = pemilikSort.value
-
-    const res = await api.get('/admin/pengguna', { params })
-    pemilikList.value = res.data.data || []
-  } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Gagal memuat daftar mitra pemilik kos.'
-  } finally {
-    loadingPemilik.value = false
+    loadingUsers.value = false
   }
 }
 
@@ -1885,74 +1884,112 @@ const getInitials = (name) => {
   return name.slice(0, 2).toUpperCase()
 }
 
-const fetchFasilitas = async () => {
-  loadingFasilitas.value = true
-  try {
-    const res = await api.get('/fasilitas')
-    fasilitasList.value = res.data.data || []
-  } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Gagal memuat master fasilitas.'
-  } finally {
-    loadingFasilitas.value = false
-  }
+
+let bookingSearchTimeout = null
+const debounceBookingSearch = () => {
+  clearTimeout(bookingSearchTimeout)
+  bookingSearchTimeout = setTimeout(() => {
+    fetchAllBookings()
+  }, 350)
 }
 
-const openCreateFasilitasModal = () => {
-  isEditingFasilitas.value = false
-  editingFasilitasId.value = null
-  fasilitasForm.nama = ''
-  fasilitasForm.icon = ''
-  showFasilitasModal.value = true
+const setBookingPeriode = (periode) => {
+  bookingPeriodeFilter.value = periode
+  fetchAllBookings()
 }
 
-const openEditFasilitasModal = (fas) => {
-  isEditingFasilitas.value = true
-  editingFasilitasId.value = fas.id
-  fasilitasForm.nama = fas.nama
-  fasilitasForm.icon = fas.icon || ''
-  showFasilitasModal.value = true
-}
-
-const saveFasilitas = async () => {
-  savingFasilitas.value = true
-  try {
-    if (isEditingFasilitas.value) {
-      await api.put(`/fasilitas/${editingFasilitasId.value}`, fasilitasForm)
-      successMsg.value = 'Fasilitas berhasil diperbarui.'
-    } else {
-      await api.post('/fasilitas', fasilitasForm)
-      successMsg.value = 'Fasilitas baru berhasil ditambahkan.'
-    }
-    showFasilitasModal.value = false
-    await fetchFasilitas()
-  } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Gagal menyimpan fasilitas.'
-  } finally {
-    savingFasilitas.value = false
-  }
-}
-
-const deleteFasilitas = async (id) => {
-  if (!confirm('Hapus master fasilitas ini?')) return
-  try {
-    await api.delete(`/fasilitas/${id}`)
-    successMsg.value = 'Fasilitas berhasil dihapus.'
-    await fetchFasilitas()
-  } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Gagal menghapus fasilitas.'
-  }
+const resetBookingFilters = () => {
+  bookingSearchQuery.value = ''
+  bookingStatusFilter.value = 'all'
+  bookingPeriodeFilter.value = 'all'
+  fetchAllBookings()
 }
 
 const fetchAllBookings = async () => {
   loadingBookings.value = true
   try {
-    const res = await api.get('/pemesanan')
+    const params = { per_page: 100 }
+    if (bookingSearchQuery.value) params.q = bookingSearchQuery.value
+    if (bookingStatusFilter.value !== 'all') params.status = bookingStatusFilter.value
+    if (bookingPeriodeFilter.value !== 'all') params.periode = bookingPeriodeFilter.value
+
+    const res = await api.get('/pemesanan', { params })
     allBookings.value = res.data.data || []
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Gagal memuat pemesanan.'
+    errorMsg.value = err.response?.data?.message || 'Gagal memuat log pemesanan.'
   } finally {
     loadingBookings.value = false
   }
+}
+
+const openBookingDetail = (booking) => {
+  selectedBookingDetail.value = booking
+  showBookingDetailModal.value = true
+}
+
+const updateBookingStatus = async (booking, newStatus) => {
+  if (!booking) return
+  if (!confirm(`Konfirmasi Tindakan Admin:\n\nUbah status pemesanan #ORD-${booking.id} menjadi "${newStatus.toUpperCase()}"?`)) {
+    return
+  }
+
+  updatingBookingId.value = booking.id
+  try {
+    const res = await api.patch(`/pemesanan/${booking.id}/status`, { status: newStatus })
+    successMsg.value = res.data?.message || `Status pesanan #ORD-${booking.id} berhasil diubah menjadi ${newStatus}.`
+    booking.status = newStatus
+    if (selectedBookingDetail.value && selectedBookingDetail.value.id === booking.id) {
+      selectedBookingDetail.value.status = newStatus
+    }
+    fetchStats()
+    fetchKos()
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || 'Gagal memperbarui status pemesanan.'
+  } finally {
+    updatingBookingId.value = null
+  }
+}
+
+const chatPenyewaWhatsApp = (booking) => {
+  if (!booking || !booking.pengguna) return
+  const phone = booking.pengguna.telepon || booking.pengguna.no_hp
+  if (!phone) {
+    alert(`Penyewa (${booking.pengguna.nama}) belum mencantumkan nomor telepon / WhatsApp.`)
+    return
+  }
+
+  const message = `Halo Kak ${booking.pengguna.nama},\n\nKami dari Administrator Layanan KosKu ingin mengonfirmasi pesanan sewa Anda (#ORD-${booking.id}) untuk properti "${booking.kos?.nama || 'Kos'}" (Kamar: ${booking.kamar?.nama_kamar || '-'}).\n\nStatus pesanan Anda saat ini: ${booking.status.toUpperCase()}.\n\nApakah ada pertanyaan atau kendala yang bisa kami bantu?\n\nTerima kasih!`
+  openWhatsAppChat(phone, message)
+}
+
+const exportBookingsToCSV = () => {
+  if (allBookings.value.length === 0) {
+    alert('Tidak ada data pemesanan untuk diekspor.')
+    return
+  }
+
+  const headers = ['ID Pesanan', 'Nama Penyewa', 'Email', 'Telepon', 'Nama Kos', 'Nama Kamar', 'Tarif Sewa', 'Tanggal Masuk', 'Status', 'Tanggal Pengajuan']
+  const rows = allBookings.value.map(b => [
+    `#ORD-${b.id}`,
+    `"${(b.pengguna?.nama || '-').replace(/"/g, '""')}"`,
+    `"${(b.pengguna?.email || '-').replace(/"/g, '""')}"`,
+    `"${(b.pengguna?.telepon || '-').replace(/"/g, '""')}"`,
+    `"${(b.kos?.nama || '-').replace(/"/g, '""')}"`,
+    `"${(b.kamar?.nama_kamar || '-').replace(/"/g, '""')}"`,
+    b.kamar?.harga || 0,
+    b.tanggal_pemesanan || '-',
+    b.status || '-',
+    b.created_at ? new Date(b.created_at).toLocaleString('id-ID') : '-',
+  ])
+
+  const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\n')
+  const encodedUri = encodeURI(csvContent)
+  const link = document.createElement('a')
+  link.setAttribute('href', encodedUri)
+  link.setAttribute('download', `audit_pemesanan_kosku_${new Date().toISOString().slice(0, 10)}.csv`)
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 
 const statusBadgeClass = (status) => {
@@ -1990,10 +2027,8 @@ const formatDateOnly = (dateStr) => {
 
 onMounted(() => {
   fetchStats()
-  fetchPencari()
-  fetchPemilik()
+  fetchUsers()
   fetchKos()
-  fetchFasilitas()
   fetchAllBookings()
 })
 </script>

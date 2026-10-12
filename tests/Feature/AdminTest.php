@@ -60,6 +60,28 @@ class AdminTest extends TestCase
         $this->assertDatabaseMissing('fasilitas', ['id' => $fasilitasId]);
     }
 
+    public function test_pemilik_can_create_amenity_tag_but_cannot_update_or_delete(): void
+    {
+        $pemilik = Pengguna::factory()->pemilik()->create();
+        $fasilitas = Fasilitas::factory()->create();
+
+        Sanctum::actingAs($pemilik);
+
+        // Pemilik can create facility
+        $createResponse = $this->postJson('/api/v1/fasilitas', [
+            'nama' => 'Gym & Fitness Center',
+            'deskripsi' => 'Fasilitas kebugaran kos',
+        ]);
+        $createResponse->assertStatus(201)
+            ->assertJsonPath('data.nama', 'Gym & Fitness Center');
+
+        // Pemilik cannot update or delete master catalog
+        $this->putJson('/api/v1/fasilitas/'.$fasilitas->id, ['nama' => 'Beda Nama'])
+            ->assertStatus(403);
+        $this->deleteJson('/api/v1/fasilitas/'.$fasilitas->id)
+            ->assertStatus(403);
+    }
+
     public function test_admin_can_list_and_filter_users(): void
     {
         $admin = Pengguna::factory()->admin()->create();
@@ -231,5 +253,43 @@ class AdminTest extends TestCase
         $this->assertDatabaseMissing('kamar', ['id' => $kamar->id]);
         $this->assertDatabaseMissing('pemesanan', ['kos_id' => $kos->id]);
         $this->assertDatabaseMissing('kos_fasilitas', ['kos_id' => $kos->id]);
+    }
+
+    public function test_admin_can_filter_and_search_all_bookings(): void
+    {
+        $admin = Pengguna::factory()->admin()->create();
+        $pencari = Pengguna::factory()->create(['nama' => 'Siti Nurhaliza']);
+        $kos = Kos::factory()->create(['nama' => 'Kos Melati Harmoni']);
+        $kamar = Kamar::factory()->create(['kos_id' => $kos->id]);
+
+        $booking = Pemesanan::factory()->create([
+            'pengguna_id' => $pencari->id,
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar->id,
+            'status' => 'menunggu',
+        ]);
+
+        Sanctum::actingAs($admin);
+
+        // Search by user name
+        $res = $this->getJson('/api/v1/pemesanan?q=Siti');
+        $res->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $booking->id);
+
+        // Filter by status
+        $resStatus = $this->getJson('/api/v1/pemesanan?status=menunggu');
+        $resStatus->assertStatus(200)
+            ->assertJsonCount(1, 'data');
+
+        // Admin can update status
+        $resUpdate = $this->patchJson('/api/v1/pemesanan/'.$booking->id.'/status', [
+            'status' => 'disetujui',
+        ]);
+        $resUpdate->assertStatus(200)
+            ->assertJsonPath('data.status', 'disetujui');
+
+        $this->assertEquals('disetujui', $booking->fresh()->status);
+        $this->assertEquals('terisi', $kamar->fresh()->status);
     }
 }

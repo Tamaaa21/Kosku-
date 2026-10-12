@@ -17,7 +17,7 @@ class FasilitasController extends Controller
      */
     public function index(): AnonymousResourceCollection
     {
-        $fasilitas = Fasilitas::orderBy('nama')->get();
+        $fasilitas = Fasilitas::withCount('kos')->orderBy('nama')->get();
 
         return FasilitasResource::collection($fasilitas);
     }

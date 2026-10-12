@@ -22,6 +22,7 @@ class FasilitasResource extends JsonResource
             'id' => $this->id,
             'nama' => $this->nama,
             'deskripsi' => $this->deskripsi,
+            'kos_count' => (int) ($this->kos_count ?? 0),
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
         ];

@@ -390,7 +390,41 @@
 
           <!-- Fasilitas Utama -->
           <div class="flex flex-col gap-1.5 pt-2">
-            <label class="text-xs font-semibold text-on-surface">Fasilitas Properti yang Disediakan</label>
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-semibold text-on-surface">Fasilitas Properti yang Disediakan</label>
+              <button
+                type="button"
+                @click="showAddCustomFasilitas = !showAddCustomFasilitas"
+                class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
+              >
+                <span class="material-symbols-outlined text-[15px]">{{ showAddCustomFasilitas ? 'remove' : 'add' }}</span>
+                {{ showAddCustomFasilitas ? 'Tutup' : 'Tambah Fasilitas Lain' }}
+              </button>
+            </div>
+
+            <!-- Inline Add Custom Facility Input -->
+            <div v-if="showAddCustomFasilitas" class="p-3 bg-surface-container-low/60 rounded-xl border border-slate-200 space-y-2 mt-1">
+              <span class="text-[11px] text-slate-500 font-medium">Daftarkan fasilitas baru yang belum ada di katalog:</span>
+              <div class="flex items-center gap-2">
+                <input
+                  v-model="customFasilitasName"
+                  type="text"
+                  placeholder="Contoh: Dapur Pribadi, CCTV 24 Jam, Water Heater..."
+                  class="flex-1 h-9 px-3 bg-white rounded-lg text-xs text-on-surface border border-slate-200 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  @keydown.enter.prevent="createCustomFasilitas"
+                />
+                <button
+                  type="button"
+                  @click="createCustomFasilitas"
+                  :disabled="creatingCustomFasilitas || !customFasilitasName.trim()"
+                  class="h-9 px-3.5 bg-primary-container text-white text-xs font-semibold rounded-lg hover:bg-primary transition disabled:opacity-50 flex items-center gap-1 shrink-0"
+                >
+                  <span v-if="creatingCustomFasilitas" class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span>
+                  <span>Tambah</span>
+                </button>
+              </div>
+            </div>
+
             <div class="grid grid-cols-2 sm:grid-cols-3 gap-2.5 pt-1">
               <label
                 v-for="item in availableFasilitas"
@@ -482,6 +516,43 @@ const fetchFasilitas = async () => {
     availableFasilitas.value = res.data?.data || []
   } catch (err) {
     console.error('Failed to load fasilitas:', err)
+  }
+}
+
+const showAddCustomFasilitas = ref(false)
+const customFasilitasName = ref('')
+const creatingCustomFasilitas = ref(false)
+
+const createCustomFasilitas = async () => {
+  const name = customFasilitasName.value.trim()
+  if (!name) return
+
+  const existing = availableFasilitas.value.find(
+    (f) => f.nama.toLowerCase() === name.toLowerCase()
+  )
+  if (existing) {
+    if (!formData.value.fasilitas_ids.includes(existing.id)) {
+      formData.value.fasilitas_ids.push(existing.id)
+    }
+    customFasilitasName.value = ''
+    showAddCustomFasilitas.value = false
+    return
+  }
+
+  creatingCustomFasilitas.value = true
+  try {
+    const res = await api.post('/fasilitas', { nama: name })
+    const newFas = res.data?.data
+    if (newFas) {
+      availableFasilitas.value.push(newFas)
+      formData.value.fasilitas_ids.push(newFas.id)
+      customFasilitasName.value = ''
+      showAddCustomFasilitas.value = false
+    }
+  } catch (err) {
+    alert(err.response?.data?.message || 'Gagal menambahkan fasilitas baru.')
+  } finally {
+    creatingCustomFasilitas.value = false
   }
 }
 
