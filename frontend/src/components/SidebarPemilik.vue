@@ -105,20 +105,6 @@
             <span class="material-symbols-outlined text-[20px]">person</span>
             <span class="flex-1">Profil Saya</span>
           </router-link>
-
-          <div class="pt-3 pb-1 px-2">
-            <div class="h-px bg-slate-800"></div>
-          </div>
-
-          <!-- 6. Pintasan Publik: Cari Kos -->
-          <router-link
-            to="/kos"
-            @click="isMobileOpen = false"
-            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-medium text-slate-400 hover:bg-slate-800 hover:text-white transition"
-          >
-            <span class="material-symbols-outlined text-[20px]">public</span>
-            <span class="flex-1">Lihat Katalog Publik</span>
-          </router-link>
         </nav>
       </div>
 

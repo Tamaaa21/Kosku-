@@ -28,6 +28,8 @@ class KosResource extends JsonResource
             'harga' => (int) $this->harga,
             'latitude' => $this->latitude !== null ? (float) $this->latitude : null,
             'longitude' => $this->longitude !== null ? (float) $this->longitude : null,
+            'peraturan' => $this->peraturan ?? [],
+            'foto' => $this->foto ?? [],
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
             'pemilik' => new PenggunaResource($this->whenLoaded('pemilik')),

@@ -99,7 +99,7 @@
             <!-- Tab Bar -->
             <div class="flex items-center gap-space-xs bg-surface-container-low p-1 rounded-xl">
               <button
-                v-for="tab in ['deskripsi', 'fasilitas', 'lokasi', 'pemilik']"
+                v-for="tab in ['deskripsi', 'fasilitas', 'peraturan', 'lokasi', 'pemilik']"
                 :key="tab"
                 @click="activeTab = tab"
                 :class="[
@@ -160,6 +160,38 @@
                 </div>
               </div>
               <p v-else class="text-xs text-on-surface-variant italic">Belum ada rincian fasilitas terdaftar.</p>
+            </div>
+
+            <!-- Tab Content: Peraturan / Tata Tertib -->
+            <div v-else-if="activeTab === 'peraturan'" class="space-y-space-md">
+              <div class="flex items-center justify-between">
+                <div>
+                  <h3 class="text-base font-bold text-on-surface">Tata Tertib & Peraturan Kos</h3>
+                  <p class="text-xs text-on-surface-variant">Harap dipatuhi oleh seluruh calon penghuni demi ketertiban bersama.</p>
+                </div>
+                <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container text-primary">
+                  {{ (kos.peraturan || []).length }} Aturan
+                </span>
+              </div>
+
+              <div v-if="(kos.peraturan || []).length > 0" class="space-y-2">
+                <div
+                  v-for="(rule, idx) in kos.peraturan"
+                  :key="idx"
+                  class="flex items-start gap-2.5 p-3 rounded-xl bg-surface-container-low text-xs text-on-surface border border-slate-100"
+                >
+                  <span class="material-symbols-outlined text-emerald-600 text-[18px] shrink-0 mt-0.5">verified_user</span>
+                  <span class="font-medium leading-relaxed">{{ rule }}</span>
+                </div>
+              </div>
+              <div v-else class="p-4 rounded-xl bg-surface-container-low text-xs text-on-surface-variant italic text-center">
+                Belum ada aturan tertulis khusus untuk kos ini. Berlaku norma kesopanan dan ketertiban umum.
+              </div>
+
+              <div class="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl flex items-center gap-2.5 text-xs text-amber-800">
+                <span class="material-symbols-outlined text-amber-600 text-[18px] shrink-0">info</span>
+                <span>Pelanggaran terhadap tata tertib kos dapat dikenai sanksi atau teguran oleh pemilik/pengelola kos.</span>
+              </div>
             </div>
 
             <!-- Tab Content: Lokasi -->
@@ -279,21 +311,47 @@
                 ]"
                 @click="kamar.status === 'tersedia' ? selectKamar(kamar) : null"
               >
-                <div class="space-y-1">
-                  <div class="flex items-center gap-2">
-                    <span class="text-sm font-bold text-on-surface">{{ kamar.nama_kamar }}</span>
-                    <span
-                      :class="[
-                        'text-[10px] font-bold uppercase px-2 py-0.5 rounded-md border',
-                        kamar.status === 'tersedia'
-                          ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                          : 'bg-rose-50 text-rose-700 border-rose-200'
-                      ]"
-                    >
-                      {{ kamar.status }}
-                    </span>
+                <div class="flex items-center gap-3">
+                  <div
+                    v-if="kamar.foto && kamar.foto.length > 0"
+                    class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden shrink-0 shadow-xs"
+                  >
+                    <img
+                      :src="resolveImageUrl(kamar.foto[0])"
+                      :alt="kamar.nama_kamar"
+                      class="w-full h-full object-cover"
+                    />
                   </div>
-                  <span class="text-xs font-bold text-primary">{{ formatRupiah(kamar.harga) }} / bulan</span>
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm font-bold text-on-surface">{{ kamar.nama_kamar }}</span>
+                      <span
+                        v-if="kamar.ukuran"
+                        class="text-[10px] font-semibold px-2 py-0.5 rounded bg-surface-container text-primary"
+                      >
+                        {{ kamar.ukuran }}
+                      </span>
+                      <span
+                        :class="[
+                          'text-[10px] font-bold uppercase px-2 py-0.5 rounded-md border',
+                          kamar.status === 'tersedia'
+                            ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                            : 'bg-rose-50 text-rose-700 border-rose-200'
+                        ]"
+                      >
+                        {{ kamar.status }}
+                      </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-xs font-bold text-primary">{{ formatRupiah(kamar.harga) }} / bulan</span>
+                      <span
+                        v-if="(kamar.fasilitas_kamar || []).length > 0"
+                        class="text-[11px] text-on-surface-variant truncate max-w-xs"
+                      >
+                        &bull; {{ kamar.fasilitas_kamar.slice(0, 3).join(', ') }}
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 <div>
@@ -385,15 +443,31 @@ const activeTab = ref('deskripsi')
 const selectedKamar = ref(null)
 const isFavorite = ref(false)
 
-const galleryImages = [
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuCOitClHgLDKT01wozYNVTlNFfj9k7oJNfa4q2kNrDk86lv3RxjjBUoPS6XVwSRz1fJt2Njq_q5ULmoPtKJ6tl88vke1gmGCs0RASAks5YEI7qsJO_F2vpf0H79xaVOLcj6daJIZt4_vYQD98RpawFS-fn8uc4Gg8SAZ6U1phc_LSoddYK5bxVMFELhOTo3bzl4rS6xJsZs6VtkRf6E9koZW5_wbWiwXvorevgASvvlZRP5P-63L62c2Q',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuABNPQIvHgX_Q4Zb8Cv-EC-QUZhpAxr2oLWkAKl-43s_dWfVblTEIgfPxV2W1TwPQL3Sdx6jXpHNs__B45sSP1R8C5SLQ12bk1VtJclahkG0hUHFlG5Rh9dkJ_W7z4727M4M2x_BWLff9is0HhIrhF9SMOQfh-ACJJF1iAJPtgGHRJ_lvLqVbmj89fzak8EdWqNcxMGQ95Whn4XcIoUOGrAAJwmiaGmI7okqSR9pTFpL2v_vEOTRBAC_A',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuC_H64BCjT467MFXE_cfIGXwa8i8J7PTlkRmw6AZ16FbsoQaSvN-VX9FPo264wrvMvzTyu769xLfhNTzbQTLYRhIu2jM3Zq56kOJCGLUy97OxuxiwGRSI6Mcd4clklzDULKwPxqxawzlsVzzTHum4idtdan6HMlhsVM4314vNjflNkv8L_e3QpFqMQTnvplpaHAunM6k2R6em90okpvbFKGQkuUJLqSx_Clxe13TRjEhXmYDS6-te7dcA',
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuD8k3ug5ZcOGyk2f4p1o6mm_lfzyW9ftsyjbeNs1HD4Aj5CNpFEJpWxAPts40v-8FgknMd4zswE6u14mqOzzHvum5afeIR3lnOJmjiI7_oWVl3izK2BcjXKgUtZWnihPPvN-Cchub8QBIT1MRIJR7JkkFhH7TAXPOzXYyQbAxzY3jdb4lIXq4lLu2DJZQPbXihldBJqXeDF9ico1n9aD1iijRqvTI_FivAi8x3v0uyhrApm660jW6hArQ',
+const defaultGalleryPlaceholders = [
+  'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1000&q=80',
+  'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1000&q=80',
+  'https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=1000&q=80',
+  'https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1000&q=80'
 ]
 
+const resolveImageUrl = (url) => {
+  if (!url) return ''
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  const baseBackend = import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace(/\/api\/v1\/?$/, '')
+    : 'https://backend-kos.ddev.site'
+  return `${baseBackend}${url.startsWith('/') ? '' : '/'}${url}`
+}
+
+const galleryImages = computed(() => {
+  if (kos.value?.foto && Array.isArray(kos.value.foto) && kos.value.foto.length > 0) {
+    return kos.value.foto.map(resolveImageUrl)
+  }
+  return defaultGalleryPlaceholders
+})
+
 const activeGalleryIndex = ref(0)
-const activeGalleryImage = computed(() => galleryImages[activeGalleryIndex.value] || galleryImages[0])
+const activeGalleryImage = computed(() => galleryImages.value[activeGalleryIndex.value] || galleryImages.value[0])
 
 const availableRoomsCount = computed(() => {
   if (!kos.value?.kamar) return 0

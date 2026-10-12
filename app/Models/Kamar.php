@@ -26,6 +26,8 @@ class Kamar extends Model
     {
         return [
             'harga' => 'integer',
+            'foto' => 'array',
+            'fasilitas_kamar' => 'array',
         ];
     }
 
