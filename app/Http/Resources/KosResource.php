@@ -33,6 +33,12 @@ class KosResource extends JsonResource
             'pemilik' => new PenggunaResource($this->whenLoaded('pemilik')),
             'fasilitas' => FasilitasResource::collection($this->whenLoaded('fasilitas')),
             'kamar' => KamarResource::collection($this->whenLoaded('kamar')),
+            'kamar_count' => $this->when(
+                isset($this->kamar_count) || $this->relationLoaded('kamar'),
+                fn () => isset($this->kamar_count)
+                    ? (int) $this->kamar_count
+                    : $this->kamar->count()
+            ),
             'kamar_tersedia_count' => $this->when(
                 isset($this->kamar_tersedia_count) || $this->relationLoaded('kamar'),
                 fn () => isset($this->kamar_tersedia_count)

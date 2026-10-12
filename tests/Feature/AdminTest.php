@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Fasilitas;
+use App\Models\Kamar;
 use App\Models\Kos;
 use App\Models\Pemesanan;
 use App\Models\Pengguna;
@@ -151,5 +152,84 @@ class AdminTest extends TestCase
                     'pemesanan_terbaru',
                 ],
             ]);
+    }
+
+    public function test_admin_can_list_and_filter_all_kos(): void
+    {
+        $admin = Pengguna::factory()->admin()->create();
+        $pencari = Pengguna::factory()->create();
+        $pemilik = Pengguna::factory()->pemilik()->create(['nama' => 'Pak Bambang']);
+
+        $kosPutri = Kos::factory()->create([
+            'pemilik_id' => $pemilik->id,
+            'nama' => 'Kos Melati Cantik',
+            'jenis' => 'putri',
+            'harga' => 800000,
+        ]);
+        Kamar::factory()->create(['kos_id' => $kosPutri->id, 'status' => 'tersedia']);
+        Kamar::factory()->create(['kos_id' => $kosPutri->id, 'status' => 'terisi']);
+
+        $kosPutra = Kos::factory()->create([
+            'nama' => 'Kos Garuda Sakti',
+            'jenis' => 'putra',
+            'harga' => 500000,
+        ]);
+
+        // Pencari cannot access admin kos index
+        Sanctum::actingAs($pencari);
+        $this->getJson('/api/v1/admin/kos')->assertStatus(403);
+
+        // Admin can list all
+        Sanctum::actingAs($admin);
+        $response = $this->getJson('/api/v1/admin/kos');
+        $response->assertStatus(200)
+            ->assertJsonCount(2, 'data');
+
+        // Admin can filter by jenis
+        $responseJenis = $this->getJson('/api/v1/admin/kos?jenis=putri');
+        $responseJenis->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $kosPutri->id)
+            ->assertJsonPath('data.0.kamar_count', 2)
+            ->assertJsonPath('data.0.kamar_tersedia_count', 1);
+
+        // Admin can search by owner name
+        $responseSearch = $this->getJson('/api/v1/admin/kos?q=Bambang');
+        $responseSearch->assertStatus(200)
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.id', $kosPutri->id);
+    }
+
+    public function test_admin_can_delete_kos_for_moderation(): void
+    {
+        $admin = Pengguna::factory()->admin()->create();
+        $pencari = Pengguna::factory()->create();
+        $pemilik = Pengguna::factory()->pemilik()->create();
+
+        $kos = Kos::factory()->create(['pemilik_id' => $pemilik->id]);
+        $kamar = Kamar::factory()->create(['kos_id' => $kos->id]);
+        $fasilitas = Fasilitas::factory()->create();
+        $kos->fasilitas()->attach($fasilitas->id);
+
+        Pemesanan::factory()->create([
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar->id,
+            'pengguna_id' => $pencari->id,
+        ]);
+
+        // Pencari cannot moderate kos
+        Sanctum::actingAs($pencari);
+        $this->deleteJson('/api/v1/admin/kos/'.$kos->id)->assertStatus(403);
+
+        // Admin deletes kos successfully with cascading relations
+        Sanctum::actingAs($admin);
+        $response = $this->deleteJson('/api/v1/admin/kos/'.$kos->id);
+        $response->assertStatus(200)
+            ->assertJsonStructure(['message']);
+
+        $this->assertDatabaseMissing('kos', ['id' => $kos->id]);
+        $this->assertDatabaseMissing('kamar', ['id' => $kamar->id]);
+        $this->assertDatabaseMissing('pemesanan', ['kos_id' => $kos->id]);
+        $this->assertDatabaseMissing('kos_fasilitas', ['kos_id' => $kos->id]);
     }
 }

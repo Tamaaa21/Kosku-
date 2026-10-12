@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\V1\AdminKosController;
 use App\Http\Controllers\Api\V1\AdminPenggunaController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\FasilitasController;
@@ -57,6 +58,10 @@ Route::prefix('v1')->group(function (): void {
             Route::get('/admin/pengguna/{id}', [AdminPenggunaController::class, 'show']);
             Route::patch('/admin/pengguna/{id}/status', [AdminPenggunaController::class, 'updateStatus']);
             Route::get('/admin/stats', [AdminPenggunaController::class, 'stats']);
+
+            // Moderasi & Data Kos (Admin Only)
+            Route::get('/admin/kos', [AdminKosController::class, 'index']);
+            Route::delete('/admin/kos/{id}', [AdminKosController::class, 'destroy']);
         });
     });
 });

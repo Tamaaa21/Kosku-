@@ -84,7 +84,18 @@
             <span class="flex-1">Kelola Mitra Pemilik</span>
           </router-link>
 
-          <!-- 4. Master Fasilitas -->
+          <!-- 4. Data & Moderasi Kos (Modul 4) -->
+          <router-link
+            :to="{ path: '/dashboard/admin', query: { tab: 'kos' } }"
+            @click="isMobileOpen = false"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="($route.path === '/dashboard/admin' && $route.query.tab === 'kos') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            <span class="material-symbols-outlined text-[20px]">home_work</span>
+            <span class="flex-1">Data & Moderasi Kos</span>
+          </router-link>
+
+          <!-- 5. Master Fasilitas -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'fasilitas' } }"
             @click="isMobileOpen = false"
