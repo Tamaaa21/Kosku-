@@ -1,0 +1,30 @@
+.git
+.github
+.ddev
+.claude
+.idea
+.vscode
+node_modules
+vendor
+frontend/node_modules
+frontend/dist
+storage/*.key
+storage/logs/*
+!storage/logs/.gitignore
+storage/framework/cache/*
+!storage/framework/cache/.gitignore
+storage/framework/sessions/*
+!storage/framework/sessions/.gitignore
+storage/framework/views/*
+!storage/framework/views/.gitignore
+.env
+.env.*
+!.env.example
+!.env.docker.example
+.phpunit.result.cache
+tests
+ui admin
+ui pemilik
+testposman
+*.md
+!README.md
