@@ -13,8 +13,9 @@
   <img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.3" />
   <img src="https://img.shields.io/badge/Vue.js-3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-3-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Ready" />
   <img src="https://img.shields.io/badge/Sanctum-Token_Auth-blue?style=for-the-badge" alt="Sanctum Auth" />
-  <img src="https://img.shields.io/badge/Tests-52_Passed-success?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-58_Passed-success?style=for-the-badge" alt="Tests" />
 </p>
 
 ---
@@ -73,7 +74,8 @@ Antarmuka beradaptasi secara otomatis sesuai hak akses pengguna:
 | **State Management** | Pinia | Manajemen sesi login, peran, dan notifikasi |
 | **Styling** | Tailwind CSS 3 | Desain sistem KosKu modern, konsisten, dan responsif |
 | **Peta Digital** | Leaflet.js | Visualisasi peta interaktif & OpenStreetMap Nominatim |
-| **Code Formatter & Test** | Laravel Pint & PHPUnit | 52 Automated Feature Tests & standar PSR-12 |
+| **Container & Deploy** | Docker & Compose | Multi-container: PHP 8.3-FPM, Nginx (SPA Reverse Proxy), MariaDB 11.4 |
+| **Code Formatter & Test** | Laravel Pint & PHPUnit | 58 Automated Feature Tests & standar PSR-12 |
 
 ---
 
@@ -112,15 +114,61 @@ backend-kos/
 
 ## ⚙️ Panduan Instalasi & Menjalankan Proyek
 
-### 1. Prasyarat Sistem
-- **PHP** >= 8.3
-- **Composer** >= 2.x
-- **Node.js** >= 18.x dan **npm**
-- **DDEV** (opsional / direkomendasikan) atau Web Server lokal (Apache/Nginx + MariaDB)
+### 🐳 Metode 1: Menggunakan Docker (Direkomendasikan untuk Deploy & Server)
+
+Cara paling praktis menjalankan seluruh stack aplikasi (**Backend Laravel 11**, **Frontend Vue 3 SPA**, dan **Database MariaDB 11.4**) tanpa perlu menginstal PHP, Node.js, atau database di komputer lokal/server:
+
+```bash
+# 1. Masuk ke direktori repositori
+cd backend-kos
+
+# 2. Salin template konfigurasi Docker
+cp .env.docker.example .env
+
+# 3. Build image dan jalankan seluruh container di background
+docker compose up -d --build
+
+# 4. Pantau log inisialisasi awal (migrasi database & seeder otomatis)
+docker compose logs -f app
+```
+
+Setelah kontainer aktif, aplikasi langsung dapat diakses di:
+👉 **`http://localhost:8080`** (atau `http://<IP_SERVER>:8080`)
+
+#### 💡 Perintah Operasional Docker:
+```bash
+# Melihat status kontainer aktif
+docker compose ps
+
+# Menjalankan perintah Artisan di dalam kontainer app
+docker compose exec app php artisan <perintah>
+
+# Menjalankan migrasi database ulang & seeder secara manual
+docker compose exec app php artisan migrate --seed --force
+
+# Backup data MariaDB ke file SQL
+docker compose exec db mariadb-dump -u kosku -psecret_password_kosku kosku > backup.sql
+
+# Update kode terbaru dari repo
+git pull origin main && docker compose up -d --build
+
+# Menghentikan seluruh kontainer
+docker compose down
+```
 
 ---
 
-### 2. Pengaturan Backend (Laravel)
+### 💻 Metode 2: Instalasi Manual / Lokal (Tanpa Docker)
+
+#### 1. Prasyarat Sistem
+- **PHP** >= 8.3
+- **Composer** >= 2.x
+- **Node.js** >= 18.x dan **npm**
+- **DDEV** (opsional) atau Web Server lokal (Apache/Nginx + MariaDB/MySQL)
+
+---
+
+#### 2. Pengaturan Backend (Laravel)
 
 ```bash
 # 1. Masuk ke direktori utama
@@ -150,7 +198,7 @@ php artisan serve
 
 ---
 
-### 3. Pengaturan Frontend (Vue 3)
+#### 3. Pengaturan Frontend (Vue 3)
 
 ```bash
 # 1. Masuk ke folder frontend
