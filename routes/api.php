@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\FasilitasController;
 use App\Http\Controllers\Api\V1\KamarController;
 use App\Http\Controllers\Api\V1\KosController;
 use App\Http\Controllers\Api\V1\PemesananController;
+use App\Http\Controllers\Api\V1\UlasanController;
 use App\Http\Controllers\Api\V1\UploadController;
 use Illuminate\Support\Facades\Route;
 
@@ -20,6 +21,7 @@ Route::prefix('v1')->group(function (): void {
     Route::get('/kos', [KosController::class, 'index']);
     Route::get('/kos/{id}', [KosController::class, 'show']);
     Route::get('/kos/{id}/kamar', [KamarController::class, 'index']);
+    Route::get('/kos/{id}/ulasan', [UlasanController::class, 'index']);
 
     Route::get('/fasilitas', [FasilitasController::class, 'index']);
 
@@ -50,6 +52,10 @@ Route::prefix('v1')->group(function (): void {
         Route::get('/pemesanan', [PemesananController::class, 'index']);
         Route::get('/pemesanan/{id}', [PemesananController::class, 'show']);
         Route::patch('/pemesanan/{id}/status', [PemesananController::class, 'updateStatus']);
+
+        // Ulasan & Rating Kos
+        Route::get('/kos/{id}/ulasan/eligibility', [UlasanController::class, 'eligibility']);
+        Route::post('/kos/{id}/ulasan', [UlasanController::class, 'store'])->middleware('role:pencari');
 
         // Master Fasilitas (Admin & Pemilik dapat mendaftarkan fasilitas kos)
         Route::post('/fasilitas', [FasilitasController::class, 'store'])->middleware('role:pemilik,admin');

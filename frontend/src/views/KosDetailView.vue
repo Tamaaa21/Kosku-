@@ -18,12 +18,20 @@
     <div v-else>
       <!-- Breadcrumb & Top Actions -->
       <div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-md">
-        <nav class="flex items-center gap-space-xs text-xs text-on-surface-variant">
+        <nav class="flex items-center gap-space-xs text-xs text-on-surface-variant flex-wrap">
           <router-link to="/" class="hover:text-primary transition-colors">Beranda</router-link>
           <span class="material-symbols-outlined text-[16px]">chevron_right</span>
           <router-link to="/kos" class="hover:text-primary transition-colors">Daftar Kos</router-link>
           <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-          <span class="text-on-surface font-semibold truncate max-w-[200px]">{{ kos.nama }}</span>
+          <router-link
+            v-if="kos.jenis"
+            :to="{ path: '/kos', query: { jenis: kos.jenis } }"
+            class="hover:text-primary transition-colors capitalize font-medium"
+          >
+            Kos {{ kos.jenis }}
+          </router-link>
+          <span v-if="kos.jenis" class="material-symbols-outlined text-[16px]">chevron_right</span>
+          <span class="text-on-surface font-semibold truncate max-w-[220px]">{{ kos.nama }}</span>
         </nav>
 
         <div class="flex items-center gap-space-sm">
@@ -59,7 +67,7 @@
                 :alt="kos.nama"
                 class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               />
-              <div class="absolute top-space-sm left-space-sm flex items-center gap-space-xs">
+              <div class="absolute top-space-sm left-space-sm flex items-center gap-space-xs flex-wrap">
                 <span
                   :class="[
                     'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 shadow-sm',
@@ -75,6 +83,16 @@
                   <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span>
                   Terverifikasi
                 </span>
+                <button
+                  type="button"
+                  @click="activeTab = 'ulasan'"
+                  class="px-2.5 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-on-surface text-[11px] font-semibold flex items-center gap-1 shadow-sm hover:bg-white transition cursor-pointer"
+                  title="Lihat ulasan dan rating kos"
+                >
+                  <span class="material-symbols-outlined text-[14px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <span>{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : 'Baru' }}</span>
+                  <span v-if="kos.ulasan_count" class="text-slate-500 font-normal">({{ kos.ulasan_count }} Ulasan)</span>
+                </button>
               </div>
             </div>
 
@@ -99,7 +117,7 @@
             <!-- Tab Bar -->
             <div class="flex items-center gap-space-xs bg-surface-container-low p-1 rounded-xl">
               <button
-                v-for="tab in ['deskripsi', 'fasilitas', 'peraturan', 'lokasi', 'pemilik']"
+                v-for="tab in ['deskripsi', 'fasilitas', 'peraturan', 'ulasan', 'lokasi', 'pemilik']"
                 :key="tab"
                 @click="activeTab = tab"
                 :class="[
@@ -139,8 +157,10 @@
                     <span class="font-semibold text-tertiary">{{ availableRoomsCount }} Kamar</span>
                   </div>
                   <div class="p-2.5 bg-surface-container-low rounded-lg flex items-center justify-between">
-                    <span class="text-on-surface-variant">Periode Pembayaran</span>
-                    <span class="font-semibold text-on-surface">Bulanan</span>
+                    <span class="text-on-surface-variant">Pilihan Durasi Sewa</span>
+                    <span class="font-semibold text-on-surface">
+                      {{ (kos.durasi_sewa || ['bulanan']).map(d => d.charAt(0).toUpperCase() + d.slice(1)).join(', ') }}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -191,6 +211,154 @@
               <div class="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl flex items-center gap-2.5 text-xs text-amber-800">
                 <span class="material-symbols-outlined text-amber-600 text-[18px] shrink-0">info</span>
                 <span>Pelanggaran terhadap tata tertib kos dapat dikenai sanksi atau teguran oleh pemilik/pengelola kos.</span>
+              </div>
+            </div>
+
+            <!-- Tab Content: Ulasan & Rating -->
+            <div v-else-if="activeTab === 'ulasan'" class="space-y-space-md">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div>
+                  <h3 class="text-base font-bold text-on-surface">Ulasan & Rating Penghuni</h3>
+                  <p class="text-xs text-on-surface-variant">Ulasan nyata dari para penyewa yang pernah tinggal atau disetujui di kos ini.</p>
+                </div>
+                <div class="flex items-center gap-3 bg-surface-container-low px-4 py-2.5 rounded-2xl border border-slate-100 self-start sm:self-auto">
+                  <div class="text-center">
+                    <div class="text-xl font-black text-slate-900 flex items-center justify-center gap-1">
+                      <span class="material-symbols-outlined text-amber-500 text-[22px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                      <span>{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : '-' }}</span>
+                    </div>
+                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">Skor dari 5.0</p>
+                  </div>
+                  <div class="w-px h-8 bg-slate-200"></div>
+                  <div class="text-center">
+                    <p class="text-xl font-black text-primary">{{ kos.ulasan_count || (reviewsList || []).length }}</p>
+                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">Total Ulasan</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Review Form for Eligible Tenants -->
+              <div v-if="reviewEligibility?.eligible" class="p-4 sm:p-5 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-3">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-600 text-[20px]">rate_review</span>
+                    <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                      {{ reviewEligibility.has_reviewed ? 'Perbarui Ulasan Anda' : 'Tulis Ulasan Pengalaman Anda' }}
+                    </h4>
+                  </div>
+                  <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-2.5 py-0.5 rounded-full">
+                    Penyewa Terverifikasi
+                  </span>
+                </div>
+
+                <form @submit.prevent="submitReview" class="space-y-3">
+                  <!-- Star rating picker -->
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Berikan Penilaian Bintang:</label>
+                    <div class="flex items-center gap-1">
+                      <button
+                        v-for="star in 5"
+                        :key="star"
+                        type="button"
+                        @click="reviewForm.rating = star"
+                        @mouseenter="hoverStar = star"
+                        @mouseleave="hoverStar = 0"
+                        class="p-1 text-slate-300 transition-colors focus:outline-hidden"
+                      >
+                        <span
+                          class="material-symbols-outlined text-[28px]"
+                          :class="(hoverStar || reviewForm.rating) >= star ? 'text-amber-500' : 'text-slate-300'"
+                          style="font-variation-settings: 'FILL' 1;"
+                        >
+                          star
+                        </span>
+                      </button>
+                      <span class="text-xs font-bold text-slate-700 ml-2">
+                        {{ reviewForm.rating ? `${reviewForm.rating} dari 5 Bintang` : 'Pilih bintang' }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Review comment textarea -->
+                  <div>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1">Ceritakan Pengalaman Anda:</label>
+                    <textarea
+                      v-model="reviewForm.komentar"
+                      rows="3"
+                      required
+                      minlength="5"
+                      maxlength="1000"
+                      placeholder="Tuliskan ulasan mengenai kebersihan, kenyamanan kamar, fasilitas, keramahan pemilik, dan lingkungan kos..."
+                      class="w-full text-xs rounded-xl border-slate-200 focus:ring-primary focus:border-primary p-3 bg-white"
+                    ></textarea>
+                  </div>
+
+                  <div class="flex items-center justify-between pt-1">
+                    <p class="text-[11px] text-slate-400">Minimal 5 karakter ulasan.</p>
+                    <button
+                      type="submit"
+                      :disabled="submittingReview || !reviewForm.rating || reviewForm.komentar.length < 5"
+                      class="px-5 py-2 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary-dark transition disabled:opacity-50 flex items-center gap-1.5"
+                    >
+                      <span class="material-symbols-outlined text-[16px]">send</span>
+                      <span>{{ submittingReview ? 'Menyimpan...' : (reviewEligibility.has_reviewed ? 'Simpan Perubahan' : 'Kirim Ulasan') }}</span>
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Notice for Non-Eligible Users -->
+              <div v-else class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center gap-2.5 text-xs text-slate-600">
+                <span class="material-symbols-outlined text-slate-400 text-[20px] shrink-0">verified_user</span>
+                <span>Untuk menjaga keaslian ulasan, fitur pemberian rating dan ulasan hanya terbuka bagi akun pencari kos yang telah memesan dan disetujui oleh pemilik properti ini.</span>
+              </div>
+
+              <!-- Reviews List -->
+              <div v-if="loadingReviews" class="py-10 text-center text-xs text-slate-400">
+                Memuat daftar ulasan...
+              </div>
+
+              <div v-else-if="reviewsList.length === 0" class="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
+                <span class="material-symbols-outlined text-slate-300 text-[40px]">rate_review</span>
+                <p class="text-xs font-bold text-slate-700">Belum Ada Ulasan</p>
+                <p class="text-[11px] text-slate-400 max-w-sm mx-auto">
+                  Jadilah penghuni pertama yang membagikan pengalaman tinggal di kos ini setelah pemesanan Anda disetujui.
+                </p>
+              </div>
+
+              <div v-else class="space-y-3">
+                <div
+                  v-for="rev in reviewsList"
+                  :key="rev.id"
+                  class="p-4 rounded-2xl bg-surface-container-low border border-slate-100 space-y-2"
+                >
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-full bg-primary/10 text-primary font-bold text-xs flex items-center justify-center">
+                        {{ rev.pengguna?.nama ? rev.pengguna.nama.charAt(0).toUpperCase() : 'U' }}
+                      </div>
+                      <div>
+                        <p class="font-bold text-xs text-on-surface">{{ rev.pengguna?.nama || 'Penyewa Kos' }}</p>
+                        <p class="text-[10px] text-on-surface-variant">{{ rev.formatted_date }}</p>
+                      </div>
+                    </div>
+                    <!-- Star Rating Display -->
+                    <div class="flex items-center gap-0.5">
+                      <span
+                        v-for="s in 5"
+                        :key="s"
+                        class="material-symbols-outlined text-[16px]"
+                        :class="s <= rev.rating ? 'text-amber-500' : 'text-slate-200'"
+                        style="font-variation-settings: 'FILL' 1;"
+                      >
+                        star
+                      </span>
+                    </div>
+                  </div>
+                  <p class="text-xs text-on-surface-variant leading-relaxed pl-10 whitespace-pre-line">
+                    {{ rev.komentar }}
+                  </p>
+                </div>
               </div>
             </div>
 
@@ -342,8 +510,14 @@
                         {{ kamar.status }}
                       </span>
                     </div>
-                    <div class="flex items-center gap-2">
-                      <span class="text-xs font-bold text-primary">{{ formatRupiah(kamar.harga) }} / bulan</span>
+                    <div class="flex items-center gap-1.5 flex-wrap">
+                      <span class="text-xs font-bold text-primary">{{ formatRupiah(kamar.harga) }} / bln</span>
+                      <span v-if="kamar.harga_mingguan" class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">
+                        {{ formatRupiah(kamar.harga_mingguan) }}/mgg
+                      </span>
+                      <span v-if="kamar.harga_harian" class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
+                        {{ formatRupiah(kamar.harga_harian) }}/hari
+                      </span>
                       <span
                         v-if="(kamar.fasilitas_kamar || []).length > 0"
                         class="text-[11px] text-on-surface-variant truncate max-w-xs"
@@ -376,7 +550,56 @@
               <span class="text-xs text-on-surface-variant block">Mulai dari</span>
               <div class="flex items-baseline gap-1 mt-0.5">
                 <span class="text-2xl font-black text-primary">{{ formatRupiah(currentSelectedPrice) }}</span>
-                <span class="text-xs text-on-surface-variant font-normal">/ bulan</span>
+                <span class="text-xs text-on-surface-variant font-normal">/ {{ currentDurationLabel }}</span>
+              </div>
+            </div>
+
+            <!-- Duration Selection Switcher -->
+            <div class="space-y-1.5">
+              <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block">Pilihan Durasi Sewa:</span>
+              <div class="grid grid-cols-3 gap-1 bg-surface-container-low p-1 rounded-xl">
+                <button
+                  type="button"
+                  @click="selectedDurationType = 'harian'"
+                  :disabled="!isDurationAvailable('harian')"
+                  :class="[
+                    'py-1.5 px-1.5 rounded-lg text-xs font-bold transition text-center',
+                    selectedDurationType === 'harian'
+                      ? 'bg-primary text-white shadow-xs'
+                      : isDurationAvailable('harian')
+                        ? 'text-slate-700 hover:bg-slate-200/60'
+                        : 'text-slate-300 cursor-not-allowed opacity-50'
+                  ]"
+                >
+                  Harian
+                </button>
+                <button
+                  type="button"
+                  @click="selectedDurationType = 'mingguan'"
+                  :disabled="!isDurationAvailable('mingguan')"
+                  :class="[
+                    'py-1.5 px-1.5 rounded-lg text-xs font-bold transition text-center',
+                    selectedDurationType === 'mingguan'
+                      ? 'bg-primary text-white shadow-xs'
+                      : isDurationAvailable('mingguan')
+                        ? 'text-slate-700 hover:bg-slate-200/60'
+                        : 'text-slate-300 cursor-not-allowed opacity-50'
+                  ]"
+                >
+                  Mingguan
+                </button>
+                <button
+                  type="button"
+                  @click="selectedDurationType = 'bulanan'"
+                  :class="[
+                    'py-1.5 px-1.5 rounded-lg text-xs font-bold transition text-center',
+                    selectedDurationType === 'bulanan'
+                      ? 'bg-primary text-white shadow-xs'
+                      : 'text-slate-700 hover:bg-slate-200/60'
+                  ]"
+                >
+                  Bulanan
+                </button>
               </div>
             </div>
 
@@ -426,7 +649,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import LeafletMap from '../components/LeafletMap.vue'
@@ -439,9 +662,21 @@ const auth = useAuthStore()
 
 const kos = ref(null)
 const loading = ref(true)
-const activeTab = ref('deskripsi')
+const activeTab = ref(route.query.tab || 'deskripsi')
 const selectedKamar = ref(null)
 const isFavorite = ref(false)
+const selectedDurationType = ref('bulanan')
+
+// Reviews & Rating states
+const reviewsList = ref([])
+const loadingReviews = ref(false)
+const reviewEligibility = ref(null)
+const hoverStar = ref(0)
+const submittingReview = ref(false)
+const reviewForm = reactive({
+  rating: 5,
+  komentar: '',
+})
 
 const defaultGalleryPlaceholders = [
   'https://images.unsplash.com/photo-1555854877-bab0e564b8d5?auto=format&fit=crop&w=1000&q=80',
@@ -474,8 +709,33 @@ const availableRoomsCount = computed(() => {
   return kos.value.kamar.filter((k) => k.status === 'tersedia').length
 })
 
+const isDurationAvailable = (durasi) => {
+  if (durasi === 'bulanan') return true
+  if (selectedKamar.value) {
+    const durations = selectedKamar.value.durasi_sewa || ['bulanan']
+    if (durasi === 'harian') return durations.includes('harian') && Boolean(selectedKamar.value.harga_harian)
+    if (durasi === 'mingguan') return durations.includes('mingguan') && Boolean(selectedKamar.value.harga_mingguan)
+  }
+  const kosDurations = kos.value?.durasi_sewa || ['bulanan']
+  if (durasi === 'harian') return kosDurations.includes('harian') && Boolean(kos.value?.harga_harian)
+  if (durasi === 'mingguan') return kosDurations.includes('mingguan') && Boolean(kos.value?.harga_mingguan)
+  return false
+}
+
 const currentSelectedPrice = computed(() => {
+  if (selectedDurationType.value === 'harian') {
+    return selectedKamar.value?.harga_harian || kos.value?.harga_harian || Math.ceil((selectedKamar.value?.harga || kos.value?.harga || 0) / 30)
+  }
+  if (selectedDurationType.value === 'mingguan') {
+    return selectedKamar.value?.harga_mingguan || kos.value?.harga_mingguan || Math.ceil((selectedKamar.value?.harga || kos.value?.harga || 0) / 4)
+  }
   return selectedKamar.value ? selectedKamar.value.harga : kos.value?.harga
+})
+
+const currentDurationLabel = computed(() => {
+  if (selectedDurationType.value === 'harian') return 'hari'
+  if (selectedDurationType.value === 'mingguan') return 'minggu'
+  return 'bulan'
 })
 
 const formatJenis = (jenis) => {
@@ -490,6 +750,10 @@ const formatRupiah = (val) => {
 
 const selectKamar = (kamar) => {
   selectedKamar.value = kamar
+  // Reset duration to bulanan if current type is not available in new room
+  if (!isDurationAvailable(selectedDurationType.value)) {
+    selectedDurationType.value = 'bulanan'
+  }
 }
 
 const shareKos = () => {
@@ -517,7 +781,10 @@ const handleProceedBooking = () => {
     return
   }
 
-  router.push(`/pesan/${kos.value.id}/${selectedKamar.value.id}`)
+  router.push({
+    path: `/pesan/${kos.value.id}/${selectedKamar.value.id}`,
+    query: { durasi: selectedDurationType.value }
+  })
 }
 
 const handleWhatsAppInquiry = () => {
@@ -532,6 +799,54 @@ const handleWhatsAppInquiry = () => {
   })
 
   openWhatsAppChat(phone, message)
+}
+
+const fetchReviews = async () => {
+  loadingReviews.value = true
+  try {
+    const res = await api.get(`/kos/${route.params.id}/ulasan`)
+    reviewsList.value = res.data.data || []
+  } catch (err) {
+    reviewsList.value = []
+  } finally {
+    loadingReviews.value = false
+  }
+}
+
+const checkReviewEligibility = async () => {
+  if (!auth.isAuthenticated || !auth.isPencari) return
+  try {
+    const res = await api.get(`/kos/${route.params.id}/ulasan/eligibility`)
+    reviewEligibility.value = res.data
+    if (res.data.existing_review) {
+      reviewForm.rating = res.data.existing_review.rating
+      reviewForm.komentar = res.data.existing_review.komentar
+    }
+  } catch (err) {
+    reviewEligibility.value = null
+  }
+}
+
+const submitReview = async () => {
+  if (!reviewForm.rating || reviewForm.komentar.length < 5) return
+  submittingReview.value = true
+  try {
+    const res = await api.post(`/kos/${route.params.id}/ulasan`, {
+      rating: reviewForm.rating,
+      komentar: reviewForm.komentar,
+    })
+    if (kos.value) {
+      kos.value.rating_rata_rata = res.data.rating_rata_rata
+      kos.value.ulasan_count = res.data.ulasan_count
+    }
+    await fetchReviews()
+    await checkReviewEligibility()
+    alert(res.data.message || 'Ulasan Anda berhasil disimpan!')
+  } catch (err) {
+    alert(err.response?.data?.message || 'Gagal menyimpan ulasan.')
+  } finally {
+    submittingReview.value = false
+  }
 }
 
 const fetchKosDetail = async () => {
@@ -556,5 +871,7 @@ const fetchKosDetail = async () => {
 
 onMounted(() => {
   fetchKosDetail()
+  fetchReviews()
+  checkReviewEligibility()
 })
 </script>

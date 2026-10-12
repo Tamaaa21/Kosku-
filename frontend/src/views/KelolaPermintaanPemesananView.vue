@@ -3,10 +3,20 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-8">
       <div>
-        <div class="flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-wider mb-1">
-          <span class="material-symbols-outlined text-[16px]">how_to_reg</span>
-          <span>Modul Reservasi KosKu</span>
-        </div>
+        <!-- Breadcrumb Dinamis -->
+        <nav class="flex items-center gap-1.5 text-xs text-on-surface-variant mb-2">
+          <router-link to="/" class="hover:text-primary transition flex items-center gap-1">
+            <span class="material-symbols-outlined text-[15px]">home</span>
+            <span>Beranda</span>
+          </router-link>
+          <span class="text-slate-300">/</span>
+          <router-link to="/dashboard/pemilik" class="hover:text-primary transition">
+            Dashboard
+          </router-link>
+          <span class="text-slate-300">/</span>
+          <span class="font-semibold text-primary">Permintaan Pemesanan</span>
+        </nav>
+
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">Permintaan Pemesanan</h1>
         <p class="text-xs text-on-surface-variant mt-0.5">
           Kelola permintaan sewa dari calon penghuni secara cepat dan transparan.
@@ -14,13 +24,6 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <router-link
-          to="/dashboard/pemilik"
-          class="h-10 px-4 rounded-lg bg-surface-container text-on-surface text-xs font-semibold flex items-center gap-1.5 hover:bg-surface-container-high transition shadow-sm"
-        >
-          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-          <span>Dashboard</span>
-        </router-link>
         <button
           @click="fetchBookings"
           :disabled="loading"
@@ -239,7 +242,10 @@
                   </span>
                   <span class="text-[11px] text-outline mt-0.5 flex items-center gap-1">
                     <span class="material-symbols-outlined text-[14px]">schedule</span>
-                    {{ booking.durasi_sewa_bulan || booking.durasi_bulan || 1 }} Bulan
+                    {{ formatDurasi(booking) }}
+                  </span>
+                  <span v-if="booking.tanggal_selesai" class="text-[10px] text-secondary mt-0.5">
+                    Hingga: {{ formatDate(booking.tanggal_selesai) }}
                   </span>
                 </div>
               </td>
@@ -393,9 +399,15 @@
               <span class="text-secondary">Tanggal Mulai Sewa:</span>
               <span class="font-semibold text-on-surface">{{ formatDate(selectedBooking.tanggal_mulai) }}</span>
             </div>
+            <div v-if="selectedBooking.tanggal_selesai" class="flex items-center justify-between">
+              <span class="text-secondary">Selesai / Check-out:</span>
+              <span class="font-semibold text-on-surface">{{ formatDate(selectedBooking.tanggal_selesai) }}</span>
+            </div>
             <div class="flex items-center justify-between">
               <span class="text-secondary">Durasi Sewa:</span>
-              <span class="font-semibold text-on-surface">{{ selectedBooking.durasi_sewa_bulan || selectedBooking.durasi_bulan || 1 }} Bulan</span>
+              <span class="font-semibold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full text-[11px]">
+                {{ formatDurasi(selectedBooking) }}
+              </span>
             </div>
             <div class="flex items-center justify-between border-t border-slate-200/60 pt-2 mt-2">
               <span class="font-bold text-on-surface">Total Biaya Sewa:</span>
@@ -520,6 +532,16 @@ const formatDate = (dateStr) => {
   } catch (e) {
     return dateStr
   }
+}
+
+const formatDurasi = (booking) => {
+  if (!booking) return '-'
+  if (booking.durasi_tipe && booking.durasi_jumlah) {
+    const unit = booking.durasi_tipe.charAt(0).toUpperCase() + booking.durasi_tipe.slice(1)
+    return `${booking.durasi_jumlah} ${unit}`
+  }
+  const bln = booking.durasi_sewa_bulan || booking.durasi_bulan || 1
+  return `${bln} Bulan`
 }
 
 const openDetail = (booking) => {

@@ -6,6 +6,7 @@ use Database\Factories\PemesananFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Pemesanan extends Model
 {
@@ -25,6 +26,9 @@ class Pemesanan extends Model
     {
         return [
             'tanggal_pemesanan' => 'date',
+            'tanggal_selesai' => 'date',
+            'durasi_jumlah' => 'integer',
+            'total_harga' => 'integer',
         ];
     }
 
@@ -41,5 +45,10 @@ class Pemesanan extends Model
     public function kamar(): BelongsTo
     {
         return $this->belongsTo(Kamar::class, 'kamar_id');
+    }
+
+    public function ulasan(): HasOne
+    {
+        return $this->hasOne(Ulasan::class, 'pemesanan_id');
     }
 }

@@ -3,10 +3,20 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-8">
       <div>
-        <div class="flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-wider mb-1">
-          <span class="material-symbols-outlined text-[16px]">meeting_room</span>
-          <span>Inventaris Kamar & Fasilitas</span>
-        </div>
+        <!-- Breadcrumb Dinamis -->
+        <nav class="flex items-center gap-1.5 text-xs text-on-surface-variant mb-2">
+          <router-link to="/" class="hover:text-primary transition flex items-center gap-1">
+            <span class="material-symbols-outlined text-[15px]">home</span>
+            <span>Beranda</span>
+          </router-link>
+          <span class="text-slate-300">/</span>
+          <router-link to="/dashboard/pemilik" class="hover:text-primary transition">
+            Dashboard
+          </router-link>
+          <span class="text-slate-300">/</span>
+          <span class="font-semibold text-primary">Kelola Kamar</span>
+        </nav>
+
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">Kelola Kamar Kos</h1>
         <p class="text-xs text-on-surface-variant mt-1">
           Kelola unit kamar beserta fasilitas langsung di masing-masing kamar dan pantau ketersediaan unit.
@@ -14,13 +24,6 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <router-link
-          to="/dashboard/pemilik"
-          class="h-10 px-4 rounded-lg bg-surface-container text-on-surface text-xs font-semibold flex items-center gap-1.5 hover:bg-surface-container-high transition shadow-sm"
-        >
-          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-          <span>Dashboard</span>
-        </router-link>
         <button
           @click="openAddModal"
           :disabled="!selectedKosId"
@@ -271,6 +274,12 @@
                   <span class="text-sm font-bold text-primary">{{ formatRupiah(kamar.harga) }}</span>
                   <span class="text-[11px] text-on-surface-variant"> / bulan</span>
                 </div>
+                <div v-if="kamar.harga_mingguan" class="text-[10px] font-semibold text-amber-700 mt-0.5">
+                  {{ formatRupiah(kamar.harga_mingguan) }} / minggu
+                </div>
+                <div v-if="kamar.harga_harian" class="text-[10px] font-semibold text-emerald-700 mt-0.5">
+                  {{ formatRupiah(kamar.harga_harian) }} / hari
+                </div>
               </td>
 
               <td class="py-4 px-space-md">
@@ -397,35 +406,123 @@
               </div>
             </div>
 
-            <!-- Harga Sewa & Status -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-on-surface">
-                  Harga Sewa per Bulan (Rp) <span class="text-rose-500">*</span>
+            <!-- Durasi Sewa & Tarif Kamar -->
+            <div class="p-4 bg-surface-container-low/40 rounded-xl border border-slate-200 space-y-3">
+              <div>
+                <label class="text-xs font-semibold text-on-surface flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px] text-primary">payments</span>
+                  <span>Tarif Sewa Riil & Durasi Unit Kamar</span>
                 </label>
-                <input
-                  v-model.number="formData.harga"
-                  type="number"
-                  min="100000"
-                  step="25000"
-                  required
-                  placeholder="750000"
-                  class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
+                <p class="text-[11px] text-on-surface-variant mt-0.5">
+                  Tentukan tarif sewa riil dan durasi yang berlaku untuk unit ini. Tarif terendah dari kamar-kamar Anda otomatis menjadi harga "Mulai Dari" pada profil listing kos.
+                </p>
               </div>
 
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-on-surface">Status Ketersediaan</label>
-                <div class="relative">
-                  <select
-                    v-model="formData.status"
-                    class="w-full h-11 pl-3.5 pr-9 bg-surface-container-low/40 rounded-lg text-xs text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  >
-                    <option value="tersedia">Tersedia (Siap Huni)</option>
-                    <option value="terisi">Terisi</option>
-                  </select>
-                  <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">arrow_drop_down</span>
+              <!-- Durasi Checkboxes -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition">
+                  <input
+                    type="checkbox"
+                    value="bulanan"
+                    v-model="formData.durasi_sewa"
+                    class="rounded text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <div>
+                    <span class="text-xs font-semibold text-slate-800 block">Bulanan</span>
+                    <span class="text-[10px] text-slate-400">Standar</span>
+                  </div>
+                </label>
+
+                <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition">
+                  <input
+                    type="checkbox"
+                    value="mingguan"
+                    v-model="formData.durasi_sewa"
+                    class="rounded text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <div>
+                    <span class="text-xs font-semibold text-slate-800 block">Mingguan</span>
+                    <span class="text-[10px] text-slate-400">Fleksibel</span>
+                  </div>
+                </label>
+
+                <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition">
+                  <input
+                    type="checkbox"
+                    value="harian"
+                    v-model="formData.durasi_sewa"
+                    class="rounded text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <div>
+                    <span class="text-xs font-semibold text-slate-800 block">Harian</span>
+                    <span class="text-[10px] text-slate-400">Transit</span>
+                  </div>
+                </label>
+              </div>
+
+              <!-- Tarif Inputs -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div class="flex flex-col gap-1">
+                  <label class="text-[11px] font-semibold text-on-surface">
+                    Tarif Bulanan (Rp) <span class="text-rose-500">*</span>
+                  </label>
+                  <input
+                    v-model.number="formData.harga"
+                    type="number"
+                    min="100000"
+                    step="25000"
+                    required
+                    placeholder="750000"
+                    class="h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
                 </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-[11px] font-semibold text-on-surface flex items-center justify-between">
+                    <span>Tarif Mingguan (Rp)</span>
+                    <span v-if="formData.durasi_sewa.includes('mingguan')" class="text-[9px] font-bold text-amber-600">Aktif</span>
+                  </label>
+                  <input
+                    v-model.number="formData.harga_mingguan"
+                    type="number"
+                    min="25000"
+                    step="25000"
+                    :disabled="!formData.durasi_sewa.includes('mingguan')"
+                    placeholder="Contoh: 300000"
+                    class="h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-slate-100 disabled:opacity-60"
+                  />
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-[11px] font-semibold text-on-surface flex items-center justify-between">
+                    <span>Tarif Harian (Rp)</span>
+                    <span v-if="formData.durasi_sewa.includes('harian')" class="text-[9px] font-bold text-amber-600">Aktif</span>
+                  </label>
+                  <input
+                    v-model.number="formData.harga_harian"
+                    type="number"
+                    min="10000"
+                    step="10000"
+                    :disabled="!formData.durasi_sewa.includes('harian')"
+                    placeholder="Contoh: 75000"
+                    class="h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-slate-100 disabled:opacity-60"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Status Ketersediaan -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-on-surface">Status Ketersediaan</label>
+              <div class="relative">
+                <select
+                  v-model="formData.status"
+                  class="w-full h-11 pl-3.5 pr-9 bg-surface-container-low/40 rounded-lg text-xs text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                >
+                  <option value="tersedia">Tersedia (Siap Huni)</option>
+                  <option value="terisi">Terisi</option>
+                </select>
+                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">arrow_drop_down</span>
               </div>
             </div>
 
@@ -562,6 +659,9 @@ const formData = ref({
   nama_kamar: '',
   ukuran: '3 x 4 m',
   harga: 750000,
+  harga_harian: null,
+  harga_mingguan: null,
+  durasi_sewa: ['bulanan'],
   status: 'tersedia',
   foto: [],
   fasilitas_kamar: ['Kasur', 'Kamar Mandi Dalam', 'AC', 'WiFi']
@@ -720,6 +820,11 @@ const openAddModal = () => {
     nama_kamar: `Kamar ${kamarList.value.length + 1}`,
     ukuran: '3 x 4 m',
     harga: currentKos.value?.harga || 750000,
+    harga_harian: currentKos.value?.harga_harian || null,
+    harga_mingguan: currentKos.value?.harga_mingguan || null,
+    durasi_sewa: Array.isArray(currentKos.value?.durasi_sewa) && currentKos.value.durasi_sewa.length > 0
+      ? [...currentKos.value.durasi_sewa]
+      : ['bulanan'],
     status: 'tersedia',
     foto: [],
     fasilitas_kamar: ['Kasur', 'Kamar Mandi Dalam', 'AC', 'WiFi']
@@ -734,6 +839,11 @@ const openEditModal = (kamar) => {
     nama_kamar: kamar.nama_kamar,
     ukuran: kamar.ukuran || '3 x 4 m',
     harga: kamar.harga,
+    harga_harian: kamar.harga_harian ?? null,
+    harga_mingguan: kamar.harga_mingguan ?? null,
+    durasi_sewa: Array.isArray(kamar.durasi_sewa) && kamar.durasi_sewa.length > 0
+      ? [...kamar.durasi_sewa]
+      : (Array.isArray(currentKos.value?.durasi_sewa) && currentKos.value.durasi_sewa.length > 0 ? [...currentKos.value.durasi_sewa] : ['bulanan']),
     status: kamar.status,
     foto: Array.isArray(kamar.foto) ? [...kamar.foto] : [],
     fasilitas_kamar: Array.isArray(kamar.fasilitas_kamar) && kamar.fasilitas_kamar.length > 0

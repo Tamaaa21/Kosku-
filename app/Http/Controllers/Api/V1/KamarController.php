@@ -38,11 +38,16 @@ class KamarController extends Controller
         $kamar = $kos->kamar()->create([
             'nama_kamar' => $validated['nama_kamar'],
             'harga' => $validated['harga'],
+            'harga_harian' => $validated['harga_harian'] ?? null,
+            'harga_mingguan' => $validated['harga_mingguan'] ?? null,
+            'durasi_sewa' => $validated['durasi_sewa'] ?? ['bulanan'],
             'status' => $validated['status'] ?? 'tersedia',
             'ukuran' => $validated['ukuran'] ?? null,
             'foto' => $validated['foto'] ?? null,
             'fasilitas_kamar' => $validated['fasilitas_kamar'] ?? null,
         ]);
+
+        $kos->syncPricesAndDurationsFromRooms();
 
         return response()->json([
             'message' => 'Kamar berhasil ditambahkan.',
@@ -59,6 +64,7 @@ class KamarController extends Controller
         Gate::authorize('update', $kamar);
 
         $kamar->update($request->validated());
+        $kamar->kos?->syncPricesAndDurationsFromRooms();
 
         return response()->json([
             'message' => 'Data kamar berhasil diperbarui.',
@@ -74,7 +80,9 @@ class KamarController extends Controller
         $kamar = Kamar::with('kos')->findOrFail($id);
         Gate::authorize('delete', $kamar);
 
+        $kos = $kamar->kos;
         $kamar->delete();
+        $kos?->syncPricesAndDurationsFromRooms();
 
         return response()->json([
             'message' => 'Kamar berhasil dihapus.',

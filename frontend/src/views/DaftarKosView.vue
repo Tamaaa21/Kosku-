@@ -264,9 +264,10 @@
                   <router-link :to="`/kos/${kos.id}`" class="text-base font-bold text-on-surface group-hover:text-primary transition-colors truncate">
                     {{ kos.nama }}
                   </router-link>
-                  <div class="flex items-center gap-1 text-on-surface text-xs">
+                  <div class="flex items-center gap-1 text-on-surface text-xs shrink-0">
                     <span class="material-symbols-outlined text-amber-500 text-sm select-none" style="font-variation-settings: 'FILL' 1;">star</span>
-                    <span class="font-semibold">4.8</span>
+                    <span class="font-semibold">{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : 'Baru' }}</span>
+                    <span v-if="kos.ulasan_count" class="text-[10px] text-slate-400 font-normal">({{ kos.ulasan_count }})</span>
                   </div>
                 </div>
 
@@ -296,6 +297,10 @@
                 <div>
                   <span class="text-base font-bold text-primary">{{ formatRupiah(kos.harga) }}</span>
                   <span class="text-xs text-on-surface-variant font-normal"> / bln</span>
+                  <div v-if="kos.harga_harian || kos.harga_mingguan" class="flex items-center gap-1 mt-0.5">
+                    <span v-if="kos.harga_harian" class="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">Bisa Harian</span>
+                    <span v-if="kos.harga_mingguan" class="text-[9px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">Mingguan</span>
+                  </div>
                 </div>
                 <router-link
                   :to="`/kos/${kos.id}`"

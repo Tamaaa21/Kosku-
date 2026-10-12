@@ -3,10 +3,20 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-space-md mb-8">
       <div>
-        <div class="flex items-center gap-1.5 text-primary text-xs font-bold uppercase tracking-wider mb-1">
-          <span class="material-symbols-outlined text-[16px]">domain</span>
-          <span>Manajemen Properti</span>
-        </div>
+        <!-- Breadcrumb Dinamis -->
+        <nav class="flex items-center gap-1.5 text-xs text-on-surface-variant mb-2">
+          <router-link to="/" class="hover:text-primary transition flex items-center gap-1">
+            <span class="material-symbols-outlined text-[15px]">home</span>
+            <span>Beranda</span>
+          </router-link>
+          <span class="text-slate-300">/</span>
+          <router-link to="/dashboard/pemilik" class="hover:text-primary transition">
+            Dashboard
+          </router-link>
+          <span class="text-slate-300">/</span>
+          <span class="font-semibold text-primary">Data Kos</span>
+        </nav>
+
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">Data Kos</h1>
         <p class="text-xs text-on-surface-variant mt-0.5">
           Kelola informasi kos, ketersediaan unit, dan detail operasional properti Anda di seluruh Indonesia.
@@ -14,13 +24,6 @@
       </div>
 
       <div class="flex items-center gap-3">
-        <router-link
-          to="/dashboard/pemilik"
-          class="h-10 px-4 rounded-lg bg-surface-container text-on-surface text-xs font-semibold flex items-center gap-1.5 hover:bg-surface-container-high transition shadow-sm"
-        >
-          <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-          <span>Dashboard</span>
-        </router-link>
         <button
           @click="openAddModal"
           class="h-10 px-5 rounded-lg bg-primary-container text-white text-xs font-semibold flex items-center gap-2 shadow-md hover:bg-primary transition active:scale-[0.98]"
@@ -189,12 +192,18 @@
                   <span class="text-[11px] text-on-surface-variant truncate max-w-xs mt-0.5">
                     {{ kos.deskripsi || 'Tidak ada deskripsi khusus' }}
                   </span>
-                  <div class="flex items-center gap-2 mt-1">
+                  <div class="flex items-center gap-2 mt-1 flex-wrap">
                     <span class="text-[10px] text-primary bg-surface-container-high px-2 py-0.5 rounded-full font-semibold">
                       {{ kos.kamar?.length || 0 }} Kamar
                     </span>
                     <span class="text-[10px] text-secondary font-medium">
                       Mulai {{ formatRupiah(kos.harga) }}/bln
+                    </span>
+                    <span
+                      v-if="kos.durasi_sewa && (kos.durasi_sewa.includes('harian') || kos.durasi_sewa.includes('mingguan'))"
+                      class="text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded"
+                    >
+                      Bisa {{ [kos.durasi_sewa.includes('harian') ? 'Harian' : '', kos.durasi_sewa.includes('mingguan') ? 'Mingguan' : ''].filter(Boolean).join(' & ') }}
                     </span>
                   </div>
                 </div>
@@ -383,32 +392,158 @@
               />
             </div>
 
-            <!-- Harga Mulai & Deskripsi -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-on-surface">
-                  Harga Mulai / Bulan (Rp) <span class="text-rose-500">*</span>
+            <!-- Opsi Durasi Sewa & Penentuan Tarif -->
+            <!-- Kondisi A: Kos sudah memiliki kamar terdaftar (Tarif dikelola otomatis oleh unit kamar) -->
+            <div v-if="isEditing && editKosKamarCount > 0" class="p-4 bg-emerald-50/80 rounded-xl border border-emerald-200/90 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-950">
+                  <span class="material-symbols-outlined text-[18px] text-emerald-600">sync_saved_locally</span>
+                  <span>Tarif & Durasi Otomatis Dikelola per Unit Kamar</span>
+                </div>
+                <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
+                  {{ editKosKamarCount }} Unit Kamar
+                </span>
+              </div>
+              <p class="text-[11px] text-emerald-800 leading-relaxed">
+                Properti ini memiliki <strong>{{ editKosKamarCount }} kamar</strong>. Tarif publik ("Mulai dari") otomatis diambil dari kamar termurah Anda (saat ini <strong>{{ formatRupiah(formData.harga) }}/bln</strong>), dan durasi sewa yang didukung dihitung otomatis dari kamar yang Anda miliki.
+              </p>
+              <div class="pt-2 border-t border-emerald-200/70 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-1.5 flex-wrap">
+                  <span class="text-[11px] text-emerald-800 font-medium">Durasi aktif:</span>
+                  <div class="flex items-center gap-1">
+                    <span
+                      v-for="d in formData.durasi_sewa"
+                      :key="d"
+                      class="text-[10px] font-bold uppercase px-1.5 py-0.5 rounded bg-white text-emerald-800 border border-emerald-200"
+                    >
+                      {{ d }}
+                    </span>
+                  </div>
+                </div>
+                <router-link
+                  :to="`/dashboard/pemilik/kamar?kos_id=${editKosId}`"
+                  class="text-xs font-bold text-emerald-900 hover:underline flex items-center gap-1 self-start sm:self-auto"
+                >
+                  <span>Atur Tarif & Durasi di Kelola Kamar</span>
+                  <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                </router-link>
+              </div>
+            </div>
+
+            <!-- Kondisi B: Kos Baru (Belum ada kamar), tentukan perkiraan tarif acuan awal -->
+            <div v-else class="p-4 bg-surface-container-low/40 rounded-xl border border-slate-200 space-y-3">
+              <div>
+                <label class="text-xs font-semibold text-on-surface flex items-center gap-1.5">
+                  <span class="material-symbols-outlined text-[16px] text-primary">price_change</span>
+                  <span>Perkiraan Tarif Acuan Awal (Mulai Dari Rp)</span>
                 </label>
-                <input
-                  v-model.number="formData.harga"
-                  type="number"
-                  min="100000"
-                  step="50000"
-                  required
-                  placeholder="750000"
-                  class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
+                <p class="text-[11px] text-on-surface-variant mt-0.5">
+                  Tentukan perkiraan tarif bulanan awal untuk properti ini. Begitu unit kamar ditambahkan di menu Kelola Kamar, tarif sewa riil dan pilihan durasi akan otomatis disinkronkan dari unit kamar.
+                </p>
               </div>
 
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-on-surface">Deskripsi Singkat</label>
-                <input
-                  v-model="formData.deskripsi"
-                  type="text"
-                  placeholder="Lingkungan tenang, aman, dekat kampus..."
-                  class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
+              <!-- Durasi Checkboxes Acuan -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition">
+                  <input
+                    type="checkbox"
+                    value="bulanan"
+                    v-model="formData.durasi_sewa"
+                    class="rounded text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <div>
+                    <span class="text-xs font-semibold text-slate-800 block">Bulanan</span>
+                    <span class="text-[10px] text-slate-400">Standar utama</span>
+                  </div>
+                </label>
+
+                <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition">
+                  <input
+                    type="checkbox"
+                    value="mingguan"
+                    v-model="formData.durasi_sewa"
+                    class="rounded text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <div>
+                    <span class="text-xs font-semibold text-slate-800 block">Mingguan</span>
+                    <span class="text-[10px] text-slate-400">Fleksibel</span>
+                  </div>
+                </label>
+
+                <label class="flex items-center gap-2 p-2.5 rounded-lg border border-slate-200 bg-white cursor-pointer hover:bg-slate-50 transition">
+                  <input
+                    type="checkbox"
+                    value="harian"
+                    v-model="formData.durasi_sewa"
+                    class="rounded text-primary focus:ring-primary h-4 w-4"
+                  />
+                  <div>
+                    <span class="text-xs font-semibold text-slate-800 block">Harian</span>
+                    <span class="text-[10px] text-slate-400">Singkat / transit</span>
+                  </div>
+                </label>
               </div>
+
+              <!-- Tarif Inputs Acuan -->
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+                <div class="flex flex-col gap-1">
+                  <label class="text-[11px] font-semibold text-on-surface">
+                    Perkiraan Bulanan (Rp) <span class="text-rose-500">*</span>
+                  </label>
+                  <input
+                    v-model.number="formData.harga"
+                    type="number"
+                    min="100000"
+                    step="50000"
+                    required
+                    placeholder="750000"
+                    class="h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                  />
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-[11px] font-semibold text-on-surface flex items-center justify-between">
+                    <span>Perkiraan Mingguan</span>
+                    <span v-if="formData.durasi_sewa.includes('mingguan')" class="text-[9px] font-bold text-amber-600">Aktif</span>
+                  </label>
+                  <input
+                    v-model.number="formData.harga_mingguan"
+                    type="number"
+                    min="25000"
+                    step="25000"
+                    :disabled="!formData.durasi_sewa.includes('mingguan')"
+                    placeholder="Contoh: 300000"
+                    class="h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-slate-100 disabled:opacity-60"
+                  />
+                </div>
+
+                <div class="flex flex-col gap-1">
+                  <label class="text-[11px] font-semibold text-on-surface flex items-center justify-between">
+                    <span>Perkiraan Harian</span>
+                    <span v-if="formData.durasi_sewa.includes('harian')" class="text-[9px] font-bold text-amber-600">Aktif</span>
+                  </label>
+                  <input
+                    v-model.number="formData.harga_harian"
+                    type="number"
+                    min="10000"
+                    step="10000"
+                    :disabled="!formData.durasi_sewa.includes('harian')"
+                    placeholder="Contoh: 75000"
+                    class="h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-slate-100 disabled:opacity-60"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <!-- Deskripsi Singkat -->
+            <div class="flex flex-col gap-1.5">
+              <label class="text-xs font-semibold text-on-surface">Deskripsi Singkat</label>
+              <input
+                v-model="formData.deskripsi"
+                type="text"
+                placeholder="Lingkungan tenang, aman, dekat kampus..."
+                class="h-11 px-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
             </div>
 
             <!-- Unggah Foto Kos (Maksimal 5 Foto, Maksimal 2MB per Foto) -->
@@ -601,6 +736,7 @@ const selectedJenis = ref('')
 const showModal = ref(false)
 const isEditing = ref(false)
 const editKosId = ref(null)
+const editKosKamarCount = ref(0)
 const locationPickerRef = ref(null)
 
 const standardRules = [
@@ -622,6 +758,9 @@ const formData = ref({
   alamat: '',
   deskripsi: '',
   harga: 750000,
+  harga_harian: null,
+  harga_mingguan: null,
+  durasi_sewa: ['bulanan'],
   latitude: null,
   longitude: null,
   peraturan: [],
@@ -791,12 +930,16 @@ const resetFilters = () => {
 const openAddModal = () => {
   isEditing.value = false
   editKosId.value = null
+  editKosKamarCount.value = 0
   formData.value = {
     nama: '',
     jenis: 'putri',
     alamat: '',
     deskripsi: '',
     harga: 750000,
+    harga_harian: null,
+    harga_mingguan: null,
+    durasi_sewa: ['bulanan'],
     latitude: null,
     longitude: null,
     peraturan: [
@@ -816,12 +959,16 @@ const openAddModal = () => {
 const openEditModal = (kos) => {
   isEditing.value = true
   editKosId.value = kos.id
+  editKosKamarCount.value = (kos.kamar || []).length
   formData.value = {
     nama: kos.nama,
     jenis: kos.jenis,
     alamat: kos.alamat,
     deskripsi: kos.deskripsi || '',
     harga: kos.harga,
+    harga_harian: kos.harga_harian ?? null,
+    harga_mingguan: kos.harga_mingguan ?? null,
+    durasi_sewa: Array.isArray(kos.durasi_sewa) && kos.durasi_sewa.length > 0 ? [...kos.durasi_sewa] : ['bulanan'],
     latitude: kos.latitude || null,
     longitude: kos.longitude || null,
     peraturan: Array.isArray(kos.peraturan) ? [...kos.peraturan] : [],

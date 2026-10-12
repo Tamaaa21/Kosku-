@@ -1026,8 +1026,11 @@
                 </td>
                 <td class="py-3.5 px-4">
                   <div class="font-bold text-emerald-700 text-xs">{{ b.kamar?.nama_kamar || '-' }}</div>
-                  <div class="text-[11px] font-mono font-semibold text-slate-600 mt-0.5">
-                    {{ b.kamar?.harga ? formatRupiah(b.kamar.harga) : '-' }}/bln
+                  <div class="text-[11px] font-mono font-bold text-slate-800 mt-0.5">
+                    {{ formatRupiah(b.total_harga || b.kamar?.harga) }}
+                  </div>
+                  <div class="text-[10px] text-slate-400">
+                    Durasi: {{ formatDurasiOrder(b) }}
                   </div>
                 </td>
                 <td class="py-3.5 px-4">
@@ -1299,14 +1302,24 @@
             </div>
 
             <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100">
-              <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Kamar & Tarif Sewa</span>
+              <span class="text-[10px] font-bold uppercase text-slate-400 block mb-1">Kamar & Rincian Transaksi</span>
               <p class="font-bold text-emerald-700 text-xs">{{ selectedBookingDetail?.kamar?.nama_kamar || '-' }}</p>
-              <p class="text-sm font-extrabold text-slate-900 mt-0.5">
-                {{ selectedBookingDetail?.kamar?.harga ? formatRupiah(selectedBookingDetail.kamar.harga) : '-' }}<span class="text-[10px] text-slate-400 font-normal">/bln</span>
-              </p>
-              <p class="text-[10px] text-slate-500 mt-2">
-                Rencana Masuk: <span class="font-semibold text-slate-700">{{ formatDateOnly(selectedBookingDetail?.tanggal_pemesanan) }}</span>
-              </p>
+              <div class="flex items-center justify-between mt-1 text-xs">
+                <span class="text-slate-500">Durasi Sewa:</span>
+                <span class="font-bold text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200">
+                  {{ formatDurasiOrder(selectedBookingDetail) }}
+                </span>
+              </div>
+              <div class="flex items-center justify-between mt-1 text-xs">
+                <span class="text-slate-500">Total Biaya:</span>
+                <span class="font-extrabold text-primary">
+                  {{ formatRupiah(selectedBookingDetail?.total_harga || selectedBookingDetail?.kamar?.harga) }}
+                </span>
+              </div>
+              <div class="text-[10px] text-slate-500 mt-2 border-t border-slate-200/60 pt-1.5 space-y-0.5">
+                <div>Rencana Masuk: <span class="font-semibold text-slate-700">{{ formatDateOnly(selectedBookingDetail?.tanggal_pemesanan || selectedBookingDetail?.tanggal_mulai) }}</span></div>
+                <div v-if="selectedBookingDetail?.tanggal_selesai">Selesai: <span class="font-semibold text-slate-700">{{ formatDateOnly(selectedBookingDetail?.tanggal_selesai) }}</span></div>
+              </div>
             </div>
           </div>
 
@@ -1973,13 +1986,23 @@ const chatPenyewaWhatsApp = (booking) => {
   openWhatsAppChat(phone, message)
 }
 
+const formatDurasiOrder = (b) => {
+  if (!b) return '-'
+  if (b.durasi_tipe && b.durasi_jumlah) {
+    const unit = b.durasi_tipe.charAt(0).toUpperCase() + b.durasi_tipe.slice(1)
+    return `${b.durasi_jumlah} ${unit}`
+  }
+  const bln = b.durasi_sewa_bulan || b.durasi_bulan || 1
+  return `${bln} Bulan`
+}
+
 const exportBookingsToCSV = () => {
   if (allBookings.value.length === 0) {
     alert('Tidak ada data pemesanan untuk diekspor.')
     return
   }
 
-  const headers = ['ID Pesanan', 'Nama Penyewa', 'Email', 'Telepon', 'Nama Kos', 'Nama Kamar', 'Tarif Sewa', 'Tanggal Masuk', 'Status', 'Tanggal Pengajuan']
+  const headers = ['ID Pesanan', 'Nama Penyewa', 'Email', 'Telepon', 'Nama Kos', 'Nama Kamar', 'Durasi Sewa', 'Total Biaya', 'Tanggal Masuk', 'Tanggal Selesai', 'Status', 'Tanggal Pengajuan']
   const rows = allBookings.value.map(b => [
     `#ORD-${b.id}`,
     `"${(b.pengguna?.nama || '-').replace(/"/g, '""')}"`,
@@ -1987,8 +2010,10 @@ const exportBookingsToCSV = () => {
     `"${(b.pengguna?.telepon || '-').replace(/"/g, '""')}"`,
     `"${(b.kos?.nama || '-').replace(/"/g, '""')}"`,
     `"${(b.kamar?.nama_kamar || '-').replace(/"/g, '""')}"`,
-    b.kamar?.harga || 0,
-    b.tanggal_pemesanan || '-',
+    `"${formatDurasiOrder(b)}"`,
+    b.total_harga || b.kamar?.harga || 0,
+    b.tanggal_pemesanan || b.tanggal_mulai || '-',
+    b.tanggal_selesai || '-',
     b.status || '-',
     b.created_at ? new Date(b.created_at).toLocaleString('id-ID') : '-',
   ])
