@@ -104,11 +104,33 @@ class PemesananController extends Controller
                 return false;
             }
 
+            $durasiTipe = $validated['durasi_tipe'] ?? 'bulanan';
+            $durasiJumlah = (int) ($validated['durasi_jumlah'] ?? 1);
+            $startDate = Carbon::parse($validated['tanggal_pemesanan']);
+
+            $endDate = match ($durasiTipe) {
+                'harian' => (clone $startDate)->addDays($durasiJumlah),
+                'mingguan' => (clone $startDate)->addWeeks($durasiJumlah),
+                default => (clone $startDate)->addMonths($durasiJumlah),
+            };
+
+            $rate = match ($durasiTipe) {
+                'harian' => $kamar->harga_harian ?: (int) ceil($kamar->harga / 30),
+                'mingguan' => $kamar->harga_mingguan ?: (int) ceil($kamar->harga / 4),
+                default => $kamar->harga,
+            };
+
+            $totalHarga = $rate * $durasiJumlah;
+
             return Pemesanan::create([
                 'pengguna_id' => $user->id,
                 'kos_id' => $kamar->kos_id,
                 'kamar_id' => $kamar->id,
                 'tanggal_pemesanan' => $validated['tanggal_pemesanan'],
+                'durasi_tipe' => $durasiTipe,
+                'durasi_jumlah' => $durasiJumlah,
+                'tanggal_selesai' => $endDate->format('Y-m-d'),
+                'total_harga' => $totalHarga,
                 'status' => 'menunggu',
             ]);
         });

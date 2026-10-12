@@ -119,6 +119,9 @@ class KosController extends Controller
             'deskripsi' => $validated['deskripsi'] ?? null,
             'jenis' => $validated['jenis'],
             'harga' => $validated['harga'],
+            'harga_harian' => $validated['harga_harian'] ?? null,
+            'harga_mingguan' => $validated['harga_mingguan'] ?? null,
+            'durasi_sewa' => $validated['durasi_sewa'] ?? ['bulanan'],
             'latitude' => $latitude,
             'longitude' => $longitude,
             'peraturan' => $validated['peraturan'] ?? null,
@@ -142,7 +145,7 @@ class KosController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $kos = Kos::with(['pemilik', 'fasilitas', 'kamar'])->findOrFail($id);
+        $kos = Kos::with(['pemilik', 'fasilitas', 'kamar', 'ulasan.pengguna'])->findOrFail($id);
 
         return response()->json([
             'data' => new KosResource($kos),

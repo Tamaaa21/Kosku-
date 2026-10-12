@@ -25,6 +25,10 @@ class UpdateKamarRequest extends FormRequest
         return [
             'nama_kamar' => ['sometimes', 'required', 'string', 'max:50'],
             'harga' => ['sometimes', 'required', 'integer', 'min:0'],
+            'harga_harian' => ['nullable', 'integer', 'min:0'],
+            'harga_mingguan' => ['nullable', 'integer', 'min:0'],
+            'durasi_sewa' => ['nullable', 'array'],
+            'durasi_sewa.*' => ['string', 'in:harian,mingguan,bulanan'],
             'status' => ['sometimes', 'required', 'in:tersedia,terisi'],
             'ukuran' => ['nullable', 'string', 'max:30'],
             'foto' => ['nullable', 'array', 'max:5'],

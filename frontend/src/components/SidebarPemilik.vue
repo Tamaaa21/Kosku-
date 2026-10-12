@@ -146,9 +146,9 @@
         <!-- Breadcrumb / Location Indicator -->
         <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
           <span class="material-symbols-outlined text-[18px] text-primary">storefront</span>
-          <span class="hidden sm:inline">Panel Kelola Properti</span>
+          <span class="hidden sm:inline">Mitra Pemilik</span>
           <span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
-          <span class="font-bold text-on-surface">Indonesia</span>
+          <span class="font-bold text-on-surface">{{ currentPageTitle }}</span>
         </div>
       </div>
 
@@ -156,14 +156,6 @@
       <div class="flex items-center gap-3">
         <!-- Notification Dropdown -->
         <NotificationDropdown />
-
-        <router-link
-          to="/dashboard/pemilik/kos"
-          class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary-container text-white hover:bg-primary transition shadow-xs"
-        >
-          <span class="material-symbols-outlined text-[16px]">add</span>
-          <span>Tambah Kos</span>
-        </router-link>
 
         <router-link
           to="/profil"
@@ -183,14 +175,23 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, computed } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import NotificationDropdown from './NotificationDropdown.vue'
 
 const auth = useAuthStore()
+const route = useRoute()
 const router = useRouter()
 const isMobileOpen = ref(false)
+
+const currentPageTitle = computed(() => {
+  if (route.path.includes('/dashboard/pemilik/kos')) return 'Kelola Data Kos'
+  if (route.path.includes('/dashboard/pemilik/kamar')) return 'Kelola Data Kamar'
+  if (route.path.includes('/dashboard/pemilik/pemesanan')) return 'Permintaan Sewa'
+  if (route.path === '/dashboard/pemilik') return 'Ringkasan Eksekutif'
+  return 'Portal Mitra Pemilik'
+})
 
 const handleLogout = async () => {
   isMobileOpen.value = false

@@ -26,6 +26,9 @@ class Kamar extends Model
     {
         return [
             'harga' => 'integer',
+            'harga_harian' => 'integer',
+            'harga_mingguan' => 'integer',
+            'durasi_sewa' => 'array',
             'foto' => 'array',
             'fasilitas_kamar' => 'array',
         ];

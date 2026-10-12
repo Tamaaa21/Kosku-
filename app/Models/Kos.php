@@ -27,6 +27,9 @@ class Kos extends Model
     {
         return [
             'harga' => 'integer',
+            'harga_harian' => 'integer',
+            'harga_mingguan' => 'integer',
+            'durasi_sewa' => 'array',
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
             'peraturan' => 'array',
@@ -53,5 +56,51 @@ class Kos extends Model
     public function pemesanan(): HasMany
     {
         return $this->hasMany(Pemesanan::class, 'kos_id');
+    }
+
+    public function ulasan(): HasMany
+    {
+        return $this->hasMany(Ulasan::class, 'kos_id');
+    }
+
+    public function getRatingRataRataAttribute(): ?float
+    {
+        $avg = $this->ulasan()->avg('rating');
+
+        return $avg !== null ? round((float) $avg, 1) : null;
+    }
+
+    public function getUlasanCountAttribute(): int
+    {
+        return (int) $this->ulasan()->count();
+    }
+
+    /**
+     * Synchronize minimum starting prices and available durations from associated rooms.
+     */
+    public function syncPricesAndDurationsFromRooms(): void
+    {
+        $rooms = $this->kamar()->get();
+
+        if ($rooms->isNotEmpty()) {
+            $minHarga = $rooms->min('harga');
+            $minHarian = $rooms->whereNotNull('harga_harian')->min('harga_harian');
+            $minMingguan = $rooms->whereNotNull('harga_mingguan')->min('harga_mingguan');
+
+            $allDurations = [];
+            foreach ($rooms as $room) {
+                if (is_array($room->durasi_sewa)) {
+                    $allDurations = array_merge($allDurations, $room->durasi_sewa);
+                }
+            }
+            $durations = ! empty($allDurations) ? array_values(array_unique($allDurations)) : ['bulanan'];
+
+            $this->update([
+                'harga' => $minHarga ?? $this->harga,
+                'harga_harian' => $minHarian,
+                'harga_mingguan' => $minMingguan,
+                'durasi_sewa' => $durations,
+            ]);
+        }
     }
 }

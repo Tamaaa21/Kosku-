@@ -10,10 +10,14 @@
         <span>Kembali ke Detail Kos</span>
       </router-link>
 
-      <div class="hidden sm:flex items-center gap-space-xs text-on-surface-variant text-xs">
-        <span>Detail Kos</span>
+      <div class="hidden sm:flex items-center gap-space-xs text-on-surface-variant text-xs flex-wrap">
+        <router-link to="/" class="hover:text-primary">Beranda</router-link>
         <span class="material-symbols-outlined text-xs">chevron_right</span>
-        <span class="text-primary font-semibold">Pengajuan Sewa</span>
+        <router-link to="/kos" class="hover:text-primary">Daftar Kos</router-link>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <router-link :to="`/kos/${kos?.id}`" class="hover:text-primary truncate max-w-[150px] font-medium">{{ kos?.nama || 'Detail Kos' }}</router-link>
+        <span class="material-symbols-outlined text-xs">chevron_right</span>
+        <span class="text-primary font-semibold">Pengajuan Sewa (Kamar {{ kamar?.nama_kamar }})</span>
       </div>
     </div>
 
@@ -52,7 +56,8 @@
             </span>
             <span class="absolute bottom-space-sm right-space-sm px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container-lowest/90 backdrop-blur-sm text-on-surface flex items-center gap-1 shadow-sm">
               <span class="material-symbols-outlined text-xs text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
-              <span>4.8 (Terverifikasi)</span>
+              <span>{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : 'Baru' }}</span>
+              <span v-if="kos.ulasan_count" class="text-slate-400 font-normal">({{ kos.ulasan_count }} ulasan)</span>
             </span>
           </div>
 
@@ -169,11 +174,73 @@
               <p class="text-[11px] text-on-surface-variant mt-1">Pilih tanggal mulai menetap di kamar kos ini.</p>
             </div>
 
-            <div>
-              <label class="block text-xs font-semibold text-on-surface mb-1">Durasi Sewa</label>
-              <select class="w-full text-xs rounded-lg border-slate-200 bg-slate-50 p-2.5" disabled>
-                <option value="1">1 Bulan (Perpanjangan otomatis setiap bulan)</option>
-              </select>
+            <!-- Pilihan Durasi & Jumlah Durasi -->
+            <div class="space-y-3 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="block text-xs font-semibold text-on-surface mb-1">
+                    Tipe Durasi Sewa <span class="text-error">*</span>
+                  </label>
+                  <select
+                    v-model="form.durasi_tipe"
+                    class="w-full text-xs rounded-lg border-slate-200 bg-white focus:ring-primary focus:border-primary p-2.5"
+                  >
+                    <option
+                      v-for="opt in availableDurationOptions"
+                      :key="opt.value"
+                      :value="opt.value"
+                    >
+                      {{ opt.label }}
+                    </option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-on-surface mb-1">
+                    Jumlah Durasi ({{ form.durasi_tipe }}) <span class="text-error">*</span>
+                  </label>
+                  <div class="flex items-center">
+                    <button
+                      type="button"
+                      @click="form.durasi_jumlah = Math.max(1, form.durasi_jumlah - 1)"
+                      class="px-3 py-2 bg-slate-200 hover:bg-slate-300 rounded-l-lg text-xs font-bold text-slate-700 transition"
+                    >
+                      -
+                    </button>
+                    <input
+                      type="number"
+                      v-model.number="form.durasi_jumlah"
+                      min="1"
+                      max="365"
+                      required
+                      class="w-full text-center text-xs border-y border-slate-200 p-2 bg-white font-bold"
+                    />
+                    <button
+                      type="button"
+                      @click="form.durasi_jumlah = form.durasi_jumlah + 1"
+                      class="px-3 py-2 bg-slate-200 hover:bg-slate-300 rounded-r-lg text-xs font-bold text-slate-700 transition"
+                    >
+                      +
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Rincian Perhitungan Biaya -->
+              <div class="pt-2 border-t border-slate-200/80 space-y-1.5 text-xs text-slate-600">
+                <div class="flex justify-between">
+                  <span>Tarif per {{ form.durasi_tipe }}:</span>
+                  <span class="font-bold text-slate-900">{{ formatRupiah(ratePerUnit) }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span>Perkiraan Selesai (Check-out):</span>
+                  <span class="font-bold text-slate-900">{{ estimatedEndDate }}</span>
+                </div>
+                <div class="flex justify-between pt-1 border-t border-dashed border-slate-300 text-sm font-extrabold text-primary">
+                  <span>Total Estimasi Biaya:</span>
+                  <span>{{ formatRupiah(totalEstimatedPrice) }}</span>
+                </div>
+              </div>
             </div>
 
             <div class="pt-2">
@@ -226,6 +293,56 @@ const todayDate = computed(() => {
 
 const form = reactive({
   tanggal_pemesanan: new Date().toISOString().split('T')[0],
+  durasi_tipe: route.query.durasi || 'bulanan',
+  durasi_jumlah: 1,
+})
+
+const availableDurationOptions = computed(() => {
+  const options = [{ value: 'bulanan', label: `Bulanan (${formatRupiah(kamar.value?.harga || 0)} / bln)` }]
+  const roomDurations = kamar.value?.durasi_sewa || kos.value?.durasi_sewa || ['bulanan']
+
+  if (roomDurations.includes('mingguan') || kamar.value?.harga_mingguan) {
+    options.push({
+      value: 'mingguan',
+      label: `Mingguan (${formatRupiah(kamar.value?.harga_mingguan || Math.ceil((kamar.value?.harga || 0) / 4))} / mgg)`
+    })
+  }
+  if (roomDurations.includes('harian') || kamar.value?.harga_harian) {
+    options.push({
+      value: 'harian',
+      label: `Harian (${formatRupiah(kamar.value?.harga_harian || Math.ceil((kamar.value?.harga || 0) / 30))} / hari)`
+    })
+  }
+  return options
+})
+
+const ratePerUnit = computed(() => {
+  if (!kamar.value) return 0
+  if (form.durasi_tipe === 'harian') {
+    return kamar.value.harga_harian || Math.ceil(kamar.value.harga / 30)
+  }
+  if (form.durasi_tipe === 'mingguan') {
+    return kamar.value.harga_mingguan || Math.ceil(kamar.value.harga / 4)
+  }
+  return kamar.value.harga
+})
+
+const totalEstimatedPrice = computed(() => {
+  return ratePerUnit.value * (Number(form.durasi_jumlah) || 1)
+})
+
+const estimatedEndDate = computed(() => {
+  if (!form.tanggal_pemesanan) return '-'
+  const d = new Date(form.tanggal_pemesanan)
+  const count = Number(form.durasi_jumlah) || 1
+  if (form.durasi_tipe === 'harian') {
+    d.setDate(d.getDate() + count)
+  } else if (form.durasi_tipe === 'mingguan') {
+    d.setDate(d.getDate() + (count * 7))
+  } else {
+    d.setMonth(d.getMonth() + count)
+  }
+  return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
 })
 
 const formatJenis = (jenis) => {
@@ -245,6 +362,8 @@ const submitBooking = async () => {
     await api.post('/pemesanan', {
       kamar_id: Number(route.params.kamarId),
       tanggal_pemesanan: form.tanggal_pemesanan,
+      durasi_tipe: form.durasi_tipe,
+      durasi_jumlah: Number(form.durasi_jumlah),
     })
     alert('Permohonan pemesanan kamar berhasil diajukan! Anda dapat memantau statusnya di halaman Riwayat Pesanan.')
     router.push('/pesanan')

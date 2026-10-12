@@ -5,7 +5,7 @@
       <router-link to="/" class="hover:text-primary transition-colors">Beranda</router-link>
       <span class="material-symbols-outlined text-sm">chevron_right</span>
       <span class="text-on-surface font-semibold">
-        {{ auth.isPemilik ? 'Kelola Pemesanan' : 'Riwayat Pemesanan' }}
+        {{ auth.isPemilik ? 'Portal Kelola Pemesanan' : 'Riwayat Sewa & Pemesanan' }}
       </span>
     </div>
 
@@ -158,10 +158,14 @@
               </div>
 
               <!-- Schedule & Details -->
-              <div class="flex flex-wrap items-center gap-y-1 gap-x-3 pt-1 text-on-surface-variant text-xs">
+              <div class="flex flex-wrap items-center gap-y-1 gap-x-2 pt-1 text-on-surface-variant text-xs">
                 <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded">
                   <span class="material-symbols-outlined text-xs text-outline">calendar_today</span>
                   <span>Masuk: <strong class="text-on-surface font-semibold">{{ formatDateOnly(item.tanggal_pemesanan) }}</strong></span>
+                </div>
+                <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded">
+                  <span class="material-symbols-outlined text-xs text-outline">schedule</span>
+                  <span>Durasi: <strong class="text-on-surface font-semibold capitalize">{{ item.durasi_jumlah || 1 }} {{ item.durasi_tipe || 'bulan' }}</strong></span>
                 </div>
                 <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded">
                   <span class="material-symbols-outlined text-xs text-outline">meeting_room</span>
@@ -196,12 +200,23 @@
 
             <div class="text-left md:text-right">
               <span class="text-[11px] text-on-surface-variant block">Total Biaya:</span>
-              <span class="text-lg font-black text-primary">{{ formatRupiah(item.kamar?.harga || item.kos?.harga) }}</span>
-              <span class="text-[11px] text-on-surface-variant"> / bulan</span>
+              <span class="text-lg font-black text-primary">{{ formatRupiah(item.total_harga || item.kamar?.harga || item.kos?.harga) }}</span>
+              <span class="text-[11px] text-on-surface-variant"> ({{ item.durasi_jumlah || 1 }} {{ item.durasi_tipe || 'bulan' }})</span>
             </div>
 
             <!-- Action Buttons -->
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap justify-end">
+              <!-- If PENCARI & status disetujui: tombol Beri Ulasan -->
+              <router-link
+                v-if="!auth.isPemilik && item.status === 'disetujui' && item.kos_id"
+                :to="{ path: `/kos/${item.kos_id}`, query: { tab: 'ulasan' } }"
+                class="text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-xs"
+                title="Beri ulasan dan rating untuk kos ini"
+              >
+                <span class="material-symbols-outlined text-[16px] text-amber-600" style="font-variation-settings: 'FILL' 1;">star</span>
+                <span>Beri Ulasan</span>
+              </router-link>
+
               <!-- If PEMILIK: Approve / Reject buttons for pending bookings -->
               <template v-if="auth.isPemilik">
                 <div v-if="item.status === 'menunggu'" class="flex items-center gap-2">

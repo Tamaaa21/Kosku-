@@ -25,6 +25,8 @@ class StorePemesananRequest extends FormRequest
         return [
             'kamar_id' => ['required', 'integer', 'exists:kamar,id'],
             'tanggal_pemesanan' => ['required', 'date', 'after_or_equal:today'],
+            'durasi_tipe' => ['nullable', 'string', 'in:harian,mingguan,bulanan'],
+            'durasi_jumlah' => ['nullable', 'integer', 'min:1', 'max:365'],
         ];
     }
 }
