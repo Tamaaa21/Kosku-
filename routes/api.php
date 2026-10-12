@@ -47,9 +47,11 @@ Route::prefix('v1')->group(function (): void {
         Route::get('/pemesanan/{id}', [PemesananController::class, 'show']);
         Route::patch('/pemesanan/{id}/status', [PemesananController::class, 'updateStatus']);
 
-        // Master Fasilitas (Admin Only)
+        // Master Fasilitas (Admin & Pemilik dapat mendaftarkan fasilitas kos)
+        Route::post('/fasilitas', [FasilitasController::class, 'store'])->middleware('role:pemilik,admin');
+
+        // Master Fasilitas & Manajemen Pengguna (Admin Only)
         Route::middleware('role:admin')->group(function (): void {
-            Route::post('/fasilitas', [FasilitasController::class, 'store']);
             Route::put('/fasilitas/{id}', [FasilitasController::class, 'update']);
             Route::delete('/fasilitas/{id}', [FasilitasController::class, 'destroy']);
 

@@ -11,6 +11,7 @@ use App\Models\Pemesanan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
@@ -22,7 +23,7 @@ class PemesananController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $user = $request->user();
-        $query = Pemesanan::with(['pengguna', 'kos', 'kamar'])->latest();
+        $query = Pemesanan::with(['pengguna', 'kos.pemilik', 'kamar'])->latest();
 
         if ($user->role === 'pencari') {
             $query->where('pengguna_id', $user->id);
@@ -33,11 +34,43 @@ class PemesananController extends Controller
         }
         // Admin dapat melihat seluruh pemesanan
 
-        if ($request->filled('status')) {
+        // Filter: pencarian teks (ID booking, nama pemesan, email, telepon, nama kos, atau nama kamar)
+        if ($request->filled('q')) {
+            $keyword = (string) $request->input('q');
+            $cleanDigits = preg_replace('/\D/', '', $keyword);
+
+            $query->where(function ($q) use ($keyword, $cleanDigits) {
+                if (! empty($cleanDigits)) {
+                    $q->orWhere('id', (int) $cleanDigits);
+                }
+                $q->orWhereHas('pengguna', function ($u) use ($keyword) {
+                    $u->where('nama', 'like', "%{$keyword}%")
+                        ->orWhere('email', 'like', "%{$keyword}%")
+                        ->orWhere('telepon', 'like', "%{$keyword}%");
+                })->orWhereHas('kos', function ($k) use ($keyword) {
+                    $k->where('nama', 'like', "%{$keyword}%");
+                })->orWhereHas('kamar', function ($r) use ($keyword) {
+                    $r->where('nama_kamar', 'like', "%{$keyword}%");
+                });
+            });
+        }
+
+        // Filter: status pemesanan
+        if ($request->filled('status') && $request->input('status') !== 'all') {
             $query->where('status', $request->input('status'));
         }
 
-        $perPage = min(max((int) $request->input('per_page', 15), 1), 100);
+        // Filter: periode waktu tanggal pemesanan
+        if ($request->filled('periode') && $request->input('periode') !== 'all') {
+            match ($request->input('periode')) {
+                'today' => $query->whereDate('created_at', Carbon::today()),
+                '7d' => $query->where('created_at', '>=', Carbon::today()->subDays(6)->startOfDay()),
+                '30d' => $query->where('created_at', '>=', Carbon::today()->subDays(29)->startOfDay()),
+                default => null,
+            };
+        }
+
+        $perPage = min(max((int) $request->input('per_page', 50), 1), 100);
         $pemesananList = $query->paginate($perPage);
 
         return PemesananResource::collection($pemesananList);

@@ -62,29 +62,18 @@
             <span class="flex-1">Ringkasan & Analitik</span>
           </router-link>
 
-          <!-- 2. Kelola Pencari Kos -->
+          <!-- 2. Manajemen Pengguna (Terpadu: Mitra Pemilik & Pencari) -->
           <router-link
-            :to="{ path: '/dashboard/admin', query: { tab: 'pencari' } }"
+            :to="{ path: '/dashboard/admin', query: { tab: 'pengguna' } }"
             @click="isMobileOpen = false"
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="($route.path === '/dashboard/admin' && $route.query.tab === 'pencari') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+            :class="($route.path === '/dashboard/admin' && ($route.query.tab === 'pengguna' || $route.query.tab === 'pencari' || $route.query.tab === 'pemilik')) ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">person_search</span>
-            <span class="flex-1">Kelola Pencari Kos</span>
+            <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+            <span class="flex-1">Manajemen Pengguna</span>
           </router-link>
 
-          <!-- 3. Kelola Mitra Pemilik -->
-          <router-link
-            :to="{ path: '/dashboard/admin', query: { tab: 'pemilik' } }"
-            @click="isMobileOpen = false"
-            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="($route.path === '/dashboard/admin' && $route.query.tab === 'pemilik') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            <span class="material-symbols-outlined text-[20px]">real_estate_agent</span>
-            <span class="flex-1">Kelola Mitra Pemilik</span>
-          </router-link>
-
-          <!-- 4. Data & Moderasi Kos (Modul 4) -->
+          <!-- 3. Data & Moderasi Kos -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'kos' } }"
             @click="isMobileOpen = false"
@@ -95,18 +84,7 @@
             <span class="flex-1">Data & Moderasi Kos</span>
           </router-link>
 
-          <!-- 5. Master Fasilitas -->
-          <router-link
-            :to="{ path: '/dashboard/admin', query: { tab: 'fasilitas' } }"
-            @click="isMobileOpen = false"
-            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="($route.path === '/dashboard/admin' && $route.query.tab === 'fasilitas') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            <span class="material-symbols-outlined text-[20px]">pool</span>
-            <span class="flex-1">Master Fasilitas</span>
-          </router-link>
-
-          <!-- 5. Log Seluruh Pemesanan -->
+          <!-- 4. Audit Log Pemesanan -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'pemesanan' } }"
             @click="isMobileOpen = false"
@@ -114,39 +92,17 @@
             :class="($route.path === '/dashboard/admin' && $route.query.tab === 'pemesanan') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
             <span class="material-symbols-outlined text-[20px]">receipt_long</span>
-            <span class="flex-1">Log Pemesanan</span>
+            <span class="flex-1">Audit Log Pemesanan</span>
           </router-link>
 
-          <!-- 6. Katalog Kos Publik -->
-          <router-link
-            to="/kos"
-            @click="isMobileOpen = false"
-            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="$route.path === '/kos' ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            <span class="material-symbols-outlined text-[20px]">apartment</span>
-            <span class="flex-1">Katalog Data Kos</span>
-          </router-link>
-
-          <!-- 7. Peta Lokasi Interaktif -->
-          <router-link
-            to="/peta"
-            @click="isMobileOpen = false"
-            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="$route.path === '/peta' ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            <span class="material-symbols-outlined text-[20px]">map</span>
-            <span class="flex-1">Peta Lokasi</span>
-          </router-link>
-
-          <!-- 8. Profil Admin -->
+          <!-- 5. Profil Admin -->
           <router-link
             to="/profil"
             @click="isMobileOpen = false"
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="$route.path === '/profil' ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+            <span class="material-symbols-outlined text-[20px]">shield_person</span>
             <span class="flex-1">Profil Administrator</span>
           </router-link>
         </nav>
@@ -176,34 +132,38 @@
 
     <!-- Top Bar Header for Admin (Spans right of sidebar) -->
     <header class="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-md border-b border-surface-container-high/40 z-30 px-4 sm:px-6 flex items-center justify-between shadow-xs">
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 min-w-0">
         <!-- Hamburger Button (Mobile Only) -->
         <button
           @click="isMobileOpen = true"
-          class="lg:hidden p-2 rounded-lg text-on-surface hover:bg-surface-container transition"
+          class="lg:hidden p-2 rounded-lg text-on-surface hover:bg-surface-container transition shrink-0"
           type="button"
           aria-label="Buka Menu Sidebar"
         >
           <span class="material-symbols-outlined text-[22px]">menu</span>
         </button>
 
-        <!-- Breadcrumb / Location Indicator -->
-        <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
-          <span class="material-symbols-outlined text-[18px] text-slate-700">security</span>
-          <span class="hidden sm:inline">Admin Panel</span>
-          <span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
-          <span class="font-bold text-on-surface">System Control</span>
+        <!-- Title & Subtitle in Header -->
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="flex items-center gap-2 shrink-0">
+            <h1 class="text-sm sm:text-base font-bold text-on-surface tracking-tight leading-tight">
+              Dashboard Administrator
+            </h1>
+            <span class="bg-primary-fixed text-on-primary-fixed text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0">
+              System Admin
+            </span>
+          </div>
+          <span class="hidden xl:inline text-slate-300 font-bold">&bull;</span>
+          <p class="hidden xl:inline text-xs text-slate-500 truncate max-w-xl">
+            Ringkasan eksekutif, kelola akun pencari, kemitraan pemilik kos, master fasilitas, dan audit transaksi.
+          </p>
         </div>
       </div>
 
       <!-- Right Header Actions -->
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 shrink-0">
         <!-- Notification Dropdown -->
         <NotificationDropdown />
-
-        <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-900 text-white uppercase tracking-wider">
-          System Admin
-        </span>
 
         <router-link
           to="/profil"
