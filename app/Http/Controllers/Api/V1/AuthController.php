@@ -10,6 +10,7 @@ use App\Models\Pengguna;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -100,6 +101,7 @@ class AuthController extends Controller
             'nama' => ['sometimes', 'required', 'string', 'max:150'],
             'telepon' => ['nullable', 'string', 'max:30'],
             'no_hp' => ['nullable', 'string', 'max:30'],
+            'foto' => ['nullable', 'string', 'max:255'],
         ]);
 
         /** @var Pengguna $pengguna */
@@ -113,11 +115,82 @@ class AuthController extends Controller
             $pengguna->telepon = $validated['telepon'] ?? $validated['no_hp'] ?? null;
         }
 
+        if (array_key_exists('foto', $validated)) {
+            $pengguna->foto = $validated['foto'];
+        }
+
         $pengguna->save();
 
         return response()->json([
             'message' => 'Profil berhasil diperbarui.',
             'user' => new PenggunaResource($pengguna),
+        ]);
+    }
+
+    /**
+     * Update current authenticated user's avatar image.
+     */
+    public function updateAvatar(Request $request): JsonResponse
+    {
+        $request->validate([
+            'foto' => ['required', 'file', 'image', 'mimes:jpeg,png,jpg,webp', 'max:2048'],
+        ], [
+            'foto.required' => 'Berkas foto profil harus diunggah.',
+            'foto.image' => 'Berkas harus berupa gambar valid.',
+            'foto.mimes' => 'Format foto harus berupa JPG, PNG, atau WEBP.',
+            'foto.max' => 'Ukuran foto profil maksimal 2MB (2048 KB).',
+        ]);
+
+        /** @var Pengguna $pengguna */
+        $pengguna = $request->user();
+
+        if ($pengguna->foto) {
+            $oldPath = str_replace(Storage::disk('public')->url(''), '', $pengguna->foto);
+            $oldPath = ltrim($oldPath, '/');
+            if (Storage::disk('public')->exists($oldPath)) {
+                Storage::disk('public')->delete($oldPath);
+            }
+        }
+
+        $path = $request->file('foto')->store('avatars', 'public');
+        $pengguna->foto = Storage::disk('public')->url($path);
+        $pengguna->save();
+
+        return response()->json([
+            'message' => 'Foto profil berhasil diperbarui.',
+            'user' => new PenggunaResource($pengguna),
+        ]);
+    }
+
+    /**
+     * Update current authenticated user's password.
+     */
+    public function updatePassword(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'current_password' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'current_password.required' => 'Kata sandi saat ini wajib diisi.',
+            'password.required' => 'Kata sandi baru wajib diisi.',
+            'password.min' => 'Kata sandi baru minimal 8 karakter.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak cocok.',
+        ]);
+
+        /** @var Pengguna $pengguna */
+        $pengguna = $request->user();
+
+        if (! Hash::check($validated['current_password'], $pengguna->password)) {
+            throw ValidationException::withMessages([
+                'current_password' => ['Kata sandi saat ini yang Anda masukkan salah.'],
+            ]);
+        }
+
+        $pengguna->password = Hash::make($validated['password']);
+        $pengguna->save();
+
+        return response()->json([
+            'message' => 'Kata sandi berhasil diperbarui.',
         ]);
     }
 }

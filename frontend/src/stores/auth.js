@@ -89,6 +89,42 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async updateAvatar(file) {
+      this.loading = true
+      this.error = null
+      try {
+        const formData = new FormData()
+        formData.append('foto', file)
+        const response = await api.post('/me/avatar', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+        this.user = response.data.user
+        localStorage.setItem('user', JSON.stringify(this.user))
+        return response.data
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Gagal memperbarui foto profil.'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async updatePassword(payload) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await api.put('/me/password', payload)
+        return response.data
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Gagal mengubah kata sandi.'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
     async logout() {
       try {
         if (this.token) {

@@ -113,8 +113,9 @@
       <!-- Bottom User Profile Card -->
       <div class="p-3 border-t border-slate-800 bg-slate-900/60">
         <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/60 transition">
-          <div class="w-9 h-9 rounded-full bg-slate-800 text-primary border border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0">
-            <span class="material-symbols-outlined text-[18px]">shield_person</span>
+          <div class="w-9 h-9 rounded-full bg-slate-800 text-primary border border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0 overflow-hidden">
+            <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
+            <span v-else class="material-symbols-outlined text-[18px]">shield_person</span>
           </div>
           <div class="min-w-0 flex-1">
             <p class="text-xs font-bold text-white truncate leading-tight">{{ auth.user?.nama }}</p>
@@ -173,7 +174,8 @@
           title="Profil Administrator"
         >
           <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs uppercase overflow-hidden">
-            <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
+            <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
+            <span v-else class="material-symbols-outlined text-[18px]">manage_accounts</span>
           </div>
           <span class="text-xs font-semibold text-on-surface hidden md:inline max-w-[120px] truncate">
             {{ auth.user?.nama }}

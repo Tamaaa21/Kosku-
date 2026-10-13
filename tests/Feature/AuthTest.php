@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Models\Pengguna;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -197,5 +199,66 @@ class AuthTest extends TestCase
         $this->assertDatabaseMissing('personal_access_tokens', [
             'id' => $token->accessToken->id,
         ]);
+    }
+
+    public function test_authenticated_user_can_update_password(): void
+    {
+        $user = Pengguna::factory()->create([
+            'password' => Hash::make('password_lama123'),
+        ]);
+        Sanctum::actingAs($user);
+
+        $response = $this->putJson('/api/v1/me/password', [
+            'current_password' => 'password_lama123',
+            'password' => 'password_baru123',
+            'password_confirmation' => 'password_baru123',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Kata sandi berhasil diperbarui.',
+            ]);
+
+        $this->assertTrue(Hash::check('password_baru123', $user->fresh()->password));
+    }
+
+    public function test_update_password_fails_if_current_password_is_incorrect(): void
+    {
+        $user = Pengguna::factory()->create([
+            'password' => Hash::make('password_lama123'),
+        ]);
+        Sanctum::actingAs($user);
+
+        $response = $this->putJson('/api/v1/me/password', [
+            'current_password' => 'salah_password',
+            'password' => 'password_baru123',
+            'password_confirmation' => 'password_baru123',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['current_password']);
+    }
+
+    public function test_authenticated_user_can_upload_avatar(): void
+    {
+        Storage::fake('public');
+
+        $user = Pengguna::factory()->create();
+        Sanctum::actingAs($user);
+
+        $file = UploadedFile::fake()->image('avatar.jpg', 300, 300)->size(500);
+
+        $response = $this->postJson('/api/v1/me/avatar', [
+            'foto' => $file,
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'message',
+                'user' => ['id', 'nama', 'email', 'foto'],
+            ]);
+
+        $this->assertNotNull($user->fresh()->foto);
+        $this->assertStringContainsString('avatars/', $user->fresh()->foto);
     }
 }
