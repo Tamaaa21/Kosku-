@@ -1,31 +1,23 @@
 <template>
   <div class="max-w-7xl mx-auto w-full px-margin py-space-lg pt-20">
-    <!-- Top Context & Quick Switch to Map View -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-space-md gap-space-sm">
-      <div class="flex items-center gap-space-xs text-on-surface-variant text-xs">
-        <router-link to="/" class="hover:text-primary transition-colors">Beranda</router-link>
-        <span class="material-symbols-outlined text-sm">chevron_right</span>
-        <span class="text-on-surface font-semibold">Daftar Kos di Indonesia</span>
-      </div>
+    <!-- Top Actions: Quick Switch to Map View & Mobile Filter -->
+    <div class="flex items-center justify-end pb-space-md gap-space-sm">
+      <router-link
+        to="/peta"
+        class="inline-flex items-center gap-1.5 px-space-md py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors shadow-sm"
+      >
+        <span class="material-symbols-outlined text-[18px]">map</span>
+        <span>Lihat di Peta</span>
+      </router-link>
 
-      <div class="flex items-center gap-space-sm self-start sm:self-auto">
-        <router-link
-          to="/peta"
-          class="inline-flex items-center gap-1.5 px-space-md py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors shadow-sm"
-        >
-          <span class="material-symbols-outlined text-[18px]">map</span>
-          <span>Lihat di Peta</span>
-        </router-link>
-
-        <button
-          @click="showMobileFilter = !showMobileFilter"
-          class="lg:hidden inline-flex items-center gap-1.5 px-space-md py-1.5 rounded-lg bg-surface-container-lowest text-on-surface text-xs font-semibold shadow-sm border border-slate-200"
-          type="button"
-        >
-          <span class="material-symbols-outlined text-[18px]">tune</span>
-          <span>Filter</span>
-        </button>
-      </div>
+      <button
+        @click="showMobileFilter = !showMobileFilter"
+        class="lg:hidden inline-flex items-center gap-1.5 px-space-md py-1.5 rounded-lg bg-surface-container-lowest text-on-surface text-xs font-semibold shadow-sm border border-slate-200"
+        type="button"
+      >
+        <span class="material-symbols-outlined text-[18px]">tune</span>
+        <span>Filter</span>
+      </button>
     </div>
 
     <!-- Main 2-Column Split: Filter Sidebar (280px) & Listings Content -->
@@ -238,19 +230,10 @@
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
               <div class="absolute top-3 left-3 flex items-center gap-1.5">
-                <span
-                  :class="[
-                    'text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm',
-                    kos.jenis === 'putri' ? 'bg-[#FCE7F3] text-[#BE185D]' :
-                    kos.jenis === 'putra' ? 'bg-[#E0F2FE] text-[#0369A1]' :
-                    'bg-[#EDE9FE] text-[#6D28D9]'
-                  ]"
-                >
-                  {{ formatJenis(kos.jenis) }}
-                </span>
+                <GenderBadge :jenis="kos.jenis" />
               </div>
               <button
-                class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-secondary hover:text-error flex items-center justify-center shadow-sm transition-colors"
+                class="absolute top-3 right-3 min-w-[36px] min-h-[36px] rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-secondary hover:text-error flex items-center justify-center shadow-sm transition-colors"
                 title="Simpan Kos"
               >
                 <span class="material-symbols-outlined text-lg select-none">favorite</span>
@@ -321,6 +304,7 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '../services/api'
+import GenderBadge from '../components/GenderBadge.vue'
 
 const route = useRoute()
 

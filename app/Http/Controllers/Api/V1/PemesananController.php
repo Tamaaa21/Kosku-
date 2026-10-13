@@ -23,7 +23,15 @@ class PemesananController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $user = $request->user();
-        $query = Pemesanan::with(['pengguna', 'kos.pemilik', 'kamar'])->latest();
+        $query = Pemesanan::with(['pengguna', 'kos.pemilik', 'kamar']);
+
+        if ($request->input('sort') === 'latest') {
+            $query->latest();
+        } elseif ($request->input('sort') === 'id_asc' || $user->role === 'pemilik' || $user->role === 'admin') {
+            $query->orderBy('id', 'asc');
+        } else {
+            $query->latest();
+        }
 
         if ($user->role === 'pencari') {
             $query->where('pengguna_id', $user->id);

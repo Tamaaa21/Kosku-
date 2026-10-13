@@ -16,21 +16,26 @@
     >
       <div class="max-w-7xl mx-auto px-margin flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2">
+          <img :src="logoUrl" alt="KosKu Logo" class="w-5 h-5 object-contain" />
           <span class="font-bold text-primary text-sm">KosKu Indonesia</span>
-          <span>&mdash; Platform Pencarian & Sewa Kos Terintegrasi di Seluruh Indonesia</span>
+          <span>&mdash; Platform Pencarian & Sewa Kos Terpercaya di Seluruh Indonesia</span>
         </div>
         <div class="flex items-center gap-4 text-[11px] text-secondary">
-          <span>Laravel 11 REST API</span>
+          <span>&copy; {{ new Date().getFullYear() }} KosKu</span>
           <span>&bull;</span>
-          <span>Vue 3 SPA & Leaflet</span>
+          <span>Privasi & Keamanan</span>
           <span>&bull;</span>
-          <span>OpenStreetMap Nominatim</span>
+          <span>Syarat & Ketentuan</span>
         </div>
       </div>
     </footer>
 
     <!-- Floating Customer Service WhatsApp Support (Disembunyikan di Panel Admin) -->
     <FloatingWhatsAppSupport v-if="showFloatingSupport" />
+
+    <!-- Global Accessible Toast & Confirm Modal -->
+    <ToastContainer />
+    <ConfirmModal />
   </div>
 </template>
 
@@ -39,6 +44,9 @@ import { onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import Navbar from './components/Navbar.vue'
 import FloatingWhatsAppSupport from './components/FloatingWhatsAppSupport.vue'
+import ToastContainer from './components/ToastContainer.vue'
+import ConfirmModal from './components/ConfirmModal.vue'
+import logoUrl from './assets/KosKu Housing Pin Logo.png'
 import { useAuthStore } from './stores/auth'
 
 const auth = useAuthStore()

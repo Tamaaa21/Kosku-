@@ -22,8 +22,7 @@ class AdminPenggunaController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         $query = Pengguna::query()
-            ->withCount(['kos', 'pemesanan'])
-            ->latest();
+            ->withCount(['kos', 'pemesanan']);
 
         if ($request->filled('role')) {
             $query->where('role', $request->input('role'));
@@ -46,6 +45,10 @@ class AdminPenggunaController extends Controller
             $query->orderByDesc('kos_count');
         } elseif ($request->input('sort') === 'nama_asc') {
             $query->reorder()->orderBy('nama', 'asc');
+        } elseif ($request->input('sort') === 'latest') {
+            $query->latest();
+        } else {
+            $query->orderBy('id', 'asc');
         }
 
         $perPage = min(max((int) $request->input('per_page', 50), 1), 100);

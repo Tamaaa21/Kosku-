@@ -1,7 +1,34 @@
 <template>
-  <div class="w-full h-[calc(100vh-4rem)] pt-16 flex flex-col lg:flex-row overflow-hidden bg-background">
-    <!-- LEFT PANEL: Listings & Filters (Fixed width desktop ~420px) -->
-    <aside class="w-full lg:w-[420px] lg:min-w-[420px] lg:max-w-[420px] h-full flex flex-col bg-surface-container-lowest shadow-md z-20 overflow-hidden border-r border-slate-200">
+  <div class="w-full h-[calc(100vh-4rem)] pt-16 flex flex-col lg:flex-row overflow-hidden bg-background relative">
+    <!-- MOBILE VIEW TOGGLE TABS (Visible only below lg) -->
+    <div class="lg:hidden z-30 bg-surface-container-lowest border-b border-slate-200 px-3 py-2 flex items-center justify-between gap-2 shadow-xs">
+      <div class="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl flex-1 max-w-sm mx-auto">
+        <button
+          type="button"
+          @click="setMobileView('list')"
+          class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+          :class="mobileView === 'list' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'"
+        >
+          <span class="material-symbols-outlined text-[16px]">format_list_bulleted</span>
+          <span>Daftar Kos ({{ filteredKosList.length }})</span>
+        </button>
+        <button
+          type="button"
+          @click="setMobileView('map')"
+          class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
+          :class="mobileView === 'map' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'"
+        >
+          <span class="material-symbols-outlined text-[16px]">map</span>
+          <span>Peta Lokasi</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- LEFT PANEL: Listings & Filters -->
+    <aside
+      class="w-full lg:w-[420px] lg:min-w-[420px] lg:max-w-[420px] h-full flex flex-col bg-surface-container-lowest shadow-md z-20 overflow-hidden border-r border-slate-200 transition-all"
+      :class="mobileView === 'list' ? 'flex' : 'hidden lg:flex'"
+    >
       <!-- Panel Top Header & Search Area -->
       <div class="p-space-md pb-space-sm bg-surface-container-lowest flex flex-col gap-space-sm border-b border-slate-100">
         <div class="flex items-center justify-between">
@@ -37,10 +64,10 @@
             ]"
             :key="chip.val"
             @click="selectedJenis = chip.val"
+            class="min-h-[36px] px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all flex items-center"
             :class="[
-              'px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all',
               selectedJenis === chip.val
-                ? 'bg-primary text-white shadow-sm'
+                ? 'bg-primary text-white shadow-xs'
                 : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high'
             ]"
           >
@@ -69,7 +96,7 @@
           :key="kos.id"
           @click="selectKos(kos)"
           :class="[
-            'group relative p-3 bg-surface-container-lowest rounded-xl cursor-pointer shadow-sm transition-all duration-200 border',
+            'group relative p-3 bg-surface-container-lowest rounded-xl cursor-pointer shadow-xs transition-all duration-200 border',
             selectedKos?.id === kos.id
               ? 'border-primary ring-1 ring-primary bg-primary/5'
               : 'border-slate-100 hover:border-slate-300'
@@ -82,16 +109,7 @@
                 :alt="kos.nama"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
               />
-              <span
-                :class="[
-                  'absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded text-[10px] font-semibold',
-                  kos.jenis === 'putri' ? 'bg-[#FCE7F3] text-[#BE185D]' :
-                  kos.jenis === 'putra' ? 'bg-[#E0F2FE] text-[#0369A1]' :
-                  'bg-[#EDE9FE] text-[#6D28D9]'
-                ]"
-              >
-                {{ formatJenis(kos.jenis) }}
-              </span>
+              <GenderBadge :jenis="kos.jenis" size="sm" class="absolute top-1.5 left-1.5" />
             </div>
 
             <div class="flex-1 min-w-0 flex flex-col justify-between">
@@ -133,7 +151,7 @@
                     :href="getGoogleMapsUrl(kos)"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-0.5 hover:underline"
+                    class="min-h-[32px] px-2 py-1 rounded text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-0.5 hover:underline"
                     @click.stop
                     title="Buka rute navigasi di Google Maps"
                   >
@@ -142,7 +160,7 @@
                   </a>
                   <router-link
                     :to="`/kos/${kos.id}`"
-                    class="text-[11px] font-semibold text-primary hover:underline flex items-center"
+                    class="min-h-[32px] px-2 py-1 rounded text-[11px] font-semibold text-primary hover:underline flex items-center"
                     @click.stop
                   >
                     Detail <span class="material-symbols-outlined text-[12px]">chevron_right</span>
@@ -153,26 +171,58 @@
           </div>
         </article>
       </div>
+
+      <!-- Mobile Floating Map Button on List View -->
+      <div class="lg:hidden absolute bottom-5 left-1/2 -translate-x-1/2 z-30">
+        <button
+          type="button"
+          @click="setMobileView('map')"
+          class="min-h-[44px] px-5 py-2.5 rounded-full bg-primary hover:bg-primary-container text-white text-xs font-bold shadow-lg flex items-center gap-2 transition active:scale-95"
+        >
+          <span class="material-symbols-outlined text-[18px]">map</span>
+          <span>Buka Peta Interaktif</span>
+        </button>
+      </div>
     </aside>
 
     <!-- RIGHT PANEL: Full Height Leaflet Map -->
-    <main class="flex-1 h-full relative">
+    <main
+      class="flex-1 h-full relative"
+      :class="mobileView === 'map' ? 'flex' : 'hidden lg:flex'"
+    >
       <div id="full-screen-map" class="w-full h-full"></div>
+
+      <!-- Mobile Floating List Button on Map View -->
+      <div class="lg:hidden absolute bottom-5 left-1/2 -translate-x-1/2 z-[1000]">
+        <button
+          type="button"
+          @click="setMobileView('list')"
+          class="min-h-[44px] px-5 py-2.5 rounded-full bg-surface-container-lowest text-primary text-xs font-bold shadow-xl border border-slate-200/80 flex items-center gap-2 transition active:scale-95"
+        >
+          <span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+          <span>Lihat Daftar Kos ({{ filteredKosList.length }})</span>
+        </button>
+      </div>
     </main>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
+import { useRouter } from 'vue-router'
 import L from 'leaflet'
+import GenderBadge from '../components/GenderBadge.vue'
 import api from '../services/api'
 import { getGoogleMapsUrl } from '../utils/whatsapp'
+
+const router = useRouter()
 
 const kosList = ref([])
 const loading = ref(false)
 const searchQuery = ref('')
 const selectedJenis = ref('')
 const selectedKos = ref(null)
+const mobileView = ref('list') // 'list' | 'map'
 
 let map = null
 const markers = new Map()
@@ -208,6 +258,14 @@ const filteredKosList = computed(() => {
     return matchesSearch && matchesJenis
   })
 })
+
+const setMobileView = async (view) => {
+  mobileView.value = view
+  if (view === 'map' && map) {
+    await nextTick()
+    map.invalidateSize()
+  }
+}
 
 const initMap = () => {
   // Center Indonesia default [-2.5489, 118.0149] zoom 5
@@ -245,7 +303,7 @@ const renderMarkers = () => {
           <span style="font-size: 11px; color: #585f67; display: block; margin-top: 3px;">${kos.alamat}</span>
           <strong style="color: #0b1c30; font-size: 12px; margin-top: 5px; display: block;">${formatRupiah(kos.harga)} / bln</strong>
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #e2e8f0;">
-            <a href="/kos/${kos.id}" style="font-size: 11px; color: #004ac6; font-weight: bold; text-decoration: underline;">Detail &rarr;</a>
+            <button onclick="window.__koskuNavigateTo(${kos.id})" style="background: none; border: none; padding: 0; font-size: 11px; color: #004ac6; font-weight: bold; cursor: pointer; text-decoration: underline;">Detail &rarr;</button>
             <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; color: #16a34a; font-weight: bold; text-decoration: underline;">Buka di Maps &nearr;</a>
           </div>
         </div>
@@ -265,8 +323,17 @@ const renderMarkers = () => {
   }
 }
 
-const selectKos = (kos) => {
+const selectKos = async (kos) => {
   selectedKos.value = kos
+  // In mobile, switch to map view to show where it is
+  if (window.innerWidth < 1024) {
+    mobileView.value = 'map'
+    await nextTick()
+    if (map) {
+      map.invalidateSize()
+    }
+  }
+
   if (kos.latitude && kos.longitude && map) {
     const lat = parseFloat(kos.latitude)
     const lng = parseFloat(kos.longitude)
@@ -294,11 +361,16 @@ const fetchAllKos = async () => {
 }
 
 onMounted(async () => {
+  window.__koskuNavigateTo = (id) => {
+    router.push(`/kos/${id}`)
+  }
+
   initMap()
   await fetchAllKos()
 })
 
 onBeforeUnmount(() => {
+  delete window.__koskuNavigateTo
   if (map) {
     map.remove()
     map = null

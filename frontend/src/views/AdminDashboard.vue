@@ -443,6 +443,7 @@
               @change="fetchUsers"
               class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white font-medium text-slate-700"
             >
+              <option value="id_asc">No 1 / ID Terdaftar Pertama</option>
               <option value="latest">Terbaru</option>
               <option value="unit_terbanyak">Properti Terbanyak</option>
               <option value="nama_asc">Nama A-Z</option>
@@ -593,12 +594,12 @@
         <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Khusus Putri</p>
-            <h4 class="text-2xl font-black text-rose-600 mt-1">{{ kosPutriCount }}</h4>
+            <h4 class="text-2xl font-black text-slate-900 mt-1">{{ kosPutriCount }}</h4>
             <span class="inline-flex items-center text-slate-500 text-[11px] font-semibold mt-1">
               Kategori Penghuni Putri
             </span>
           </div>
-          <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+          <div class="w-12 h-12 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center font-bold">
             <span class="material-symbols-outlined text-[24px]">female</span>
           </div>
         </div>
@@ -607,7 +608,7 @@
         <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Khusus Putra</p>
-            <h4 class="text-2xl font-black text-sky-600 mt-1">{{ kosPutraCount }}</h4>
+            <h4 class="text-2xl font-black text-slate-900 mt-1">{{ kosPutraCount }}</h4>
             <span class="inline-flex items-center text-slate-500 text-[11px] font-semibold mt-1">
               Kategori Penghuni Putra
             </span>
@@ -621,12 +622,12 @@
         <div class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-sm flex items-center justify-between">
           <div>
             <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Campur / Pasutri</p>
-            <h4 class="text-2xl font-black text-indigo-600 mt-1">{{ kosCampurCount }}</h4>
+            <h4 class="text-2xl font-black text-slate-900 mt-1">{{ kosCampurCount }}</h4>
             <span class="inline-flex items-center text-slate-500 text-[11px] font-semibold mt-1">
               Kategori Penghuni Campur
             </span>
           </div>
-          <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+          <div class="w-12 h-12 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center font-bold">
             <span class="material-symbols-outlined text-[24px]">group</span>
           </div>
         </div>
@@ -668,6 +669,7 @@
             @change="fetchKos"
             class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-700 font-semibold cursor-pointer"
           >
+            <option value="id_asc">No 1 / ID Terdaftar Pertama</option>
             <option value="latest">Terbaru Didata</option>
             <option value="harga_asc">Tarif Termurah</option>
             <option value="harga_desc">Tarif Tertinggi</option>
@@ -1612,7 +1614,7 @@ const loadingUsers = ref(false)
 const userSearchQuery = ref('')
 const userRoleFilter = ref(route.query.tab === 'pemilik' ? 'pemilik' : (route.query.tab === 'pencari' ? 'pencari' : 'all'))
 const userStatusFilter = ref('all')
-const userSort = ref('latest')
+const userSort = ref('id_asc')
 
 const pemilikCount = computed(() => userList.value.filter(u => u.role === 'pemilik').length)
 const pencariCount = computed(() => userList.value.filter(u => u.role === 'pencari').length)
@@ -1621,7 +1623,7 @@ const kosList = ref([])
 const loadingKos = ref(false)
 const kosSearchQuery = ref('')
 const kosJenisFilter = ref('all')
-const kosSort = ref('latest')
+const kosSort = ref('id_asc')
 const selectedKosPreview = ref(null)
 const showKosPreviewModal = ref(false)
 const deletingKosId = ref(null)
@@ -1763,7 +1765,11 @@ const fetchUsers = async () => {
     if (userSort.value) params.sort = userSort.value
 
     const res = await api.get('/admin/pengguna', { params })
-    userList.value = res.data.data || []
+    let data = res.data.data || []
+    if (userSort.value === 'id_asc') {
+      data = data.sort((a, b) => a.id - b.id)
+    }
+    userList.value = data
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Gagal memuat daftar pengguna.'
   } finally {
@@ -1831,7 +1837,7 @@ const debounceKosSearch = () => {
 const resetKosFilters = () => {
   kosSearchQuery.value = ''
   kosJenisFilter.value = 'all'
-  kosSort.value = 'latest'
+  kosSort.value = 'id_asc'
   fetchKos()
 }
 
@@ -1844,7 +1850,11 @@ const fetchKos = async () => {
     if (kosSort.value) params.sort = kosSort.value
 
     const res = await api.get('/admin/kos', { params })
-    kosList.value = res.data.data || []
+    let data = res.data.data || []
+    if (kosSort.value === 'id_asc') {
+      data = data.sort((a, b) => a.id - b.id)
+    }
+    kosList.value = data
 
     if (kosList.value.length > 0) {
       if (!selectedKosPreview.value || !kosList.value.some(k => k.id === selectedKosPreview.value.id)) {

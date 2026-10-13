@@ -1,7 +1,7 @@
 <template>
   <div class="w-full max-w-5xl mx-auto px-margin py-space-xl pt-20">
-    <!-- Breadcrumb & Nav Back Top -->
-    <div class="mb-space-lg flex items-center justify-between">
+    <!-- Nav Back Top -->
+    <div class="mb-space-lg">
       <router-link
         :to="kos ? `/kos/${kos.id}` : '/kos'"
         class="inline-flex items-center gap-space-xs text-on-surface-variant hover:text-primary transition-colors text-xs font-semibold group"
@@ -9,16 +9,6 @@
         <span class="material-symbols-outlined text-sm transition-transform group-hover:-translate-x-1">arrow_back</span>
         <span>Kembali ke Detail Kos</span>
       </router-link>
-
-      <div class="hidden sm:flex items-center gap-space-xs text-on-surface-variant text-xs flex-wrap">
-        <router-link to="/" class="hover:text-primary">Beranda</router-link>
-        <span class="material-symbols-outlined text-xs">chevron_right</span>
-        <router-link to="/kos" class="hover:text-primary">Daftar Kos</router-link>
-        <span class="material-symbols-outlined text-xs">chevron_right</span>
-        <router-link :to="`/kos/${kos?.id}`" class="hover:text-primary truncate max-w-[150px] font-medium">{{ kos?.nama || 'Detail Kos' }}</router-link>
-        <span class="material-symbols-outlined text-xs">chevron_right</span>
-        <span class="text-primary font-semibold">Pengajuan Sewa (Kamar {{ kamar?.nama_kamar }})</span>
-      </div>
     </div>
 
     <!-- Loading Skeleton -->
@@ -44,16 +34,7 @@
               :alt="kos.nama"
               class="w-full h-48 object-cover object-center group-hover:scale-105 transition-transform duration-500"
             />
-            <span
-              :class="[
-                'absolute top-space-sm left-space-sm px-2.5 py-0.5 rounded-full text-[11px] font-semibold shadow-sm',
-                kos.jenis === 'putri' ? 'bg-[#FCE7F3] text-[#BE185D]' :
-                kos.jenis === 'putra' ? 'bg-[#E0F2FE] text-[#0369A1]' :
-                'bg-[#EDE9FE] text-[#6D28D9]'
-              ]"
-            >
-              {{ formatJenis(kos.jenis) }}
-            </span>
+            <GenderBadge :jenis="kos.jenis" size="sm" class="absolute top-space-sm left-space-sm" />
             <span class="absolute bottom-space-sm right-space-sm px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container-lowest/90 backdrop-blur-sm text-on-surface flex items-center gap-1 shadow-sm">
               <span class="material-symbols-outlined text-xs text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
               <span>{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : 'Baru' }}</span>
@@ -274,11 +255,14 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useUiStore } from '../stores/ui'
+import GenderBadge from '../components/GenderBadge.vue'
 import api from '../services/api'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const ui = useUiStore()
 
 const kos = ref(null)
 const kamar = ref(null)
@@ -365,7 +349,7 @@ const submitBooking = async () => {
       durasi_tipe: form.durasi_tipe,
       durasi_jumlah: Number(form.durasi_jumlah),
     })
-    alert('Permohonan pemesanan kamar berhasil diajukan! Anda dapat memantau statusnya di halaman Riwayat Pesanan.')
+    ui.success('Permohonan pemesanan kamar berhasil diajukan! Anda dapat memantau statusnya di halaman Riwayat Pesanan.')
     router.push('/pesanan')
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Gagal mengajukan pemesanan kamar.'

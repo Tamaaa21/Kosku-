@@ -3,20 +3,6 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-8">
       <div>
-        <!-- Breadcrumb Dinamis -->
-        <nav class="flex items-center gap-1.5 text-xs text-on-surface-variant mb-2">
-          <router-link to="/" class="hover:text-primary transition flex items-center gap-1">
-            <span class="material-symbols-outlined text-[15px]">home</span>
-            <span>Beranda</span>
-          </router-link>
-          <span class="text-slate-300">/</span>
-          <router-link to="/dashboard/pemilik" class="hover:text-primary transition">
-            Dashboard
-          </router-link>
-          <span class="text-slate-300">/</span>
-          <span class="font-semibold text-primary">Kelola Kamar</span>
-        </nav>
-
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">Kelola Kamar Kos</h1>
         <p class="text-xs text-on-surface-variant mt-1">
           Kelola unit kamar beserta fasilitas langsung di masing-masing kamar dan pantau ketersediaan unit.
@@ -620,11 +606,13 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useUiStore } from '../stores/ui'
 import api from '../services/api'
 import ImageUploader from '../components/ImageUploader.vue'
 
 const route = useRoute()
 const auth = useAuthStore()
+const ui = useUiStore()
 
 const loading = ref(false)
 const saving = ref(false)
@@ -733,16 +721,18 @@ const currentKos = computed(() => {
 })
 
 const filteredKamarList = computed(() => {
-  return kamarList.value.filter((kamar) => {
-    const matchSearch =
-      !searchQuery.value ||
-      kamar.nama_kamar.toLowerCase().includes(searchQuery.value.toLowerCase())
+  return kamarList.value
+    .filter((kamar) => {
+      const matchSearch =
+        !searchQuery.value ||
+        kamar.nama_kamar.toLowerCase().includes(searchQuery.value.toLowerCase())
 
-    const matchStatus =
-      filterStatus.value === 'all' || kamar.status === filterStatus.value
+      const matchStatus =
+        filterStatus.value === 'all' || kamar.status === filterStatus.value
 
-    return matchSearch && matchStatus
-  })
+      return matchSearch && matchStatus
+    })
+    .sort((a, b) => a.id - b.id)
 })
 
 const countTersedia = computed(() => {
@@ -880,14 +870,24 @@ const saveKamar = async () => {
 }
 
 const confirmDeleteKamar = async (kamar) => {
-  if (confirm(`Hapus unit ${kamar.nama_kamar}?`)) {
-    try {
-      await api.delete(`/kamar/${kamar.id}`)
-      successMsg.value = `Unit ${kamar.nama_kamar} berhasil dihapus.`
-      await fetchKamar()
-    } catch (err) {
-      errorMsg.value = err.response?.data?.message || 'Gagal menghapus unit kamar.'
-    }
+  const confirmed = await ui.confirm({
+    title: 'Hapus Unit Kamar?',
+    message: `Apakah Anda yakin ingin menghapus unit "${kamar.nama_kamar}"? Tindakan ini tidak dapat dibatalkan.`,
+    confirmText: 'Ya, Hapus Unit',
+    cancelText: 'Batal',
+    confirmType: 'danger'
+  })
+
+  if (!confirmed) return
+
+  try {
+    await api.delete(`/kamar/${kamar.id}`)
+    ui.success(`Unit ${kamar.nama_kamar} berhasil dihapus.`)
+    successMsg.value = `Unit ${kamar.nama_kamar} berhasil dihapus.`
+    await fetchKamar()
+  } catch (err) {
+    ui.error(err.response?.data?.message || 'Gagal menghapus unit kamar.')
+    errorMsg.value = err.response?.data?.message || 'Gagal menghapus unit kamar.'
   }
 }
 </script>

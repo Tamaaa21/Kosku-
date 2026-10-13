@@ -3,16 +3,6 @@
     <!-- Header & Quick Nav -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md mb-6">
       <div>
-        <!-- Breadcrumb Dinamis -->
-        <nav class="flex items-center gap-1.5 text-xs text-on-surface-variant mb-2">
-          <router-link to="/" class="hover:text-primary transition flex items-center gap-1">
-            <span class="material-symbols-outlined text-[15px]">home</span>
-            <span>Beranda</span>
-          </router-link>
-          <span class="text-slate-300">/</span>
-          <span class="font-semibold text-primary">Dashboard Pengelola</span>
-        </nav>
-
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">
           Selamat Datang, {{ auth.user?.nama }}! 👋
         </h1>
@@ -576,7 +566,7 @@ const approvedBookingsCount = computed(() => {
 })
 
 const recentBookings = computed(() => {
-  return bookingsList.value.slice(0, 5)
+  return [...bookingsList.value].sort((a, b) => a.id - b.id).slice(0, 5)
 })
 
 // 4. Trend Chart Calculation

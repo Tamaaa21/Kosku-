@@ -18,9 +18,11 @@
         <!-- Sidebar Brand Header -->
         <div class="h-16 px-5 flex items-center justify-between border-b border-slate-800/80">
           <router-link to="/dashboard/pemilik" class="flex items-center gap-2.5" @click="isMobileOpen = false">
-            <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm">
-              <span class="material-symbols-outlined text-[22px]">cottage</span>
-            </div>
+            <img
+              :src="logoUrl"
+              alt="KosKu Logo"
+              class="w-9 h-9 object-contain rounded-xl bg-white/10 p-0.5 shadow-sm"
+            />
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5 leading-none">
                 <span class="text-lg font-bold text-white tracking-tight">KosKu</span>
@@ -143,12 +145,12 @@
           <span class="material-symbols-outlined text-[22px]">menu</span>
         </button>
 
-        <!-- Breadcrumb / Location Indicator -->
-        <div class="flex items-center gap-1.5 text-xs text-on-surface-variant font-medium">
-          <span class="material-symbols-outlined text-[18px] text-primary">storefront</span>
-          <span class="hidden sm:inline">Mitra Pemilik</span>
-          <span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
-          <span class="font-bold text-on-surface">{{ currentPageTitle }}</span>
+        <!-- Location Indicator -->
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[18px]">storefront</span>
+          </div>
+          <span class="font-bold text-sm sm:text-base text-on-surface">{{ currentPageTitle }}</span>
         </div>
       </div>
 
@@ -179,6 +181,7 @@ import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import NotificationDropdown from './NotificationDropdown.vue'
+import logoUrl from '../assets/KosKu Housing Pin Logo.png'
 
 const auth = useAuthStore()
 const route = useRoute()

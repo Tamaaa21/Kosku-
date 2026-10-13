@@ -27,5 +27,9 @@ Homestead.yaml
 Thumbs.db
 /.agents/
 /.claude/
+/.ddev/
+/.impeccable/
+/testposman/
+/testpostman/
 /ui admin/
 /ui pemilik/

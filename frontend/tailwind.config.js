@@ -56,9 +56,13 @@ export default {
         "on-surface": "#0b1c30",
         "on-surface-variant": "#434655",
         "inverse-surface": "#213145",
-        "inverse-on-surface": "#eaf1ff",
         "outline": "#737686",
         "outline-variant": "#c3c6d7",
+
+        "whatsapp": "#16a34a",
+        "whatsapp-hover": "#15803d",
+        "whatsapp-container": "#dcfce7",
+        "on-whatsapp-container": "#14532d",
       },
       spacing: {
         "gutter": "1.5rem",

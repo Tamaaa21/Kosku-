@@ -18,9 +18,11 @@
         <!-- Sidebar Brand Header -->
         <div class="h-16 px-5 flex items-center justify-between border-b border-slate-800/80">
           <router-link to="/dashboard/admin" class="flex items-center gap-2.5" @click="isMobileOpen = false">
-            <div class="w-9 h-9 rounded-xl bg-slate-800 flex items-center justify-center text-primary shadow-sm border border-slate-700">
-              <span class="material-symbols-outlined text-[22px]">admin_panel_settings</span>
-            </div>
+            <img
+              :src="logoUrl"
+              alt="KosKu Logo"
+              class="w-9 h-9 object-contain rounded-xl bg-white/10 p-0.5 shadow-sm"
+            />
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5 leading-none">
                 <span class="text-lg font-bold text-white tracking-tight">KosKu</span>
@@ -187,6 +189,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import NotificationDropdown from './NotificationDropdown.vue'
+import logoUrl from '../assets/KosKu Housing Pin Logo.png'
 
 const auth = useAuthStore()
 const router = useRouter()
