@@ -20,7 +20,7 @@ class KamarController extends Controller
     public function index(int $kosId): AnonymousResourceCollection
     {
         $kos = Kos::findOrFail($kosId);
-        $kamar = $kos->kamar()->latest()->get();
+        $kamar = $kos->kamar()->orderBy('id', 'asc')->get();
 
         return KamarResource::collection($kamar);
     }

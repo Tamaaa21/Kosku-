@@ -63,7 +63,8 @@ class AdminKosController extends Controller
             'harga_desc' => $query->orderBy('harga', 'desc'),
             'kamar_banyak' => $query->orderByDesc('kamar_count'),
             'nama_asc' => $query->orderBy('nama', 'asc'),
-            default => $query->latest('id'),
+            'latest' => $query->latest('id'),
+            default => $query->orderBy('id', 'asc'),
         };
 
         $perPage = min(max((int) $request->input('per_page', 20), 1), 100);

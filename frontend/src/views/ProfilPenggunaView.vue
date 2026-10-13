@@ -3,11 +3,6 @@
     <!-- Header Page Meta -->
     <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-space-sm mb-8">
       <div>
-        <div class="flex items-center gap-1.5 text-secondary text-xs font-semibold mb-1">
-          <span>Pengaturan</span>
-          <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-          <span class="text-primary font-bold">Profil Akun</span>
-        </div>
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">Profil Saya</h1>
         <p class="text-xs text-on-surface-variant mt-0.5">
           Kelola informasi akun pengguna, kontak, dan akses sistem KosKu.
@@ -16,7 +11,7 @@
 
       <!-- Quick Status Badge -->
       <div class="inline-flex items-center gap-2 bg-surface-container-lowest border border-slate-100 px-4 py-2 rounded-full shadow-sm">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
         <span class="text-xs text-on-surface font-semibold capitalize">{{ auth.role }} Terverifikasi</span>
         <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
       </div>
@@ -40,8 +35,6 @@
       <div class="lg:col-span-4 xl:col-span-4 flex flex-col gap-space-md">
         <!-- Profile Card -->
         <div class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-slate-100 flex flex-col items-center text-center relative overflow-hidden">
-          <div class="absolute top-0 left-0 right-0 h-16 bg-gradient-to-r from-primary/10 via-surface-variant to-primary/5"></div>
-
           <!-- Avatar -->
           <div class="relative mt-2 mb-space-md">
             <div class="w-24 h-24 rounded-full overflow-hidden shadow-md ring-4 ring-white bg-surface-container flex items-center justify-center">
@@ -60,9 +53,6 @@
               ]"
             >
               {{ auth.role }}
-            </span>
-            <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold">
-              Indonesia
             </span>
           </div>
 

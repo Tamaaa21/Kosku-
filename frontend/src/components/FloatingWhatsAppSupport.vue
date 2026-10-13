@@ -117,7 +117,7 @@
       <button
         @click="toggleOpen"
         type="button"
-        class="w-13 h-13 sm:w-14 sm:h-14 rounded-full bg-[#25D366] hover:bg-[#20BA5A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-emerald-400/40 active:scale-95 group"
+        class="w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#20BA5A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-emerald-400/40 active:scale-95 group"
         :aria-label="isOpen ? 'Tutup bantuan CS' : 'Buka customer service WhatsApp'"
         :title="isOpen ? 'Tutup' : 'Customer Service WhatsApp'"
       >

@@ -1,14 +1,5 @@
 <template>
   <div class="w-full max-w-5xl mx-auto px-margin py-space-xl pt-20">
-    <!-- Breadcrumb -->
-    <div class="flex items-center gap-space-xs text-on-surface-variant text-xs mb-space-md">
-      <router-link to="/" class="hover:text-primary transition-colors">Beranda</router-link>
-      <span class="material-symbols-outlined text-sm">chevron_right</span>
-      <span class="text-on-surface font-semibold">
-        {{ auth.isPemilik ? 'Portal Kelola Pemesanan' : 'Riwayat Sewa & Pemesanan' }}
-      </span>
-    </div>
-
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pb-space-lg">
       <div class="space-y-space-xs">
@@ -30,7 +21,7 @@
       <!-- Quick Metrics Summary -->
       <div class="flex items-center gap-space-sm bg-surface-container-low px-space-md py-space-sm rounded-xl border border-slate-100">
         <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
           <span class="text-xs text-on-surface-variant font-medium">{{ countStatus('menunggu') }} Menunggu</span>
         </div>
         <div class="w-px h-4 bg-outline-variant"></div>
@@ -290,10 +281,12 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../stores/auth'
+import { useUiStore } from '../stores/ui'
 import api from '../services/api'
 import { openWhatsAppChat, buildTenantInquiryTemplate, buildOwnerContactTenantTemplate } from '../utils/whatsapp'
 
 const auth = useAuthStore()
+const ui = useUiStore()
 
 const bookings = ref([])
 const loading = ref(false)
@@ -337,15 +330,22 @@ const fetchBookings = async () => {
 
 // Pencari cancel action
 const cancelBooking = async (id) => {
-  if (!confirm('Apakah Anda yakin ingin membatalkan pengajuan sewa ini?')) return
+  const confirmed = await ui.confirm({
+    title: 'Batalkan Pengajuan Sewa?',
+    message: 'Apakah Anda yakin ingin membatalkan pengajuan sewa ini? Tindakan ini tidak dapat dibatalkan.',
+    confirmText: 'Ya, Batalkan',
+    cancelText: 'Kembali',
+    confirmType: 'danger'
+  })
+  if (!confirmed) return
 
   actionLoading.value = id
   try {
     await api.patch(`/pemesanan/${id}/status`, { status: 'dibatalkan' })
-    alert('Pengajuan sewa berhasil dibatalkan.')
+    ui.success('Pengajuan sewa berhasil dibatalkan.')
     await fetchBookings()
   } catch (err) {
-    alert(err.response?.data?.message || 'Gagal membatalkan pemesanan.')
+    ui.error(err.response?.data?.message || 'Gagal membatalkan pemesanan.')
   } finally {
     actionLoading.value = null
   }
@@ -354,15 +354,22 @@ const cancelBooking = async (id) => {
 // Pemilik approve/reject action
 const updateBookingStatus = async (id, status) => {
   const label = status === 'disetujui' ? 'menyetujui' : 'menolak'
-  if (!confirm(`Apakah Anda yakin ingin ${label} permohonan sewa ini?`)) return
+  const confirmed = await ui.confirm({
+    title: `${status === 'disetujui' ? 'Setujui' : 'Tolak'} Permohonan Sewa?`,
+    message: `Apakah Anda yakin ingin ${label} permohonan sewa ini?`,
+    confirmText: status === 'disetujui' ? 'Ya, Setujui' : 'Ya, Tolak',
+    cancelText: 'Batal',
+    confirmType: status === 'disetujui' ? 'primary' : 'danger'
+  })
+  if (!confirmed) return
 
   actionLoading.value = id
   try {
     await api.patch(`/pemesanan/${id}/status`, { status })
-    alert(`Permohonan sewa berhasil di-${status}!`)
+    ui.success(`Permohonan sewa berhasil di-${status}!`)
     await fetchBookings()
   } catch (err) {
-    alert(err.response?.data?.message || 'Gagal memperbarui status pemesanan.')
+    ui.error(err.response?.data?.message || 'Gagal memperbarui status pemesanan.')
   } finally {
     actionLoading.value = null
   }

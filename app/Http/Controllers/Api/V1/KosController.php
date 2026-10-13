@@ -83,7 +83,9 @@ class KosController extends Controller
         match ($request->input('sort')) {
             'harga_asc' => $query->orderBy('harga', 'asc'),
             'harga_desc' => $query->orderBy('harga', 'desc'),
-            default => $query->latest(),
+            'id_asc' => $query->orderBy('id', 'asc'),
+            'latest' => $query->latest(),
+            default => $request->filled('pemilik_id') ? $query->orderBy('id', 'asc') : $query->latest(),
         };
 
         $perPage = min(max((int) $request->input('per_page', 12), 1), 100);

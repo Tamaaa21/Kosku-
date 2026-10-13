@@ -3,20 +3,6 @@
     <!-- Header -->
     <div class="flex flex-col md:flex-row md:items-center justify-between gap-space-md mb-8">
       <div>
-        <!-- Breadcrumb Dinamis -->
-        <nav class="flex items-center gap-1.5 text-xs text-on-surface-variant mb-2">
-          <router-link to="/" class="hover:text-primary transition flex items-center gap-1">
-            <span class="material-symbols-outlined text-[15px]">home</span>
-            <span>Beranda</span>
-          </router-link>
-          <span class="text-slate-300">/</span>
-          <router-link to="/dashboard/pemilik" class="hover:text-primary transition">
-            Dashboard
-          </router-link>
-          <span class="text-slate-300">/</span>
-          <span class="font-semibold text-primary">Permintaan Pemesanan</span>
-        </nav>
-
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">Permintaan Pemesanan</h1>
         <p class="text-xs text-on-surface-variant mt-0.5">
           Kelola permintaan sewa dari calon penghuni secara cepat dan transparan.
@@ -455,8 +441,11 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import { useUiStore } from '../stores/ui'
 import api from '../services/api'
 import { openWhatsAppChat, buildOwnerContactTenantTemplate } from '../utils/whatsapp'
+
+const ui = useUiStore()
 
 const loading = ref(false)
 const successMsg = ref('')
@@ -485,18 +474,20 @@ onMounted(() => {
 })
 
 const filteredBookings = computed(() => {
-  return allBookings.value.filter((b) => {
-    const matchStatus =
-      activeStatusFilter.value === 'all' || b.status === activeStatusFilter.value
+  return allBookings.value
+    .filter((b) => {
+      const matchStatus =
+        activeStatusFilter.value === 'all' || b.status === activeStatusFilter.value
 
-    const matchSearch =
-      !searchQuery.value ||
-      (b.user?.nama && b.user.nama.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
-      (b.kos?.nama && b.kos.nama.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
-      (b.kamar?.nama_kamar && b.kamar.nama_kamar.toLowerCase().includes(searchQuery.value.toLowerCase()))
+      const matchSearch =
+        !searchQuery.value ||
+        (b.user?.nama && b.user.nama.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
+        (b.kos?.nama && b.kos.nama.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
+        (b.kamar?.nama_kamar && b.kamar.nama_kamar.toLowerCase().includes(searchQuery.value.toLowerCase()))
 
-    return matchStatus && matchSearch
-  })
+      return matchStatus && matchSearch
+    })
+    .sort((a, b) => a.id - b.id)
 })
 
 const countMenunggu = computed(() => {
@@ -549,23 +540,31 @@ const openDetail = (booking) => {
 }
 
 const updateStatus = async (booking, newStatus) => {
-  const confirmMsg =
-    newStatus === 'disetujui'
-      ? `Setujui reservasi dari ${booking.user?.nama || 'calon penghuni'}?`
-      : `Tolak reservasi dari ${booking.user?.nama || 'calon penghuni'}?`
+  const isApprove = newStatus === 'disetujui'
+  const confirmed = await ui.confirm({
+    title: isApprove ? 'Setujui Reservasi Kamar?' : 'Tolak Reservasi Kamar?',
+    message: isApprove
+      ? `Setujui reservasi dari ${booking.user?.nama || 'calon penghuni'} untuk unit ${booking.kamar?.nama_kamar || 'kamar'}? Status kamar akan diperbarui secara otomatis.`
+      : `Tolak permohonan reservasi dari ${booking.user?.nama || 'calon penghuni'}?`,
+    confirmText: isApprove ? 'Ya, Setujui' : 'Ya, Tolak',
+    cancelText: 'Batal',
+    confirmType: isApprove ? 'primary' : 'danger',
+  })
 
-  if (!confirm(confirmMsg)) return
+  if (!confirmed) return
 
   try {
     await api.patch(`/pemesanan/${booking.id}/status`, {
       status: newStatus
     })
+    ui.success(`Reservasi #${booking.id} berhasil diubah menjadi ${newStatus}.`)
     successMsg.value = `Reservasi #${booking.id} berhasil diubah menjadi ${newStatus}.`
     if (selectedBooking.value && selectedBooking.value.id === booking.id) {
       selectedBooking.value.status = newStatus
     }
     await fetchBookings()
   } catch (err) {
+    ui.error(err.response?.data?.message || 'Gagal mengubah status pemesanan.')
     errorMsg.value = err.response?.data?.message || 'Gagal mengubah status pemesanan.'
   }
 }

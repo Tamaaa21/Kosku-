@@ -16,23 +16,15 @@
 
     <!-- Detail Content -->
     <div v-else>
-      <!-- Breadcrumb & Top Actions -->
-      <div class="flex flex-wrap items-center justify-between gap-space-sm mb-space-md">
-        <nav class="flex items-center gap-space-xs text-xs text-on-surface-variant flex-wrap">
-          <router-link to="/" class="hover:text-primary transition-colors">Beranda</router-link>
-          <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-          <router-link to="/kos" class="hover:text-primary transition-colors">Daftar Kos</router-link>
-          <span class="material-symbols-outlined text-[16px]">chevron_right</span>
-          <router-link
-            v-if="kos.jenis"
-            :to="{ path: '/kos', query: { jenis: kos.jenis } }"
-            class="hover:text-primary transition-colors capitalize font-medium"
-          >
-            Kos {{ kos.jenis }}
-          </router-link>
-          <span v-if="kos.jenis" class="material-symbols-outlined text-[16px]">chevron_right</span>
-          <span class="text-on-surface font-semibold truncate max-w-[220px]">{{ kos.nama }}</span>
-        </nav>
+      <!-- Top Action Bar -->
+      <div class="flex items-center justify-between gap-space-sm mb-space-md">
+        <router-link
+          to="/kos"
+          class="inline-flex items-center gap-1 text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors group"
+        >
+          <span class="material-symbols-outlined text-base transition-transform group-hover:-translate-x-1">arrow_back</span>
+          <span>Daftar Kos</span>
+        </router-link>
 
         <div class="flex items-center gap-space-sm">
           <button
@@ -68,17 +60,7 @@
                 class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
               />
               <div class="absolute top-space-sm left-space-sm flex items-center gap-space-xs flex-wrap">
-                <span
-                  :class="[
-                    'px-2.5 py-1 rounded-full text-[11px] font-semibold flex items-center gap-1 shadow-sm',
-                    kos.jenis === 'putri' ? 'bg-[#FCE7F3] text-[#BE185D]' :
-                    kos.jenis === 'putra' ? 'bg-[#E0F2FE] text-[#0369A1]' :
-                    'bg-[#EDE9FE] text-[#6D28D9]'
-                  ]"
-                >
-                  <span class="material-symbols-outlined text-[14px]">group</span>
-                  Khusus {{ formatJenis(kos.jenis) }}
-                </span>
+                <GenderBadge :jenis="kos.jenis" size="md" show-icon prefix="Khusus " class="shadow-sm" />
                 <span class="px-2.5 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-tertiary text-[11px] font-semibold flex items-center gap-1 shadow-sm">
                   <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span>
                   Terverifikasi
@@ -442,7 +424,7 @@
                 <button
                   type="button"
                   @click="handleWhatsAppInquiry"
-                  class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition active:scale-95 shrink-0"
+                  class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-whatsapp hover:bg-whatsapp-hover text-white text-xs font-bold shadow-xs transition active:scale-95 shrink-0"
                 >
                   <span class="material-symbols-outlined text-[18px]">chat</span>
                   <span>Chat WhatsApp</span>
@@ -629,7 +611,7 @@
               <button
                 type="button"
                 @click="handleWhatsAppInquiry"
-                class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-2"
+                class="w-full bg-whatsapp hover:bg-whatsapp-hover text-white py-2.5 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-2"
                 title="Tanya ketersediaan atau jadwal survei langsung ke pemilik via WhatsApp"
               >
                 <span class="material-symbols-outlined text-base">chat</span>
@@ -652,13 +634,16 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useUiStore } from '../stores/ui'
 import LeafletMap from '../components/LeafletMap.vue'
+import GenderBadge from '../components/GenderBadge.vue'
 import api from '../services/api'
 import { openWhatsAppChat, buildInquiryTemplate, getGoogleMapsUrl } from '../utils/whatsapp'
 
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const ui = useUiStore()
 
 const kos = ref(null)
 const loading = ref(true)
@@ -761,7 +746,7 @@ const shareKos = () => {
     navigator.share({ title: kos.value.nama, url: window.location.href })
   } else {
     navigator.clipboard.writeText(window.location.href)
-    alert('Tautan halaman kos berhasil disalin ke clipboard!')
+    ui.success('Tautan halaman kos berhasil disalin ke clipboard!')
   }
 }
 
@@ -771,13 +756,13 @@ const toggleFavorite = () => {
 
 const handleProceedBooking = () => {
   if (!auth.isAuthenticated) {
-    alert('Silakan masuk (login) terlebih dahulu untuk mengajukan sewa kos.')
+    ui.warning('Silakan masuk (login) terlebih dahulu untuk mengajukan sewa kos.')
     router.push({ name: 'login', query: { redirect: route.fullPath } })
     return
   }
 
   if (!auth.isPencari) {
-    alert('Hanya akun dengan peran Pencari yang dapat mengajukan pemesanan kamar.')
+    ui.warning('Hanya akun dengan peran Pencari yang dapat mengajukan pemesanan kamar.')
     return
   }
 
@@ -841,9 +826,9 @@ const submitReview = async () => {
     }
     await fetchReviews()
     await checkReviewEligibility()
-    alert(res.data.message || 'Ulasan Anda berhasil disimpan!')
+    ui.success(res.data.message || 'Ulasan Anda berhasil disimpan!')
   } catch (err) {
-    alert(err.response?.data?.message || 'Gagal menyimpan ulasan.')
+    ui.error(err.response?.data?.message || 'Gagal menyimpan ulasan.')
   } finally {
     submittingReview.value = false
   }

@@ -95,44 +95,44 @@
       </div>
     </section>
 
-    <!-- Platform Advantages Section -->
+    <!-- Platform Advantages Band -->
     <section class="max-w-7xl mx-auto w-full px-margin py-space-xl">
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-space-lg">
-        <!-- Card 1 -->
-        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-space-md group border border-slate-100">
-          <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors flex-shrink-0">
-            <span class="material-symbols-outlined text-2xl select-none" style="font-variation-settings: 'FILL' 1;">location_on</span>
+      <div class="bg-surface-container-lowest rounded-2xl p-space-lg sm:p-space-xl border border-slate-200/80 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+        <!-- Item 1 -->
+        <div class="flex items-start gap-space-md">
+          <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[24px]">pin_drop</span>
           </div>
           <div class="space-y-1">
-            <h3 class="text-base font-bold text-on-surface">Lokasi Akurat</h3>
+            <h3 class="text-sm sm:text-base font-bold text-on-surface">Peta Lokasi Presisi</h3>
             <p class="text-xs text-on-surface-variant leading-relaxed">
-              Terintegrasi dengan peta presisi OpenStreetMap dan Geocoding API untuk memastikan titik lokasi kos tepat tanpa tersesat.
+              Titik lokasi terintegrasi Leaflet & OpenStreetMap untuk kemudahan survei rute kos tanpa tersesat.
             </p>
           </div>
         </div>
 
-        <!-- Card 2 -->
-        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-space-md group border border-slate-100">
-          <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors flex-shrink-0">
-            <span class="material-symbols-outlined text-2xl select-none" style="font-variation-settings: 'FILL' 1;">checklist</span>
+        <!-- Item 2 -->
+        <div class="flex items-start gap-space-md">
+          <div class="w-11 h-11 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[24px]">fact_check</span>
           </div>
           <div class="space-y-1">
-            <h3 class="text-base font-bold text-on-surface">Fasilitas Lengkap</h3>
+            <h3 class="text-sm sm:text-base font-bold text-on-surface">Fasilitas & Harga Transparan</h3>
             <p class="text-xs text-on-surface-variant leading-relaxed">
-              Lihat ketersediaan kamar, kamar mandi dalam, WiFi, dan parkir kendaraan secara transparan dan detail.
+              Cek tipe kamar mandi, fasilitas WiFi, parkir, dan ketersediaan unit sewa secara riil tanpa biaya tersembunyi.
             </p>
           </div>
         </div>
 
-        <!-- Card 3 -->
-        <div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow flex items-start gap-space-md group border border-slate-100">
-          <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors flex-shrink-0">
-            <span class="material-symbols-outlined text-2xl select-none" style="font-variation-settings: 'FILL' 1;">verified_user</span>
+        <!-- Item 3 -->
+        <div class="flex items-start gap-space-md">
+          <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+            <span class="material-symbols-outlined text-[24px]">chat</span>
           </div>
           <div class="space-y-1">
-            <h3 class="text-base font-bold text-on-surface">Aman & Terpercaya</h3>
+            <h3 class="text-sm sm:text-base font-bold text-on-surface">Hubungi Langsung Pemilik</h3>
             <p class="text-xs text-on-surface-variant leading-relaxed">
-              Seluruh data listing dikelola langsung oleh pemilik properti resmi dengan proteksi akun terverifikasi.
+              Ajukan sewa transparan atau koordinasi jadwal survei langsung via WhatsApp ke pemilik properti resmi.
             </p>
           </div>
         </div>
@@ -176,22 +176,16 @@
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
             <div class="absolute top-3 left-3 flex items-center gap-1.5">
-              <span class="bg-primary text-white text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm tracking-wide">
-                Populer
-              </span>
               <span
-                :class="[
-                  'text-[11px] font-semibold px-2.5 py-1 rounded-full shadow-sm',
-                  kos.jenis === 'putri' ? 'bg-[#FCE7F3] text-[#BE185D]' :
-                  kos.jenis === 'putra' ? 'bg-[#E0F2FE] text-[#0369A1]' :
-                  'bg-[#EDE9FE] text-[#6D28D9]'
-                ]"
+                v-if="kos.rating_rata_rata && Number(kos.rating_rata_rata) >= 4.5"
+                class="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs tracking-wide"
               >
-                {{ formatJenis(kos.jenis) }}
+                Top Rating
               </span>
+              <GenderBadge :jenis="kos.jenis" />
             </div>
             <button
-              class="absolute top-3 right-3 w-8 h-8 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-secondary hover:text-error flex items-center justify-center shadow-sm transition-colors"
+              class="absolute top-3 right-3 min-w-[36px] min-h-[36px] sm:min-w-[40px] sm:min-h-[40px] rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-secondary hover:text-error flex items-center justify-center shadow-sm transition-colors"
               title="Simpan Kos"
             >
               <span class="material-symbols-outlined text-lg select-none">favorite</span>
@@ -207,7 +201,8 @@
                 </router-link>
                 <div class="flex items-center gap-1 text-on-surface text-xs">
                   <span class="material-symbols-outlined text-amber-500 text-sm select-none" style="font-variation-settings: 'FILL' 1;">star</span>
-                  <span class="font-semibold">4.8</span>
+                  <span class="font-semibold">{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : 'Baru' }}</span>
+                  <span v-if="kos.ulasan_count" class="text-[10px] text-slate-400 font-normal">({{ kos.ulasan_count }})</span>
                 </div>
               </div>
 
@@ -261,6 +256,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
+import GenderBadge from '../components/GenderBadge.vue'
 
 const router = useRouter()
 

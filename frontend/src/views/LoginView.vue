@@ -2,9 +2,7 @@
   <div class="min-h-[85vh] flex items-center justify-center px-4 py-12 pt-20">
     <div class="bg-surface-container-lowest p-8 rounded-2xl border border-slate-100 shadow-md max-w-md w-full">
       <div class="text-center mb-8">
-        <div class="w-12 h-12 bg-primary/10 text-primary rounded-xl flex items-center justify-center mx-auto mb-3">
-          <span class="material-symbols-outlined text-3xl">home_work</span>
-        </div>
+        <img :src="logoUrl" alt="KosKu Logo" class="w-14 h-14 object-contain mx-auto mb-3" />
         <h2 class="text-2xl font-bold text-on-surface tracking-tight">Masuk ke KosKu</h2>
         <p class="text-xs text-on-surface-variant mt-1">Gunakan akun terdaftar Anda untuk melanjutkan ke sistem.</p>
       </div>
@@ -88,6 +86,7 @@
 import { reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import logoUrl from '../assets/KosKu Housing Pin Logo.png'
 
 const router = useRouter()
 const route = useRoute()

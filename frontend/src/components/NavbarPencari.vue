@@ -3,9 +3,11 @@
     <div class="h-16 max-w-7xl mx-auto px-margin flex items-center justify-between gap-space-md">
       <!-- Logo Brand (Pencari / Publik) -->
       <router-link to="/" class="flex items-center gap-space-sm group">
-        <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white shadow-sm group-hover:bg-primary-container transition">
-          <span class="material-symbols-outlined text-[22px]">home_work</span>
-        </div>
+        <img
+          :src="logoUrl"
+          alt="KosKu Logo"
+          class="w-9 h-9 object-contain rounded-lg shadow-xs group-hover:scale-105 transition-transform"
+        />
         <div class="flex items-center gap-1.5">
           <span class="text-xl font-bold text-primary tracking-tight">KosKu</span>
           <span class="hidden sm:inline-block text-[11px] font-semibold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">
@@ -204,6 +206,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import NotificationDropdown from './NotificationDropdown.vue'
+import logoUrl from '../assets/KosKu Housing Pin Logo.png'
 
 const auth = useAuthStore()
 const router = useRouter()
