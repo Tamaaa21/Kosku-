@@ -117,18 +117,24 @@
       <button
         @click="toggleOpen"
         type="button"
-        class="w-14 h-14 rounded-full bg-[#25D366] hover:bg-[#20BA5A] text-white shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-emerald-400/40 active:scale-95 group"
+        class="w-14 h-14 rounded-full bg-[#2563EB] hover:bg-[#2563EB] text-white shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-emerald-400/40 active:scale-95 group"
         :aria-label="isOpen ? 'Tutup bantuan CS' : 'Buka customer service WhatsApp'"
         :title="isOpen ? 'Tutup' : 'Customer Service WhatsApp'"
       >
         <!-- WhatsApp Icon SVG -->
-        <svg
-          v-if="!isOpen"
-          class="w-7 h-7 sm:w-8 sm:h-8 fill-current drop-shadow-xs transition-transform group-hover:scale-110"
-          viewBox="0 0 24 24"
-        >
-          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.699c.974.551 1.838.814 2.796.814 3.181 0 5.767-2.586 5.768-5.766.001-3.18-2.585-5.766-5.768-5.766zm6.657 5.765c-.002 3.67-2.986 6.654-6.658 6.654-.997 0-2.025-.262-2.915-.758l-3.328.873.888-3.245c-.569-.974-.869-2.046-.867-3.524.002-3.67 2.986-6.654 6.658-6.654 3.672 0 6.659 2.984 6.662 6.654z"/>
-        </svg>
+       
+
+<svg
+    v-if="!isOpen"
+    xmlns="http://www.w3.org/2000/svg"
+    class="w-7 h-7 sm:w-8 sm:h-8 fill-current drop-shadow-xs"
+    viewBox="0 0 24 24"
+  >
+    <path
+      d="M12 2a9 9 0 0 0-9 9v5a3 3 0 0 0 3 3h2v-8H5a7 7 0 0 1 14 0h-3v8h2a3 3 0 0 0 3-3v-5a9 9 0 0 0-9-9ZM6 13v4H6a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1Zm12 4v-4h0a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1Z"
+    />
+  </svg>
+
 
         <span v-else class="material-symbols-outlined text-[28px]">close</span>
       </button>

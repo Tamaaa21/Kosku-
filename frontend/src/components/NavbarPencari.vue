@@ -6,14 +6,9 @@
         <img
           :src="logoUrl"
           alt="KosKu Logo"
-          class="w-9 h-9 object-contain rounded-lg shadow-xs group-hover:scale-105 transition-transform"
+          class="w-12 h-12 object-contain rounded-lg shadow-xs group-hover:scale-105 transition-transform"
         />
-        <div class="flex items-center gap-1.5">
-          <span class="text-xl font-bold text-primary tracking-tight">KosKu</span>
-          <span class="hidden sm:inline-block text-[11px] font-semibold text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">
-            Indonesia
-          </span>
-        </div>
+       
       </router-link>
 
       <!-- Desktop Navigation Menu -->
@@ -68,9 +63,7 @@
           <NotificationDropdown />
 
           <!-- Role Badge -->
-          <span class="hidden sm:inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-surface-container-high text-primary uppercase">
-            Pencari Kos
-          </span>
+         
 
           <!-- Profile Link -->
           <router-link
@@ -79,7 +72,8 @@
             title="Profil Akun"
           >
             <div class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs uppercase overflow-hidden">
-              <span class="material-symbols-outlined text-[18px]">person</span>
+              <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
+              <span v-else class="material-symbols-outlined text-[18px]">person</span>
             </div>
             <span class="text-xs font-semibold text-on-surface hidden lg:inline max-w-[120px] truncate">
               {{ auth.user?.nama }}

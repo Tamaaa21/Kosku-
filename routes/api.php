@@ -33,6 +33,8 @@ Route::prefix('v1')->group(function (): void {
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::get('/me', [AuthController::class, 'me']);
         Route::put('/me', [AuthController::class, 'updateProfile']);
+        Route::post('/me/avatar', [AuthController::class, 'updateAvatar']);
+        Route::put('/me/password', [AuthController::class, 'updatePassword']);
 
         // Upload Gambar (Maks 5 berkas, maks 2MB per berkas)
         Route::post('/upload/images', [UploadController::class, 'uploadImages'])->middleware('role:pemilik,admin');

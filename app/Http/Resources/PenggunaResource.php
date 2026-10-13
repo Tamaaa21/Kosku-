@@ -24,6 +24,7 @@ class PenggunaResource extends JsonResource
             'email' => $this->email,
             'telepon' => $this->telepon,
             'no_hp' => $this->telepon,
+            'foto' => $this->foto,
             'role' => $this->role,
             'aktif' => (bool) $this->aktif,
             'kos_count' => $this->whenCounted('kos'),
