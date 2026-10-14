@@ -4,7 +4,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-xs shrink-0">
-          <span class="material-symbols-outlined text-[20px]">{{ activeTabMeta.icon }}</span>
+          <component :is="activeTabMeta.icon" :size="20" weight="bold" />
         </div>
         <div>
           <div class="flex items-center gap-2">
@@ -63,7 +63,7 @@
           :disabled="allBookings.length === 0"
           class="inline-flex items-center gap-1.5 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
         >
-          <span class="material-symbols-outlined text-[16px] text-emerald-600">table_view</span>
+          <PhTable :size="16" class="text-emerald-600" />
           Ekspor CSV
         </button>
         <button
@@ -367,7 +367,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">group</span>
+            <PhUsersThree :size="24" weight="duotone" />
           </div>
         </div>
 
@@ -380,7 +380,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">real_estate_agent</span>
+            <PhUserCheck :size="24" weight="duotone" />
           </div>
         </div>
 
@@ -393,7 +393,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">person_search</span>
+            <PhUser :size="24" weight="duotone" />
           </div>
         </div>
       </div>
@@ -586,7 +586,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">home_work</span>
+            <PhBuildings :size="24" weight="duotone" />
           </div>
         </div>
 
@@ -600,7 +600,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-pink-50 text-pink-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">female</span>
+            <PhGenderFemale :size="24" weight="bold" />
           </div>
         </div>
 
@@ -614,7 +614,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">male</span>
+            <PhGenderMale :size="24" weight="bold" />
           </div>
         </div>
 
@@ -628,7 +628,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-violet-50 text-violet-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">group</span>
+            <PhUsers :size="24" weight="bold" />
           </div>
         </div>
       </div>
@@ -836,7 +836,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">receipt_long</span>
+            <PhReceipt :size="24" weight="duotone" />
           </div>
         </div>
 
@@ -850,7 +850,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">check_circle</span>
+            <PhCheckCircle :size="24" weight="duotone" />
           </div>
         </div>
 
@@ -864,7 +864,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">hourglass_top</span>
+            <PhHourglassHigh :size="24" weight="duotone" />
           </div>
         </div>
 
@@ -880,7 +880,7 @@
             </span>
           </div>
           <div class="w-12 h-12 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold">
-            <span class="material-symbols-outlined text-[24px]">payments</span>
+            <PhCurrencyCircleDollar :size="24" weight="duotone" />
           </div>
         </div>
       </div>
@@ -1077,7 +1077,7 @@
         <div class="shrink-0 px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
           <div class="flex items-center gap-2.5">
             <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-              <span class="material-symbols-outlined text-[22px]">domain_verification</span>
+              <PhBuildings :size="22" weight="bold" />
             </div>
             <div>
               <h3 class="text-base font-black text-slate-900">
@@ -1134,7 +1134,7 @@
           <!-- Address & Geocoding -->
           <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 space-y-2 text-xs">
             <div class="flex items-start gap-2">
-              <span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">pin_drop</span>
+              <PhMapPin :size="18" weight="bold" class="text-primary shrink-0 mt-0.5" />
               <div>
                 <p class="font-bold text-slate-800 text-[11px]">Alamat Lengkap</p>
                 <p class="text-slate-500 leading-relaxed text-[11px] mt-0.5">{{ selectedKosPreview.alamat }}</p>
@@ -1184,7 +1184,7 @@
                 :key="fas.id"
                 class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-semibold"
               >
-                <span class="material-symbols-outlined text-[13px] text-primary">check_small</span>
+                <PhCheck :size="13" weight="bold" class="text-primary" />
                 {{ fas.nama }}
               </span>
             </div>
@@ -1238,7 +1238,7 @@
         <div class="shrink-0 px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
-              <span class="material-symbols-outlined text-[22px]">receipt_long</span>
+              <PhReceipt :size="22" weight="bold" />
             </div>
             <div>
               <div class="flex items-center gap-2">
@@ -1327,7 +1327,7 @@
 
           <!-- Audit Governance Information -->
           <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-start gap-3">
-            <span class="material-symbols-outlined text-[20px] text-primary shrink-0 mt-0.5">verified_user</span>
+            <PhShieldCheck :size="20" weight="bold" class="text-primary shrink-0 mt-0.5" />
             <div class="text-xs text-slate-600 leading-relaxed">
               <span class="font-bold text-slate-800 block mb-0.5">Tata Kelola Persetujuan Sewa:</span>
               Status konfirmasi sewa dikelola secara mandiri oleh <span class="font-semibold text-slate-800">Pemilik Kos</span> melalui Dashboard Mitra Pemilik. Administrator memantau seluruh transaksi untuk kebutuhan audit trail, verifikasi, dan ekspor pelaporan nasional.
@@ -1532,6 +1532,24 @@
 <script setup>
 import { ref, onMounted, reactive, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+import {
+  PhSquaresFour,
+  PhUsersThree,
+  PhBuildings,
+  PhReceipt,
+  PhTable,
+  PhUserCheck,
+  PhUser,
+  PhGenderFemale,
+  PhGenderMale,
+  PhUsers,
+  PhCheckCircle,
+  PhHourglassHigh,
+  PhCurrencyCircleDollar,
+  PhMapPin,
+  PhCheck,
+  PhShieldCheck,
+} from '@phosphor-icons/vue'
 import api from '../services/api'
 import { openWhatsAppChat } from '../utils/whatsapp'
 
@@ -1573,35 +1591,35 @@ const activeTabMeta = computed(() => {
   switch (activeTab.value) {
     case 'ringkasan':
       return {
-        icon: 'dashboard',
+        icon: PhSquaresFour,
         title: 'Ringkasan & Analitik',
         badge: null,
         description: 'Statistik performa real-time dan ringkasan eksekutif platform kos.',
       }
     case 'pengguna':
       return {
-        icon: 'manage_accounts',
+        icon: PhUsersThree,
         title: 'Manajemen Pengguna Terpadu',
         badge: `${userList.value.length} Pengguna`,
         description: 'Kelola akun mitra pemilik kos, pencari kos, dan verifikasi kepatuhan sistem.',
       }
     case 'kos':
       return {
-        icon: 'home_work',
+        icon: PhBuildings,
         title: 'Data & Moderasi Properti Kos',
         badge: `${kosList.value.length} Listing`,
         description: 'Katalog data seluruh kos nasional dan pengawasan listing properti.',
       }
     case 'pemesanan':
       return {
-        icon: 'receipt_long',
+        icon: PhReceipt,
         title: 'Audit Log Pemesanan (Audit Trail)',
         badge: `${allBookings.value.length} Transaksi`,
         description: 'Rekapitulasi dan audit transaksi reservasi sewa kos seluruh Indonesia.',
       }
     default:
       return {
-        icon: 'dashboard',
+        icon: PhSquaresFour,
         title: 'Dashboard Administrator',
         badge: null,
         description: 'Panel tata kelola sistem platform kos.',

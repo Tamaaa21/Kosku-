@@ -13,7 +13,7 @@
       <div class="inline-flex items-center gap-2 bg-surface-container-lowest border border-slate-100 px-4 py-2 rounded-full shadow-sm">
         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
         <span class="text-xs text-on-surface font-semibold capitalize">{{ auth.role }} Terverifikasi</span>
-        <span class="material-symbols-outlined text-primary text-[18px]">verified</span>
+        <PhShieldCheck :size="18" weight="fill" class="text-primary" />
       </div>
     </div>
 
@@ -23,7 +23,7 @@
       class="mb-6 p-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-medium border border-emerald-200 flex items-center justify-between shadow-xs transition-all"
     >
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-emerald-600 text-[18px]">check_circle</span>
+        <PhCheckCircle :size="18" weight="fill" class="text-emerald-600" />
         <span>{{ toastMsg }}</span>
       </div>
       <button @click="toastMsg = ''" class="text-emerald-700 font-bold ml-4 text-base hover:opacity-75">&times;</button>
@@ -44,14 +44,14 @@
                 :alt="auth.user?.nama"
                 class="w-full h-full object-cover"
               />
-              <span v-else class="material-symbols-outlined text-[54px] text-primary select-none">person</span>
+              <PhUser v-else :size="54" class="text-primary select-none" />
 
               <!-- Overlay loader saat mengunggah foto -->
               <div
                 v-if="uploadingAvatar"
                 class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white"
               >
-                <span class="material-symbols-outlined animate-spin text-2xl">progress_activity</span>
+                <PhCircleNotch :size="24" class="animate-spin" />
                 <span class="text-[10px] mt-1 font-semibold">Mengunggah...</span>
               </div>
             </div>
@@ -64,7 +64,7 @@
               class="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-white shadow-md flex items-center justify-center transition border-2 border-white focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
               title="Ganti Foto Profil"
             >
-              <span class="material-symbols-outlined text-[18px]">photo_camera</span>
+              <PhCamera :size="18" weight="bold" />
             </button>
             <input
               ref="fileInputRef"
@@ -122,7 +122,7 @@
               class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-rose-600 bg-rose-50 hover:bg-rose-100 transition text-xs font-semibold"
               type="button"
             >
-              <span class="material-symbols-outlined text-[18px]">logout</span>
+              <PhSignOut :size="18" weight="bold" />
               <span>Keluar dari Akun</span>
             </button>
           </div>
@@ -144,7 +144,7 @@
               @click="refreshData"
               class="px-3.5 py-1.5 bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold rounded-lg transition flex items-center gap-1.5"
             >
-              <span class="material-symbols-outlined text-[16px]">sync</span>
+              <PhArrowClockwise :size="16" weight="bold" />
               <span>Segarkan</span>
             </button>
           </div>
@@ -154,8 +154,8 @@
               <!-- Nama -->
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-on-surface">Nama Lengkap</label>
-                <div class="relative">
-                  <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-slate-400">person</span>
+                <div class="relative flex items-center">
+                  <PhUser :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
                   <input
                     v-model="profileForm.nama"
                     type="text"
@@ -168,8 +168,8 @@
               <!-- Email -->
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-on-surface">Alamat Email</label>
-                <div class="relative">
-                  <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-slate-400">mail</span>
+                <div class="relative flex items-center">
+                  <PhEnvelope :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
                   <input
                     :value="auth.user?.email"
                     type="email"
@@ -184,8 +184,8 @@
               <!-- Nomor Telepon -->
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-on-surface">Nomor WhatsApp / Telepon</label>
-                <div class="relative">
-                  <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-slate-400">call</span>
+                <div class="relative flex items-center">
+                  <PhPhone :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
                   <input
                     v-model="profileForm.no_hp"
                     type="tel"
@@ -198,8 +198,8 @@
               <!-- Peran Akun -->
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-on-surface">Peran / Hak Akses Sistem</label>
-                <div class="relative">
-                  <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-slate-400">badge</span>
+                <div class="relative flex items-center">
+                  <PhIdentificationBadge :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
                   <input
                     :value="auth.role?.toUpperCase()"
                     type="text"
@@ -213,7 +213,7 @@
             <!-- Simpan Perubahan Button -->
             <div class="pt-4 flex items-center justify-between border-t border-slate-100">
               <span class="text-[11px] text-on-surface-variant flex items-center gap-1">
-                <span class="material-symbols-outlined text-[15px] text-emerald-600">lock</span>
+                <PhLock :size="15" class="text-emerald-600" />
                 Data tersinkronisasi dengan REST API KosKu
               </span>
               <button
@@ -221,7 +221,7 @@
                 :disabled="saving"
                 class="h-10 px-6 rounded-lg bg-primary-container text-white text-xs font-semibold hover:bg-primary transition shadow-sm disabled:opacity-50 flex items-center gap-2"
               >
-                <span v-if="saving" class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                <PhCircleNotch v-if="saving" :size="16" class="animate-spin" />
                 <span>{{ saving ? 'Menyimpan...' : 'Simpan Perubahan' }}</span>
               </button>
             </div>
@@ -232,7 +232,7 @@
         <div class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-slate-100">
           <div class="flex items-center gap-3 pb-4 border-b border-slate-100 mb-6">
             <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <span class="material-symbols-outlined text-[20px]">lock_reset</span>
+              <PhLockKey :size="20" weight="bold" />
             </div>
             <div>
               <h3 class="text-base font-bold text-on-surface">Ganti Kata Sandi</h3>
@@ -248,7 +248,7 @@
             class="mb-4 p-3.5 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-medium border border-emerald-200 flex items-center justify-between"
           >
             <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-emerald-600 text-[18px]">check_circle</span>
+              <PhCheckCircle :size="18" weight="fill" class="text-emerald-600" />
               <span>{{ passwordSuccess }}</span>
             </div>
             <button @click="passwordSuccess = ''" class="text-emerald-700 font-bold ml-4 text-base">&times;</button>
@@ -260,7 +260,7 @@
             class="mb-4 p-3.5 rounded-xl bg-rose-50 text-rose-800 text-xs font-medium border border-rose-200 flex items-center justify-between"
           >
             <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-rose-600 text-[18px]">error</span>
+              <PhWarningCircle :size="18" weight="fill" class="text-rose-600" />
               <span>{{ passwordError }}</span>
             </div>
             <button @click="passwordError = ''" class="text-rose-700 font-bold ml-4 text-base">&times;</button>
@@ -270,8 +270,8 @@
             <!-- Password Lama -->
             <div class="flex flex-col gap-1.5">
               <label class="text-xs font-semibold text-on-surface">Kata Sandi Saat Ini</label>
-              <div class="relative">
-                <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-slate-400">key</span>
+              <div class="relative flex items-center">
+                <PhKey :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
                 <input
                   v-model="passwordForm.current_password"
                   :type="showCurrentPassword ? 'text' : 'password'"
@@ -282,11 +282,10 @@
                 <button
                   type="button"
                   @click="showCurrentPassword = !showCurrentPassword"
-                  class="absolute right-3 top-2.5 text-slate-400 hover:text-on-surface text-[18px] flex items-center"
+                  class="absolute right-3 text-slate-400 hover:text-on-surface flex items-center"
                 >
-                  <span class="material-symbols-outlined text-[18px]">
-                    {{ showCurrentPassword ? 'visibility_off' : 'visibility' }}
-                  </span>
+                  <PhEyeSlash v-if="showCurrentPassword" :size="18" />
+                  <PhEye v-else :size="18" />
                 </button>
               </div>
             </div>
@@ -295,8 +294,8 @@
               <!-- Password Baru -->
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-on-surface">Kata Sandi Baru</label>
-                <div class="relative">
-                  <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-slate-400">lock</span>
+                <div class="relative flex items-center">
+                  <PhLock :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
                   <input
                     v-model="passwordForm.password"
                     :type="showNewPassword ? 'text' : 'password'"
@@ -308,11 +307,10 @@
                   <button
                     type="button"
                     @click="showNewPassword = !showNewPassword"
-                    class="absolute right-3 top-2.5 text-slate-400 hover:text-on-surface text-[18px] flex items-center"
+                    class="absolute right-3 text-slate-400 hover:text-on-surface flex items-center"
                   >
-                    <span class="material-symbols-outlined text-[18px]">
-                      {{ showNewPassword ? 'visibility_off' : 'visibility' }}
-                    </span>
+                    <PhEyeSlash v-if="showNewPassword" :size="18" />
+                    <PhEye v-else :size="18" />
                   </button>
                 </div>
                 <span class="text-[10px] text-on-surface-variant">Kombinasikan huruf dan angka untuk keamanan optimal</span>
@@ -321,8 +319,8 @@
               <!-- Konfirmasi Password Baru -->
               <div class="flex flex-col gap-1.5">
                 <label class="text-xs font-semibold text-on-surface">Ulangi Kata Sandi Baru</label>
-                <div class="relative">
-                  <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-slate-400">lock_reset</span>
+                <div class="relative flex items-center">
+                  <PhLockKey :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
                   <input
                     v-model="passwordForm.password_confirmation"
                     :type="showConfirmPassword ? 'text' : 'password'"
@@ -334,11 +332,10 @@
                   <button
                     type="button"
                     @click="showConfirmPassword = !showConfirmPassword"
-                    class="absolute right-3 top-2.5 text-slate-400 hover:text-on-surface text-[18px] flex items-center"
+                    class="absolute right-3 text-slate-400 hover:text-on-surface flex items-center"
                   >
-                    <span class="material-symbols-outlined text-[18px]">
-                      {{ showConfirmPassword ? 'visibility_off' : 'visibility' }}
-                    </span>
+                    <PhEyeSlash v-if="showConfirmPassword" :size="18" />
+                    <PhEye v-else :size="18" />
                   </button>
                 </div>
               </div>
@@ -351,7 +348,7 @@
                 :disabled="passwordLoading"
                 class="h-10 px-6 rounded-lg bg-primary hover:bg-primary-container text-white text-xs font-semibold transition shadow-sm disabled:opacity-50 flex items-center gap-2"
               >
-                <span v-if="passwordLoading" class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                <PhCircleNotch v-if="passwordLoading" :size="16" class="animate-spin" />
                 <span>{{ passwordLoading ? 'Menyimpan Sandi...' : 'Perbarui Kata Sandi' }}</span>
               </button>
             </div>
@@ -362,7 +359,7 @@
         <div class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-slate-100">
           <div class="flex items-center gap-3 pb-3 border-b border-slate-100 mb-4">
             <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <span class="material-symbols-outlined text-[20px]">security</span>
+              <PhShieldCheck :size="20" weight="bold" />
             </div>
             <div>
               <h4 class="text-sm font-bold text-on-surface">Keamanan & Sesi Akun</h4>
@@ -372,7 +369,7 @@
 
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-surface-container-low/50 border border-slate-100 text-xs">
             <div class="flex items-center gap-3">
-              <span class="material-symbols-outlined text-2xl text-emerald-600">shield_with_heart</span>
+              <PhShieldCheck :size="24" weight="fill" class="text-emerald-600" />
               <div>
                 <p class="font-bold text-on-surface">Akun Terlindungi</p>
                 <p class="text-[11px] text-slate-500">Token otentikasi valid dan tersimpan aman di peramban Anda.</p>
@@ -394,6 +391,24 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import {
+  PhShieldCheck,
+  PhCheckCircle,
+  PhUser,
+  PhCircleNotch,
+  PhCamera,
+  PhSignOut,
+  PhArrowClockwise,
+  PhEnvelope,
+  PhPhone,
+  PhIdentificationBadge,
+  PhLock,
+  PhLockKey,
+  PhWarningCircle,
+  PhKey,
+  PhEyeSlash,
+  PhEye,
+} from '@phosphor-icons/vue'
 import { useAuthStore } from '../stores/auth'
 import api from '../services/api'
 

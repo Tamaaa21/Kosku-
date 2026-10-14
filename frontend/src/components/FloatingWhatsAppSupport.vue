@@ -14,11 +14,11 @@
         class="absolute bottom-16 right-0 w-80 sm:w-88 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden"
       >
         <!-- Header -->
-        <div class="bg-gradient-to-r from-emerald-600 to-teal-700 p-4 text-white">
+        <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 p-4 text-white">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="relative w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white border border-white/30 shrink-0">
-                <span class="material-symbols-outlined text-[24px]">support_agent</span>
+                <PhHeadset :size="22" weight="bold" />
                 <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-700"></span>
               </div>
               <div>
@@ -36,7 +36,7 @@
               class="p-1 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition"
               title="Tutup"
             >
-              <span class="material-symbols-outlined text-[20px]">close</span>
+              <PhX :size="20" weight="bold" />
             </button>
           </div>
           <p class="text-[11px] text-emerald-100/90 mt-2.5 leading-snug">
@@ -59,7 +59,7 @@
                 item.iconBg
               ]"
             >
-              <span class="material-symbols-outlined text-[18px]">{{ item.icon }}</span>
+              <component :is="item.iconComponent" :size="18" weight="bold" />
             </div>
             <div class="flex-1 min-w-0">
               <h4 class="text-xs font-bold text-on-surface group-hover:text-emerald-700 transition-colors">
@@ -69,9 +69,7 @@
                 {{ item.desc }}
               </p>
             </div>
-            <span class="material-symbols-outlined text-[16px] text-slate-300 group-hover:text-emerald-600 transition-transform group-hover:translate-x-0.5 mt-1">
-              chevron_right
-            </span>
+            <PhCaretRight :size="16" weight="bold" class="text-slate-300 group-hover:text-emerald-600 transition-transform group-hover:translate-x-0.5 mt-1" />
           </button>
         </div>
 
@@ -82,7 +80,7 @@
             type="button"
             class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm active:scale-[0.99]"
           >
-            <span class="material-symbols-outlined text-[18px]">chat</span>
+            <PhWhatsappLogo :size="18" weight="fill" />
             <span>Mulai Chat via WhatsApp</span>
           </button>
           <span class="text-[10px] text-slate-400 text-center block mt-1.5 font-medium">
@@ -117,26 +115,12 @@
       <button
         @click="toggleOpen"
         type="button"
-        class="w-14 h-14 rounded-full bg-[#2563EB] hover:bg-[#2563EB] text-white shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-emerald-400/40 active:scale-95 group"
+        class="w-14 h-14 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-emerald-400/40 active:scale-95 group"
         :aria-label="isOpen ? 'Tutup bantuan CS' : 'Buka customer service WhatsApp'"
         :title="isOpen ? 'Tutup' : 'Customer Service WhatsApp'"
       >
-        <!-- WhatsApp Icon SVG -->
-       
-
-<svg
-    v-if="!isOpen"
-    xmlns="http://www.w3.org/2000/svg"
-    class="w-7 h-7 sm:w-8 sm:h-8 fill-current drop-shadow-xs"
-    viewBox="0 0 24 24"
-  >
-    <path
-      d="M12 2a9 9 0 0 0-9 9v5a3 3 0 0 0 3 3h2v-8H5a7 7 0 0 1 14 0h-3v8h2a3 3 0 0 0 3-3v-5a9 9 0 0 0-9-9ZM6 13v4H6a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1Zm12 4v-4h0a1 1 0 0 1 1 1v2a1 1 0 0 1-1 1Z"
-    />
-  </svg>
-
-
-        <span v-else class="material-symbols-outlined text-[28px]">close</span>
+        <PhWhatsappLogo v-if="!isOpen" :size="30" weight="fill" class="drop-shadow-xs" />
+        <PhX v-else :size="24" weight="bold" />
       </button>
     </div>
   </div>
@@ -147,6 +131,15 @@ import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { openWhatsAppChat, buildCustomerServiceTemplate } from '../utils/whatsapp'
+import {
+  PhHeadset,
+  PhX,
+  PhMagnifyingGlass,
+  PhBuildings,
+  PhWarningCircle,
+  PhCaretRight,
+  PhWhatsappLogo
+} from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
 const route = useRoute()
@@ -166,21 +159,21 @@ const supportTopics = [
     id: 'pencari',
     title: 'Bantuan Pencari Kos',
     desc: 'Tanya ketersediaan, booking kamar, & survei',
-    icon: 'search',
+    iconComponent: PhMagnifyingGlass,
     iconBg: 'bg-emerald-100 text-emerald-700',
   },
   {
     id: 'pemilik',
     title: 'Mitra Pemilik Kos',
     desc: 'Bantuan tambah properti, kamar, & pesanan',
-    icon: 'storefront',
-    iconBg: 'bg-sky-100 text-sky-700',
+    iconComponent: PhBuildings,
+    iconBg: 'bg-primary-fixed text-primary',
   },
   {
     id: 'kendala',
     title: 'Lapor Kendala / Pertanyaan',
     desc: 'Keluhan teknis, akun, & pertanyaan umum',
-    icon: 'report_problem',
+    iconComponent: PhWarningCircle,
     iconBg: 'bg-amber-100 text-amber-700',
   },
 ]

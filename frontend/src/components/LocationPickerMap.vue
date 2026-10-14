@@ -3,7 +3,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
       <div>
         <label class="text-xs font-semibold text-on-surface flex items-center gap-1.5">
-          <span class="material-symbols-outlined text-[16px] text-primary">pin_drop</span>
+          <PhMapPin :size="16" weight="bold" class="text-primary" />
           <span>Titik Lokasi Peta (Responsif)</span>
         </label>
         <p class="text-[11px] text-on-surface-variant">
@@ -20,13 +20,13 @@
           class="h-8 px-3 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-[11px] font-bold border border-emerald-200 transition flex items-center gap-1 shrink-0 disabled:opacity-60"
           title="Gunakan lokasi GPS perangkat saya saat ini"
         >
-          <span
+          <PhCircleNotch
             v-if="detectingGps"
-            class="material-symbols-outlined animate-spin text-[14px]"
-          >
-            progress_activity
-          </span>
-          <span v-else class="material-symbols-outlined text-[14px]">my_location</span>
+            :size="14"
+            weight="bold"
+            class="animate-spin"
+          />
+          <PhCrosshair v-else :size="14" weight="bold" />
           <span>{{ detectingGps ? 'Mendeteksi...' : 'Lokasi GPS Saya' }}</span>
         </button>
 
@@ -38,13 +38,13 @@
           class="h-8 px-3 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary text-[11px] font-bold transition flex items-center gap-1 shrink-0 disabled:opacity-60"
           title="Cari koordinat berdasarkan alamat yang diketik"
         >
-          <span
+          <PhCircleNotch
             v-if="searchingAddress"
-            class="material-symbols-outlined animate-spin text-[14px]"
-          >
-            progress_activity
-          </span>
-          <span v-else class="material-symbols-outlined text-[14px]">search</span>
+            :size="14"
+            weight="bold"
+            class="animate-spin"
+          />
+          <PhMagnifyingGlass v-else :size="14" weight="bold" />
           <span>Cari dari Alamat</span>
         </button>
       </div>
@@ -68,6 +68,12 @@
 <script setup>
 import { ref, onMounted, watch, onBeforeUnmount, nextTick } from 'vue'
 import L from 'leaflet'
+import {
+  PhMapPin,
+  PhCrosshair,
+  PhMagnifyingGlass,
+  PhCircleNotch
+} from '@phosphor-icons/vue'
 
 // Fix default Leaflet icon paths in Vite build
 delete L.Icon.Default.prototype._getIconUrl

@@ -110,7 +110,7 @@
           :disabled="auth.loading"
           class="w-full bg-primary-container hover:bg-primary text-white font-bold py-2.5 rounded-lg transition text-xs shadow-md disabled:opacity-50 mt-4 flex items-center justify-center gap-1.5"
         >
-          <span class="material-symbols-outlined text-base">how_to_reg</span>
+          <PhUserPlus :size="16" weight="bold" />
           <span>{{ auth.loading ? 'Mendaftarkan Akun...' : 'Daftar Sekarang' }}</span>
         </button>
       </form>
@@ -128,6 +128,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { PhUserPlus } from '@phosphor-icons/vue'
 import { useAuthStore } from '../stores/auth'
 import logoUrl from '../assets/KosKu Housing Pin Logo.png'
 

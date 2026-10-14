@@ -40,7 +40,7 @@
             class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
             type="button"
           >
-            <span class="material-symbols-outlined text-[20px]">close</span>
+            <PhX :size="20" weight="bold" />
           </button>
         </div>
 
@@ -60,7 +60,7 @@
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="$route.path === '/dashboard/pemilik' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">dashboard</span>
+            <PhSquaresFour :size="20" weight="bold" />
             <span class="flex-1">Dashboard</span>
           </router-link>
 
@@ -71,7 +71,7 @@
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="$route.path === '/dashboard/pemilik/kos' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">apartment</span>
+            <PhBuildings :size="20" weight="bold" />
             <span class="flex-1">Data Kos</span>
           </router-link>
 
@@ -82,7 +82,7 @@
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="$route.path === '/dashboard/pemilik/kamar' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">meeting_room</span>
+            <PhBed :size="20" weight="bold" />
             <span class="flex-1">Kelola Kamar</span>
           </router-link>
 
@@ -93,7 +93,7 @@
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="$route.path === '/dashboard/pemilik/pemesanan' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">event_available</span>
+            <PhCalendarCheck :size="20" weight="bold" />
             <span class="flex-1">Pemesanan Masuk</span>
           </router-link>
 
@@ -104,7 +104,7 @@
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="$route.path === '/profil' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">person</span>
+            <PhUser :size="20" weight="bold" />
             <span class="flex-1">Profil Saya</span>
           </router-link>
         </nav>
@@ -115,7 +115,7 @@
         <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/60 transition">
           <div class="w-9 h-9 rounded-full bg-primary/20 text-primary-fixed border border-primary/30 flex items-center justify-center font-bold text-xs uppercase shrink-0 overflow-hidden">
             <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-            <span v-else class="material-symbols-outlined text-[18px]">storefront</span>
+            <PhBuildings v-else :size="18" weight="bold" />
           </div>
           <div class="min-w-0 flex-1">
             <p class="text-xs font-bold text-white truncate leading-tight">{{ auth.user?.nama }}</p>
@@ -127,7 +127,7 @@
             title="Keluar / Logout"
             type="button"
           >
-            <span class="material-symbols-outlined text-[18px]">logout</span>
+            <PhSignOut :size="18" weight="bold" />
           </button>
         </div>
       </div>
@@ -143,13 +143,13 @@
           type="button"
           aria-label="Buka Menu Sidebar"
         >
-          <span class="material-symbols-outlined text-[22px]">menu</span>
+          <PhList :size="22" weight="bold" />
         </button>
 
         <!-- Location Indicator -->
         <div class="flex items-center gap-2">
           <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[18px]">storefront</span>
+            <PhBuildings :size="18" weight="bold" />
           </div>
           <span class="font-bold text-sm sm:text-base text-on-surface">{{ currentPageTitle }}</span>
         </div>
@@ -167,7 +167,7 @@
         >
           <div class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs uppercase overflow-hidden">
             <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-            <span v-else class="material-symbols-outlined text-[18px]">person</span>
+            <PhUser v-else :size="18" weight="bold" />
           </div>
           <span class="text-xs font-semibold text-on-surface hidden md:inline max-w-[120px] truncate">
             {{ auth.user?.nama }}
@@ -184,6 +184,16 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import NotificationDropdown from './NotificationDropdown.vue'
 import logoUrl from '../assets/KosKu Housing Pin Logo.png'
+import {
+  PhX,
+  PhSquaresFour,
+  PhBuildings,
+  PhBed,
+  PhCalendarCheck,
+  PhUser,
+  PhSignOut,
+  PhList
+} from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
 const route = useRoute()

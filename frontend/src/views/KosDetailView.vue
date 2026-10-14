@@ -22,7 +22,7 @@
           to="/kos"
           class="inline-flex items-center gap-1 text-xs font-semibold text-on-surface-variant hover:text-primary transition-colors group"
         >
-          <span class="material-symbols-outlined text-base transition-transform group-hover:-translate-x-1">arrow_back</span>
+          <PhArrowLeft :size="16" weight="bold" class="transition-transform group-hover:-translate-x-1" />
           <span>Daftar Kos</span>
         </router-link>
 
@@ -31,16 +31,14 @@
             @click="shareKos"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition shadow-sm"
           >
-            <span class="material-symbols-outlined text-[16px]">share</span>
+            <PhShareNetwork :size="16" weight="bold" />
             <span>Bagikan</span>
           </button>
           <button
             @click="toggleFavorite"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface text-xs font-medium transition shadow-sm"
           >
-            <span class="material-symbols-outlined text-[16px]" :class="isFavorite ? 'text-error' : ''">
-              {{ isFavorite ? 'favorite' : 'favorite_border' }}
-            </span>
+            <PhHeart :size="16" :weight="isFavorite ? 'fill' : 'bold'" :class="isFavorite ? 'text-error' : ''" />
             <span>{{ isFavorite ? 'Tersimpan' : 'Simpan' }}</span>
           </button>
         </div>
@@ -62,7 +60,7 @@
               <div class="absolute top-space-sm left-space-sm flex items-center gap-space-xs flex-wrap">
                 <GenderBadge :jenis="kos.jenis" size="md" show-icon prefix="Khusus " class="shadow-sm" />
                 <span class="px-2.5 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-tertiary text-[11px] font-semibold flex items-center gap-1 shadow-sm">
-                  <span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                  <PhSealCheck :size="14" weight="fill" />
                   Terverifikasi
                 </span>
                 <button
@@ -71,7 +69,7 @@
                   class="px-2.5 py-1 rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-on-surface text-[11px] font-semibold flex items-center gap-1 shadow-sm hover:bg-white transition cursor-pointer"
                   title="Lihat ulasan dan rating kos"
                 >
-                  <span class="material-symbols-outlined text-[14px] text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <PhStar :size="14" weight="fill" class="text-amber-500" />
                   <span>{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : 'Baru' }}</span>
                   <span v-if="kos.ulasan_count" class="text-slate-500 font-normal">({{ kos.ulasan_count }} Ulasan)</span>
                 </button>
@@ -157,7 +155,7 @@
                   :key="fas.id"
                   class="flex items-center gap-2 p-2.5 rounded-lg bg-surface-container-low text-xs text-on-surface"
                 >
-                  <span class="material-symbols-outlined text-primary text-base">check_circle</span>
+                  <PhCheckCircle :size="16" weight="bold" class="text-primary" />
                   <span class="font-medium">{{ fas.nama }}</span>
                 </div>
               </div>
@@ -182,7 +180,7 @@
                   :key="idx"
                   class="flex items-start gap-2.5 p-3 rounded-xl bg-surface-container-low text-xs text-on-surface border border-slate-100"
                 >
-                  <span class="material-symbols-outlined text-emerald-600 text-[18px] shrink-0 mt-0.5">verified_user</span>
+                  <PhShieldCheck :size="18" weight="bold" class="text-emerald-600 shrink-0 mt-0.5" />
                   <span class="font-medium leading-relaxed">{{ rule }}</span>
                 </div>
               </div>
@@ -191,7 +189,7 @@
               </div>
 
               <div class="p-3 bg-amber-50/70 border border-amber-200/60 rounded-xl flex items-center gap-2.5 text-xs text-amber-800">
-                <span class="material-symbols-outlined text-amber-600 text-[18px] shrink-0">info</span>
+                <PhInfo :size="18" weight="bold" class="text-amber-600 shrink-0" />
                 <span>Pelanggaran terhadap tata tertib kos dapat dikenai sanksi atau teguran oleh pemilik/pengelola kos.</span>
               </div>
             </div>
@@ -206,7 +204,7 @@
                 <div class="flex items-center gap-3 bg-surface-container-low px-4 py-2.5 rounded-2xl border border-slate-100 self-start sm:self-auto">
                   <div class="text-center">
                     <div class="text-xl font-black text-slate-900 flex items-center justify-center gap-1">
-                      <span class="material-symbols-outlined text-amber-500 text-[22px]" style="font-variation-settings: 'FILL' 1;">star</span>
+                      <PhStar :size="22" weight="fill" class="text-amber-500" />
                       <span>{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : '-' }}</span>
                     </div>
                     <p class="text-[10px] text-slate-400 font-medium mt-0.5">Skor dari 5.0</p>
@@ -223,7 +221,7 @@
               <div v-if="reviewEligibility?.eligible" class="p-4 sm:p-5 rounded-2xl bg-amber-50/50 border border-amber-200/80 space-y-3">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-amber-600 text-[20px]">rate_review</span>
+                    <PhChatTeardropText :size="20" weight="bold" class="text-amber-600" />
                     <h4 class="text-xs font-bold text-slate-900 uppercase tracking-wider">
                       {{ reviewEligibility.has_reviewed ? 'Perbarui Ulasan Anda' : 'Tulis Ulasan Pengalaman Anda' }}
                     </h4>
@@ -247,13 +245,11 @@
                         @mouseleave="hoverStar = 0"
                         class="p-1 text-slate-300 transition-colors focus:outline-hidden"
                       >
-                        <span
-                          class="material-symbols-outlined text-[28px]"
+                        <PhStar
+                          :size="28"
+                          :weight="(hoverStar || reviewForm.rating) >= star ? 'fill' : 'regular'"
                           :class="(hoverStar || reviewForm.rating) >= star ? 'text-amber-500' : 'text-slate-300'"
-                          style="font-variation-settings: 'FILL' 1;"
-                        >
-                          star
-                        </span>
+                        />
                       </button>
                       <span class="text-xs font-bold text-slate-700 ml-2">
                         {{ reviewForm.rating ? `${reviewForm.rating} dari 5 Bintang` : 'Pilih bintang' }}
@@ -282,7 +278,7 @@
                       :disabled="submittingReview || !reviewForm.rating || reviewForm.komentar.length < 5"
                       class="px-5 py-2 rounded-xl bg-primary text-white text-xs font-bold shadow-sm hover:bg-primary-dark transition disabled:opacity-50 flex items-center gap-1.5"
                     >
-                      <span class="material-symbols-outlined text-[16px]">send</span>
+                      <PhPaperPlaneTilt :size="16" weight="bold" />
                       <span>{{ submittingReview ? 'Menyimpan...' : (reviewEligibility.has_reviewed ? 'Simpan Perubahan' : 'Kirim Ulasan') }}</span>
                     </button>
                   </div>
@@ -291,7 +287,7 @@
 
               <!-- Notice for Non-Eligible Users -->
               <div v-else class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center gap-2.5 text-xs text-slate-600">
-                <span class="material-symbols-outlined text-slate-400 text-[20px] shrink-0">verified_user</span>
+                <PhShieldCheck :size="20" weight="bold" class="text-slate-400 shrink-0" />
                 <span>Untuk menjaga keaslian ulasan, fitur pemberian rating dan ulasan hanya terbuka bagi akun pencari kos yang telah memesan dan disetujui oleh pemilik properti ini.</span>
               </div>
 
@@ -301,7 +297,7 @@
               </div>
 
               <div v-else-if="reviewsList.length === 0" class="p-8 text-center bg-slate-50 rounded-2xl border border-slate-100 space-y-2">
-                <span class="material-symbols-outlined text-slate-300 text-[40px]">rate_review</span>
+                <PhChatTeardropText :size="40" weight="duotone" class="text-slate-300 mx-auto" />
                 <p class="text-xs font-bold text-slate-700">Belum Ada Ulasan</p>
                 <p class="text-[11px] text-slate-400 max-w-sm mx-auto">
                   Jadilah penghuni pertama yang membagikan pengalaman tinggal di kos ini setelah pemesanan Anda disetujui.
@@ -326,15 +322,13 @@
                     </div>
                     <!-- Star Rating Display -->
                     <div class="flex items-center gap-0.5">
-                      <span
+                      <PhStar
                         v-for="s in 5"
                         :key="s"
-                        class="material-symbols-outlined text-[16px]"
+                        :size="16"
+                        :weight="s <= rev.rating ? 'fill' : 'regular'"
                         :class="s <= rev.rating ? 'text-amber-500' : 'text-slate-200'"
-                        style="font-variation-settings: 'FILL' 1;"
-                      >
-                        star
-                      </span>
+                      />
                     </div>
                   </div>
                   <p class="text-xs text-on-surface-variant leading-relaxed pl-10 whitespace-pre-line">
@@ -350,7 +344,7 @@
                 <div>
                   <h3 class="text-base font-bold text-on-surface mb-1">Titik Lokasi Properti</h3>
                   <p class="text-xs text-on-surface-variant flex items-center gap-1">
-                    <span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                    <PhMapPin :size="14" weight="bold" class="text-primary" />
                     {{ kos.alamat }}
                   </p>
                 </div>
@@ -363,9 +357,9 @@
                   class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold border border-emerald-200 transition shadow-xs self-start sm:self-auto shrink-0"
                   title="Buka rute navigasi di Google Maps"
                 >
-                  <span class="material-symbols-outlined text-[16px]">near_me</span>
+                  <PhNavigationArrow :size="16" weight="bold" />
                   <span>Buka di Google Maps</span>
-                  <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+                  <PhArrowSquareOut :size="14" weight="bold" />
                 </a>
               </div>
 
@@ -381,7 +375,7 @@
               <!-- Navigation Directions Callout -->
               <div class="p-3 bg-surface-container-low/70 rounded-xl border border-slate-100 flex items-center justify-between gap-3 text-xs">
                 <div class="flex items-center gap-2 text-on-surface-variant">
-                  <span class="material-symbols-outlined text-emerald-600 text-[18px]">directions</span>
+                  <PhCompass :size="18" weight="bold" class="text-emerald-600" />
                   <span>Ingin survei langsung ke lokasi kos ini? Buka rute panduan di Google Maps.</span>
                 </div>
                 <a
@@ -391,7 +385,7 @@
                   class="font-bold text-emerald-700 hover:underline flex items-center gap-0.5 shrink-0"
                 >
                   <span>Petunjuk Arah</span>
-                  <span class="material-symbols-outlined text-[14px]">chevron_right</span>
+                  <PhCaretRight :size="14" weight="bold" />
                 </a>
               </div>
             </div>
@@ -426,7 +420,7 @@
                   @click="handleWhatsAppInquiry"
                   class="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-whatsapp hover:bg-whatsapp-hover text-white text-xs font-bold shadow-xs transition active:scale-95 shrink-0"
                 >
-                  <span class="material-symbols-outlined text-[18px]">chat</span>
+                  <PhWhatsappLogo :size="18" weight="fill" />
                   <span>Chat WhatsApp</span>
                 </button>
               </div>
@@ -604,7 +598,7 @@
                 :disabled="!selectedKamar"
                 class="w-full bg-primary-container hover:bg-primary text-white py-3 rounded-lg text-sm font-bold shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2"
               >
-                <span class="material-symbols-outlined text-lg">receipt_long</span>
+                <PhReceipt :size="20" weight="bold" />
                 <span>Ajukan Sewa Sekarang</span>
               </button>
 
@@ -614,13 +608,13 @@
                 class="w-full bg-whatsapp hover:bg-whatsapp-hover text-white py-2.5 rounded-lg text-xs font-bold shadow-sm transition flex items-center justify-center gap-2"
                 title="Tanya ketersediaan atau jadwal survei langsung ke pemilik via WhatsApp"
               >
-                <span class="material-symbols-outlined text-base">chat</span>
+                <PhWhatsappLogo :size="18" weight="fill" />
                 <span>Tanya Pemilik via WhatsApp</span>
               </button>
             </div>
 
             <p class="text-[11px] text-on-surface-variant text-center flex items-center justify-center gap-1">
-              <span class="material-symbols-outlined text-xs text-tertiary">lock</span>
+              <PhLock :size="14" weight="bold" class="text-tertiary" />
               <span>Transaksi aman dan diverifikasi langsung ke pemilik</span>
             </p>
           </div>
@@ -639,6 +633,26 @@ import LeafletMap from '../components/LeafletMap.vue'
 import GenderBadge from '../components/GenderBadge.vue'
 import api from '../services/api'
 import { openWhatsAppChat, buildInquiryTemplate, getGoogleMapsUrl } from '../utils/whatsapp'
+import {
+  PhArrowLeft,
+  PhShareNetwork,
+  PhHeart,
+  PhSealCheck,
+  PhStar,
+  PhCheckCircle,
+  PhShieldCheck,
+  PhInfo,
+  PhChatTeardropText,
+  PhPaperPlaneTilt,
+  PhMapPin,
+  PhNavigationArrow,
+  PhArrowSquareOut,
+  PhCompass,
+  PhCaretRight,
+  PhWhatsappLogo,
+  PhReceipt,
+  PhLock
+} from '@phosphor-icons/vue'
 
 const route = useRoute()
 const router = useRouter()

@@ -15,7 +15,7 @@
           :disabled="loading"
           class="h-10 px-4 rounded-lg bg-surface-container-lowest border border-slate-200 text-on-surface text-xs font-semibold flex items-center gap-2 hover:bg-slate-50 transition shadow-sm disabled:opacity-50"
         >
-          <span class="material-symbols-outlined text-[18px]" :class="{ 'animate-spin': loading }">refresh</span>
+          <PhArrowClockwise :size="18" :class="{ 'animate-spin': loading }" />
           <span>Segarkan Data</span>
         </button>
       </div>
@@ -27,7 +27,7 @@
       class="mb-6 p-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-medium border border-emerald-200 flex items-center justify-between"
     >
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-emerald-600 text-[18px]">check_circle</span>
+        <PhCheckCircle :size="18" weight="fill" class="text-emerald-600" />
         <span>{{ successMsg }}</span>
       </div>
       <button @click="successMsg = ''" class="text-emerald-700 font-bold ml-4 text-base">&times;</button>
@@ -37,7 +37,7 @@
       class="mb-6 p-4 rounded-xl bg-rose-50 text-rose-800 text-xs font-medium border border-rose-200 flex items-center justify-between"
     >
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-rose-600 text-[18px]">error</span>
+        <PhWarningCircle :size="18" weight="fill" class="text-rose-600" />
         <span>{{ errorMsg }}</span>
       </div>
       <button @click="errorMsg = ''" class="text-rose-700 font-bold ml-4 text-base">&times;</button>
@@ -128,7 +128,7 @@
       </div>
 
       <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low rounded-lg w-full sm:w-auto">
-        <span class="material-symbols-outlined text-[18px] text-outline">search</span>
+        <PhMagnifyingGlass :size="18" class="text-outline" />
         <input
           v-model="searchQuery"
           type="text"
@@ -156,14 +156,14 @@
           <tbody class="divide-y divide-slate-100 text-xs text-on-surface">
             <tr v-if="loading" class="text-center">
               <td colspan="7" class="py-12 text-slate-400">
-                <span class="material-symbols-outlined animate-spin text-[28px] text-primary">progress_activity</span>
+                <PhCircleNotch :size="28" class="animate-spin text-primary inline-block" />
                 <p class="mt-2 text-xs">Memuat permintaan pemesanan...</p>
               </td>
             </tr>
 
             <tr v-else-if="filteredBookings.length === 0" class="text-center">
               <td colspan="7" class="py-12 text-slate-400">
-                <span class="material-symbols-outlined text-[36px] text-slate-300">inbox</span>
+                <PhTray :size="36" class="text-slate-300 inline-block" />
                 <p class="mt-2 text-xs font-semibold text-slate-600">Tidak ada permintaan pemesanan yang sesuai.</p>
                 <p class="text-[11px] text-slate-400 mt-0.5">Semua permintaan sewa kamar telah ditinjau atau belum ada permintaan baru.</p>
               </td>
@@ -190,7 +190,7 @@
                     </span>
                     <div class="flex items-center gap-2 mt-0.5">
                       <span class="text-[11px] text-on-surface-variant flex items-center gap-1">
-                        <span class="material-symbols-outlined text-[13px] text-tertiary">call</span>
+                        <PhPhone :size="13" class="text-tertiary" />
                         <span>{{ booking.user?.telepon || booking.user?.email || '-' }}</span>
                       </span>
                       <button
@@ -200,7 +200,7 @@
                         class="text-[10px] font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 rounded transition flex items-center gap-0.5"
                         title="Hubungi Calon Penghuni via WhatsApp"
                       >
-                        <span class="material-symbols-outlined text-[12px]">chat</span>
+                        <PhWhatsappLogo :size="12" weight="fill" />
                         <span>WA</span>
                       </button>
                     </div>
@@ -227,7 +227,7 @@
                     Mulai: {{ formatDate(booking.tanggal_mulai) }}
                   </span>
                   <span class="text-[11px] text-outline mt-0.5 flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[14px]">schedule</span>
+                    <PhClock :size="14" />
                     {{ formatDurasi(booking) }}
                   </span>
                   <span v-if="booking.tanggal_selesai" class="text-[10px] text-secondary mt-0.5">
@@ -274,7 +274,7 @@
                     class="p-1.5 rounded-lg bg-surface-container-high text-primary hover:bg-primary hover:text-white transition"
                     title="Lihat Detail Lengkap"
                   >
-                    <span class="material-symbols-outlined text-[18px]">visibility</span>
+                    <PhEye :size="18" />
                   </button>
 
                   <template v-if="booking.status === 'menunggu'">
@@ -283,7 +283,7 @@
                       class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-semibold text-[11px] hover:bg-emerald-700 transition flex items-center gap-1 shadow-sm"
                       title="Setujui Permintaan Sewa"
                     >
-                      <span class="material-symbols-outlined text-[14px]">check</span>
+                      <PhCheck :size="14" weight="bold" />
                       <span>Setujui</span>
                     </button>
 
@@ -292,7 +292,7 @@
                       class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-semibold text-[11px] hover:bg-rose-100 transition flex items-center gap-1 border border-rose-200"
                       title="Tolak Permintaan Sewa"
                     >
-                      <span class="material-symbols-outlined text-[14px]">close</span>
+                      <PhX :size="14" weight="bold" />
                       <span>Tolak</span>
                     </button>
                   </template>
@@ -322,7 +322,7 @@
         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100 bg-surface-container-lowest shrink-0">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-[24px]">receipt_long</span>
+              <PhReceipt :size="24" weight="duotone" />
             </div>
             <div>
               <h3 class="text-base sm:text-lg font-bold text-on-surface">Detail Reservasi #{{ selectedBooking.id }}</h3>
@@ -336,7 +336,7 @@
             class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shrink-0"
             type="button"
           >
-            <span class="material-symbols-outlined text-[20px]">close</span>
+            <PhX :size="20" weight="bold" />
           </button>
         </div>
 
@@ -352,7 +352,7 @@
                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold shadow-xs transition"
                 title="Hubungi Calon Penghuni via WhatsApp"
               >
-                <span class="material-symbols-outlined text-[14px]">chat</span>
+                <PhWhatsappLogo :size="14" weight="fill" />
                 <span>Chat WA</span>
               </button>
             </div>
@@ -441,6 +441,21 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import {
+  PhArrowClockwise,
+  PhCheckCircle,
+  PhWarningCircle,
+  PhMagnifyingGlass,
+  PhCircleNotch,
+  PhTray,
+  PhPhone,
+  PhWhatsappLogo,
+  PhClock,
+  PhEye,
+  PhCheck,
+  PhX,
+  PhReceipt,
+} from '@phosphor-icons/vue'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
 import { openWhatsAppChat, buildOwnerContactTenantTemplate } from '../utils/whatsapp'

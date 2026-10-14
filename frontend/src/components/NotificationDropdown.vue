@@ -8,7 +8,7 @@
       title="Notifikasi"
       aria-label="Lihat Notifikasi"
     >
-      <span class="material-symbols-outlined text-[22px]">notifications</span>
+      <PhBell :size="22" weight="bold" />
 
       <!-- Unread Indicator Badge -->
       <span
@@ -77,7 +77,7 @@
       <!-- Notifications List -->
       <div class="max-h-80 overflow-y-auto divide-y divide-slate-100">
         <div v-if="notificationStore.loading" class="p-8 text-center text-slate-400 text-xs">
-          <span class="material-symbols-outlined animate-spin text-[24px] text-primary">progress_activity</span>
+          <PhCircleNotch :size="24" weight="bold" class="animate-spin text-primary mx-auto mb-1" />
           <p class="mt-1">Memuat notifikasi...</p>
         </div>
 
@@ -85,7 +85,7 @@
           v-else-if="filteredList.length === 0"
           class="p-8 text-center text-slate-400 text-xs flex flex-col items-center justify-center"
         >
-          <span class="material-symbols-outlined text-[32px] text-slate-300 mb-1">notifications_off</span>
+          <PhBellSlash :size="32" weight="duotone" class="text-slate-300 mb-1" />
           <p class="font-semibold text-slate-600">Tidak ada notifikasi</p>
           <p class="text-[11px] text-slate-400 mt-0.5">
             {{ activeFilter === 'unread' ? 'Semua notifikasi sudah dibaca.' : 'Belum ada aktivitas baru saat ini.' }}
@@ -108,7 +108,7 @@
               item.iconBg || 'bg-primary/10 text-primary'
             ]"
           >
-            <span class="material-symbols-outlined text-[18px]">{{ item.icon || 'notifications' }}</span>
+            <component :is="resolveNotificationIcon(item.icon)" :size="18" weight="bold" />
           </div>
 
           <!-- Body -->
@@ -143,7 +143,7 @@
             title="Hapus"
             type="button"
           >
-            <span class="material-symbols-outlined text-[14px]">close</span>
+            <PhX :size="14" weight="bold" />
           </button>
         </div>
       </div>
@@ -155,7 +155,7 @@
           class="text-[11px] font-semibold text-primary hover:underline flex items-center justify-center gap-1 w-full py-1"
           type="button"
         >
-          <span class="material-symbols-outlined text-[14px]">refresh</span>
+          <PhArrowClockwise :size="14" weight="bold" />
           <span>Segarkan Notifikasi</span>
         </button>
       </div>
@@ -167,6 +167,19 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useNotificationStore } from '../stores/notification'
+import {
+  PhBell,
+  PhBellSlash,
+  PhCircleNotch,
+  PhX,
+  PhArrowClockwise,
+  PhReceipt,
+  PhInfo,
+  PhCheckCircle,
+  PhWarning,
+  PhHouse,
+  PhUser
+} from '@phosphor-icons/vue'
 
 const router = useRouter()
 const notificationStore = useNotificationStore()
@@ -174,6 +187,29 @@ const notificationStore = useNotificationStore()
 const isOpen = ref(false)
 const activeFilter = ref('all')
 const dropdownRef = ref(null)
+
+const resolveNotificationIcon = (iconName) => {
+  switch (iconName) {
+    case 'receipt_long':
+    case 'receipt':
+      return PhReceipt
+    case 'check_circle':
+    case 'check':
+      return PhCheckCircle
+    case 'warning':
+    case 'alert':
+      return PhWarning
+    case 'home_work':
+    case 'home':
+      return PhHouse
+    case 'person':
+    case 'manage_accounts':
+      return PhUser
+    case 'info':
+    default:
+      return PhInfo
+  }
+}
 
 const toggleDropdown = () => {
   isOpen.value = !isOpen.value

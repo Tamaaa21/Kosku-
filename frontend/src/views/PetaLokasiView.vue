@@ -9,7 +9,7 @@
           class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
           :class="mobileView === 'list' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'"
         >
-          <span class="material-symbols-outlined text-[16px]">format_list_bulleted</span>
+          <PhListBullets :size="16" weight="bold" />
           <span>Daftar Kos ({{ filteredKosList.length }})</span>
         </button>
         <button
@@ -18,7 +18,7 @@
           class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-all"
           :class="mobileView === 'map' ? 'bg-surface-container-lowest text-primary shadow-xs' : 'text-on-surface-variant hover:text-on-surface'"
         >
-          <span class="material-symbols-outlined text-[16px]">map</span>
+          <PhMapTrifold :size="16" weight="bold" />
           <span>Peta Lokasi</span>
         </button>
       </div>
@@ -44,7 +44,7 @@
 
         <!-- Search Bar -->
         <div class="relative flex items-center">
-          <span class="material-symbols-outlined absolute left-3 text-secondary text-[20px] pointer-events-none">search</span>
+          <PhMagnifyingGlass :size="20" class="absolute left-3 text-secondary pointer-events-none" />
           <input
             v-model="searchQuery"
             type="text"
@@ -126,7 +126,7 @@
                 </div>
 
                 <p class="text-[11px] text-on-surface-variant flex items-center gap-1 mt-0.5 truncate">
-                  <span class="material-symbols-outlined text-[13px] text-secondary">location_on</span>
+                  <PhMapPin :size="13" class="text-secondary shrink-0" />
                   {{ kos.alamat }}
                 </p>
 
@@ -151,19 +151,19 @@
                     :href="getGoogleMapsUrl(kos)"
                     target="_blank"
                     rel="noopener noreferrer"
-                    class="min-h-[32px] px-2 py-1 rounded text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-0.5 hover:underline"
+                    class="min-h-[32px] px-2 py-1 rounded text-[11px] font-semibold text-emerald-700 hover:text-emerald-800 flex items-center gap-1 hover:underline"
                     @click.stop
                     title="Buka rute navigasi di Google Maps"
                   >
-                    <span class="material-symbols-outlined text-[13px]">near_me</span>
+                    <PhNavigationArrow :size="13" weight="bold" />
                     <span>Maps</span>
                   </a>
                   <router-link
                     :to="`/kos/${kos.id}`"
-                    class="min-h-[32px] px-2 py-1 rounded text-[11px] font-semibold text-primary hover:underline flex items-center"
+                    class="min-h-[32px] px-2 py-1 rounded text-[11px] font-semibold text-primary hover:underline flex items-center gap-0.5"
                     @click.stop
                   >
-                    Detail <span class="material-symbols-outlined text-[12px]">chevron_right</span>
+                    Detail <PhCaretRight :size="12" weight="bold" />
                   </router-link>
                 </div>
               </div>
@@ -179,7 +179,7 @@
           @click="setMobileView('map')"
           class="min-h-[44px] px-5 py-2.5 rounded-full bg-primary hover:bg-primary-container text-white text-xs font-bold shadow-lg flex items-center gap-2 transition active:scale-95"
         >
-          <span class="material-symbols-outlined text-[18px]">map</span>
+          <PhMapTrifold :size="18" weight="bold" />
           <span>Buka Peta Interaktif</span>
         </button>
       </div>
@@ -199,7 +199,7 @@
           @click="setMobileView('list')"
           class="min-h-[44px] px-5 py-2.5 rounded-full bg-surface-container-lowest text-primary text-xs font-bold shadow-xl border border-slate-200/80 flex items-center gap-2 transition active:scale-95"
         >
-          <span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+          <PhListBullets :size="18" weight="bold" />
           <span>Lihat Daftar Kos ({{ filteredKosList.length }})</span>
         </button>
       </div>
@@ -211,6 +211,14 @@
 import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import L from 'leaflet'
+import {
+  PhListBullets,
+  PhMapTrifold,
+  PhMagnifyingGlass,
+  PhMapPin,
+  PhNavigationArrow,
+  PhCaretRight,
+} from '@phosphor-icons/vue'
 import GenderBadge from '../components/GenderBadge.vue'
 import api from '../services/api'
 import { getGoogleMapsUrl } from '../utils/whatsapp'
@@ -298,12 +306,12 @@ const renderMarkers = () => {
       const marker = L.marker([lat, lng]).addTo(map)
       const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`
       marker.bindPopup(`
-        <div style="font-family: Inter, sans-serif; padding: 4px; max-width: 200px;">
-          <strong style="color: #004ac6; font-size: 13px; display: block; line-height: 1.2;">${kos.nama}</strong>
-          <span style="font-size: 11px; color: #585f67; display: block; margin-top: 3px;">${kos.alamat}</span>
-          <strong style="color: #0b1c30; font-size: 12px; margin-top: 5px; display: block;">${formatRupiah(kos.harga)} / bln</strong>
+        <div style="font-family: Satoshi, system-ui, sans-serif; padding: 4px; max-width: 200px;">
+          <strong style="color: #0B478B; font-size: 13px; display: block; line-height: 1.2;">${kos.nama}</strong>
+          <span style="font-size: 11px; color: #64748b; display: block; margin-top: 3px;">${kos.alamat}</span>
+          <strong style="color: #0f172a; font-size: 12px; margin-top: 5px; display: block;">${formatRupiah(kos.harga)} / bln</strong>
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #e2e8f0;">
-            <button onclick="window.__koskuNavigateTo(${kos.id})" style="background: none; border: none; padding: 0; font-size: 11px; color: #004ac6; font-weight: bold; cursor: pointer; text-decoration: underline;">Detail &rarr;</button>
+            <button onclick="window.__koskuNavigateTo(${kos.id})" style="background: none; border: none; padding: 0; font-size: 11px; color: #0B478B; font-weight: bold; cursor: pointer; text-decoration: underline;">Detail &rarr;</button>
             <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; color: #16a34a; font-weight: bold; text-decoration: underline;">Buka di Maps &nearr;</a>
           </div>
         </div>

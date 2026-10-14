@@ -3,12 +3,9 @@
     <!-- Header Section -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pb-space-lg">
       <div class="space-y-space-xs">
-        <div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-surface-container text-[11px] text-primary font-semibold">
-          <span class="material-symbols-outlined text-sm">receipt_long</span>
-          {{ auth.isPemilik ? 'Pemesanan Masuk' : 'Aktivitas Sewa' }}
-        </div>
+       
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">
-          {{ auth.isPemilik ? 'Kelola Pemesanan Masuk' : 'Riwayat Pemesanan' }}
+          {{ auth.isPemilik ? 'Kelola Pemesanan Masuk' : '' }}
         </h1>
         <p class="text-xs text-on-surface-variant max-w-2xl">
           {{ auth.isPemilik
@@ -60,7 +57,7 @@
 
       <!-- Search mini input -->
       <div class="hidden sm:flex items-center gap-2 bg-surface-container-lowest px-3 py-1.5 rounded-lg shadow-sm border border-slate-200">
-        <span class="material-symbols-outlined text-outline text-base">search</span>
+        <PhMagnifyingGlass :size="16" class="text-outline" />
         <input
           v-model="searchFilter"
           type="text"
@@ -78,7 +75,7 @@
     <!-- Empty State -->
     <div v-else-if="filteredBookings.length === 0" class="text-center py-16 bg-surface-container-lowest rounded-xl border border-slate-100 mt-space-sm">
       <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mx-auto text-primary mb-4">
-        <span class="material-symbols-outlined text-3xl">receipt</span>
+        <PhReceipt :size="32" weight="duotone" />
       </div>
       <h3 class="text-base font-bold text-on-surface">Tidak ada data pemesanan</h3>
       <p class="text-xs text-on-surface-variant mt-1">
@@ -144,22 +141,22 @@
               </div>
 
               <div class="flex items-center gap-1 text-on-surface-variant text-xs">
-                <span class="material-symbols-outlined text-sm text-primary">location_on</span>
+                <PhMapPin :size="14" class="text-primary shrink-0" />
                 <span>{{ item.kos?.alamat || '-' }}</span>
               </div>
 
               <!-- Schedule & Details -->
               <div class="flex flex-wrap items-center gap-y-1 gap-x-2 pt-1 text-on-surface-variant text-xs">
                 <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded">
-                  <span class="material-symbols-outlined text-xs text-outline">calendar_today</span>
+                  <PhCalendar :size="12" class="text-outline" />
                   <span>Masuk: <strong class="text-on-surface font-semibold">{{ formatDateOnly(item.tanggal_pemesanan) }}</strong></span>
                 </div>
                 <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded">
-                  <span class="material-symbols-outlined text-xs text-outline">schedule</span>
+                  <PhClock :size="12" class="text-outline" />
                   <span>Durasi: <strong class="text-on-surface font-semibold capitalize">{{ item.durasi_jumlah || 1 }} {{ item.durasi_tipe || 'bulan' }}</strong></span>
                 </div>
                 <div class="flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded">
-                  <span class="material-symbols-outlined text-xs text-outline">meeting_room</span>
+                  <PhDoor :size="12" class="text-outline" />
                   <span>Kamar: <strong class="text-on-surface font-semibold">{{ item.kamar?.nama_kamar || '-' }}</strong></span>
                 </div>
               </div>
@@ -204,7 +201,7 @@
                 class="text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1 shadow-xs"
                 title="Beri ulasan dan rating untuk kos ini"
               >
-                <span class="material-symbols-outlined text-[16px] text-amber-600" style="font-variation-settings: 'FILL' 1;">star</span>
+                <PhStar :size="16" weight="fill" class="text-amber-600" />
                 <span>Beri Ulasan</span>
               </router-link>
 
@@ -248,7 +245,7 @@
                 class="text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5"
                 title="Hubungi Pemilik Kos via WhatsApp"
               >
-                <span class="material-symbols-outlined text-[16px]">chat</span>
+                <PhWhatsappLogo :size="16" weight="fill" class="text-emerald-600" />
                 <span>Chat WA</span>
               </button>
 
@@ -259,7 +256,7 @@
                 class="text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 px-3 py-1.5 rounded-lg transition flex items-center gap-1.5"
                 title="Hubungi Calon Penyewa via WhatsApp"
               >
-                <span class="material-symbols-outlined text-[16px]">chat</span>
+                <PhWhatsappLogo :size="16" weight="fill" class="text-emerald-600" />
                 <span>Chat WA</span>
               </button>
 
@@ -280,6 +277,16 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import {
+  PhReceipt,
+  PhMagnifyingGlass,
+  PhMapPin,
+  PhCalendar,
+  PhClock,
+  PhDoor,
+  PhStar,
+  PhWhatsappLogo,
+} from '@phosphor-icons/vue'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'

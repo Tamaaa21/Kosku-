@@ -67,7 +67,7 @@
           :disabled="auth.loading"
           class="w-full bg-primary-container hover:bg-primary text-white font-bold py-2.5 rounded-lg transition text-xs shadow-md disabled:opacity-50 mt-2 flex items-center justify-center gap-1.5"
         >
-          <span class="material-symbols-outlined text-base">login</span>
+          <PhSignIn :size="16" weight="bold" />
           <span>{{ auth.loading ? 'Memproses...' : 'Masuk Sekarang' }}</span>
         </button>
       </form>
@@ -85,6 +85,7 @@
 <script setup>
 import { reactive } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+import { PhSignIn } from '@phosphor-icons/vue'
 import { useAuthStore } from '../stores/auth'
 import logoUrl from '../assets/KosKu Housing Pin Logo.png'
 

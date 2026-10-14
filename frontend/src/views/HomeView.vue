@@ -21,7 +21,7 @@
           <div class="w-full max-w-4xl bg-surface-container-lowest rounded-xl shadow-xl p-space-xs sm:p-space-sm flex flex-col lg:flex-row items-stretch lg:items-center gap-space-xs sm:gap-space-sm">
             <!-- Text Search -->
             <div class="flex-1 flex items-center gap-space-xs px-space-sm py-2 bg-surface-container-low rounded-lg focus-within:bg-surface-container-lowest focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-              <span class="material-symbols-outlined text-primary text-xl select-none">search</span>
+              <PhMagnifyingGlass :size="20" weight="bold" class="text-primary select-none shrink-0" />
               <input
                 v-model="searchQuery"
                 type="text"
@@ -36,7 +36,7 @@
 
             <!-- Jenis Kos Dropdown -->
             <div class="flex items-center gap-space-xs px-space-sm py-2 bg-surface-container-low rounded-lg min-w-[160px]">
-              <span class="material-symbols-outlined text-secondary text-lg select-none">group</span>
+              <PhUsers :size="20" weight="bold" class="text-secondary select-none shrink-0" />
               <select
                 v-model="selectedJenis"
                 class="w-full bg-transparent text-sm text-on-surface border-none focus:ring-0 p-0 cursor-pointer"
@@ -53,7 +53,7 @@
 
             <!-- Rentang Harga Dropdown -->
             <div class="flex items-center gap-space-xs px-space-sm py-2 bg-surface-container-low rounded-lg min-w-[170px]">
-              <span class="material-symbols-outlined text-secondary text-lg select-none">payments</span>
+              <PhCurrencyCircleDollar :size="20" weight="bold" class="text-secondary select-none shrink-0" />
               <select
                 v-model="selectedPriceRange"
                 class="w-full bg-transparent text-sm text-on-surface border-none focus:ring-0 p-0 cursor-pointer"
@@ -70,7 +70,7 @@
               @click="handleSearch"
               class="bg-primary-container hover:bg-primary text-white px-space-lg py-3 rounded-lg text-sm font-semibold flex items-center justify-center gap-space-xs transition-all shadow-md hover:shadow-lg active:scale-[0.99] whitespace-nowrap"
             >
-              <span class="material-symbols-outlined text-lg select-none">search</span>
+              <PhMagnifyingGlass :size="18" weight="bold" class="select-none" />
               <span>Cari</span>
             </button>
           </div>
@@ -101,7 +101,7 @@
         <!-- Item 1 -->
         <div class="flex items-start gap-space-md">
           <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[24px]">pin_drop</span>
+            <PhMapPin :size="24" weight="duotone" />
           </div>
           <div class="space-y-1">
             <h3 class="text-sm sm:text-base font-bold text-on-surface">Peta Lokasi Presisi</h3>
@@ -114,7 +114,7 @@
         <!-- Item 2 -->
         <div class="flex items-start gap-space-md">
           <div class="w-11 h-11 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[24px]">fact_check</span>
+            <PhShieldCheck :size="24" weight="duotone" />
           </div>
           <div class="space-y-1">
             <h3 class="text-sm sm:text-base font-bold text-on-surface">Fasilitas & Harga Transparan</h3>
@@ -127,7 +127,7 @@
         <!-- Item 3 -->
         <div class="flex items-start gap-space-md">
           <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-            <span class="material-symbols-outlined text-[24px]">chat</span>
+            <PhWhatsappLogo :size="24" weight="duotone" />
           </div>
           <div class="space-y-1">
             <h3 class="text-sm sm:text-base font-bold text-on-surface">Hubungi Langsung Pemilik</h3>
@@ -152,7 +152,7 @@
           class="text-xs font-semibold text-primary hover:text-primary-container flex items-center gap-1 group"
         >
           <span>Lihat Semua</span>
-          <span class="material-symbols-outlined text-base group-hover:translate-x-1 transition-transform select-none">arrow_forward</span>
+          <PhArrowRight :size="16" weight="bold" class="group-hover:translate-x-1 transition-transform select-none" />
         </router-link>
       </div>
 
@@ -178,7 +178,7 @@
             <div class="absolute top-3 left-3 flex items-center gap-1.5">
               <span
                 v-if="kos.rating_rata_rata && Number(kos.rating_rata_rata) >= 4.5"
-                class="bg-primary text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs tracking-wide"
+                class="bg-accent text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs tracking-wide"
               >
                 Top Rating
               </span>
@@ -188,7 +188,7 @@
               class="absolute top-3 right-3 min-w-[36px] min-h-[36px] sm:min-w-[40px] sm:min-h-[40px] rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-secondary hover:text-error flex items-center justify-center shadow-sm transition-colors"
               title="Simpan Kos"
             >
-              <span class="material-symbols-outlined text-lg select-none">favorite</span>
+              <PhHeart :size="18" weight="bold" class="select-none" />
             </button>
           </div>
 
@@ -200,14 +200,14 @@
                   {{ kos.nama }}
                 </router-link>
                 <div class="flex items-center gap-1 text-on-surface text-xs">
-                  <span class="material-symbols-outlined text-amber-500 text-sm select-none" style="font-variation-settings: 'FILL' 1;">star</span>
+                  <PhStar :size="14" weight="fill" class="text-amber-500 select-none" />
                   <span class="font-semibold">{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : 'Baru' }}</span>
                   <span v-if="kos.ulasan_count" class="text-[10px] text-slate-400 font-normal">({{ kos.ulasan_count }})</span>
                 </div>
               </div>
 
               <div class="flex items-center gap-1 text-on-surface-variant text-xs mb-space-sm">
-                <span class="material-symbols-outlined text-sm text-primary select-none">location_on</span>
+                <PhMapPin :size="14" weight="bold" class="text-primary select-none shrink-0" />
                 <span class="truncate">{{ kos.alamat }}</span>
               </div>
 
@@ -218,7 +218,7 @@
                   :key="fas.id"
                   class="inline-flex items-center gap-1 bg-surface-container-low text-primary text-[11px] font-semibold px-2.5 py-1 rounded-full"
                 >
-                  <span class="material-symbols-outlined text-[13px] select-none">check_circle</span>
+                  <PhCheckCircle :size="13" weight="bold" class="select-none shrink-0" />
                   <span>{{ fas.nama }}</span>
                 </span>
                 <span v-if="(kos.fasilitas || []).length > 3" class="text-[11px] text-on-surface-variant">
@@ -257,6 +257,18 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '../services/api'
 import GenderBadge from '../components/GenderBadge.vue'
+import {
+  PhMagnifyingGlass,
+  PhUsers,
+  PhCurrencyCircleDollar,
+  PhMapPin,
+  PhShieldCheck,
+  PhWhatsappLogo,
+  PhArrowRight,
+  PhHeart,
+  PhStar,
+  PhCheckCircle
+} from '@phosphor-icons/vue'
 
 const router = useRouter()
 

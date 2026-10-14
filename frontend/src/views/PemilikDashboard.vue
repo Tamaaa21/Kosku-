@@ -22,7 +22,7 @@
     >
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
-          <span class="material-symbols-outlined text-[24px]">notifications_active</span>
+          <PhBellRinging :size="24" weight="bold" />
         </div>
         <div>
           <h3 class="text-xs font-bold text-amber-950">
@@ -38,7 +38,7 @@
         class="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold transition flex items-center gap-1.5 self-start sm:self-auto shrink-0 shadow-xs"
       >
         <span>Tinjau Pemesanan</span>
-        <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+        <PhArrowRight :size="16" weight="bold" />
       </router-link>
     </div>
 
@@ -52,12 +52,12 @@
             <span class="text-2xl font-black text-on-surface">{{ myKosList.length }}</span>
             <span class="text-xs text-secondary font-medium">Properti</span>
           </div>
-          <span class="text-[11px] text-emerald-600 font-semibold mt-1 inline-flex items-center gap-0.5">
-            <span class="material-symbols-outlined text-[13px]">verified</span> Aktif di listing
+          <span class="text-[11px] text-emerald-600 font-semibold mt-1 inline-flex items-center gap-1">
+            <PhCheckCircle :size="13" weight="fill" /> Aktif di listing
           </span>
         </div>
         <div class="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shrink-0">
-          <span class="material-symbols-outlined text-[24px]">domain</span>
+          <PhBuildings :size="24" weight="duotone" />
         </div>
       </div>
 
@@ -74,7 +74,7 @@
           </span>
         </div>
         <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
-          <span class="material-symbols-outlined text-[24px]">bed</span>
+          <PhBed :size="24" weight="duotone" />
         </div>
       </div>
 
@@ -92,7 +92,7 @@
           </span>
         </div>
         <div class="w-12 h-12 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 shrink-0">
-          <span class="material-symbols-outlined text-[24px]">payments</span>
+          <PhCurrencyCircleDollar :size="24" weight="duotone" />
         </div>
       </div>
 
@@ -109,7 +109,7 @@
           </span>
         </div>
         <div class="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-primary-container shrink-0">
-          <span class="material-symbols-outlined text-[24px]">receipt_long</span>
+          <PhReceipt :size="24" weight="duotone" />
         </div>
       </div>
     </div>
@@ -120,7 +120,7 @@
       class="text-center py-16 bg-surface-container-lowest rounded-2xl border border-slate-100 mb-8"
     >
       <div class="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-3">
-        <span class="material-symbols-outlined text-[32px]">apartment</span>
+        <PhBuildings :size="32" weight="duotone" />
       </div>
       <h3 class="text-base font-bold text-on-surface">Mulai Daftarkan Properti Kos Anda</h3>
       <p class="text-xs text-on-surface-variant max-w-md mx-auto mt-1 mb-5">
@@ -130,7 +130,7 @@
         to="/dashboard/pemilik/kos"
         class="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-container text-white text-xs font-bold rounded-xl shadow-md hover:bg-primary transition"
       >
-        <span class="material-symbols-outlined text-[18px]">add</span>
+        <PhPlus :size="18" weight="bold" />
         <span>Tambah Kos Pertama</span>
       </router-link>
     </div>
@@ -144,7 +144,7 @@
           <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
             <div>
               <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary text-[20px]">trending_up</span>
+                <PhTrendUp :size="20" weight="bold" class="text-primary" />
                 <h2 class="text-base font-bold text-on-surface">Tren Aktivitas Pemesanan</h2>
               </div>
               <p class="text-xs text-on-surface-variant mt-0.5">
@@ -259,7 +259,7 @@
         <div class="lg:col-span-4 bg-surface-container-lowest rounded-2xl p-6 shadow-xs border border-slate-100 flex flex-col justify-between">
           <div>
             <div class="flex items-center gap-2 mb-1">
-              <span class="material-symbols-outlined text-emerald-600 text-[20px]">pie_chart</span>
+              <PhChartPieSlice :size="20" weight="bold" class="text-emerald-600" />
               <h2 class="text-base font-bold text-on-surface">Rasio Okupansi Kamar</h2>
             </div>
             <p class="text-xs text-on-surface-variant">Keterisian unit kamar seluruh properti</p>
@@ -330,7 +330,7 @@
         <div class="lg:col-span-4 bg-surface-container-lowest rounded-2xl p-6 shadow-xs border border-slate-100 flex flex-col justify-between">
           <div>
             <div class="flex items-center gap-2 mb-1">
-              <span class="material-symbols-outlined text-amber-600 text-[20px]">date_range</span>
+              <PhCalendarBlank :size="20" weight="bold" class="text-amber-600" />
               <h2 class="text-base font-bold text-on-surface">Pilihan Durasi Sewa</h2>
             </div>
             <p class="text-xs text-on-surface-variant mb-5">
@@ -403,7 +403,7 @@
             <div class="flex items-center justify-between mb-4">
               <div>
                 <div class="flex items-center gap-2">
-                  <span class="material-symbols-outlined text-primary text-[20px]">history</span>
+                  <PhClockCounterClockwise :size="20" weight="bold" class="text-primary" />
                   <h2 class="text-base font-bold text-on-surface">Aktivitas Pemesanan Terkini</h2>
                 </div>
                 <p class="text-xs text-on-surface-variant mt-0.5">
@@ -415,7 +415,7 @@
                 class="text-xs text-primary font-bold hover:underline flex items-center gap-0.5"
               >
                 <span>Kelola Semua</span>
-                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                <PhArrowRight :size="16" weight="bold" />
               </router-link>
             </div>
 
@@ -494,6 +494,20 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
+import {
+  PhBellRinging,
+  PhArrowRight,
+  PhCheckCircle,
+  PhBuildings,
+  PhBed,
+  PhCurrencyCircleDollar,
+  PhReceipt,
+  PhPlus,
+  PhTrendUp,
+  PhChartPieSlice,
+  PhCalendarBlank,
+  PhClockCounterClockwise,
+} from '@phosphor-icons/vue'
 import { useAuthStore } from '../stores/auth'
 import api from '../services/api'
 
