@@ -73,7 +73,7 @@
           >
             <div class="w-8 h-8 rounded-full bg-primary/10 border border-primary/20 text-primary flex items-center justify-center font-bold text-xs uppercase overflow-hidden">
               <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-              <span v-else class="material-symbols-outlined text-[18px]">person</span>
+              <PhUser v-else :size="18" weight="bold" />
             </div>
             <span class="text-xs font-semibold text-on-surface hidden lg:inline max-w-[120px] truncate">
               {{ auth.user?.nama }}
@@ -86,7 +86,7 @@
             class="text-xs text-error hover:bg-error-container/40 p-2 rounded-lg font-medium transition flex items-center justify-center"
             title="Keluar"
           >
-            <span class="material-symbols-outlined text-[18px]">logout</span>
+            <PhSignOut :size="18" weight="bold" />
           </button>
         </template>
 
@@ -112,9 +112,8 @@
           type="button"
           aria-label="Toggle Menu"
         >
-          <span class="material-symbols-outlined text-[22px]">
-            {{ mobileMenuOpen ? 'close' : 'menu' }}
-          </span>
+          <PhX v-if="mobileMenuOpen" :size="22" weight="bold" />
+          <PhList v-else :size="22" weight="bold" />
         </button>
       </div>
     </div>
@@ -169,7 +168,7 @@
           @click="handleLogout"
           class="text-left px-3 py-2 rounded-lg text-sm font-semibold text-error hover:bg-error-container/30 transition flex items-center gap-2"
         >
-          <span class="material-symbols-outlined text-[18px]">logout</span>
+          <PhSignOut :size="18" weight="bold" />
           <span>Keluar</span>
         </button>
       </template>
@@ -201,6 +200,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import NotificationDropdown from './NotificationDropdown.vue'
 import logoUrl from '../assets/KosKu Housing Pin Logo.png'
+import { PhUser, PhSignOut, PhX, PhList } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
 const router = useRouter()

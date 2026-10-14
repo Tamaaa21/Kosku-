@@ -6,7 +6,7 @@
         :to="kos ? `/kos/${kos.id}` : '/kos'"
         class="inline-flex items-center gap-space-xs text-on-surface-variant hover:text-primary transition-colors text-xs font-semibold group"
       >
-        <span class="material-symbols-outlined text-sm transition-transform group-hover:-translate-x-1">arrow_back</span>
+        <PhArrowLeft :size="14" weight="bold" class="transition-transform group-hover:-translate-x-1" />
         <span>Kembali ke Detail Kos</span>
       </router-link>
     </div>
@@ -36,7 +36,7 @@
             />
             <GenderBadge :jenis="kos.jenis" size="sm" class="absolute top-space-sm left-space-sm" />
             <span class="absolute bottom-space-sm right-space-sm px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-container-lowest/90 backdrop-blur-sm text-on-surface flex items-center gap-1 shadow-sm">
-              <span class="material-symbols-outlined text-xs text-amber-500" style="font-variation-settings: 'FILL' 1;">star</span>
+              <PhStar :size="12" weight="fill" class="text-amber-500" />
               <span>{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : 'Baru' }}</span>
               <span v-if="kos.ulasan_count" class="text-slate-400 font-normal">({{ kos.ulasan_count }} ulasan)</span>
             </span>
@@ -51,7 +51,7 @@
               </span>
             </div>
             <p class="text-xs text-on-surface-variant flex items-center gap-1 mt-1">
-              <span class="material-symbols-outlined text-sm text-primary">location_on</span>
+              <PhMapPin :size="14" weight="bold" class="text-primary shrink-0" />
               <span>{{ kos.alamat }}</span>
             </p>
           </div>
@@ -74,7 +74,7 @@
                 :key="fas.id"
                 class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium bg-surface-container text-primary"
               >
-                <span class="material-symbols-outlined text-[13px]">check_circle</span>
+                <PhCheckCircle :size="13" weight="bold" class="shrink-0" />
                 <span>{{ fas.nama }}</span>
               </span>
             </div>
@@ -82,7 +82,7 @@
 
           <!-- Pemilik Info -->
           <div class="flex items-center gap-2 p-2.5 rounded-lg bg-emerald-50 text-emerald-800 text-xs">
-            <span class="material-symbols-outlined text-base text-emerald-600">verified_user</span>
+            <PhShieldCheck :size="16" weight="bold" class="text-emerald-600 shrink-0" />
             <p>Dikelola oleh <strong class="font-semibold">{{ kos.pemilik?.nama }}</strong></p>
           </div>
         </div>
@@ -94,7 +94,7 @@
           <!-- Header Form -->
           <div class="mb-space-lg">
             <div class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-semibold text-primary bg-primary-fixed mb-1.5">
-              <span class="material-symbols-outlined text-xs">receipt_long</span>
+              <PhReceipt :size="12" weight="bold" />
               Langkah Terakhir
             </div>
             <h1 class="text-2xl font-bold text-on-surface tracking-tight">Formulir Pemesanan</h1>
@@ -241,7 +241,7 @@
               :disabled="submitting || !agreeTerms"
               class="w-full bg-primary-container hover:bg-primary text-white py-3 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
             >
-              <span class="material-symbols-outlined text-base">send</span>
+              <PhPaperPlaneTilt :size="16" weight="bold" />
               <span>{{ submitting ? 'Mengirim Pengajuan...' : 'Kirim Pengajuan Sewa Sekarang' }}</span>
             </button>
           </form>
@@ -258,6 +258,15 @@ import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import GenderBadge from '../components/GenderBadge.vue'
 import api from '../services/api'
+import {
+  PhArrowLeft,
+  PhStar,
+  PhMapPin,
+  PhCheckCircle,
+  PhShieldCheck,
+  PhReceipt,
+  PhPaperPlaneTilt
+} from '@phosphor-icons/vue'
 
 const route = useRoute()
 const router = useRouter()

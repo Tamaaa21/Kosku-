@@ -15,7 +15,7 @@
           :disabled="!selectedKosId"
           class="h-10 px-5 rounded-lg bg-primary-container text-white text-xs font-semibold flex items-center gap-2 shadow-md hover:bg-primary transition active:scale-[0.98] disabled:opacity-50"
         >
-          <span class="material-symbols-outlined text-[18px]">add</span>
+          <PhPlus :size="18" weight="bold" />
           <span>Tambah Kamar</span>
         </button>
       </div>
@@ -27,7 +27,7 @@
       class="mb-6 p-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-medium border border-emerald-200 flex items-center justify-between"
     >
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-emerald-600 text-[18px]">check_circle</span>
+        <PhCheckCircle :size="18" weight="fill" class="text-emerald-600" />
         <span>{{ successMsg }}</span>
       </div>
       <button @click="successMsg = ''" class="text-emerald-700 font-bold ml-4 text-base">&times;</button>
@@ -37,7 +37,7 @@
       class="mb-6 p-4 rounded-xl bg-rose-50 text-rose-800 text-xs font-medium border border-rose-200 flex items-center justify-between"
     >
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-rose-600 text-[18px]">error</span>
+        <PhWarningCircle :size="18" weight="fill" class="text-rose-600" />
         <span>{{ errorMsg }}</span>
       </div>
       <button @click="errorMsg = ''" class="text-rose-700 font-bold ml-4 text-base">&times;</button>
@@ -47,7 +47,7 @@
     <div class="grid grid-cols-1 md:grid-cols-4 gap-space-md mb-8">
       <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-slate-100 flex items-center gap-space-md">
         <div class="w-12 h-12 rounded-xl bg-surface-container-high flex items-center justify-center text-primary shrink-0">
-          <span class="material-symbols-outlined text-[26px]">meeting_room</span>
+          <PhDoor :size="24" weight="duotone" />
         </div>
         <div>
           <p class="text-xs text-on-surface-variant font-medium">Total Kamar</p>
@@ -57,7 +57,7 @@
 
       <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-slate-100 flex items-center gap-space-md">
         <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
-          <span class="material-symbols-outlined text-[26px]">check_circle</span>
+          <PhCheckCircle :size="24" weight="duotone" />
         </div>
         <div>
           <p class="text-xs text-on-surface-variant font-medium">Kamar Siap Huni</p>
@@ -67,7 +67,7 @@
 
       <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-slate-100 flex items-center gap-space-md">
         <div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary-container shrink-0">
-          <span class="material-symbols-outlined text-[26px]">person</span>
+          <PhUser :size="24" weight="duotone" />
         </div>
         <div>
           <p class="text-xs text-on-surface-variant font-medium">Kamar Terisi</p>
@@ -77,7 +77,7 @@
 
       <div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-slate-100 flex items-center gap-space-md">
         <div class="w-12 h-12 rounded-xl bg-surface-container-low flex items-center justify-center text-primary shrink-0">
-          <span class="material-symbols-outlined text-[26px]">payments</span>
+          <PhCurrencyCircleDollar :size="24" weight="duotone" />
         </div>
         <div>
           <p class="text-xs text-on-surface-variant font-medium">Estimasi Pendapatan</p>
@@ -96,7 +96,7 @@
               Pilih Properti Kos
             </label>
             <div class="relative">
-              <span class="material-symbols-outlined absolute left-3 top-2.5 text-[20px] text-primary">cottage</span>
+              <PhHouse :size="18" class="absolute left-3 top-3 text-primary pointer-events-none" />
               <select
                 id="kos-select"
                 v-model="selectedKosId"
@@ -110,7 +110,7 @@
                   {{ kos.nama }} ({{ kos.alamat }})
                 </option>
               </select>
-              <span class="material-symbols-outlined absolute right-3 top-2.5 text-[20px] text-outline pointer-events-none">expand_more</span>
+              <PhCaretDown :size="18" class="absolute right-3 top-3 text-outline pointer-events-none" />
             </div>
           </div>
 
@@ -120,7 +120,7 @@
               Cari Unit
             </label>
             <div class="relative">
-              <span class="material-symbols-outlined absolute left-3 top-2.5 text-[18px] text-outline">search</span>
+              <PhMagnifyingGlass :size="18" class="absolute left-3 top-3 text-outline pointer-events-none" />
               <input
                 v-model="searchQuery"
                 type="text"
@@ -190,14 +190,14 @@
           <tbody class="divide-y divide-slate-100 text-xs text-on-surface">
             <tr v-if="loading" class="text-center">
               <td colspan="6" class="py-12 text-slate-400">
-                <span class="material-symbols-outlined animate-spin text-[28px] text-primary">progress_activity</span>
+                <PhCircleNotch :size="28" class="animate-spin text-primary inline-block" />
                 <p class="mt-2 text-xs">Memuat data kamar...</p>
               </td>
             </tr>
 
             <tr v-else-if="filteredKamarList.length === 0" class="text-center">
               <td colspan="6" class="py-12 text-slate-400">
-                <span class="material-symbols-outlined text-[36px] text-slate-300">meeting_room</span>
+                <PhDoor :size="36" class="text-slate-300 inline-block" />
                 <p class="mt-2 text-xs font-semibold text-slate-600">Belum ada unit kamar di kos ini.</p>
                 <p class="text-[11px] text-slate-400 mt-0.5">Silakan tambahkan kamar baru untuk mulai mengelola unit.</p>
               </td>
@@ -228,12 +228,12 @@
                         v-if="kamar.ukuran"
                         class="px-2 py-0.5 rounded bg-surface-container text-primary text-[10px] font-semibold flex items-center gap-0.5"
                       >
-                        <span class="material-symbols-outlined text-[12px]">aspect_ratio</span>
+                        <PhBoundingBox :size="12" />
                         <span>{{ kamar.ukuran }}</span>
                       </span>
                     </div>
                     <div class="flex items-center gap-1.5 text-on-surface-variant text-[11px] mt-0.5">
-                      <span class="material-symbols-outlined text-[16px] text-outline">apartment</span>
+                      <PhBuildings :size="15" class="text-outline" />
                       <span>{{ currentKos?.nama || 'Unit Kos' }} &bull; {{ (kamar.foto || []).length }} Foto</span>
                     </div>
                   </div>
@@ -248,7 +248,7 @@
                     :key="amenity.name"
                     class="px-2 py-0.5 rounded-full bg-surface-container-low text-primary text-[10px] font-medium flex items-center gap-1 border border-slate-100"
                   >
-                    <span class="material-symbols-outlined text-[13px]">{{ amenity.icon }}</span>
+                    <component :is="amenity.iconComponent" :size="13" />
                     <span>{{ amenity.name }}</span>
                   </span>
                 </div>
@@ -296,14 +296,14 @@
                     class="p-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container transition"
                     title="Edit Kamar"
                   >
-                    <span class="material-symbols-outlined text-[18px]">edit</span>
+                    <PhPencilSimple :size="18" />
                   </button>
                   <button
                     @click="confirmDeleteKamar(kamar)"
                     class="p-2 rounded-lg text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition"
                     title="Hapus Kamar"
                   >
-                    <span class="material-symbols-outlined text-[18px]">delete</span>
+                    <PhTrash :size="18" />
                   </button>
                 </div>
               </td>
@@ -324,7 +324,7 @@
             class="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
           >
             <span>Lihat permintaan pemesanan masuk</span>
-            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            <PhArrowRight :size="16" weight="bold" />
           </router-link>
         </div>
       </div>
@@ -340,7 +340,7 @@
         <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 bg-surface-container-lowest shrink-0">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-[24px]">meeting_room</span>
+              <PhDoor :size="24" weight="bold" />
             </div>
             <div>
               <h3 class="text-base sm:text-lg font-bold text-on-surface">
@@ -356,7 +356,7 @@
             class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shrink-0"
             type="button"
           >
-            <span class="material-symbols-outlined text-[20px]">close</span>
+            <PhX :size="20" weight="bold" />
           </button>
         </div>
 
@@ -396,7 +396,7 @@
             <div class="p-4 bg-surface-container-low/40 rounded-xl border border-slate-200 space-y-3">
               <div>
                 <label class="text-xs font-semibold text-on-surface flex items-center gap-1.5">
-                  <span class="material-symbols-outlined text-[16px] text-primary">payments</span>
+                  <PhCurrencyCircleDollar :size="16" weight="bold" class="text-primary" />
                   <span>Tarif Sewa Riil & Durasi Unit Kamar</span>
                 </label>
                 <p class="text-[11px] text-on-surface-variant mt-0.5">
@@ -508,7 +508,7 @@
                   <option value="tersedia">Tersedia (Siap Huni)</option>
                   <option value="terisi">Terisi</option>
                 </select>
-                <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">arrow_drop_down</span>
+                <PhCaretDown :size="18" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" />
               </div>
             </div>
 
@@ -527,7 +527,7 @@
               <div class="flex items-center justify-between">
                 <div>
                   <label class="text-xs font-semibold text-on-surface flex items-center gap-1">
-                    <span class="material-symbols-outlined text-[16px] text-primary">bed</span>
+                    <PhBed :size="16" weight="bold" class="text-primary" />
                     <span>Fasilitas Kamar (Terintegrasi)</span>
                   </label>
                   <p class="text-[11px] text-on-surface-variant">
@@ -551,7 +551,7 @@
                     v-model="formData.fasilitas_kamar"
                     class="rounded text-primary focus:ring-primary h-4 w-4"
                   />
-                  <span class="material-symbols-outlined text-[16px] text-primary">{{ f.icon }}</span>
+                  <component :is="f.iconComponent" :size="16" class="text-primary" />
                   <span class="text-xs text-slate-700 font-medium">{{ f.name }}</span>
                 </label>
               </div>
@@ -571,7 +571,7 @@
                   :disabled="!customAmenityInput.trim()"
                   class="h-9 px-3.5 bg-primary-container text-white text-xs font-semibold rounded-lg hover:bg-primary transition disabled:opacity-50 flex items-center gap-1 shrink-0"
                 >
-                  <span class="material-symbols-outlined text-[15px]">add</span>
+                  <PhPlus :size="15" weight="bold" />
                   <span>Tambah</span>
                 </button>
               </div>
@@ -592,7 +592,7 @@
               :disabled="saving"
               class="h-10 px-6 rounded-lg bg-primary-container text-white text-xs font-semibold hover:bg-primary shadow-sm transition flex items-center gap-1.5 disabled:opacity-60"
             >
-              <span v-if="saving" class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+              <PhCircleNotch v-if="saving" :size="16" class="animate-spin" />
               <span>{{ isEditing ? 'Simpan Perubahan' : 'Tambah Kamar' }}</span>
             </button>
           </div>
@@ -605,6 +605,32 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
+import {
+  PhPlus,
+  PhCheckCircle,
+  PhWarningCircle,
+  PhDoor,
+  PhUser,
+  PhCurrencyCircleDollar,
+  PhHouse,
+  PhCaretDown,
+  PhMagnifyingGlass,
+  PhCircleNotch,
+  PhBoundingBox,
+  PhBuildings,
+  PhPencilSimple,
+  PhTrash,
+  PhArrowRight,
+  PhX,
+  PhBed,
+  PhShower,
+  PhSnowflake,
+  PhWifiHigh,
+  PhCoatHanger,
+  PhArmchair,
+  PhThermometerHot,
+  PhFrameCorners
+} from '@phosphor-icons/vue'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
@@ -631,14 +657,14 @@ const isEditing = ref(false)
 const editKamarId = ref(null)
 
 const defaultAmenities = [
-  { name: 'Kasur', icon: 'bed' },
-  { name: 'Kamar Mandi Dalam', icon: 'shower' },
-  { name: 'AC', icon: 'ac_unit' },
-  { name: 'WiFi', icon: 'wifi' },
-  { name: 'Lemari Pakaian', icon: 'shelves' },
-  { name: 'Meja Belajar', icon: 'desk' },
-  { name: 'Water Heater', icon: 'hot_tub' },
-  { name: 'Jendela / Ventilasi', icon: 'window' }
+  { name: 'Kasur', iconComponent: PhBed },
+  { name: 'Kamar Mandi Dalam', iconComponent: PhShower },
+  { name: 'AC', iconComponent: PhSnowflake },
+  { name: 'WiFi', iconComponent: PhWifiHigh },
+  { name: 'Lemari Pakaian', iconComponent: PhCoatHanger },
+  { name: 'Meja Belajar', iconComponent: PhArmchair },
+  { name: 'Water Heater', iconComponent: PhThermometerHot },
+  { name: 'Jendela / Ventilasi', iconComponent: PhFrameCorners }
 ]
 
 const customAmenityInput = ref('')
@@ -768,25 +794,25 @@ const getRoomImage = (kamar) => {
   return images[(kamar.id || 0) % images.length]
 }
 
-const amenityIconMap = {
-  'Kasur': 'bed',
-  'KM Dalam': 'shower',
-  'Kamar Mandi Dalam': 'shower',
-  'AC': 'ac_unit',
-  'WiFi': 'wifi',
-  'Lemari': 'shelves',
-  'Lemari Pakaian': 'shelves',
-  'Meja Belajar': 'desk',
-  'Water Heater': 'hot_tub',
-  'Jendela': 'window',
-  'Jendela / Ventilasi': 'window'
+const amenityComponentMap = {
+  'Kasur': PhBed,
+  'KM Dalam': PhShower,
+  'Kamar Mandi Dalam': PhShower,
+  'AC': PhSnowflake,
+  'WiFi': PhWifiHigh,
+  'Lemari': PhCoatHanger,
+  'Lemari Pakaian': PhCoatHanger,
+  'Meja Belajar': PhArmchair,
+  'Water Heater': PhThermometerHot,
+  'Jendela': PhFrameCorners,
+  'Jendela / Ventilasi': PhFrameCorners
 }
 
 const getRoomAmenities = (kamar) => {
   const list = kamar.fasilitas_kamar || []
   return list.map((name) => ({
     name,
-    icon: amenityIconMap[name] || 'check_circle'
+    iconComponent: amenityComponentMap[name] || PhCheckCircle
   }))
 }
 

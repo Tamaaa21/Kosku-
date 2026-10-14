@@ -14,7 +14,7 @@
           @click="openAddModal"
           class="h-10 px-5 rounded-lg bg-primary-container text-white text-xs font-semibold flex items-center gap-2 shadow-md hover:bg-primary transition active:scale-[0.98]"
         >
-          <span class="material-symbols-outlined text-[18px]">add</span>
+          <PhPlus :size="18" weight="bold" />
           <span>Tambah Kos Baru</span>
         </button>
       </div>
@@ -26,7 +26,7 @@
       class="mb-6 p-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-medium border border-emerald-200 flex items-center justify-between"
     >
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-emerald-600 text-[18px]">check_circle</span>
+        <PhCheckCircle :size="18" weight="fill" class="text-emerald-600" />
         <span>{{ successMsg }}</span>
       </div>
       <button @click="successMsg = ''" class="text-emerald-700 font-bold ml-4 text-base">&times;</button>
@@ -36,7 +36,7 @@
       class="mb-6 p-4 rounded-xl bg-rose-50 text-rose-800 text-xs font-medium border border-rose-200 flex items-center justify-between"
     >
       <div class="flex items-center gap-2">
-        <span class="material-symbols-outlined text-rose-600 text-[18px]">error</span>
+        <PhWarningCircle :size="18" weight="fill" class="text-rose-600" />
         <span>{{ errorMsg }}</span>
       </div>
       <button @click="errorMsg = ''" class="text-rose-700 font-bold ml-4 text-base">&times;</button>
@@ -52,7 +52,7 @@
           </span>
         </div>
         <div class="w-11 h-11 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
-          <span class="material-symbols-outlined text-[24px]">apartment</span>
+          <PhBuildings :size="24" weight="duotone" />
         </div>
       </div>
 
@@ -64,7 +64,7 @@
           </span>
         </div>
         <div class="w-11 h-11 rounded-lg bg-surface-container-high flex items-center justify-center text-tertiary">
-          <span class="material-symbols-outlined text-[24px]">bed</span>
+          <PhBed :size="24" weight="duotone" />
         </div>
       </div>
 
@@ -74,7 +74,7 @@
           <span class="text-2xl font-black text-primary mt-1">{{ occupancyRate }}%</span>
         </div>
         <div class="w-11 h-11 rounded-lg bg-surface-container-high flex items-center justify-center text-primary-container">
-          <span class="material-symbols-outlined text-[24px]">donut_large</span>
+          <PhChartPieSlice :size="24" weight="duotone" />
         </div>
       </div>
     </div>
@@ -82,7 +82,7 @@
     <!-- Filter & Search Toolbar Container -->
     <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-slate-100 mb-6 flex flex-col md:flex-row gap-space-sm items-stretch md:items-center justify-between">
       <div class="relative flex-1 min-w-0">
-        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-outline text-[20px]">search</span>
+        <PhMagnifyingGlass :size="20" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" />
         <input
           v-model="searchQuery"
           type="text"
@@ -102,7 +102,7 @@
             <option value="putra">Putra</option>
             <option value="campur">Campur</option>
           </select>
-          <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">arrow_drop_down</span>
+          <PhCaretDown :size="18" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" />
         </div>
 
         <button
@@ -110,7 +110,7 @@
           title="Reset Filter"
           class="h-11 px-3.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface flex items-center justify-center transition"
         >
-          <span class="material-symbols-outlined text-[20px]">refresh</span>
+          <PhArrowClockwise :size="20" />
         </button>
       </div>
     </div>
@@ -133,14 +133,14 @@
           <tbody class="divide-y divide-slate-100 text-xs text-on-surface">
             <tr v-if="loading" class="text-center">
               <td colspan="7" class="py-12 text-slate-400">
-                <span class="material-symbols-outlined animate-spin text-[28px] text-primary">progress_activity</span>
+                <PhCircleNotch :size="28" class="animate-spin text-primary inline-block" />
                 <p class="mt-2 text-xs">Memuat data kos Anda...</p>
               </td>
             </tr>
 
             <tr v-else-if="filteredKosList.length === 0" class="text-center">
               <td colspan="7" class="py-12 text-slate-400">
-                <span class="material-symbols-outlined text-[36px] text-slate-300">apartment</span>
+                <PhBuildings :size="36" class="text-slate-300 inline-block" />
                 <p class="mt-2 text-xs font-semibold text-slate-600">Belum ada properti kos yang sesuai.</p>
                 <p class="text-[11px] text-slate-400 mt-0.5">Silakan tambahkan kos baru atau sesuaikan kata kunci pencarian.</p>
               </td>
@@ -172,7 +172,7 @@
                       {{ kos.nama }}
                     </span>
                     <span class="inline-flex items-center text-tertiary" title="Terverifikasi">
-                      <span class="material-symbols-outlined text-[16px]" style="font-variation-settings: 'FILL' 1;">verified</span>
+                      <PhCheckCircle :size="16" weight="fill" />
                     </span>
                   </div>
                   <span class="text-[11px] text-on-surface-variant truncate max-w-xs mt-0.5">
@@ -220,7 +220,7 @@
                     class="h-8 px-2.5 rounded-lg bg-primary/10 text-primary hover:bg-primary hover:text-white transition flex items-center gap-1 text-[11px] font-semibold"
                     title="Kelola Kamar Kos Ini"
                   >
-                    <span class="material-symbols-outlined text-[16px]">meeting_room</span>
+                    <PhDoor :size="16" />
                     <span>Kamar</span>
                   </router-link>
 
@@ -229,7 +229,7 @@
                     class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition"
                     title="Lihat Halaman Publik"
                   >
-                    <span class="material-symbols-outlined text-[19px]">visibility</span>
+                    <PhEye :size="19" />
                   </router-link>
 
                   <button
@@ -237,7 +237,7 @@
                     class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition"
                     title="Ubah Data Kos"
                   >
-                    <span class="material-symbols-outlined text-[19px]">edit</span>
+                    <PhPencilSimple :size="19" />
                   </button>
 
                   <button
@@ -245,7 +245,7 @@
                     class="w-8 h-8 rounded-lg flex items-center justify-center text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition"
                     title="Hapus Kos"
                   >
-                    <span class="material-symbols-outlined text-[19px]">delete</span>
+                    <PhTrash :size="19" />
                   </button>
                 </div>
               </td>
@@ -266,7 +266,7 @@
             class="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
           >
             <span>Kelola unit kamar masing-masing</span>
-            <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+            <PhArrowRight :size="16" weight="bold" />
           </router-link>
         </div>
       </div>
@@ -282,9 +282,8 @@
         <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100 bg-surface-container-lowest shrink-0">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-              <span class="material-symbols-outlined text-[24px]">
-                {{ isEditing ? 'edit_note' : 'add_business' }}
-              </span>
+              <PhNotePencil v-if="isEditing" :size="24" weight="bold" />
+              <PhBuildings v-else :size="24" weight="bold" />
             </div>
             <div>
               <h3 class="text-base sm:text-lg font-bold text-on-surface">
@@ -300,7 +299,7 @@
             class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition shrink-0"
             type="button"
           >
-            <span class="material-symbols-outlined text-[20px]">close</span>
+            <PhX :size="20" weight="bold" />
           </button>
         </div>
 
@@ -389,7 +388,7 @@
                       <option value="putra">Putra (Khusus Pria)</option>
                       <option value="campur">Campur</option>
                     </select>
-                    <span class="material-symbols-outlined absolute right-2.5 top-1/2 -translate-y-1/2 text-outline text-[20px] pointer-events-none">arrow_drop_down</span>
+                    <PhCaretDown :size="18" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" />
                   </div>
                 </div>
               </div>
@@ -428,7 +427,7 @@
               <div v-if="isEditing && editKosKamarCount > 0" class="p-4 bg-emerald-50/80 rounded-xl border border-emerald-200/90 space-y-2.5">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-1.5 text-xs font-bold text-emerald-950">
-                    <span class="material-symbols-outlined text-[18px] text-emerald-600">sync_saved_locally</span>
+                    <PhCloudCheck :size="18" weight="bold" class="text-emerald-600" />
                     <span>Tarif & Durasi Otomatis Dikelola per Unit Kamar</span>
                   </div>
                   <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">
@@ -456,7 +455,7 @@
                     class="text-xs font-bold text-emerald-900 hover:underline flex items-center gap-1 self-start sm:self-auto"
                   >
                     <span>Atur Tarif & Durasi di Kelola Kamar</span>
-                    <span class="material-symbols-outlined text-[15px]">arrow_forward</span>
+                    <PhArrowRight :size="15" weight="bold" />
                   </router-link>
                 </div>
               </div>
@@ -465,7 +464,7 @@
               <div v-else class="p-4 bg-surface-container-low/40 rounded-xl border border-slate-200 space-y-3">
                 <div>
                   <label class="text-xs font-semibold text-on-surface flex items-center gap-1.5">
-                    <span class="material-symbols-outlined text-[16px] text-primary">price_change</span>
+                    <PhCurrencyCircleDollar :size="16" weight="bold" class="text-primary" />
                     <span>Perkiraan Tarif Acuan Awal (Mulai Dari Rp)</span>
                   </label>
                   <p class="text-[11px] text-on-surface-variant mt-0.5">
@@ -575,7 +574,8 @@
                     @click="showAddCustomFasilitas = !showAddCustomFasilitas"
                     class="text-[11px] font-bold text-primary hover:underline flex items-center gap-1"
                   >
-                    <span class="material-symbols-outlined text-[15px]">{{ showAddCustomFasilitas ? 'remove' : 'add' }}</span>
+                    <PhMinus v-if="showAddCustomFasilitas" :size="15" weight="bold" />
+                    <PhPlus v-else :size="15" weight="bold" />
                     {{ showAddCustomFasilitas ? 'Tutup' : 'Tambah Fasilitas Lain' }}
                   </button>
                 </div>
@@ -597,7 +597,7 @@
                       :disabled="creatingCustomFasilitas || !customFasilitasName.trim()"
                       class="h-9 px-3.5 bg-primary-container text-white text-xs font-semibold rounded-lg hover:bg-primary transition disabled:opacity-50 flex items-center gap-1 shrink-0"
                     >
-                      <span v-if="creatingCustomFasilitas" class="material-symbols-outlined animate-spin text-[14px]">progress_activity</span>
+                      <PhCircleNotch v-if="creatingCustomFasilitas" :size="14" class="animate-spin" />
                       <span>Tambah</span>
                     </button>
                   </div>
@@ -649,7 +649,7 @@
                 <div class="flex items-center justify-between">
                   <div>
                     <label class="text-xs font-semibold text-on-surface flex items-center gap-1">
-                      <span class="material-symbols-outlined text-[16px] text-primary">policy</span>
+                      <PhShieldCheck :size="16" class="text-primary" />
                       <span>Tata Tertib & Peraturan Kos</span>
                     </label>
                     <p class="text-[11px] text-on-surface-variant">
@@ -675,9 +675,8 @@
                         : 'bg-white text-slate-700 border-slate-200 hover:border-primary/50'
                     ]"
                   >
-                    <span class="material-symbols-outlined text-[13px]">
-                      {{ formData.peraturan.includes(rule) ? 'check' : 'add' }}
-                    </span>
+                    <PhCheck v-if="formData.peraturan.includes(rule)" :size="13" weight="bold" />
+                    <PhPlus v-else :size="13" weight="bold" />
                     <span>{{ rule }}</span>
                   </button>
                 </div>
@@ -697,7 +696,7 @@
                     :disabled="!customRuleInput.trim()"
                     class="h-9 px-3.5 bg-primary-container text-white text-xs font-semibold rounded-lg hover:bg-primary transition disabled:opacity-50 flex items-center gap-1 shrink-0"
                   >
-                    <span class="material-symbols-outlined text-[15px]">add</span>
+                    <PhPlus :size="15" weight="bold" />
                     <span>Tambah Aturan</span>
                   </button>
                 </div>
@@ -709,7 +708,7 @@
                     :key="idx"
                     class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-medium"
                   >
-                    <span class="material-symbols-outlined text-emerald-600 text-[13px]">verified_user</span>
+                    <PhShieldCheck :size="13" weight="fill" class="text-emerald-600" />
                     <span>{{ rule }}</span>
                     <button
                       type="button"
@@ -734,7 +733,7 @@
                 @click="goToStep(activeModalStep - 1)"
                 class="min-h-[40px] px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition text-xs font-semibold text-on-surface flex items-center gap-1.5"
               >
-                <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+                <PhArrowLeft :size="16" weight="bold" />
                 <span>Kembali</span>
               </button>
               <button
@@ -755,7 +754,7 @@
                 class="min-h-[40px] px-5 rounded-xl bg-primary hover:bg-primary-container text-white text-xs font-semibold shadow-xs transition flex items-center gap-1.5"
               >
                 <span>Lanjut</span>
-                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+                <PhArrowRight :size="16" weight="bold" />
               </button>
 
               <button
@@ -764,7 +763,7 @@
                 :disabled="saving"
                 class="min-h-[40px] px-6 rounded-xl bg-primary hover:bg-primary-container text-white text-xs font-semibold shadow-xs transition flex items-center gap-1.5 disabled:opacity-60"
               >
-                <span v-if="saving" class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+                <PhCircleNotch v-if="saving" :size="16" class="animate-spin" />
                 <span>{{ isEditing ? 'Simpan Perubahan' : 'Simpan Kos Baru' }}</span>
               </button>
             </div>
@@ -777,6 +776,31 @@
 
 <script setup>
 import { ref, computed, onMounted, nextTick } from 'vue'
+import {
+  PhPlus,
+  PhMinus,
+  PhCheckCircle,
+  PhWarningCircle,
+  PhBuildings,
+  PhBed,
+  PhChartPieSlice,
+  PhMagnifyingGlass,
+  PhCaretDown,
+  PhArrowClockwise,
+  PhCircleNotch,
+  PhDoor,
+  PhEye,
+  PhPencilSimple,
+  PhTrash,
+  PhArrowRight,
+  PhArrowLeft,
+  PhNotePencil,
+  PhX,
+  PhCloudCheck,
+  PhCurrencyCircleDollar,
+  PhShieldCheck,
+  PhCheck
+} from '@phosphor-icons/vue'
 import { useAuthStore } from '../stores/auth'
 import api from '../services/api'
 import ImageUploader from '../components/ImageUploader.vue'

@@ -2,51 +2,55 @@
 name: KosKu
 description: Platform Pencarian & Sewa Kos Terintegrasi Indonesia
 colors:
-  primary: "#004ac6"
+  primary: "#0B478B"
   on-primary: "#ffffff"
-  primary-container: "#2563eb"
-  on-primary-container: "#eeefff"
-  secondary: "#585f67"
-  secondary-container: "#dce3ec"
-  tertiary: "#006329"
+  primary-container: "#0D52A0"
+  on-primary-container: "#ffffff"
+  accent: "#FF9900"
+  on-accent: "#ffffff"
+  accent-container: "#FFF4E5"
+  secondary: "#475569"
+  secondary-container: "#f1f5f9"
+  tertiary: "#FF9900"
   on-tertiary: "#ffffff"
-  tertiary-container: "#007f36"
-  surface: "#f8f9ff"
+  tertiary-container: "#FF9900"
+  tertiary-fixed: "#FFF4E5"
+  surface: "#ffffff"
   surface-container-lowest: "#ffffff"
-  surface-container-low: "#eff4ff"
-  surface-container: "#e5eeff"
-  surface-container-high: "#dce9ff"
-  on-surface: "#0b1c30"
-  on-surface-variant: "#434655"
-  outline: "#737686"
-  outline-variant: "#c3c6d7"
-  error: "#ba1a1a"
+  surface-container-low: "#f8fafc"
+  surface-container: "#f1f5f9"
+  surface-container-high: "#e2e8f0"
+  on-surface: "#0f172a"
+  on-surface-variant: "#475569"
+  outline: "#cbd5e1"
+  outline-variant: "#e2e8f0"
+  error: "#dc2626"
   whatsapp-green: "#16a34a"
 typography:
   display:
-    fontFamily: "Inter, sans-serif"
+    fontFamily: "Satoshi, sans-serif"
     fontSize: "clamp(2rem, 5vw, 3rem)"
     fontWeight: 700
     lineHeight: 1.15
     letterSpacing: "-0.02em"
   headline:
-    fontFamily: "Inter, sans-serif"
+    fontFamily: "Satoshi, sans-serif"
     fontSize: "1.5rem"
     fontWeight: 700
     lineHeight: 1.25
     letterSpacing: "-0.01em"
   title:
-    fontFamily: "Inter, sans-serif"
+    fontFamily: "Satoshi, sans-serif"
     fontSize: "1.125rem"
     fontWeight: 600
     lineHeight: 1.35
   body:
-    fontFamily: "Inter, sans-serif"
+    fontFamily: "Satoshi, sans-serif"
     fontSize: "0.875rem"
     fontWeight: 400
     lineHeight: 1.5
   label:
-    fontFamily: "Inter, sans-serif"
+    fontFamily: "Satoshi, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 500
     lineHeight: 1.4
@@ -70,6 +74,11 @@ components:
     padding: "12px 24px"
   button-primary-hover:
     backgroundColor: "{colors.primary}"
+  button-accent:
+    backgroundColor: "{colors.accent}"
+    textColor: "{colors.on-accent}"
+    rounded: "{rounded.md}"
+    padding: "10px 20px"
   button-whatsapp:
     backgroundColor: "{colors.whatsapp-green}"
     textColor: "{colors.on-primary}"
@@ -88,51 +97,44 @@ components:
 
 **Creative North Star: "The Nusantara Living Compass"**
 
-KosKu dirancang sebagai pemandu arah hunian yang jernih, tenang, dan tepercaya di Indonesia. Filosofi visualnya menggabungkan ketepatan teknis navigasi peta modern dengan kehangatan interaksi khas lokal. Setiap permukaan antarmuka memprioritaskan keterbacaan data properti, kepastian lokasi, dan kemudahan akses komunikasi langsung antara pencari kos dan pemilik.
+KosKu dirancang sebagai pemandu arah hunian yang jernih, tenang, dan tepercaya di Indonesia. Identitas visualnya berakar langsung dari logo resmi KosKu, memadukan ketegasan **Deep Blue (#0B478B)** sebagai lambang kestabilan dan keamanan hunian, dengan kehangatan **Kuning Ke-orangan (#FF9900)** sebagai aksen ramah khas nusantara.
 
-Sistem menghindari kesan dashboard korporat yang kaku dan dingin, menolak gradien neon yang menyilaukan mata, serta membatasi penumpukan badge promosi yang dapat mengalihkan perhatian dari foto asli unit hunian. Kejujuran ruang, kejelasan harga, dan transparansi status sewa adalah pusat dari setiap keputusan tata letak.
+Setiap permukaan antarmuka memprioritaskan keterbacaan data properti, kepastian lokasi peta, dan kemudahan akses komunikasi langsung antara pencari kos dan pemilik.
 
 **Key Characteristics:**
-- **Layered Tonal Surfaces**: Tingkatan kontras yang sejuk dan bersih tanpa bergantung pada bayangan pekat.
+- **Harmonisasi Identitas Logo**: Warna Deep Blue `#0B478B` sebagai jangkar navigasi dan tombol aksi utama, dipadukan dengan aksen Kuning Ke-orangan `#FF9900` untuk sorotan rating, promo, dan status aktif.
+- **Layered Tonal Surfaces**: Tingkatan kontras yang sejuk dan bersih (`#f8fafc`, `#ffffff`) tanpa bergantung pada bayangan pekat.
 - **Direct Contact Affordance**: Jalur tindakan langsung (WhatsApp 1-klik dan navigasi Google Maps) yang selalu mudah ditemukan.
 - **Adaptive Role Navigation**: Bilah atas publik yang luas untuk pencari berpadu harmonis dengan bilah laci samping yang efisien bagi pemilik kos.
 - **Ergonomic Tactility**: Tombol dan target sentuh berukuran mantap (minimal 44px) yang nyaman dioperasikan dengan satu tangan di ponsel.
 
 ## Colors
 
-Palet warna KosKu dibangun atas dasar nada sejuk laut nusantara, aksen zamrud equatorial untuk aksi komunikatif, dan kanvas putih berkabut yang tenang.
+Palet warna KosKu dibangun dari warna brand logo resmi KosKu dan palet netral Slate:
 
-### Primary
-- **Maritime Cobalt** (`#004ac6`): Digunakan untuk identitas merek utama, tombol penelusuran, sorotan tab aktif, dan status prioritas tinggi. Menghadirkan kesan stabilitas dan keandalan sistem.
-- **Vibrant Electric Blue** (`#2563eb`): Wadah interaktif utama (container) untuk tombol aksi penelusuran hero dan tautan fokus interaktif.
+### Primary (Brand Logo)
+- **KosKu Deep Blue** (`#0B478B`): Digunakan untuk identitas merek utama, tombol utama, tautan aktif, border fokus, dan status prioritas tinggi. Menghadirkan rasio kontras 9.17:1 di atas putih (melampaui WCAG AAA).
+- **Interactive Deep Blue Container** (`#0D52A0`): Wadah interaktif untuk tombol submit/pencarian dengan feedback hover mendalam (`#083569`).
+- **Primary Fixed Soft Tint** (`#e0edff`): Latar belakang sorotan lembut untuk tag aktif dan badge properti.
 
-### Secondary
-- **Slate Graphite** (`#585f67`): Elemen sekunder, ikon pendukung, label unit non-aktif, dan pembatas visual pelengkap.
-- **Subtle Surface Container** (`#dce3ec`): Latar belakang penampung untuk badge netral dan kolom input sekunder.
+### Accent & Tertiary (Brand Logo)
+- **KosKu Warm Yellow-Orange** (`#FF9900`): Aksen hangat khas logo KosKu untuk sorotan rating bintang, badge pilihan/top-rated, notifikasi perhatian, dan status sewa aktif.
+- **Accent Container** (`#FFF4E5`): Latar belakang badge halus berpadu kontras tinggi dengan teks oranye gelap (`#9A3412`).
 
-### Tertiary
-- **Equatorial Emerald** (`#006329`): Menandai status keberhasilan, verifikasi legalitas properti kos, serta ketersediaan kamar yang siap huni.
-- **WhatsApp Action Green** (`#16a34a`): Aksen fungsional khusus untuk tombol komunikasi WhatsApp instan, menjamin pengenalan pola yang universal bagi pengguna di Indonesia.
-
-### Neutral
-- **Ice Mist** (`#f8f9ff`): Warna dasar latar belakang aplikasi; sejuk, bersih, dan mengurangi kelelahan mata di bawah sinar matahari.
-- **Pure Canvas White** (`#ffffff`): Latar belakang kartu unit, modal dialog, dan dropdown navigasi (`surface-container-lowest`).
-- **Midnight Navy Ink** (`#0b1c30`): Warna teks primer dengan rasio kontras tinggi di atas seluruh permukaan terang.
-- **Muted Steel Slate** (`#434655`): Warna teks sekunder untuk deskripsi fasilitas, alamat, dan tanggal pembaruan.
-- **Soft Divider Outline** (`#c3c6d7`): Garis pembatas halus 1px yang memisahkan modul tanpa menimbulkan kekacauan visual.
-
-### Named Rules
-**The Clarity-First Contact Rule.** Jalur kontak langsung (tombol Chat WhatsApp dan tombol Buka di Google Maps) harus selalu menggunakan aksen warna fungsional murninya tanpa terdistorsi tema umum, menjamin aksi dapat dipahami dalam sekejap mata.
-
-**The Quiet Canvas Rule.** Kanvas latar belakang dan bingkai kartu properti harus tetap bersahaja dalam batas netral (`#f8f9ff` dan `#ffffff`), memastikan foto autentik kamar kos menjadi pusat perhatian visual.
+### Secondary & Neutrals
+- **Slate Support** (`#475569`): Teks keterangan sekunder, ikon netral, dan label pembantu.
+- **Ice Slate Canvas** (`#f8fafc`): Warna dasar latar belakang aplikasi; tenang, bersih, dan nyaman di mata.
+- **Pure Canvas White** (`#ffffff`): Latar belakang kartu unit, modal dialog, dan dropdown navigasi.
+- **Midnight Slate Ink** (`#0f172a`): Warna teks primer dengan rasio kontras tajam di atas latar belakang terang.
+- **WhatsApp Action Green** (`#16a34a`): Aksen fungsional khusus untuk tombol komunikasi WhatsApp instan.
 
 ## Typography
 
-**Display Font:** Inter (dengan fallback system-ui, -apple-system, sans-serif)  
-**Body Font:** Inter (dengan fallback system-ui, -apple-system, sans-serif)  
-**Icon Font:** Material Symbols Outlined (Google Fonts)
+**Display Font:** Satoshi (Fontshare, 400/500/700/900)  
+**Body Font:** Satoshi (Fontshare, 400/500/700/900)  
+**Icon Library:** Phosphor Icons (`@phosphor-icons/vue`)
 
-**Character:** Tipografi humanis netral dengan tracking presisi yang memaksimalkan keterbacaan angka tarif sewa, nama jalan, dan spesifikasi kamar pada layar ponsel kompak.
+**Character:** Tipografi geometris humanis Satoshi memberikan kejelasan tinggi pada angka tarif sewa, nama jalan, dan spesifikasi kamar pada seluruh ukuran layar.
 
 ### Hierarchy
 - **Display** (Bold 700, clamp(2rem, 5vw, 3rem), line-height 1.15, tracking -0.02em): Digunakan untuk judul hero utama beranda pencarian.

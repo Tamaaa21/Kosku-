@@ -28,9 +28,8 @@
                   : 'bg-primary/10 text-primary'
               "
             >
-              <span class="material-symbols-outlined text-[24px]">
-                {{ ui.confirmModal.confirmType === 'danger' ? 'warning' : 'help' }}
-              </span>
+              <PhWarning v-if="ui.confirmModal.confirmType === 'danger'" :size="24" weight="duotone" />
+              <PhQuestion v-else :size="24" weight="duotone" />
             </div>
 
             <div class="flex-1 min-w-0">
@@ -74,6 +73,7 @@
 
 <script setup>
 import { useUiStore } from '../stores/ui'
+import { PhWarning, PhQuestion } from '@phosphor-icons/vue'
 
 const ui = useUiStore()
 </script>

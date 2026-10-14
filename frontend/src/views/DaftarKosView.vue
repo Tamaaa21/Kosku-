@@ -2,20 +2,14 @@
   <div class="max-w-7xl mx-auto w-full px-margin py-space-lg pt-20">
     <!-- Top Actions: Quick Switch to Map View & Mobile Filter -->
     <div class="flex items-center justify-end pb-space-md gap-space-sm">
-      <router-link
-        to="/peta"
-        class="inline-flex items-center gap-1.5 px-space-md py-1.5 rounded-lg bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold transition-colors shadow-sm"
-      >
-        <span class="material-symbols-outlined text-[18px]">map</span>
-        <span>Lihat di Peta</span>
-      </router-link>
+   
 
       <button
         @click="showMobileFilter = !showMobileFilter"
         class="lg:hidden inline-flex items-center gap-1.5 px-space-md py-1.5 rounded-lg bg-surface-container-lowest text-on-surface text-xs font-semibold shadow-sm border border-slate-200"
         type="button"
       >
-        <span class="material-symbols-outlined text-[18px]">tune</span>
+        <PhSlidersHorizontal :size="18" weight="bold" />
         <span>Filter</span>
       </button>
     </div>
@@ -32,7 +26,7 @@
         <!-- Header Filter -->
         <div class="flex items-center justify-between pb-space-xs border-b border-slate-100">
           <div class="flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary text-[20px]">filter_list</span>
+            <PhFunnel :size="20" weight="bold" class="text-primary" />
             <h2 class="text-base font-bold text-on-surface">Filter</h2>
           </div>
           <button
@@ -48,7 +42,7 @@
         <div class="space-y-1.5">
           <label class="block text-xs font-semibold text-on-surface">Pencarian / Lokasi</label>
           <div class="relative flex items-center">
-            <span class="material-symbols-outlined absolute left-3 text-secondary text-[20px] pointer-events-none">location_on</span>
+            <PhMapPin :size="20" weight="bold" class="absolute left-3 text-secondary pointer-events-none" />
             <input
               v-model="filters.q"
               @input="debounceFetch"
@@ -201,7 +195,7 @@
         <!-- Empty State -->
         <div v-else-if="kosList.length === 0" class="text-center py-16 bg-surface-container-lowest rounded-xl border border-slate-100">
           <div class="w-16 h-16 rounded-full bg-surface-container flex items-center justify-center mx-auto text-primary mb-4">
-            <span class="material-symbols-outlined text-3xl">search_off</span>
+            <PhMagnifyingGlass :size="32" weight="bold" />
           </div>
           <h3 class="text-base font-bold text-on-surface">Tidak ada kos yang cocok</h3>
           <p class="text-xs text-on-surface-variant mt-1 max-w-sm mx-auto">
@@ -236,7 +230,7 @@
                 class="absolute top-3 right-3 min-w-[36px] min-h-[36px] rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-secondary hover:text-error flex items-center justify-center shadow-sm transition-colors"
                 title="Simpan Kos"
               >
-                <span class="material-symbols-outlined text-lg select-none">favorite</span>
+                <PhHeart :size="18" weight="bold" class="select-none" />
               </button>
             </div>
 
@@ -248,14 +242,14 @@
                     {{ kos.nama }}
                   </router-link>
                   <div class="flex items-center gap-1 text-on-surface text-xs shrink-0">
-                    <span class="material-symbols-outlined text-amber-500 text-sm select-none" style="font-variation-settings: 'FILL' 1;">star</span>
+                    <PhStar :size="14" weight="fill" class="text-amber-500 select-none" />
                     <span class="font-semibold">{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : 'Baru' }}</span>
                     <span v-if="kos.ulasan_count" class="text-[10px] text-slate-400 font-normal">({{ kos.ulasan_count }})</span>
                   </div>
                 </div>
 
                 <div class="flex items-center gap-1 text-on-surface-variant text-xs mb-space-sm">
-                  <span class="material-symbols-outlined text-sm text-primary select-none">location_on</span>
+                  <PhMapPin :size="14" weight="bold" class="text-primary select-none shrink-0" />
                   <span class="truncate">{{ kos.alamat }}</span>
                 </div>
 
@@ -266,7 +260,7 @@
                     :key="fas.id"
                     class="inline-flex items-center gap-1 bg-surface-container-low text-primary text-[11px] font-semibold px-2.5 py-1 rounded-full"
                   >
-                    <span class="material-symbols-outlined text-[13px] select-none">check_circle</span>
+                    <PhCheckCircle :size="13" weight="bold" class="select-none shrink-0" />
                     <span>{{ fas.nama }}</span>
                   </span>
                   <span v-if="(kos.fasilitas || []).length > 3" class="text-[11px] text-on-surface-variant">
@@ -305,6 +299,16 @@ import { ref, reactive, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '../services/api'
 import GenderBadge from '../components/GenderBadge.vue'
+import {
+  PhMapTrifold,
+  PhSlidersHorizontal,
+  PhFunnel,
+  PhMapPin,
+  PhMagnifyingGlass,
+  PhHeart,
+  PhStar,
+  PhCheckCircle
+} from '@phosphor-icons/vue'
 
 const route = useRoute()
 

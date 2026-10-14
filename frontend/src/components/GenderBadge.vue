@@ -6,19 +6,20 @@
       badgeStyles
     ]"
   >
-    <span
+    <component
+      :is="iconComponent"
       v-if="showIcon"
-      class="material-symbols-outlined shrink-0"
-      :class="size === 'sm' ? 'text-[12px]' : 'text-[14px]'"
-    >
-      {{ iconName }}
-    </span>
+      :size="size === 'sm' ? 12 : 14"
+      weight="bold"
+      class="shrink-0"
+    />
     <span>{{ prefix }}{{ label }}</span>
   </span>
 </template>
 
 <script setup>
 import { computed } from 'vue'
+import { PhGenderFemale, PhGenderMale, PhUsers, PhHouse } from '@phosphor-icons/vue'
 
 const props = defineProps({
   jenis: {
@@ -54,16 +55,16 @@ const label = computed(() => {
   }
 })
 
-const iconName = computed(() => {
+const iconComponent = computed(() => {
   switch (normalized.value) {
     case 'putri':
-      return 'female'
+      return PhGenderFemale
     case 'putra':
-      return 'male'
+      return PhGenderMale
     case 'campur':
-      return 'group'
+      return PhUsers
     default:
-      return 'home'
+      return PhHouse
   }
 })
 

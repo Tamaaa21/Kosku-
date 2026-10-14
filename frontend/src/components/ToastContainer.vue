@@ -18,13 +18,13 @@
         :class="getToastClasses(toast.type)"
         role="alert"
       >
-        <span
-          class="material-symbols-outlined text-[20px] shrink-0 mt-0.5"
+        <component
+          :is="getIconComponent(toast.type)"
+          :size="20"
+          weight="fill"
+          class="shrink-0 mt-0.5"
           :class="getIconClasses(toast.type)"
-          style="font-variation-settings: 'FILL' 1;"
-        >
-          {{ getIconName(toast.type) }}
-        </span>
+        />
 
         <div class="flex-1 min-w-0 pr-1 leading-relaxed text-on-surface">
           {{ toast.message }}
@@ -36,7 +36,7 @@
           class="text-on-surface-variant/60 hover:text-on-surface shrink-0 p-1 -mr-1 -mt-1 rounded-lg transition"
           aria-label="Tutup notifikasi"
         >
-          <span class="material-symbols-outlined text-[16px]">close</span>
+          <PhX :size="16" weight="bold" />
         </button>
       </div>
     </transition-group>
@@ -45,6 +45,13 @@
 
 <script setup>
 import { useUiStore } from '../stores/ui'
+import {
+  PhCheckCircle,
+  PhXCircle,
+  PhWarningCircle,
+  PhInfo,
+  PhX
+} from '@phosphor-icons/vue'
 
 const ui = useUiStore()
 
@@ -76,17 +83,17 @@ function getIconClasses(type) {
   }
 }
 
-function getIconName(type) {
+function getIconComponent(type) {
   switch (type) {
     case 'success':
-      return 'check_circle'
+      return PhCheckCircle
     case 'error':
-      return 'cancel'
+      return PhXCircle
     case 'warning':
-      return 'warning'
+      return PhWarningCircle
     case 'info':
     default:
-      return 'info'
+      return PhInfo
   }
 }
 </script>

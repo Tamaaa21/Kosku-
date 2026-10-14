@@ -40,7 +40,7 @@
             class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
             type="button"
           >
-            <span class="material-symbols-outlined text-[20px]">close</span>
+            <PhX :size="20" weight="bold" />
           </button>
         </div>
 
@@ -60,7 +60,7 @@
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="($route.path === '/dashboard/admin' && (!$route.query.tab || $route.query.tab === 'ringkasan')) ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">dashboard</span>
+            <PhSquaresFour :size="20" weight="bold" />
             <span class="flex-1">Ringkasan & Analitik</span>
           </router-link>
 
@@ -71,7 +71,7 @@
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="($route.path === '/dashboard/admin' && ($route.query.tab === 'pengguna' || $route.query.tab === 'pencari' || $route.query.tab === 'pemilik')) ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+            <PhUsersThree :size="20" weight="bold" />
             <span class="flex-1">Manajemen Pengguna</span>
           </router-link>
 
@@ -82,7 +82,7 @@
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="($route.path === '/dashboard/admin' && $route.query.tab === 'kos') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">home_work</span>
+            <PhBuildings :size="20" weight="bold" />
             <span class="flex-1">Data & Moderasi Kos</span>
           </router-link>
 
@@ -93,7 +93,7 @@
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="($route.path === '/dashboard/admin' && $route.query.tab === 'pemesanan') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">receipt_long</span>
+            <PhReceipt :size="20" weight="bold" />
             <span class="flex-1">Audit Log Pemesanan</span>
           </router-link>
 
@@ -104,7 +104,7 @@
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="$route.path === '/profil' ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <span class="material-symbols-outlined text-[20px]">shield_person</span>
+            <PhShieldCheck :size="20" weight="bold" />
             <span class="flex-1">Profil Administrator</span>
           </router-link>
         </nav>
@@ -115,7 +115,7 @@
         <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/60 transition">
           <div class="w-9 h-9 rounded-full bg-slate-800 text-primary border border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0 overflow-hidden">
             <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-            <span v-else class="material-symbols-outlined text-[18px]">shield_person</span>
+            <PhShieldCheck v-else :size="18" weight="bold" />
           </div>
           <div class="min-w-0 flex-1">
             <p class="text-xs font-bold text-white truncate leading-tight">{{ auth.user?.nama }}</p>
@@ -127,7 +127,7 @@
             title="Keluar / Logout"
             type="button"
           >
-            <span class="material-symbols-outlined text-[18px]">logout</span>
+            <PhSignOut :size="18" weight="bold" />
           </button>
         </div>
       </div>
@@ -143,7 +143,7 @@
           type="button"
           aria-label="Buka Menu Sidebar"
         >
-          <span class="material-symbols-outlined text-[22px]">menu</span>
+          <PhList :size="22" weight="bold" />
         </button>
 
         <!-- Title & Subtitle in Header -->
@@ -175,7 +175,7 @@
         >
           <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs uppercase overflow-hidden">
             <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-            <span v-else class="material-symbols-outlined text-[18px]">manage_accounts</span>
+            <PhUsersThree v-else :size="18" weight="bold" />
           </div>
           <span class="text-xs font-semibold text-on-surface hidden md:inline max-w-[120px] truncate">
             {{ auth.user?.nama }}
@@ -192,6 +192,16 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import NotificationDropdown from './NotificationDropdown.vue'
 import logoUrl from '../assets/KosKu Housing Pin Logo.png'
+import {
+  PhX,
+  PhSquaresFour,
+  PhUsersThree,
+  PhBuildings,
+  PhReceipt,
+  PhShieldCheck,
+  PhSignOut,
+  PhList
+} from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
 const router = useRouter()

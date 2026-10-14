@@ -18,7 +18,7 @@
       class="p-2.5 rounded-lg bg-rose-50 border border-rose-200 text-rose-700 text-xs flex items-center justify-between gap-2"
     >
       <div class="flex items-center gap-1.5 min-w-0">
-        <span class="material-symbols-outlined text-rose-600 text-[16px] shrink-0">warning</span>
+        <PhWarning :size="16" weight="bold" class="text-rose-600 shrink-0" />
         <span class="truncate">{{ validationError }}</span>
       </div>
       <button
@@ -54,13 +54,13 @@
       />
 
       <div v-if="uploading" class="flex flex-col items-center gap-2 py-2">
-        <span class="material-symbols-outlined animate-spin text-primary text-[28px]">progress_activity</span>
+        <PhCircleNotch :size="28" weight="bold" class="animate-spin text-primary" />
         <span class="text-xs font-semibold text-primary">Mengunggah gambar...</span>
       </div>
 
       <template v-else>
         <div class="w-10 h-10 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-1">
-          <span class="material-symbols-outlined text-[22px]">add_photo_alternate</span>
+          <PhImageSquare :size="22" weight="bold" />
         </div>
         <p class="text-xs font-semibold text-on-surface">
           Klik atau seret foto ke sini untuk mengunggah
@@ -89,7 +89,7 @@
           v-if="index === 0"
           class="absolute top-1.5 left-1.5 bg-primary text-white text-[9px] font-bold px-1.5 py-0.5 rounded shadow-xs flex items-center gap-0.5"
         >
-          <span class="material-symbols-outlined text-[11px]">star</span>
+          <PhStar :size="11" weight="fill" />
           <span>Utama</span>
         </div>
 
@@ -103,7 +103,7 @@
             title="Jadikan Foto Utama"
             class="w-8 h-8 rounded-lg bg-white/90 text-primary hover:bg-white flex items-center justify-center shadow-sm transition text-xs"
           >
-            <span class="material-symbols-outlined text-[16px]">star</span>
+            <PhStar :size="16" weight="fill" />
           </button>
 
           <!-- Hapus Foto button -->
@@ -113,7 +113,7 @@
             title="Hapus Foto"
             class="w-8 h-8 rounded-lg bg-white/90 text-rose-600 hover:bg-white flex items-center justify-center shadow-sm transition text-xs"
           >
-            <span class="material-symbols-outlined text-[16px]">delete</span>
+            <PhTrash :size="16" weight="bold" />
           </button>
         </div>
       </div>
@@ -124,6 +124,13 @@
 <script setup>
 import { ref, computed } from 'vue'
 import api from '../services/api'
+import {
+  PhWarning,
+  PhCircleNotch,
+  PhImageSquare,
+  PhStar,
+  PhTrash
+} from '@phosphor-icons/vue'
 
 const props = defineProps({
   modelValue: {
