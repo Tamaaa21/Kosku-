@@ -63,7 +63,22 @@ class KamarController extends Controller
         $kamar = Kamar::with('kos')->findOrFail($id);
         Gate::authorize('update', $kamar);
 
-        $kamar->update($request->validated());
+        $validated = $request->validated();
+
+        // Cegah perubahan status menjadi 'tersedia' jika kamar sedang memiliki sewa aktif (disetujui)
+        if (isset($validated['status']) && $validated['status'] === 'tersedia') {
+            $hasActiveBooking = $kamar->pemesanan()
+                ->where('status', 'disetujui')
+                ->exists();
+
+            if ($hasActiveBooking) {
+                return response()->json([
+                    'message' => 'Status kamar tidak dapat diubah menjadi tersedia karena sedang memiliki sewa aktif (disetujui).',
+                ], 422);
+            }
+        }
+
+        $kamar->update($validated);
         $kamar->kos?->syncPricesAndDurationsFromRooms();
 
         return response()->json([
@@ -79,6 +94,22 @@ class KamarController extends Controller
     {
         $kamar = Kamar::with('kos')->findOrFail($id);
         Gate::authorize('delete', $kamar);
+
+        $hasActiveBooking = $kamar->pemesanan()
+            ->whereIn('status', ['menunggu', 'disetujui'])
+            ->exists();
+
+        if ($hasActiveBooking) {
+            return response()->json([
+                'message' => 'Kamar tidak dapat dihapus karena sedang memiliki transaksi pemesanan aktif.',
+            ], 422);
+        }
+
+        if ($kamar->pemesanan()->exists()) {
+            return response()->json([
+                'message' => 'Kamar tidak dapat dihapus karena memiliki riwayat data pemesanan terkait.',
+            ], 422);
+        }
 
         $kos = $kamar->kos;
         $kamar->delete();

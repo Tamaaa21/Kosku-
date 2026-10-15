@@ -207,4 +207,29 @@ class BookingTransactionTest extends TestCase
             ->assertStatus(200)
             ->assertJsonCount(2, 'data');
     }
+
+    public function test_pemilik_cannot_approve_booking_if_room_is_already_occupied(): void
+    {
+        $pemilik = Pengguna::factory()->pemilik()->create();
+        $kos = Kos::factory()->create(['pemilik_id' => $pemilik->id]);
+        $kamar = Kamar::factory()->terisi()->create(['kos_id' => $kos->id]);
+
+        $pencari = Pengguna::factory()->create();
+        $pemesanan = Pemesanan::factory()->create([
+            'pengguna_id' => $pencari->id,
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar->id,
+            'status' => 'menunggu',
+        ]);
+
+        Sanctum::actingAs($pemilik);
+        $response = $this->patchJson('/api/v1/pemesanan/'.$pemesanan->id.'/status', [
+            'status' => 'disetujui',
+        ]);
+
+        $response->assertStatus(409)
+            ->assertJson([
+                'message' => 'Tidak dapat menyetujui pemesanan karena kamar sudah terisi oleh penyewa lain.',
+            ]);
+    }
 }

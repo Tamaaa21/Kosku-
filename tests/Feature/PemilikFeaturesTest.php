@@ -2,10 +2,11 @@
 
 namespace Tests\Feature;
 
+use App\Models\Kamar;
 use App\Models\Kos;
+use App\Models\Pemesanan;
 use App\Models\Pengguna;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -26,8 +27,8 @@ class PemilikFeaturesTest extends TestCase
 
         $response = $this->postJson('/api/v1/upload/images', [
             'images' => [
-                UploadedFile::fake()->image('kos1.jpg', 800, 600)->size(500),
-                UploadedFile::fake()->image('kos2.png', 800, 600)->size(1500),
+                $this->createFakeImage('kos1.jpg', 500),
+                $this->createFakeImage('kos2.png', 1500),
             ],
         ]);
 
@@ -54,7 +55,7 @@ class PemilikFeaturesTest extends TestCase
         // 3000 KB > 2048 KB limit
         $response = $this->postJson('/api/v1/upload/images', [
             'images' => [
-                UploadedFile::fake()->image('huge.jpg', 1200, 1200)->size(3000),
+                $this->createFakeImage('huge.jpg', 3000),
             ],
         ]);
 
@@ -74,7 +75,7 @@ class PemilikFeaturesTest extends TestCase
 
         $images = [];
         for ($i = 0; $i < 6; $i++) {
-            $images[] = UploadedFile::fake()->image("img_{$i}.jpg", 400, 400)->size(100);
+            $images[] = $this->createFakeImage("img_{$i}.jpg", 100);
         }
 
         $response = $this->postJson('/api/v1/upload/images', [
@@ -97,7 +98,7 @@ class PemilikFeaturesTest extends TestCase
 
         $response = $this->postJson('/api/v1/upload/images', [
             'images' => [
-                UploadedFile::fake()->image('test.jpg', 400, 400)->size(100),
+                $this->createFakeImage('test.jpg', 100),
             ],
         ]);
 
@@ -183,5 +184,61 @@ class PemilikFeaturesTest extends TestCase
         $updateResponse->assertStatus(200)
             ->assertJsonPath('data.ukuran', '4 x 4 m')
             ->assertJsonPath('data.status', 'terisi');
+    }
+
+    public function test_pemilik_cannot_set_room_to_tersedia_if_has_approved_booking(): void
+    {
+        $pemilik = Pengguna::factory()->create([
+            'role' => 'pemilik',
+            'aktif' => true,
+        ]);
+        Sanctum::actingAs($pemilik);
+
+        $kos = Kos::factory()->create(['pemilik_id' => $pemilik->id]);
+        $kamar = Kamar::factory()->terisi()->create(['kos_id' => $kos->id]);
+        $pencari = Pengguna::factory()->create(['role' => 'pencari']);
+
+        Pemesanan::factory()->create([
+            'pengguna_id' => $pencari->id,
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar->id,
+            'status' => 'disetujui',
+        ]);
+
+        $response = $this->putJson("/api/v1/kamar/{$kamar->id}", [
+            'status' => 'tersedia',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'message' => 'Status kamar tidak dapat diubah menjadi tersedia karena sedang memiliki sewa aktif (disetujui).',
+            ]);
+    }
+
+    public function test_pemilik_cannot_delete_room_with_active_booking(): void
+    {
+        $pemilik = Pengguna::factory()->create([
+            'role' => 'pemilik',
+            'aktif' => true,
+        ]);
+        Sanctum::actingAs($pemilik);
+
+        $kos = Kos::factory()->create(['pemilik_id' => $pemilik->id]);
+        $kamar = Kamar::factory()->terisi()->create(['kos_id' => $kos->id]);
+        $pencari = Pengguna::factory()->create(['role' => 'pencari']);
+
+        Pemesanan::factory()->create([
+            'pengguna_id' => $pencari->id,
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar->id,
+            'status' => 'menunggu',
+        ]);
+
+        $response = $this->deleteJson("/api/v1/kamar/{$kamar->id}");
+
+        $response->assertStatus(422)
+            ->assertJson([
+                'message' => 'Kamar tidak dapat dihapus karena sedang memiliki transaksi pemesanan aktif.',
+            ]);
     }
 }

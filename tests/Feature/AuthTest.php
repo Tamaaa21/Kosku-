@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Pengguna;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
@@ -246,7 +245,7 @@ class AuthTest extends TestCase
         $user = Pengguna::factory()->create();
         Sanctum::actingAs($user);
 
-        $file = UploadedFile::fake()->image('avatar.jpg', 300, 300)->size(500);
+        $file = $this->createFakeImage('avatar.jpg', 500);
 
         $response = $this->postJson('/api/v1/me/avatar', [
             'foto' => $file,

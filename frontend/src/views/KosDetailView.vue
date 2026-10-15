@@ -628,6 +628,7 @@
 import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useFavoritesStore } from '../stores/favorites'
 import { useUiStore } from '../stores/ui'
 import LeafletMap from '../components/LeafletMap.vue'
 import GenderBadge from '../components/GenderBadge.vue'
@@ -657,13 +658,16 @@ import {
 const route = useRoute()
 const router = useRouter()
 const auth = useAuthStore()
+const favoritesStore = useFavoritesStore()
 const ui = useUiStore()
 
 const kos = ref(null)
 const loading = ref(true)
 const activeTab = ref(route.query.tab || 'deskripsi')
 const selectedKamar = ref(null)
-const isFavorite = ref(false)
+const isFavorite = computed(() => {
+  return kos.value ? favoritesStore.isFavorite(kos.value.id) : false
+})
 const selectedDurationType = ref('bulanan')
 
 // Reviews & Rating states
@@ -765,7 +769,13 @@ const shareKos = () => {
 }
 
 const toggleFavorite = () => {
-  isFavorite.value = !isFavorite.value
+  if (!kos.value) return
+  const isAdded = favoritesStore.toggleFavorite(kos.value)
+  if (isAdded) {
+    ui.success(`Kos "${kos.value.nama}" berhasil disimpan ke daftar favorit!`)
+  } else {
+    ui.info(`Kos "${kos.value.nama}" dihapus dari favorit.`)
+  }
 }
 
 const handleProceedBooking = () => {

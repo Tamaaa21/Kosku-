@@ -180,19 +180,40 @@ class PemesananController extends Controller
 
         Gate::authorize('updateStatus', [$pemesanan, $newStatus]);
 
-        DB::transaction(function () use ($pemesanan, $newStatus) {
+        $result = DB::transaction(function () use ($pemesanan, $newStatus) {
+            /** @var Kamar|null $kamar */
+            $kamar = Kamar::where('id', $pemesanan->kamar_id)->lockForUpdate()->first();
+
+            if (! $kamar) {
+                return false;
+            }
+
+            if ($newStatus === 'disetujui') {
+                $alreadyOccupied = Pemesanan::where('kamar_id', $pemesanan->kamar_id)
+                    ->where('id', '!=', $pemesanan->id)
+                    ->where('status', 'disetujui')
+                    ->lockForUpdate()
+                    ->exists();
+
+                if ($alreadyOccupied || $kamar->status === 'terisi') {
+                    return false;
+                }
+
+                $kamar->update(['status' => 'terisi']);
+            } elseif (in_array($newStatus, ['dibatalkan', 'ditolak'], true) && $kamar->status === 'terisi') {
+                $kamar->update(['status' => 'tersedia']);
+            }
+
             $pemesanan->update(['status' => $newStatus]);
 
-            // Jika disetujui, ubah status kamar menjadi terisi secara otomatis
-            if ($newStatus === 'disetujui') {
-                $pemesanan->kamar->update(['status' => 'terisi']);
-            }
-
-            // Jika sebelumnya disetujui lalu dibatalkan atau ditolak, kembalikan status kamar ke tersedia
-            if (in_array($newStatus, ['dibatalkan', 'ditolak'], true) && $pemesanan->kamar->status === 'terisi') {
-                $pemesanan->kamar->update(['status' => 'tersedia']);
-            }
+            return true;
         });
+
+        if (! $result) {
+            return response()->json([
+                'message' => 'Tidak dapat menyetujui pemesanan karena kamar sudah terisi oleh penyewa lain.',
+            ], 409);
+        }
 
         $pemesanan->load(['pengguna', 'kos', 'kamar']);
 

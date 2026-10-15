@@ -4,6 +4,7 @@ import { useAuthStore } from '../stores/auth'
 import HomeView from '../views/HomeView.vue'
 import DaftarKosView from '../views/DaftarKosView.vue'
 import KosDetailView from '../views/KosDetailView.vue'
+import FavoritView from '../views/FavoritView.vue'
 import PetaLokasiView from '../views/PetaLokasiView.vue'
 import PengajuanPemesananView from '../views/PengajuanPemesananView.vue'
 import ProfilPenggunaView from '../views/ProfilPenggunaView.vue'
@@ -32,6 +33,12 @@ const routes = [
     name: 'kos-detail',
     component: KosDetailView,
     props: true,
+  },
+  {
+    path: '/favorit',
+    alias: '/tersimpan',
+    name: 'favorit',
+    component: FavoritView,
   },
   {
     path: '/peta',

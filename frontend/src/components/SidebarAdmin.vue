@@ -110,26 +110,17 @@
         </nav>
       </div>
 
-      <!-- Bottom User Profile Card -->
+      <!-- Bottom Action: Log Out -->
       <div class="p-3 border-t border-slate-800 bg-slate-900/60">
-        <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-800/60 transition">
-          <div class="w-9 h-9 rounded-full bg-slate-800 text-primary border border-slate-700 flex items-center justify-center font-bold text-xs uppercase shrink-0 overflow-hidden">
-            <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-            <PhShieldCheck v-else :size="18" weight="bold" />
-          </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-bold text-white truncate leading-tight">{{ auth.user?.nama }}</p>
-            <p class="text-[10px] text-slate-400 truncate leading-tight mt-0.5">System Admin</p>
-          </div>
-          <button
-            @click="handleLogout"
-            class="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-slate-800 transition"
-            title="Keluar / Logout"
-            type="button"
-          >
-            <PhSignOut :size="18" weight="bold" />
-          </button>
-        </div>
+        <button
+          @click="handleLogout"
+          class="w-full flex items-center justify-center gap-2.5 px-4 py-2.5 rounded-xl text-xs font-bold text-rose-400 hover:text-white bg-rose-500/10 hover:bg-rose-600 transition shadow-xs cursor-pointer"
+          type="button"
+          title="Keluar / Log Out"
+        >
+          <PhSignOut :size="18" weight="bold" />
+          <span>Log Out</span>
+        </button>
       </div>
     </aside>
 

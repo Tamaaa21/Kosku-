@@ -185,10 +185,17 @@
               <GenderBadge :jenis="kos.jenis" />
             </div>
             <button
-              class="absolute top-3 right-3 min-w-[36px] min-h-[36px] sm:min-w-[40px] sm:min-h-[40px] rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-secondary hover:text-error flex items-center justify-center shadow-sm transition-colors"
-              title="Simpan Kos"
+              @click.stop.prevent="handleToggleFavorite(kos)"
+              class="absolute top-3 right-3 min-w-[36px] min-h-[36px] sm:min-w-[40px] sm:min-h-[40px] rounded-full bg-surface-container-lowest/90 backdrop-blur-sm flex items-center justify-center shadow-sm transition-all"
+              :class="favoritesStore.isFavorite(kos.id) ? 'text-error hover:scale-110' : 'text-secondary hover:text-error hover:scale-105'"
+              :title="favoritesStore.isFavorite(kos.id) ? 'Hapus dari Favorit' : 'Simpan Kos ke Favorit'"
+              type="button"
             >
-              <PhHeart :size="18" weight="bold" class="select-none" />
+              <PhHeart
+                :size="18"
+                :weight="favoritesStore.isFavorite(kos.id) ? 'fill' : 'bold'"
+                class="select-none"
+              />
             </button>
           </div>
 
@@ -255,6 +262,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useFavoritesStore } from '../stores/favorites'
+import { useUiStore } from '../stores/ui'
 import api from '../services/api'
 import GenderBadge from '../components/GenderBadge.vue'
 import {
@@ -271,12 +280,23 @@ import {
 } from '@phosphor-icons/vue'
 
 const router = useRouter()
+const favoritesStore = useFavoritesStore()
+const ui = useUiStore()
 
 const searchQuery = ref('')
 const selectedJenis = ref('')
 const selectedPriceRange = ref('')
 const kosList = ref([])
 const loading = ref(false)
+
+const handleToggleFavorite = (kos) => {
+  const isAdded = favoritesStore.toggleFavorite(kos)
+  if (isAdded) {
+    ui.success(`Kos "${kos.nama}" disimpan ke favorit!`)
+  } else {
+    ui.info(`Kos "${kos.nama}" dihapus dari favorit.`)
+  }
+}
 
 // Sample default cover photos from Stitch design assets
 const samplePhotos = [
