@@ -38,6 +38,7 @@
         </router-link>
 
         <router-link
+          v-if="auth.isAuthenticated"
           to="/favorit"
           class="text-sm font-medium transition-colors flex items-center gap-1.5"
           :class="($route.path === '/favorit' || $route.path === '/tersimpan') ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
@@ -162,24 +163,24 @@
       >
         Peta Lokasi
       </router-link>
-      <router-link
-        to="/favorit"
-        @click="mobileMenuOpen = false"
-        class="px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-between"
-        :class="($route.path === '/favorit' || $route.path === '/tersimpan') ? 'bg-primary-container text-white font-bold' : 'text-on-surface-variant hover:bg-surface-container'"
-      >
-        <div class="flex items-center gap-2">
-          <PhHeart :size="18" :weight="($route.path === '/favorit' || $route.path === '/tersimpan' || favoritesStore.count > 0) ? 'fill' : 'bold'" :class="favoritesStore.count > 0 ? 'text-error' : ''" />
-          <span>Kos Tersimpan / Favorit</span>
-        </div>
-        <span
-          v-if="favoritesStore.count > 0"
-          class="px-2 py-0.5 text-[11px] font-bold bg-error text-white rounded-full"
-        >
-          {{ favoritesStore.count }}
-        </span>
-      </router-link>
       <template v-if="auth.isAuthenticated">
+        <router-link
+          to="/favorit"
+          @click="mobileMenuOpen = false"
+          class="px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-between"
+          :class="($route.path === '/favorit' || $route.path === '/tersimpan') ? 'bg-primary-container text-white font-bold' : 'text-on-surface-variant hover:bg-surface-container'"
+        >
+          <div class="flex items-center gap-2">
+            <PhHeart :size="18" :weight="($route.path === '/favorit' || $route.path === '/tersimpan' || favoritesStore.count > 0) ? 'fill' : 'bold'" :class="favoritesStore.count > 0 ? 'text-error' : ''" />
+            <span>Kos Tersimpan / Favorit</span>
+          </div>
+          <span
+            v-if="favoritesStore.count > 0"
+            class="px-2 py-0.5 text-[11px] font-bold bg-error text-white rounded-full"
+          >
+            {{ favoritesStore.count }}
+          </span>
+        </router-link>
         <router-link
           to="/pesanan"
           @click="mobileMenuOpen = false"

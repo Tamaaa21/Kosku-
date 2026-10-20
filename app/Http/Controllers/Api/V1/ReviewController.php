@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\UlasanResource;
+use App\Http\Resources\ReviewResource;
 use App\Models\Kos;
 use App\Models\Pemesanan;
 use App\Models\Ulasan;
@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
-class UlasanController extends Controller
+class ReviewController extends Controller
 {
     /**
      * Display a listing of reviews for the specified kos.
@@ -26,7 +26,7 @@ class UlasanController extends Controller
             ->latest()
             ->paginate($perPage);
 
-        return UlasanResource::collection($ulasanList);
+        return ReviewResource::collection($ulasanList);
     }
 
     /**
@@ -59,7 +59,7 @@ class UlasanController extends Controller
         return response()->json([
             'eligible' => $hasApprovedBooking,
             'has_reviewed' => $existingReview !== null,
-            'existing_review' => $existingReview ? new UlasanResource($existingReview->load('pengguna')) : null,
+            'existing_review' => $existingReview ? new ReviewResource($existingReview->load('pengguna')) : null,
             'message' => $hasApprovedBooking
                 ? 'Pengguna memenuhi syarat untuk menulis ulasan.'
                 : 'Ulasan hanya dapat diberikan setelah pengajuan sewa Anda disetujui oleh pemilik kos.',
@@ -115,7 +115,7 @@ class UlasanController extends Controller
 
         return response()->json([
             'message' => 'Ulasan Anda berhasil disimpan. Terima kasih atas kontribusi Anda!',
-            'data' => new UlasanResource($ulasan),
+            'data' => new ReviewResource($ulasan),
             'rating_rata_rata' => $kos->rating_rata_rata,
             'ulasan_count' => $kos->ulasan_count,
         ], 200);

@@ -9,7 +9,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @mixin Pemesanan
  */
-class PemesananResource extends JsonResource
+class BookingResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -31,10 +31,10 @@ class PemesananResource extends JsonResource
             'status' => $this->status,
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
-            'pengguna' => new PenggunaResource($this->whenLoaded('pengguna')),
+            'pengguna' => new UserResource($this->whenLoaded('pengguna')),
             'kos' => new KosResource($this->whenLoaded('kos')),
-            'kamar' => new KamarResource($this->whenLoaded('kamar')),
-            'ulasan' => new UlasanResource($this->whenLoaded('ulasan')),
+            'kamar' => new RoomResource($this->whenLoaded('kamar')),
+            'ulasan' => new ReviewResource($this->whenLoaded('ulasan')),
         ];
     }
 }

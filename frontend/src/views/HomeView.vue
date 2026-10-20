@@ -261,7 +261,8 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRouter, useRoute } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import { useFavoritesStore } from '../stores/favorites'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
@@ -280,6 +281,8 @@ import {
 } from '@phosphor-icons/vue'
 
 const router = useRouter()
+const route = useRoute()
+const auth = useAuthStore()
 const favoritesStore = useFavoritesStore()
 const ui = useUiStore()
 
@@ -290,6 +293,11 @@ const kosList = ref([])
 const loading = ref(false)
 
 const handleToggleFavorite = (kos) => {
+  if (!auth.isAuthenticated) {
+    ui.warning('Silakan masuk terlebih dahulu untuk menyimpan kos favorit.')
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
   const isAdded = favoritesStore.toggleFavorite(kos)
   if (isAdded) {
     ui.success(`Kos "${kos.nama}" disimpan ke favorit!`)

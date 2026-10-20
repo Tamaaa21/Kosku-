@@ -770,6 +770,11 @@ const shareKos = () => {
 
 const toggleFavorite = () => {
   if (!kos.value) return
+  if (!auth.isAuthenticated) {
+    ui.warning('Silakan masuk terlebih dahulu untuk menyimpan kos favorit.')
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
   const isAdded = favoritesStore.toggleFavorite(kos.value)
   if (isAdded) {
     ui.success(`Kos "${kos.value.nama}" berhasil disimpan ke daftar favorit!`)
@@ -813,7 +818,7 @@ const handleWhatsAppInquiry = () => {
 const fetchReviews = async () => {
   loadingReviews.value = true
   try {
-    const res = await api.get(`/kos/${route.params.id}/ulasan`)
+    const res = await api.get(`/kos/${route.params.id}/reviews`)
     reviewsList.value = res.data.data || []
   } catch (err) {
     reviewsList.value = []
@@ -825,7 +830,7 @@ const fetchReviews = async () => {
 const checkReviewEligibility = async () => {
   if (!auth.isAuthenticated || !auth.isPencari) return
   try {
-    const res = await api.get(`/kos/${route.params.id}/ulasan/eligibility`)
+    const res = await api.get(`/kos/${route.params.id}/reviews/eligibility`)
     reviewEligibility.value = res.data
     if (res.data.existing_review) {
       reviewForm.rating = res.data.existing_review.rating
@@ -840,7 +845,7 @@ const submitReview = async () => {
   if (!reviewForm.rating || reviewForm.komentar.length < 5) return
   submittingReview.value = true
   try {
-    const res = await api.post(`/kos/${route.params.id}/ulasan`, {
+    const res = await api.post(`/kos/${route.params.id}/reviews`, {
       rating: reviewForm.rating,
       komentar: reviewForm.komentar,
     })

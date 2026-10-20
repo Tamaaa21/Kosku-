@@ -711,7 +711,7 @@ const fetchDashboardData = async () => {
   try {
     const [resKos, resBookings] = await Promise.all([
       api.get('/kos', { params: { pemilik_id: auth.user?.id, per_page: 50 } }),
-      api.get('/pemesanan')
+      api.get('/bookings')
     ])
     myKosList.value = resKos.data.data || []
     bookingsList.value = resBookings.data.data || []

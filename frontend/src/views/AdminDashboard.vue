@@ -1782,7 +1782,7 @@ const fetchUsers = async () => {
     if (userStatusFilter.value !== 'all') params.aktif = userStatusFilter.value
     if (userSort.value) params.sort = userSort.value
 
-    const res = await api.get('/admin/pengguna', { params })
+    const res = await api.get('/admin/users', { params })
     let data = res.data.data || []
     if (userSort.value === 'id_asc') {
       data = data.sort((a, b) => a.id - b.id)
@@ -1799,7 +1799,7 @@ const viewUserDetail = async (userId) => {
   loadingUserDetail.value = true
   showUserDetailModal.value = true
   try {
-    const res = await api.get(`/admin/pengguna/${userId}`)
+    const res = await api.get(`/admin/users/${userId}`)
     selectedUserDetail.value = res.data.data || null
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Gagal memuat rincian informasi pengguna.'
@@ -1814,7 +1814,7 @@ const toggleUserActive = async (user) => {
   togglingUserId.value = user.id
   try {
     const nextStatus = !user.aktif
-    await api.patch(`/admin/pengguna/${user.id}/status`, { aktif: nextStatus })
+    await api.patch(`/admin/users/${user.id}/status`, { aktif: nextStatus })
     user.aktif = nextStatus
     if (selectedUserDetail.value && selectedUserDetail.value.id === user.id) {
       selectedUserDetail.value.aktif = nextStatus
@@ -1965,7 +1965,7 @@ const fetchAllBookings = async () => {
     if (bookingStatusFilter.value !== 'all') params.status = bookingStatusFilter.value
     if (bookingPeriodeFilter.value !== 'all') params.periode = bookingPeriodeFilter.value
 
-    const res = await api.get('/pemesanan', { params })
+    const res = await api.get('/bookings', { params })
     allBookings.value = res.data.data || []
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Gagal memuat log pemesanan.'
@@ -1987,7 +1987,7 @@ const updateBookingStatus = async (booking, newStatus) => {
 
   updatingBookingId.value = booking.id
   try {
-    const res = await api.patch(`/pemesanan/${booking.id}/status`, { status: newStatus })
+    const res = await api.patch(`/bookings/${booking.id}/status`, { status: newStatus })
     successMsg.value = res.data?.message || `Status pesanan #ORD-${booking.id} berhasil diubah menjadi ${newStatus}.`
     booking.status = newStatus
     if (selectedBookingDetail.value && selectedBookingDetail.value.id === booking.id) {

@@ -475,7 +475,7 @@ const fetchBookings = async () => {
   loading.value = true
   errorMsg.value = ''
   try {
-    const res = await api.get('/pemesanan')
+    const res = await api.get('/bookings')
     allBookings.value = res.data?.data || []
   } catch (err) {
     errorMsg.value = 'Gagal memuat permintaan pemesanan.'
@@ -569,7 +569,7 @@ const updateStatus = async (booking, newStatus) => {
   if (!confirmed) return
 
   try {
-    await api.patch(`/pemesanan/${booking.id}/status`, {
+    await api.patch(`/bookings/${booking.id}/status`, {
       status: newStatus
     })
     ui.success(`Reservasi #${booking.id} berhasil diubah menjadi ${newStatus}.`)

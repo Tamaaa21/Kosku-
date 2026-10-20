@@ -455,7 +455,7 @@ const loadStats = async () => {
     }
   } else {
     try {
-      const res = await api.get('/pemesanan')
+      const res = await api.get('/bookings')
       myBookingCount.value = (res.data?.data || []).length
     } catch (e) {
       // ignore

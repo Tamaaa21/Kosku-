@@ -326,7 +326,7 @@ const filteredBookings = computed(() => {
 const fetchBookings = async () => {
   loading.value = true
   try {
-    const res = await api.get('/pemesanan')
+    const res = await api.get('/bookings')
     bookings.value = res.data.data || []
   } catch (err) {
     // Abaikan
@@ -348,7 +348,7 @@ const cancelBooking = async (id) => {
 
   actionLoading.value = id
   try {
-    await api.patch(`/pemesanan/${id}/status`, { status: 'dibatalkan' })
+    await api.patch(`/bookings/${id}/status`, { status: 'dibatalkan' })
     ui.success('Pengajuan sewa berhasil dibatalkan.')
     await fetchBookings()
   } catch (err) {
@@ -372,7 +372,7 @@ const updateBookingStatus = async (id, status) => {
 
   actionLoading.value = id
   try {
-    await api.patch(`/pemesanan/${id}/status`, { status })
+    await api.patch(`/bookings/${id}/status`, { status })
     ui.success(`Permohonan sewa berhasil di-${status}!`)
     await fetchBookings()
   } catch (err) {

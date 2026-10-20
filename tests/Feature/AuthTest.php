@@ -15,7 +15,7 @@ class AuthTest extends TestCase
 
     public function test_user_can_register_as_pencari(): void
     {
-        $response = $this->postJson('/api/v1/register', [
+        $response = $this->postJson('/api/v1/auth/register', [
             'nama' => 'Pencari Baru',
             'email' => 'pencari.baru@example.com',
             'password' => 'password123',
@@ -85,7 +85,7 @@ class AuthTest extends TestCase
             'aktif' => true,
         ]);
 
-        $response = $this->postJson('/api/v1/login', [
+        $response = $this->postJson('/api/v1/auth/login', [
             'email' => 'login.test@example.com',
             'password' => 'secret123',
         ]);
@@ -188,7 +188,7 @@ class AuthTest extends TestCase
         $token = $user->createToken('test_token');
 
         $response = $this->withHeader('Authorization', 'Bearer '.$token->plainTextToken)
-            ->postJson('/api/v1/logout');
+            ->postJson('/api/v1/auth/logout');
 
         $response->assertStatus(200)
             ->assertJson([

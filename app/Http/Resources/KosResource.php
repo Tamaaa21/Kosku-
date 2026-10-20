@@ -37,10 +37,10 @@ class KosResource extends JsonResource
             'foto' => $this->foto ?? [],
             'created_at' => $this->created_at?->toISOString(),
             'updated_at' => $this->updated_at?->toISOString(),
-            'pemilik' => new PenggunaResource($this->whenLoaded('pemilik')),
-            'fasilitas' => FasilitasResource::collection($this->whenLoaded('fasilitas')),
-            'ulasan' => UlasanResource::collection($this->whenLoaded('ulasan')),
-            'kamar' => KamarResource::collection($this->whenLoaded('kamar')),
+            'pemilik' => new UserResource($this->whenLoaded('pemilik')),
+            'fasilitas' => FacilityResource::collection($this->whenLoaded('fasilitas')),
+            'ulasan' => ReviewResource::collection($this->whenLoaded('ulasan')),
+            'kamar' => RoomResource::collection($this->whenLoaded('kamar')),
             'kamar_count' => $this->when(
                 isset($this->kamar_count) || $this->relationLoaded('kamar'),
                 fn () => isset($this->kamar_count)

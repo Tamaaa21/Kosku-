@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Pemesanan;
+namespace App\Http\Requests\Booking;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdatePemesananStatusRequest extends FormRequest
+class UpdateBookingStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

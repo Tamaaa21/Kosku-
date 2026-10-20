@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Pemesanan\StorePemesananRequest;
-use App\Http\Requests\Pemesanan\UpdatePemesananStatusRequest;
-use App\Http\Resources\PemesananResource;
+use App\Http\Requests\Booking\StoreBookingRequest;
+use App\Http\Requests\Booking\UpdateBookingStatusRequest;
+use App\Http\Resources\BookingResource;
 use App\Models\Kamar;
 use App\Models\Pemesanan;
 use Illuminate\Http\JsonResponse;
@@ -15,7 +15,7 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
-class PemesananController extends Controller
+class BookingController extends Controller
 {
     /**
      * Display a listing of bookings based on the authenticated user's role.
@@ -81,13 +81,13 @@ class PemesananController extends Controller
         $perPage = min(max((int) $request->input('per_page', 50), 1), 100);
         $pemesananList = $query->paginate($perPage);
 
-        return PemesananResource::collection($pemesananList);
+        return BookingResource::collection($pemesananList);
     }
 
     /**
      * Store a newly created booking with atomic double-booking prevention.
      */
-    public function store(StorePemesananRequest $request): JsonResponse
+    public function store(StoreBookingRequest $request): JsonResponse
     {
         $validated = $request->validated();
         $user = $request->user();
@@ -153,7 +153,7 @@ class PemesananController extends Controller
 
         return response()->json([
             'message' => 'Pemesanan berhasil diajukan.',
-            'data' => new PemesananResource($pemesanan),
+            'data' => new BookingResource($pemesanan),
         ], 201);
     }
 
@@ -166,14 +166,14 @@ class PemesananController extends Controller
         Gate::authorize('view', $pemesanan);
 
         return response()->json([
-            'data' => new PemesananResource($pemesanan),
+            'data' => new BookingResource($pemesanan),
         ]);
     }
 
     /**
      * Update the booking status (approval/rejection/cancellation).
      */
-    public function updateStatus(UpdatePemesananStatusRequest $request, int $id): JsonResponse
+    public function updateStatus(UpdateBookingStatusRequest $request, int $id): JsonResponse
     {
         $pemesanan = Pemesanan::with(['kos', 'kamar'])->findOrFail($id);
         $newStatus = $request->validated('status');
@@ -219,7 +219,7 @@ class PemesananController extends Controller
 
         return response()->json([
             'message' => "Status pemesanan berhasil diperbarui menjadi {$newStatus}.",
-            'data' => new PemesananResource($pemesanan),
+            'data' => new BookingResource($pemesanan),
         ]);
     }
 }

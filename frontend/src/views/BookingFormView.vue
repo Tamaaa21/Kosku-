@@ -352,7 +352,7 @@ const submitBooking = async () => {
   submitting.value = true
   errorMsg.value = null
   try {
-    await api.post('/pemesanan', {
+    await api.post('/bookings', {
       kamar_id: Number(route.params.kamarId),
       tanggal_pemesanan: form.tanggal_pemesanan,
       durasi_tipe: form.durasi_tipe,

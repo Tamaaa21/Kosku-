@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Requests\Fasilitas;
+namespace App\Http\Requests\Admin;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreFasilitasRequest extends FormRequest
+class UpdateUserStatusRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return in_array($this->user()?->role, ['admin', 'pemilik'], true);
+        return $this->user()?->role === 'admin';
     }
 
     /**
@@ -23,8 +23,7 @@ class StoreFasilitasRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nama' => ['required', 'string', 'max:100', 'unique:fasilitas,nama'],
-            'deskripsi' => ['nullable', 'string'],
+            'aktif' => ['required', 'boolean'],
         ];
     }
 }

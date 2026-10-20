@@ -19,7 +19,7 @@ class AdminTest extends TestCase
     {
         Fasilitas::factory()->count(3)->create();
 
-        $response = $this->getJson('/api/v1/fasilitas');
+        $response = $this->getJson('/api/v1/facilities');
 
         $response->assertStatus(200)
             ->assertJsonCount(3, 'data');
@@ -32,12 +32,12 @@ class AdminTest extends TestCase
 
         // Non-admin fails
         Sanctum::actingAs($pencari);
-        $this->postJson('/api/v1/fasilitas', ['nama' => 'Kolam Renang'])
+        $this->postJson('/api/v1/facilities', ['nama' => 'Kolam Renang'])
             ->assertStatus(403);
 
         // Admin succeeds creating
         Sanctum::actingAs($admin);
-        $createResponse = $this->postJson('/api/v1/fasilitas', [
+        $createResponse = $this->postJson('/api/v1/facilities', [
             'nama' => 'Kolam Renang',
             'deskripsi' => 'Kolam renang air hangat',
         ]);
@@ -48,13 +48,13 @@ class AdminTest extends TestCase
         $fasilitasId = $createResponse->json('data.id');
 
         // Admin succeeds updating
-        $this->putJson('/api/v1/fasilitas/'.$fasilitasId, [
+        $this->putJson('/api/v1/facilities/'.$fasilitasId, [
             'nama' => 'Kolam Renang Mewah',
         ])->assertStatus(200)
             ->assertJsonPath('data.nama', 'Kolam Renang Mewah');
 
         // Admin succeeds deleting
-        $this->deleteJson('/api/v1/fasilitas/'.$fasilitasId)
+        $this->deleteJson('/api/v1/facilities/'.$fasilitasId)
             ->assertStatus(200);
 
         $this->assertDatabaseMissing('fasilitas', ['id' => $fasilitasId]);
@@ -68,7 +68,7 @@ class AdminTest extends TestCase
         Sanctum::actingAs($pemilik);
 
         // Pemilik can create facility
-        $createResponse = $this->postJson('/api/v1/fasilitas', [
+        $createResponse = $this->postJson('/api/v1/facilities', [
             'nama' => 'Gym & Fitness Center',
             'deskripsi' => 'Fasilitas kebugaran kos',
         ]);
@@ -76,9 +76,9 @@ class AdminTest extends TestCase
             ->assertJsonPath('data.nama', 'Gym & Fitness Center');
 
         // Pemilik cannot update or delete master catalog
-        $this->putJson('/api/v1/fasilitas/'.$fasilitas->id, ['nama' => 'Beda Nama'])
+        $this->putJson('/api/v1/facilities/'.$fasilitas->id, ['nama' => 'Beda Nama'])
             ->assertStatus(403);
-        $this->deleteJson('/api/v1/fasilitas/'.$fasilitas->id)
+        $this->deleteJson('/api/v1/facilities/'.$fasilitas->id)
             ->assertStatus(403);
     }
 
@@ -90,7 +90,7 @@ class AdminTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/v1/admin/pengguna?role=pemilik');
+        $response = $this->getJson('/api/v1/admin/users?role=pemilik');
 
         $response->assertStatus(200)
             ->assertJsonCount(2, 'data');
@@ -104,7 +104,7 @@ class AdminTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->getJson('/api/v1/admin/pengguna/'.$pemilik->id);
+        $response = $this->getJson('/api/v1/admin/users/'.$pemilik->id);
 
         $response->assertStatus(200)
             ->assertJsonPath('data.id', $pemilik->id)
@@ -132,7 +132,7 @@ class AdminTest extends TestCase
 
         Sanctum::actingAs($admin);
 
-        $response = $this->patchJson('/api/v1/admin/pengguna/'.$targetUser->id.'/status', [
+        $response = $this->patchJson('/api/v1/admin/users/'.$targetUser->id.'/status', [
             'aktif' => false,
         ]);
 
@@ -272,18 +272,18 @@ class AdminTest extends TestCase
         Sanctum::actingAs($admin);
 
         // Search by user name
-        $res = $this->getJson('/api/v1/pemesanan?q=Siti');
+        $res = $this->getJson('/api/v1/bookings?q=Siti');
         $res->assertStatus(200)
             ->assertJsonCount(1, 'data')
             ->assertJsonPath('data.0.id', $booking->id);
 
         // Filter by status
-        $resStatus = $this->getJson('/api/v1/pemesanan?status=menunggu');
+        $resStatus = $this->getJson('/api/v1/bookings?status=menunggu');
         $resStatus->assertStatus(200)
             ->assertJsonCount(1, 'data');
 
         // Admin can update status
-        $resUpdate = $this->patchJson('/api/v1/pemesanan/'.$booking->id.'/status', [
+        $resUpdate = $this->patchJson('/api/v1/bookings/'.$booking->id.'/status', [
             'status' => 'disetujui',
         ]);
         $resUpdate->assertStatus(200)

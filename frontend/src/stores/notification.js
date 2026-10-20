@@ -51,7 +51,7 @@ export const useNotificationStore = defineStore('notification', () => {
     try {
       if (role === 'pemilik') {
         // Pemilik: pull recent bookings for their properties
-        const res = await api.get('/pemesanan')
+        const res = await api.get('/bookings')
         const bookings = res.data?.data || []
 
         bookings.forEach((b) => {
@@ -96,7 +96,7 @@ export const useNotificationStore = defineStore('notification', () => {
         })
       } else if (role === 'pencari') {
         // Pencari: pull their bookings
-        const res = await api.get('/pemesanan')
+        const res = await api.get('/bookings')
         const bookings = res.data?.data || []
 
         bookings.forEach((b) => {
@@ -152,7 +152,7 @@ export const useNotificationStore = defineStore('notification', () => {
         })
       } else if (role === 'admin') {
         // Admin: pull bookings and users overview
-        const res = await api.get('/pemesanan')
+        const res = await api.get('/bookings')
         const bookings = res.data?.data || []
 
         bookings.slice(0, 5).forEach((b) => {

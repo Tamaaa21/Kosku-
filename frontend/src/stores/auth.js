@@ -22,7 +22,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.post('/login', credentials)
+        const response = await api.post('/auth/login', credentials)
         const { user, token } = response.data
 
         this.user = user
@@ -43,7 +43,7 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.post('/register', data)
+        const response = await api.post('/auth/register', data)
         const { user, token } = response.data
 
         this.user = user
@@ -128,7 +128,7 @@ export const useAuthStore = defineStore('auth', {
     async logout() {
       try {
         if (this.token) {
-          await api.post('/logout')
+          await api.post('/auth/logout')
         }
       } catch (err) {
         // Abaikan error saat logout

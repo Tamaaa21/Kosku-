@@ -1,18 +1,18 @@
 <?php
 
-namespace App\Http\Requests\Pemesanan;
+namespace App\Http\Requests\Facility;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class StorePemesananRequest extends FormRequest
+class StoreFacilityRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return $this->user()?->role === 'pencari';
+        return in_array($this->user()?->role, ['admin', 'pemilik'], true);
     }
 
     /**
@@ -23,10 +23,8 @@ class StorePemesananRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'kamar_id' => ['required', 'integer', 'exists:kamar,id'],
-            'tanggal_pemesanan' => ['required', 'date', 'after_or_equal:today'],
-            'durasi_tipe' => ['nullable', 'string', 'in:harian,mingguan,bulanan'],
-            'durasi_jumlah' => ['nullable', 'integer', 'min:1', 'max:365'],
+            'nama' => ['required', 'string', 'max:100', 'unique:fasilitas,nama'],
+            'deskripsi' => ['nullable', 'string'],
         ];
     }
 }

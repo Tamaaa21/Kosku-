@@ -1,13 +1,27 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
+import { useAuthStore } from './auth'
 
 export const useFavoritesStore = defineStore('favorites', () => {
-  const STORAGE_KEY = 'kosku_favorites'
+  const auth = useAuthStore()
+
+  const getStorageKey = () => {
+    return auth.user?.id ? `kosku_favorites_${auth.user.id}` : null
+  }
 
   const loadFromStorage = () => {
+    const key = getStorageKey()
+    if (!key) return []
     try {
-      const raw = localStorage.getItem(STORAGE_KEY)
-      return raw ? JSON.parse(raw) : []
+      const raw = localStorage.getItem(key)
+      if (raw) return JSON.parse(raw)
+      // Check legacy global key for migration
+      const legacy = localStorage.getItem('kosku_favorites')
+      if (legacy) {
+        localStorage.setItem(key, legacy)
+        return JSON.parse(legacy)
+      }
+      return []
     } catch {
       return []
     }
@@ -15,23 +29,38 @@ export const useFavoritesStore = defineStore('favorites', () => {
 
   const favorites = ref(loadFromStorage())
 
+  // Keep favorites in sync with the logged-in user
+  watch(
+    () => auth.user?.id,
+    (newUserId) => {
+      if (newUserId) {
+        favorites.value = loadFromStorage()
+      } else {
+        favorites.value = []
+      }
+    }
+  )
+
   const persist = () => {
+    const key = getStorageKey()
+    if (!key) return
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites.value))
+      localStorage.setItem(key, JSON.stringify(favorites.value))
     } catch {
       // Storage might be full or disabled in private mode
     }
   }
 
-  const count = computed(() => favorites.value.length)
+  const count = computed(() => (auth.isAuthenticated ? favorites.value.length : 0))
 
   const isFavorite = (kosId) => {
+    if (!auth.isAuthenticated) return false
     const id = Number(kosId)
     return favorites.value.some((item) => Number(item.id) === id)
   }
 
   const toggleFavorite = (kos) => {
-    if (!kos || !kos.id) return false
+    if (!auth.isAuthenticated || !kos || !kos.id) return false
 
     const id = Number(kos.id)
     const index = favorites.value.findIndex((item) => Number(item.id) === id)
@@ -65,6 +94,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
   }
 
   const removeFavorite = (kosId) => {
+    if (!auth.isAuthenticated) return
     const id = Number(kosId)
     const index = favorites.value.findIndex((item) => Number(item.id) === id)
     if (index >= 0) {
@@ -74,6 +104,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
   }
 
   const clearFavorites = () => {
+    if (!auth.isAuthenticated) return
     favorites.value = []
     persist()
   }

@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Kamar;
+namespace App\Http\Requests\Room;
 
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateKamarRequest extends FormRequest
+class UpdateRoomRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

@@ -904,7 +904,7 @@ const fetchKos = async () => {
 
 const fetchFasilitas = async () => {
   try {
-    const res = await api.get('/fasilitas')
+    const res = await api.get('/facilities')
     availableFasilitas.value = res.data?.data || []
   } catch (err) {
     console.error('Failed to load fasilitas:', err)
@@ -933,7 +933,7 @@ const createCustomFasilitas = async () => {
 
   creatingCustomFasilitas.value = true
   try {
-    const res = await api.post('/fasilitas', { nama: name })
+    const res = await api.post('/facilities', { nama: name })
     const newFas = res.data?.data
     if (newFas) {
       availableFasilitas.value.push(newFas)

@@ -23,7 +23,7 @@ class BookingTransactionTest extends TestCase
         $pencari = Pengguna::factory()->create();
         Sanctum::actingAs($pencari);
 
-        $response = $this->postJson('/api/v1/pemesanan', [
+        $response = $this->postJson('/api/v1/bookings', [
             'kamar_id' => $kamar->id,
             'tanggal_pemesanan' => now()->addDays(5)->toDateString(),
         ]);
@@ -62,7 +62,7 @@ class BookingTransactionTest extends TestCase
 
         // Pencari B mencoba memesan kamar yang sama
         Sanctum::actingAs($pencariB);
-        $response = $this->postJson('/api/v1/pemesanan', [
+        $response = $this->postJson('/api/v1/bookings', [
             'kamar_id' => $kamar->id,
             'tanggal_pemesanan' => now()->addDays(3)->toDateString(),
         ]);
@@ -79,7 +79,7 @@ class BookingTransactionTest extends TestCase
         $pencari = Pengguna::factory()->create();
         Sanctum::actingAs($pencari);
 
-        $response = $this->postJson('/api/v1/pemesanan', [
+        $response = $this->postJson('/api/v1/bookings', [
             'kamar_id' => $kamar->id,
             'tanggal_pemesanan' => now()->addDays(2)->toDateString(),
         ]);
@@ -105,7 +105,7 @@ class BookingTransactionTest extends TestCase
         ]);
 
         Sanctum::actingAs($pemilik);
-        $response = $this->patchJson('/api/v1/pemesanan/'.$pemesanan->id.'/status', [
+        $response = $this->patchJson('/api/v1/bookings/'.$pemesanan->id.'/status', [
             'status' => 'disetujui',
         ]);
 
@@ -131,7 +131,7 @@ class BookingTransactionTest extends TestCase
         ]);
 
         Sanctum::actingAs($pemilik);
-        $response = $this->patchJson('/api/v1/pemesanan/'.$pemesanan->id.'/status', [
+        $response = $this->patchJson('/api/v1/bookings/'.$pemesanan->id.'/status', [
             'status' => 'ditolak',
         ]);
 
@@ -150,7 +150,7 @@ class BookingTransactionTest extends TestCase
         ]);
 
         Sanctum::actingAs($pencari);
-        $response = $this->patchJson('/api/v1/pemesanan/'.$pemesanan->id.'/status', [
+        $response = $this->patchJson('/api/v1/bookings/'.$pemesanan->id.'/status', [
             'status' => 'dibatalkan',
         ]);
 
@@ -167,7 +167,7 @@ class BookingTransactionTest extends TestCase
         ]);
 
         Sanctum::actingAs($pencari);
-        $response = $this->patchJson('/api/v1/pemesanan/'.$pemesanan->id.'/status', [
+        $response = $this->patchJson('/api/v1/bookings/'.$pemesanan->id.'/status', [
             'status' => 'dibatalkan',
         ]);
 
@@ -197,13 +197,13 @@ class BookingTransactionTest extends TestCase
 
         // Pencari A hanya melihat pemesanan miliknya (1)
         Sanctum::actingAs($pencariA);
-        $this->getJson('/api/v1/pemesanan')
+        $this->getJson('/api/v1/bookings')
             ->assertStatus(200)
             ->assertJsonCount(1, 'data');
 
         // Pemilik melihat semua pemesanan kos miliknya (2)
         Sanctum::actingAs($pemilik);
-        $this->getJson('/api/v1/pemesanan')
+        $this->getJson('/api/v1/bookings')
             ->assertStatus(200)
             ->assertJsonCount(2, 'data');
     }
@@ -223,7 +223,7 @@ class BookingTransactionTest extends TestCase
         ]);
 
         Sanctum::actingAs($pemilik);
-        $response = $this->patchJson('/api/v1/pemesanan/'.$pemesanan->id.'/status', [
+        $response = $this->patchJson('/api/v1/bookings/'.$pemesanan->id.'/status', [
             'status' => 'disetujui',
         ]);
 

@@ -223,7 +223,7 @@ const processFiles = async (files) => {
       formData.append('images[]', file)
     })
 
-    const res = await api.post('/upload/images', formData, {
+    const res = await api.post('/uploads/images', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

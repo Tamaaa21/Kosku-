@@ -2,20 +2,20 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
 import HomeView from '../views/HomeView.vue'
-import DaftarKosView from '../views/DaftarKosView.vue'
+import KosListView from '../views/KosListView.vue'
 import KosDetailView from '../views/KosDetailView.vue'
-import FavoritView from '../views/FavoritView.vue'
-import PetaLokasiView from '../views/PetaLokasiView.vue'
-import PengajuanPemesananView from '../views/PengajuanPemesananView.vue'
-import ProfilPenggunaView from '../views/ProfilPenggunaView.vue'
+import FavoritesView from '../views/FavoritesView.vue'
+import LocationMapView from '../views/LocationMapView.vue'
+import BookingFormView from '../views/BookingFormView.vue'
+import UserProfileView from '../views/UserProfileView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
-import PencariDashboard from '../views/PencariDashboard.vue'
+import TenantDashboard from '../views/TenantDashboard.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
-import PemilikDashboard from '../views/PemilikDashboard.vue'
-import KelolaKosView from '../views/KelolaKosView.vue'
-import KelolaKamarView from '../views/KelolaKamarView.vue'
-import KelolaPermintaanPemesananView from '../views/KelolaPermintaanPemesananView.vue'
+import OwnerDashboard from '../views/OwnerDashboard.vue'
+import ManageKosView from '../views/ManageKosView.vue'
+import ManageRoomsView from '../views/ManageRoomsView.vue'
+import BookingRequestsView from '../views/BookingRequestsView.vue'
 
 const routes = [
   {
@@ -26,7 +26,7 @@ const routes = [
   {
     path: '/kos',
     name: 'daftar-kos',
-    component: DaftarKosView,
+    component: KosListView,
   },
   {
     path: '/kos/:id',
@@ -38,30 +38,31 @@ const routes = [
     path: '/favorit',
     alias: '/tersimpan',
     name: 'favorit',
-    component: FavoritView,
+    component: FavoritesView,
+    meta: { requiresAuth: true },
   },
   {
     path: '/peta',
     name: 'peta-lokasi',
-    component: PetaLokasiView,
+    component: LocationMapView,
   },
   {
     path: '/pesan/:kosId/:kamarId',
     name: 'pengajuan-pemesanan',
-    component: PengajuanPemesananView,
+    component: BookingFormView,
     meta: { requiresAuth: true, roles: ['pencari'] },
     props: true,
   },
   {
     path: '/pesanan',
     name: 'riwayat-pemesanan',
-    component: PencariDashboard,
+    component: TenantDashboard,
     meta: { requiresAuth: true, roles: ['pencari', 'pemilik', 'admin'] },
   },
   {
     path: '/profil',
     name: 'profil-pengguna',
-    component: ProfilPenggunaView,
+    component: UserProfileView,
     meta: { requiresAuth: true },
   },
   {
@@ -83,25 +84,25 @@ const routes = [
   {
     path: '/dashboard/pemilik',
     name: 'pemilik-dashboard',
-    component: PemilikDashboard,
+    component: OwnerDashboard,
     meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
   },
   {
     path: '/dashboard/pemilik/kos',
     name: 'kelola-kos',
-    component: KelolaKosView,
+    component: ManageKosView,
     meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
   },
   {
     path: '/dashboard/pemilik/kamar',
     name: 'kelola-kamar',
-    component: KelolaKamarView,
+    component: ManageRoomsView,
     meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
   },
   {
     path: '/dashboard/pemilik/pemesanan',
     name: 'kelola-pemesanan',
-    component: KelolaPermintaanPemesananView,
+    component: BookingRequestsView,
     meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
   },
   {

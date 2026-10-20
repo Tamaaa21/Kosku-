@@ -10,8 +10,8 @@
 <script setup>
 import { computed } from 'vue'
 import { useAuthStore } from '../stores/auth'
-import NavbarPencari from './NavbarPencari.vue'
-import SidebarPemilik from './SidebarPemilik.vue'
+import TenantNavbar from './TenantNavbar.vue'
+import OwnerSidebar from './OwnerSidebar.vue'
 import SidebarAdmin from './SidebarAdmin.vue'
 
 const auth = useAuthStore()
@@ -21,8 +21,8 @@ const activeNavigationComponent = computed(() => {
     return SidebarAdmin
   }
   if (auth.isPemilik) {
-    return SidebarPemilik
+    return OwnerSidebar
   }
-  return NavbarPencari
+  return TenantNavbar
 })
 </script>

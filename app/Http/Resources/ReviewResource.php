@@ -9,7 +9,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 /**
  * @mixin Ulasan
  */
-class UlasanResource extends JsonResource
+class ReviewResource extends JsonResource
 {
     /**
      * Transform the resource into an array.
@@ -27,7 +27,7 @@ class UlasanResource extends JsonResource
             'komentar' => (string) $this->komentar,
             'created_at' => $this->created_at?->toISOString(),
             'formatted_date' => $this->created_at?->translatedFormat('d M Y') ?? '',
-            'pengguna' => new PenggunaResource($this->whenLoaded('pengguna')),
+            'pengguna' => new UserResource($this->whenLoaded('pengguna')),
         ];
     }
 }

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
-use App\Http\Resources\PenggunaResource;
+use App\Http\Resources\UserResource;
 use App\Models\Pengguna;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,7 +35,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Registrasi berhasil.',
-            'user' => new PenggunaResource($pengguna),
+            'user' => new UserResource($pengguna),
             'token' => $token,
         ], 201);
     }
@@ -65,7 +65,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Login berhasil.',
-            'user' => new PenggunaResource($pengguna),
+            'user' => new UserResource($pengguna),
             'token' => $token,
         ]);
     }
@@ -88,7 +88,7 @@ class AuthController extends Controller
     public function me(Request $request): JsonResponse
     {
         return response()->json([
-            'user' => new PenggunaResource($request->user()),
+            'user' => new UserResource($request->user()),
         ]);
     }
 
@@ -123,7 +123,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Profil berhasil diperbarui.',
-            'user' => new PenggunaResource($pengguna),
+            'user' => new UserResource($pengguna),
         ]);
     }
 
@@ -158,7 +158,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Foto profil berhasil diperbarui.',
-            'user' => new PenggunaResource($pengguna),
+            'user' => new UserResource($pengguna),
         ]);
     }
 

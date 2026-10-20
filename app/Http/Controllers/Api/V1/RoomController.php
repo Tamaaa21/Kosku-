@@ -3,16 +3,16 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Kamar\StoreKamarRequest;
-use App\Http\Requests\Kamar\UpdateKamarRequest;
-use App\Http\Resources\KamarResource;
+use App\Http\Requests\Room\StoreRoomRequest;
+use App\Http\Requests\Room\UpdateRoomRequest;
+use App\Http\Resources\RoomResource;
 use App\Models\Kamar;
 use App\Models\Kos;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 
-class KamarController extends Controller
+class RoomController extends Controller
 {
     /**
      * Display a listing of rooms for a specific kos.
@@ -22,13 +22,13 @@ class KamarController extends Controller
         $kos = Kos::findOrFail($kosId);
         $kamar = $kos->kamar()->orderBy('id', 'asc')->get();
 
-        return KamarResource::collection($kamar);
+        return RoomResource::collection($kamar);
     }
 
     /**
      * Store a newly created room in a specific kos.
      */
-    public function store(StoreKamarRequest $request, int $kosId): JsonResponse
+    public function store(StoreRoomRequest $request, int $kosId): JsonResponse
     {
         $kos = Kos::findOrFail($kosId);
         Gate::authorize('create', [Kamar::class, $kos]);
@@ -51,14 +51,14 @@ class KamarController extends Controller
 
         return response()->json([
             'message' => 'Kamar berhasil ditambahkan.',
-            'data' => new KamarResource($kamar),
+            'data' => new RoomResource($kamar),
         ], 201);
     }
 
     /**
      * Update the specified room in storage.
      */
-    public function update(UpdateKamarRequest $request, int $id): JsonResponse
+    public function update(UpdateRoomRequest $request, int $id): JsonResponse
     {
         $kamar = Kamar::with('kos')->findOrFail($id);
         Gate::authorize('update', $kamar);
@@ -83,7 +83,7 @@ class KamarController extends Controller
 
         return response()->json([
             'message' => 'Data kamar berhasil diperbarui.',
-            'data' => new KamarResource($kamar),
+            'data' => new RoomResource($kamar),
         ]);
     }
 

@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Admin\UpdatePenggunaStatusRequest;
-use App\Http\Resources\PenggunaResource;
+use App\Http\Requests\Admin\UpdateUserStatusRequest;
+use App\Http\Resources\UserResource;
 use App\Models\Kamar;
 use App\Models\Kos;
 use App\Models\Pemesanan;
@@ -14,7 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
 
-class AdminPenggunaController extends Controller
+class AdminUserController extends Controller
 {
     /**
      * Display a listing of all users for admin management.
@@ -54,7 +54,7 @@ class AdminPenggunaController extends Controller
         $perPage = min(max((int) $request->input('per_page', 50), 1), 100);
         $users = $query->paginate($perPage);
 
-        return PenggunaResource::collection($users);
+        return UserResource::collection($users);
     }
 
     /**
@@ -91,7 +91,7 @@ class AdminPenggunaController extends Controller
     /**
      * Update active status of a user account.
      */
-    public function updateStatus(UpdatePenggunaStatusRequest $request, int $id): JsonResponse
+    public function updateStatus(UpdateUserStatusRequest $request, int $id): JsonResponse
     {
         $pengguna = Pengguna::findOrFail($id);
         $pengguna->update([
@@ -100,7 +100,7 @@ class AdminPenggunaController extends Controller
 
         return response()->json([
             'message' => 'Status akun pengguna berhasil diperbarui.',
-            'data' => new PenggunaResource($pengguna),
+            'data' => new UserResource($pengguna),
         ]);
     }
 

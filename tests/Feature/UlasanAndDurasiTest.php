@@ -33,7 +33,7 @@ class UlasanAndDurasiTest extends TestCase
 
         Sanctum::actingAs($pencari);
 
-        $response = $this->postJson("/api/v1/kos/{$kos->id}/ulasan", [
+        $response = $this->postJson("/api/v1/kos/{$kos->id}/reviews", [
             'rating' => 5,
             'komentar' => 'Kos sangat bersih, fasilitas lengkap dan pemilik sangat ramah!',
         ]);
@@ -69,7 +69,7 @@ class UlasanAndDurasiTest extends TestCase
 
         Sanctum::actingAs($pencari);
 
-        $response = $this->postJson("/api/v1/kos/{$kos->id}/ulasan", [
+        $response = $this->postJson("/api/v1/kos/{$kos->id}/reviews", [
             'rating' => 4,
             'komentar' => 'Mencoba memberi ulasan sebelum disetujui.',
         ]);
@@ -88,7 +88,7 @@ class UlasanAndDurasiTest extends TestCase
         Sanctum::actingAs($pencari);
 
         // Awalnya tidak eligible
-        $res1 = $this->getJson("/api/v1/kos/{$kos->id}/ulasan/eligibility");
+        $res1 = $this->getJson("/api/v1/kos/{$kos->id}/reviews/eligibility");
         $res1->assertStatus(200)
             ->assertJsonPath('eligible', false)
             ->assertJsonPath('has_reviewed', false);
@@ -102,7 +102,7 @@ class UlasanAndDurasiTest extends TestCase
             'status' => 'disetujui',
         ]);
 
-        $res2 = $this->getJson("/api/v1/kos/{$kos->id}/ulasan/eligibility");
+        $res2 = $this->getJson("/api/v1/kos/{$kos->id}/reviews/eligibility");
         $res2->assertStatus(200)
             ->assertJsonPath('eligible', true)
             ->assertJsonPath('has_reviewed', false);
@@ -127,7 +127,7 @@ class UlasanAndDurasiTest extends TestCase
 
         $startDate = now()->addDays(2)->format('Y-m-d');
 
-        $response = $this->postJson('/api/v1/pemesanan', [
+        $response = $this->postJson('/api/v1/bookings', [
             'kamar_id' => $kamar->id,
             'tanggal_pemesanan' => $startDate,
             'durasi_tipe' => 'harian',
@@ -169,7 +169,7 @@ class UlasanAndDurasiTest extends TestCase
 
         $kosId = $resKos->json('data.id');
 
-        $resKamar = $this->postJson("/api/v1/kos/{$kosId}/kamar", [
+        $resKamar = $this->postJson("/api/v1/kos/{$kosId}/rooms", [
             'nama_kamar' => 'Kamar Deluxe 01',
             'harga' => 1500000,
             'harga_harian' => 100000,
@@ -183,7 +183,7 @@ class UlasanAndDurasiTest extends TestCase
             ->assertJsonPath('data.durasi_sewa', ['harian', 'bulanan']);
 
         // Add a second room with lower price to verify automatic sync to parent Kos
-        $resKamar2 = $this->postJson("/api/v1/kos/{$kosId}/kamar", [
+        $resKamar2 = $this->postJson("/api/v1/kos/{$kosId}/rooms", [
             'nama_kamar' => 'Kamar Standard 02',
             'harga' => 900000,
             'harga_harian' => 60000,

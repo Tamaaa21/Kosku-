@@ -25,7 +25,7 @@ class PemilikFeaturesTest extends TestCase
         ]);
         Sanctum::actingAs($pemilik);
 
-        $response = $this->postJson('/api/v1/upload/images', [
+        $response = $this->postJson('/api/v1/uploads/images', [
             'images' => [
                 $this->createFakeImage('kos1.jpg', 500),
                 $this->createFakeImage('kos2.png', 1500),
@@ -53,7 +53,7 @@ class PemilikFeaturesTest extends TestCase
         Sanctum::actingAs($pemilik);
 
         // 3000 KB > 2048 KB limit
-        $response = $this->postJson('/api/v1/upload/images', [
+        $response = $this->postJson('/api/v1/uploads/images', [
             'images' => [
                 $this->createFakeImage('huge.jpg', 3000),
             ],
@@ -78,7 +78,7 @@ class PemilikFeaturesTest extends TestCase
             $images[] = $this->createFakeImage("img_{$i}.jpg", 100);
         }
 
-        $response = $this->postJson('/api/v1/upload/images', [
+        $response = $this->postJson('/api/v1/uploads/images', [
             'images' => $images,
         ]);
 
@@ -96,7 +96,7 @@ class PemilikFeaturesTest extends TestCase
         ]);
         Sanctum::actingAs($pencari);
 
-        $response = $this->postJson('/api/v1/upload/images', [
+        $response = $this->postJson('/api/v1/uploads/images', [
             'images' => [
                 $this->createFakeImage('test.jpg', 100),
             ],
@@ -159,7 +159,7 @@ class PemilikFeaturesTest extends TestCase
 
         $kos = Kos::factory()->create(['pemilik_id' => $pemilik->id]);
 
-        $storeResponse = $this->postJson("/api/v1/kos/{$kos->id}/kamar", [
+        $storeResponse = $this->postJson("/api/v1/kos/{$kos->id}/rooms", [
             'nama_kamar' => 'Kamar Deluxe A1',
             'harga' => 1500000,
             'status' => 'tersedia',
@@ -176,7 +176,7 @@ class PemilikFeaturesTest extends TestCase
 
         $kamarId = $storeResponse->json('data.id');
 
-        $updateResponse = $this->putJson("/api/v1/kamar/{$kamarId}", [
+        $updateResponse = $this->putJson("/api/v1/rooms/{$kamarId}", [
             'ukuran' => '4 x 4 m',
             'status' => 'terisi',
         ]);
@@ -205,7 +205,7 @@ class PemilikFeaturesTest extends TestCase
             'status' => 'disetujui',
         ]);
 
-        $response = $this->putJson("/api/v1/kamar/{$kamar->id}", [
+        $response = $this->putJson("/api/v1/rooms/{$kamar->id}", [
             'status' => 'tersedia',
         ]);
 
@@ -234,7 +234,7 @@ class PemilikFeaturesTest extends TestCase
             'status' => 'menunggu',
         ]);
 
-        $response = $this->deleteJson("/api/v1/kamar/{$kamar->id}");
+        $response = $this->deleteJson("/api/v1/rooms/{$kamar->id}");
 
         $response->assertStatus(422)
             ->assertJson([

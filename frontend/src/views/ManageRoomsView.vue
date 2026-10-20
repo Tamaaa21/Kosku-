@@ -725,7 +725,7 @@ const fetchKamar = async () => {
   if (!selectedKosId.value) return
   loading.value = true
   try {
-    const res = await api.get(`/kos/${selectedKosId.value}/kamar`)
+    const res = await api.get(`/kos/${selectedKosId.value}/rooms`)
     kamarList.value = res.data?.data || []
   } catch (err) {
     errorMsg.value = 'Gagal memuat kamar kos.'
@@ -819,7 +819,7 @@ const getRoomAmenities = (kamar) => {
 const toggleKamarStatus = async (kamar) => {
   const newStatus = kamar.status === 'tersedia' ? 'terisi' : 'tersedia'
   try {
-    await api.put(`/kamar/${kamar.id}`, {
+    await api.put(`/rooms/${kamar.id}`, {
       status: newStatus
     })
     kamar.status = newStatus
@@ -880,10 +880,10 @@ const saveKamar = async () => {
 
   try {
     if (isEditing.value) {
-      await api.put(`/kamar/${editKamarId.value}`, formData.value)
+      await api.put(`/rooms/${editKamarId.value}`, formData.value)
       successMsg.value = 'Data kamar berhasil diperbarui!'
     } else {
-      await api.post(`/kos/${selectedKosId.value}/kamar`, formData.value)
+      await api.post(`/kos/${selectedKosId.value}/rooms`, formData.value)
       successMsg.value = 'Unit kamar baru berhasil ditambahkan!'
     }
     showModal.value = false
@@ -907,7 +907,7 @@ const confirmDeleteKamar = async (kamar) => {
   if (!confirmed) return
 
   try {
-    await api.delete(`/kamar/${kamar.id}`)
+    await api.delete(`/rooms/${kamar.id}`)
     ui.success(`Unit ${kamar.nama_kamar} berhasil dihapus.`)
     successMsg.value = `Unit ${kamar.nama_kamar} berhasil dihapus.`
     await fetchKamar()
