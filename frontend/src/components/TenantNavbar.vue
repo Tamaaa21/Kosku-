@@ -62,14 +62,7 @@
           Riwayat Pesanan
         </router-link>
 
-        <router-link
-          v-if="auth.isAuthenticated"
-          to="/profil"
-          class="text-sm font-medium transition-colors"
-          :class="$route.path === '/profil' ? 'text-primary font-bold' : 'text-on-surface-variant hover:text-on-surface'"
-        >
-          Profil
-        </router-link>
+       
       </nav>
 
       <!-- Right Action / User Profile -->
@@ -97,13 +90,13 @@
           </router-link>
 
           <!-- Logout Button -->
-          <button
+         <!-- <button
             @click="handleLogout"
             class="text-xs text-error hover:bg-error-container/40 p-2 rounded-lg font-medium transition flex items-center justify-center"
             title="Keluar"
           >
             <PhSignOut :size="18" weight="bold" />
-          </button>
+          </button> -->
         </template>
 
         <template v-else>

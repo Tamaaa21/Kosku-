@@ -27,7 +27,7 @@ Kombinasi eksplorasi visual interaktif (peta Leaflet & rute Google Maps turn-by-
 
 ## Capabilities and Constraints
 
-- **Arsitektur**: Decoupled RESTful API (Laravel 11, PHP 8.3, Sanctum Bearer Token) dan Frontend SPA (Vue 3 Composition API, Vite 5, Tailwind CSS 3, Pinia).
+- **Arsitektur**: Decoupled RESTful API (Laravel 11, PHP 8.4 / 8.3, Sanctum Bearer Token) dan Frontend SPA (Vue 3 Composition API, Vite 5, Tailwind CSS 3, Pinia).
 - **Otentikasi & Peran**: Role-Based Access Control (Publik/Pencari, Pemilik Kos, Administrator).
 - **Fitur Utama**:
   - Katalog dan filter kos multi-parameter (harga, tipe putra/putri/campur, fasilitas, kota).

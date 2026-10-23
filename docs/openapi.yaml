@@ -1,0 +1,2248 @@
+openapi: 3.1.0
+info:
+  title: KosKu REST API
+  version: 1.0.0
+  description: |
+    Spesifikasi RESTful API untuk platform pencarian dan manajemen indekos **KosKu**.
+    Memfasilitasi pencari hunian sewa, mitra pemilik kos, dan administrator platform.
+  contact:
+    name: Tim Pengembang KosKu
+    email: sigitpratamaaa21@gmail.com
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: https://api.kosku.id/api/v1
+    description: Server Produksi
+  - url: http://127.0.0.1:8000/api/v1
+    description: Server Pengembangan Lokal
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Authentication & Profile
+    description: Pengelolaan akun, login, logout, dan profil pengguna.
+  - name: Properties (Kos)
+    description: Pencarian, katalog, dan manajemen properti indekos.
+  - name: Rooms (Kamar)
+    description: Pengelolaan unit kamar dalam suatu kos.
+  - name: Bookings (Pemesanan)
+    description: Alur pengajuan sewa, persetujuan, penolakan, dan pembatalan kamar.
+  - name: Reviews (Ulasan)
+    description: Penilaian rating dan komentar dari penyewa terverifikasi.
+  - name: Facilities (Fasilitas)
+    description: Master fasilitas bersama untuk properti kos.
+  - name: Media Upload
+    description: Pengunggahan berkas gambar foto kos dan kamar.
+  - name: Admin Moderation
+    description: Panel kontrol admin untuk moderasi akun, kos, dan statistik platform.
+
+paths:
+  # ---------------------------------------------------------------------------
+  # Authentication & Profile
+  # ---------------------------------------------------------------------------
+  /auth/register:
+    post:
+      tags:
+        - Authentication & Profile
+      summary: Registrasi Akun Pengguna Baru
+      description: Mendaftarkan akun baru ke platform sebagai pencari atau pemilik kos.
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+                - email
+                - password
+                - password_confirmation
+              properties:
+                nama:
+                  type: string
+                  example: Budi Santoso
+                email:
+                  type: string
+                  format: email
+                  example: budi.santoso@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: Password123!
+                password_confirmation:
+                  type: string
+                  format: password
+                  example: Password123!
+                telepon:
+                  type:
+                    - string
+                    - "null"
+                  example: "081234567890"
+                role:
+                  type: string
+                  enum: [pencari, pemilik]
+                  default: pencari
+                  example: pencari
+      responses:
+        '201':
+          description: Akun berhasil didaftarkan dan token diterbitkan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Registrasi berhasil.
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: 1|kYx9A12345...
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication & Profile
+      summary: Masuk dan Terbitkan Token
+      description: Otentikasi kredensial email dan password untuk mendapatkan Sanctum Bearer Token.
+      operationId: loginUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: budi.santoso@example.com
+                password:
+                  type: string
+                  format: password
+                  example: Password123!
+      responses:
+        '200':
+          description: Login berhasil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Login berhasil.
+                  user:
+                    $ref: '#/components/schemas/User'
+                  token:
+                    type: string
+                    example: 2|mNz8B67890...
+        '403':
+          description: Akun dinonaktifkan oleh administrator.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Akun Anda dinonaktifkan oleh administrator.
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /auth/logout:
+    post:
+      tags:
+        - Authentication & Profile
+      summary: Keluar / Revoke Token
+      description: Menghapus token otentikasi aktif yang sedang digunakan.
+      operationId: logoutUser
+      responses:
+        '200':
+          description: Logout berhasil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Logout berhasil.
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+
+  /me:
+    get:
+      tags:
+        - Authentication & Profile
+      summary: Detail Profil Pengguna Aktif
+      description: Mengambil data pengguna yang saat ini sedang login berdasarkan Bearer token.
+      operationId: getCurrentUser
+      responses:
+        '200':
+          description: Profil pengguna berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+    put:
+      tags:
+        - Authentication & Profile
+      summary: Perbarui Profil Pengguna
+      description: Mengubah nama lengkap atau nomor telepon pengguna yang sedang login.
+      operationId: updateCurrentUserProfile
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nama:
+                  type: string
+                  example: Budi Santoso Wijaya
+                telepon:
+                  type:
+                    - string
+                    - "null"
+                  example: "089876543210"
+                foto:
+                  type:
+                    - string
+                    - "null"
+                  format: uri
+                  example: https://api.kosku.id/storage/avatars/user1.webp
+      responses:
+        '200':
+          description: Profil berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Profil berhasil diperbarui.
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /me/avatar:
+    post:
+      tags:
+        - Authentication & Profile
+      summary: Unggah Foto Profil (Avatar)
+      description: Mengunggah berkas foto profil baru (maksimal 2MB, format JPG/PNG/WEBP).
+      operationId: uploadAvatar
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - foto
+              properties:
+                foto:
+                  type: string
+                  format: binary
+                  description: Berkas gambar foto profil
+      responses:
+        '200':
+          description: Foto profil berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Foto profil berhasil diperbarui.
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /me/password:
+    put:
+      tags:
+        - Authentication & Profile
+      summary: Perbarui Kata Sandi
+      description: Memperbarui kata sandi akun dengan memverifikasi kata sandi lama terlebih dahulu.
+      operationId: updatePassword
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - current_password
+                - password
+                - password_confirmation
+              properties:
+                current_password:
+                  type: string
+                  format: password
+                  example: PasswordLama123!
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: PasswordBaru123!
+                password_confirmation:
+                  type: string
+                  format: password
+                  example: PasswordBaru123!
+      responses:
+        '200':
+          description: Kata sandi berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Kata sandi berhasil diperbarui.
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  # ---------------------------------------------------------------------------
+  # Properties (Kos)
+  # ---------------------------------------------------------------------------
+  /kos:
+    get:
+      tags:
+        - Properties (Kos)
+      summary: Katalog Properti Kos (Pencarian & Filter)
+      description: Menampilkan daftar properti indekos dengan dukungan query pencarian teks, filter spesifikasi, pengurutan, dan paginasi.
+      operationId: listKos
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - $ref: '#/components/parameters/SearchQueryParam'
+        - name: lokasi
+          in: query
+          description: Filter alamat atau wilayah kota
+          schema:
+            type: string
+          example: Sleman
+        - name: harga_min
+          in: query
+          description: Batas minimum tarif bulanan dasar
+          schema:
+            type: integer
+            minimum: 0
+          example: 500000
+        - name: harga_max
+          in: query
+          description: Batas maksimum tarif bulanan dasar
+          schema:
+            type: integer
+            minimum: 0
+          example: 2000000
+        - name: jenis
+          in: query
+          description: Kategori jenis penghuni kos
+          schema:
+            type: string
+            enum: [putra, putri, campur]
+          example: campur
+        - name: fasilitas
+          in: query
+          description: Array ID fasilitas (harus memiliki seluruh fasilitas terpilih)
+          style: form
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+          example: [1, 2]
+        - name: tersedia
+          in: query
+          description: Hanya tampilkan kos yang memiliki kamar berstatus tersedia
+          schema:
+            type: boolean
+          example: true
+        - name: pemilik_id
+          in: query
+          description: Filter kos milik mitra pemilik tertentu
+          schema:
+            type: integer
+          example: 2
+        - name: sort
+          in: query
+          description: Pengurutan data katalog kos
+          schema:
+            type: string
+            enum: [latest, harga_asc, harga_desc, id_asc]
+            default: latest
+          example: harga_asc
+      responses:
+        '200':
+          description: Katalog kos berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Kos'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '400':
+          description: Parameter query filter atau paginasi tidak valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Kesalahan internal server.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Properties (Kos)
+      summary: Daftarkan Properti Kos Baru
+      description: Menambahkan data kos baru oleh mitra pemilik kos. Dilengkapi geocoding otomatis jika koordinat dikosongkan.
+      operationId: createKos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+                - alamat
+                - jenis
+                - harga
+              properties:
+                nama:
+                  type: string
+                  example: Kos Graha Melati Harmoni
+                alamat:
+                  type: string
+                  example: Jl. Kaliurang KM 5 No. 12, Sleman, Yogyakarta
+                deskripsi:
+                  type:
+                    - string
+                    - "null"
+                  example: Kos nyaman dengan suasana asri dekat kampus UGM.
+                jenis:
+                  type: string
+                  enum: [putra, putri, campur]
+                  example: campur
+                harga:
+                  type: integer
+                  minimum: 0
+                  example: 1500000
+                harga_harian:
+                  type:
+                    - integer
+                    - "null"
+                  example: 120000
+                harga_mingguan:
+                  type:
+                    - integer
+                    - "null"
+                  example: 450000
+                durasi_sewa:
+                  type: array
+                  items:
+                    type: string
+                    enum: [harian, mingguan, bulanan]
+                  example: [harian, mingguan, bulanan]
+                latitude:
+                  type:
+                    - number
+                    - "null"
+                  format: float
+                  example: -7.7554312
+                longitude:
+                  type:
+                    - number
+                    - "null"
+                  format: float
+                  example: 110.3789123
+                peraturan:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Dilarang merokok di dalam kamar", "Jam malam tamu pukul 22:00 WIB"]
+                foto:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+                  example: ["https://api.kosku.id/storage/uploads/graha_front.webp"]
+                fasilitas_ids:
+                  type: array
+                  items:
+                    type: integer
+                  example: [1, 2]
+      responses:
+        '201':
+          description: Data properti kos berhasil ditambahkan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Data kos berhasil ditambahkan.
+                  data:
+                    $ref: '#/components/schemas/Kos'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /kos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID unik properti kos
+        schema:
+          type: integer
+        example: 1
+    get:
+      tags:
+        - Properties (Kos)
+      summary: Detail Properti Kos
+      description: Menampilkan rincian lengkap kos beserta relasi pemilik, fasilitas, daftar kamar, dan ulasan.
+      operationId: getKosById
+      security: []
+      responses:
+        '200':
+          description: Data kos ditemukan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Kos'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+    put:
+      tags:
+        - Properties (Kos)
+      summary: Perbarui Data Properti Kos
+      description: Memperbarui spesifikasi, tarif, aturan, atau fasilitas properti kos oleh pemilik atau admin.
+      operationId: updateKos
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nama:
+                  type: string
+                  example: Kos Graha Melati Harmoni
+                alamat:
+                  type: string
+                  example: Jl. Kaliurang KM 5 No. 12, Sleman
+                deskripsi:
+                  type:
+                    - string
+                    - "null"
+                jenis:
+                  type: string
+                  enum: [putra, putri, campur]
+                harga:
+                  type: integer
+                  minimum: 0
+                harga_harian:
+                  type:
+                    - integer
+                    - "null"
+                harga_mingguan:
+                  type:
+                    - integer
+                    - "null"
+                durasi_sewa:
+                  type: array
+                  items:
+                    type: string
+                peraturan:
+                  type: array
+                  items:
+                    type: string
+                foto:
+                  type: array
+                  items:
+                    type: string
+                fasilitas_ids:
+                  type: array
+                  items:
+                    type: integer
+      responses:
+        '200':
+          description: Data kos berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Data kos berhasil diperbarui.
+                  data:
+                    $ref: '#/components/schemas/Kos'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+    delete:
+      tags:
+        - Properties (Kos)
+      summary: Hapus Properti Kos
+      description: Menghapus data properti kos oleh pemilik kos terkait atau administrator.
+      operationId: deleteKos
+      responses:
+        '200':
+          description: Data kos berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Data kos berhasil dihapus.
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+  # ---------------------------------------------------------------------------
+  # Rooms (Kamar)
+  # ---------------------------------------------------------------------------
+  /kos/{id}/rooms:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID properti kos
+        schema:
+          type: integer
+        example: 1
+    get:
+      tags:
+        - Rooms (Kamar)
+      summary: Daftar Kamar dalam Kos
+      description: Mengambil seluruh unit kamar yang dimiliki oleh properti kos tertentu.
+      operationId: listRoomsByKos
+      security: []
+      responses:
+        '200':
+          description: Daftar kamar berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Room'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+    post:
+      tags:
+        - Rooms (Kamar)
+      summary: Tambah Unit Kamar Baru
+      description: Menambahkan unit kamar baru ke dalam kos oleh pemilik kos terkait.
+      operationId: createRoom
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama_kamar
+                - harga
+              properties:
+                nama_kamar:
+                  type: string
+                  example: Kamar 01 - Lantai 1
+                harga:
+                  type: integer
+                  minimum: 0
+                  example: 1500000
+                harga_harian:
+                  type:
+                    - integer
+                    - "null"
+                  example: 120000
+                harga_mingguan:
+                  type:
+                    - integer
+                    - "null"
+                  example: 450000
+                durasi_sewa:
+                  type: array
+                  items:
+                    type: string
+                  example: [harian, bulanan]
+                status:
+                  type: string
+                  enum: [tersedia, terisi]
+                  default: tersedia
+                  example: tersedia
+                ukuran:
+                  type:
+                    - string
+                    - "null"
+                  example: 3.5 x 4 m
+                foto:
+                  type: array
+                  items:
+                    type: string
+                    format: uri
+                  example: ["https://api.kosku.id/storage/uploads/room_101.webp"]
+                fasilitas_kamar:
+                  type: array
+                  items:
+                    type: string
+                  example: ["Kamar Mandi Dalam", "AC", "Kasur Springbed"]
+      responses:
+        '201':
+          description: Kamar berhasil ditambahkan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Kamar berhasil ditambahkan.
+                  data:
+                    $ref: '#/components/schemas/Room'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /rooms/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID unit kamar
+        schema:
+          type: integer
+        example: 101
+    put:
+      tags:
+        - Rooms (Kamar)
+      summary: Perbarui Data Kamar
+      description: Memperbarui spesifikasi atau status ketersediaan kamar. Status tidak dapat diubah menjadi tersedia jika sedang memiliki sewa aktif.
+      operationId: updateRoom
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nama_kamar:
+                  type: string
+                harga:
+                  type: integer
+                harga_harian:
+                  type:
+                    - integer
+                    - "null"
+                harga_mingguan:
+                  type:
+                    - integer
+                    - "null"
+                durasi_sewa:
+                  type: array
+                  items:
+                    type: string
+                status:
+                  type: string
+                  enum: [tersedia, terisi]
+                ukuran:
+                  type:
+                    - string
+                    - "null"
+                foto:
+                  type: array
+                  items:
+                    type: string
+                fasilitas_kamar:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: Data kamar berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Data kamar berhasil diperbarui.
+                  data:
+                    $ref: '#/components/schemas/Room'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+    delete:
+      tags:
+        - Rooms (Kamar)
+      summary: Hapus Unit Kamar
+      description: Menghapus unit kamar. Ditolak jika kamar sedang dalam proses sewa aktif (menunggu atau disetujui).
+      operationId: deleteRoom
+      responses:
+        '200':
+          description: Kamar berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Kamar berhasil dihapus.
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  # ---------------------------------------------------------------------------
+  # Bookings (Pemesanan)
+  # ---------------------------------------------------------------------------
+  /bookings:
+    get:
+      tags:
+        - Bookings (Pemesanan)
+      summary: Riwayat & Daftar Pemesanan Sewa
+      description: Mengambil daftar pemesanan sewa kamar. Data terfilter otomatis berdasarkan peran aktor (pencari, pemilik kos terkait, atau admin).
+      operationId: listBookings
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: per_page
+          in: query
+          description: Jumlah transaksi per halaman
+          schema:
+            type: integer
+            default: 50
+            minimum: 1
+            maximum: 100
+          example: 50
+        - $ref: '#/components/parameters/SearchQueryParam'
+        - name: status
+          in: query
+          description: Filter status pemesanan
+          schema:
+            type: string
+            enum: [all, menunggu, disetujui, ditolak, dibatalkan, selesai]
+            default: all
+          example: menunggu
+        - name: periode
+          in: query
+          description: Filter rentang waktu transaksi sewa
+          schema:
+            type: string
+            enum: [all, today, 7d, 30d]
+            default: all
+          example: 7d
+        - name: sort
+          in: query
+          description: Pengurutan data pemesanan
+          schema:
+            type: string
+            enum: [latest, id_asc]
+            default: latest
+          example: latest
+      responses:
+        '200':
+          description: Daftar pemesanan berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Booking'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+
+    post:
+      tags:
+        - Bookings (Pemesanan)
+      summary: Ajukan Pemesanan Sewa Baru
+      description: Mengajukan sewa kamar oleh pencari kos. Dilengkapi transaksi atomik pesimistic lock untuk mencegah kondisi double-booking.
+      operationId: createBooking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - kamar_id
+                - tanggal_pemesanan
+              properties:
+                kamar_id:
+                  type: integer
+                  example: 101
+                tanggal_pemesanan:
+                  type: string
+                  format: date
+                  example: "2026-11-01"
+                durasi_tipe:
+                  type: string
+                  enum: [harian, mingguan, bulanan]
+                  default: bulanan
+                  example: bulanan
+                durasi_jumlah:
+                  type: integer
+                  minimum: 1
+                  default: 1
+                  example: 3
+      responses:
+        '201':
+          description: Pemesanan berhasil diajukan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Pemesanan berhasil diajukan.
+                  data:
+                    $ref: '#/components/schemas/Booking'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '409':
+          description: Kamar tidak tersedia atau sedang dalam proses sewa aktif.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Kamar tidak tersedia atau sedang dalam proses pemesanan.
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /bookings/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID transaksi pemesanan
+        schema:
+          type: integer
+        example: 78
+    get:
+      tags:
+        - Bookings (Pemesanan)
+      summary: Rincian Detail Pemesanan
+      description: Mengambil data transaksi pemesanan lengkap beserta objek penyewa, kos, kamar, dan ulasan.
+      operationId: getBookingById
+      responses:
+        '200':
+          description: Data pemesanan ditemukan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Booking'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+  /bookings/{id}/status:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID transaksi pemesanan
+        schema:
+          type: integer
+        example: 78
+    patch:
+      tags:
+        - Bookings (Pemesanan)
+      summary: Transisi Status Pemesanan (Aksi Non-CRUD)
+      description: Menyetujui atau menolak pesanan oleh pemilik/admin, atau membatalkan pesanan oleh pencari. Otomatis menyinkronkan status keterisian kamar secara atomik.
+      operationId: updateBookingStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [disetujui, ditolak, dibatalkan]
+                  example: disetujui
+      responses:
+        '200':
+          description: Status pemesanan berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Status pemesanan berhasil diperbarui menjadi disetujui.
+                  data:
+                    $ref: '#/components/schemas/Booking'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '409':
+          description: Kamar sudah terisi oleh penyewa lain.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                message: Tidak dapat menyetujui pemesanan karena kamar sudah terisi oleh penyewa lain.
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  # ---------------------------------------------------------------------------
+  # Reviews (Ulasan)
+  # ---------------------------------------------------------------------------
+  /kos/{id}/reviews:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID properti kos
+        schema:
+          type: integer
+        example: 1
+    get:
+      tags:
+        - Reviews (Ulasan)
+      summary: Daftar Ulasan Kos
+      description: Menampilkan daftar ulasan dan penilaian bintang dari penyewa pada properti kos tertentu.
+      operationId: listReviewsByKos
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 50
+          example: 10
+      responses:
+        '200':
+          description: Daftar ulasan berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Review'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+    post:
+      tags:
+        - Reviews (Ulasan)
+      summary: Kirim / Perbarui Ulasan Kos
+      description: Mengirim ulasan rating (1-5) dan komentar oleh pencari yang telah memiliki sewa berstatus disetujui.
+      operationId: submitReview
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - rating
+                - komentar
+              properties:
+                rating:
+                  type: integer
+                  minimum: 1
+                  maximum: 5
+                  example: 5
+                komentar:
+                  type: string
+                  minLength: 5
+                  maxLength: 1000
+                  example: Kamar sangat bersih, sirkulasi udara baik, dan pemilik ramah.
+      responses:
+        '200':
+          description: Ulasan berhasil disimpan atau diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Ulasan Anda berhasil disimpan.
+                  data:
+                    $ref: '#/components/schemas/Review'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          description: Pengguna tidak memiliki sewa aktif yang disetujui pada kos ini.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /kos/{id}/reviews/eligibility:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID properti kos
+        schema:
+          type: integer
+        example: 1
+    get:
+      tags:
+        - Reviews (Ulasan)
+      summary: Cek Kelayakan Penulisan Ulasan
+      description: Memverifikasi apakah akun pengguna yang sedang login memenuhi syarat untuk mengulas kos ini.
+      operationId: checkReviewEligibility
+      responses:
+        '200':
+          description: Status kelayakan ulasan berhasil diperiksa.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  eligible:
+                    type: boolean
+                    example: true
+                  has_reviewed:
+                    type: boolean
+                    example: false
+                  existing_review:
+                    anyOf:
+                      - $ref: '#/components/schemas/Review'
+                      - type: 'null'
+                  message:
+                    type: string
+                    example: Pengguna memenuhi syarat untuk menulis ulasan.
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+
+  # ---------------------------------------------------------------------------
+  # Facilities (Fasilitas)
+  # ---------------------------------------------------------------------------
+  /facilities:
+    get:
+      tags:
+        - Facilities (Fasilitas)
+      summary: Daftar Master Fasilitas
+      description: Mengambil seluruh daftar fasilitas umum yang tersedia pada platform KosKu.
+      operationId: listFacilities
+      security: []
+      responses:
+        '200':
+          description: Daftar fasilitas berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Facility'
+        '400':
+          description: Permintaan tidak valid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    post:
+      tags:
+        - Facilities (Fasilitas)
+      summary: Tambah Master Fasilitas Baru
+      description: Menambahkan jenis fasilitas baru oleh mitra pemilik kos atau administrator.
+      operationId: createFacility
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+              properties:
+                nama:
+                  type: string
+                  example: Kolam Renang
+                deskripsi:
+                  type:
+                    - string
+                    - "null"
+                  example: Kolam renang luar ruangan untuk seluruh penghuni
+      responses:
+        '201':
+          description: Fasilitas berhasil ditambahkan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Fasilitas berhasil ditambahkan.
+                  data:
+                    $ref: '#/components/schemas/Facility'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /facilities/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID master fasilitas
+        schema:
+          type: integer
+        example: 1
+    put:
+      tags:
+        - Facilities (Fasilitas)
+      summary: Perbarui Master Fasilitas
+      description: Mengubah nama atau deskripsi fasilitas oleh administrator.
+      operationId: updateFacility
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nama
+              properties:
+                nama:
+                  type: string
+                  example: WiFi 100 Mbps
+                deskripsi:
+                  type:
+                    - string
+                    - "null"
+                  example: Internet super cepat dan stabil
+      responses:
+        '200':
+          description: Fasilitas berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Fasilitas berhasil diperbarui.
+                  data:
+                    $ref: '#/components/schemas/Facility'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+    delete:
+      tags:
+        - Facilities (Fasilitas)
+      summary: Hapus Master Fasilitas
+      description: Menghapus fasilitas dari sistem oleh administrator.
+      operationId: deleteFacility
+      responses:
+        '200':
+          description: Fasilitas berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Fasilitas berhasil dihapus.
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+  # ---------------------------------------------------------------------------
+  # Media Upload
+  # ---------------------------------------------------------------------------
+  /uploads/images:
+    post:
+      tags:
+        - Media Upload
+      summary: Unggah Gambar Batch
+      description: Mengunggah 1 hingga 5 berkas gambar sekaligus untuk foto kos atau kamar (maksimal 2MB per file, format JPG/PNG/WEBP).
+      operationId: uploadImages
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - images
+              properties:
+                images:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Berkas gambar yang diunggah
+      responses:
+        '201':
+          description: Gambar berhasil diunggah.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Gambar berhasil diunggah.
+                  urls:
+                    type: array
+                    items:
+                      type: string
+                      format: uri
+                    example:
+                      - https://api.kosku.id/storage/uploads/graha_front.webp
+                      - https://api.kosku.id/storage/uploads/graha_room.webp
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  # ---------------------------------------------------------------------------
+  # Admin Moderation
+  # ---------------------------------------------------------------------------
+  /admin/users:
+    get:
+      tags:
+        - Admin Moderation
+      summary: Daftar Pengguna Platform
+      description: Mengambil seluruh pengguna terdaftar dengan fitur pencarian, filter role, filter status aktif, dan jumlah properti/transaksi.
+      operationId: listAdminUsers
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - $ref: '#/components/parameters/PerPageParam'
+        - $ref: '#/components/parameters/SearchQueryParam'
+        - name: role
+          in: query
+          schema:
+            type: string
+            enum: [pencari, pemilik, admin]
+          example: pemilik
+        - name: aktif
+          in: query
+          schema:
+            type: boolean
+          example: true
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [latest, unit_terbanyak, nama_asc, id_asc]
+            default: id_asc
+          example: unit_terbanyak
+      responses:
+        '200':
+          description: Data pengguna berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+
+  /admin/users/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID pengguna
+        schema:
+          type: integer
+        example: 2
+    get:
+      tags:
+        - Admin Moderation
+      summary: Detail Pengguna & Riwayat Aktivitas
+      description: Menampilkan rincian data profil pengguna beserta daftar properti kos yang dimiliki atau riwayat sewa terakhir.
+      operationId: getAdminUserById
+      responses:
+        '200':
+          description: Data detail pengguna ditemukan.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+  /admin/users/{id}/status:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID pengguna
+        schema:
+          type: integer
+        example: 2
+    patch:
+      tags:
+        - Admin Moderation
+      summary: Ubah Status Aktif Pengguna
+      description: Mengaktifkan atau menonaktifkan akun pengguna oleh administrator.
+      operationId: updateAdminUserStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - aktif
+              properties:
+                aktif:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: Status pengguna berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Status pengguna berhasil dinonaktifkan.
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /admin/stats:
+    get:
+      tags:
+        - Admin Moderation
+      summary: Statistik Ringkasan Platform
+      description: Mengambil data metrik agregat platform seperti total pengguna, pemilik, properti kos, kamar, dan status transaksi sewa.
+      operationId: getAdminStats
+      responses:
+        '200':
+          description: Statistik platform berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_pengguna:
+                    type: integer
+                    example: 128
+                  total_pemilik:
+                    type: integer
+                    example: 34
+                  total_pencari:
+                    type: integer
+                    example: 92
+                  total_kos:
+                    type: integer
+                    example: 45
+                  total_kamar:
+                    type: integer
+                    example: 260
+                  kamar_tersedia:
+                    type: integer
+                    example: 110
+                  kamar_terisi:
+                    type: integer
+                    example: 150
+                  total_pemesanan:
+                    type: integer
+                    example: 312
+                  pemesanan_menunggu:
+                    type: integer
+                    example: 18
+                  pemesanan_disetujui:
+                    type: integer
+                    example: 240
+                  pemesanan_ditolak:
+                    type: integer
+                    example: 30
+                  pemesanan_dibatalkan:
+                    type: integer
+                    example: 24
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+
+  /admin/kos:
+    get:
+      tags:
+        - Admin Moderation
+      summary: Moderasi Katalog Properti Kos
+      description: Mengambil seluruh properti kos dengan relasi lengkap pemilik dan counter ketersediaan kamar untuk keperluan pengawasan dan moderasi admin.
+      operationId: listAdminKos
+      parameters:
+        - $ref: '#/components/parameters/PageParam'
+        - name: per_page
+          in: query
+          schema:
+            type: integer
+            default: 20
+            minimum: 1
+            maximum: 100
+          example: 20
+        - $ref: '#/components/parameters/SearchQueryParam'
+        - name: jenis
+          in: query
+          schema:
+            type: string
+            enum: [all, putra, putri, campur]
+            default: all
+          example: campur
+        - name: status_kamar
+          in: query
+          schema:
+            type: string
+            enum: [all, tersedia, penuh]
+            default: all
+          example: tersedia
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [latest, harga_asc, harga_desc, kamar_banyak, nama_asc, id_asc]
+            default: id_asc
+          example: kamar_banyak
+      responses:
+        '200':
+          description: Daftar moderasi kos berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Kos'
+                  links:
+                    $ref: '#/components/schemas/PaginationLinks'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+
+  /admin/kos/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID properti kos
+        schema:
+          type: integer
+        example: 1
+    delete:
+      tags:
+        - Admin Moderation
+      summary: Hapus Moderasi Properti Kos
+      description: Menghapus properti kos secara paksa oleh administrator dengan pembersihan cascading terhadap kamar, pemesanan, dan relasi terkait.
+      operationId: deleteAdminKos
+      responses:
+        '200':
+          description: Properti kos berhasil dihapus oleh admin.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Properti kos berhasil dihapus dari sistem (moderasi admin).
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+# -----------------------------------------------------------------------------
+# Components (Schemas, Parameters, Responses, SecuritySchemes)
+# -----------------------------------------------------------------------------
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Masukkan Bearer token yang diperoleh dari endpoint `/auth/login` atau `/auth/register`.
+
+  parameters:
+    PageParam:
+      name: page
+      in: query
+      description: Nomor halaman paginasi
+      schema:
+        type: integer
+        default: 1
+        minimum: 1
+      example: 1
+
+    PerPageParam:
+      name: per_page
+      in: query
+      description: Jumlah data per halaman
+      schema:
+        type: integer
+        default: 12
+        minimum: 1
+        maximum: 100
+      example: 12
+
+    SearchQueryParam:
+      name: q
+      in: query
+      description: Kata kunci pencarian teks bebas
+      schema:
+        type: string
+      example: Graha Melati
+
+  responses:
+    UnauthorizedResponse:
+      description: Permintaan tidak terotentikasi (Token tidak disertakan atau tidak valid).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Unauthenticated.
+
+    ForbiddenResponse:
+      description: Akses ditolak karena role atau kebijakan otorisasi tidak mencukupi.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: Anda tidak memiliki wewenang untuk mengakses aksi ini.
+
+    NotFoundResponse:
+      description: Data resource yang diminta tidak ditemukan.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            message: No query results for model.
+
+    ValidationErrorResponse:
+      description: Validasi input data formulir gagal.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+          example:
+            message: The given data was invalid.
+            errors:
+              email:
+                - Format email tidak valid.
+                - Email sudah terdaftar dalam sistem.
+
+  schemas:
+    Error:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Pesan deskripsi kesalahan
+          example: Terjadi kesalahan pada permintaan Anda.
+
+    ValidationError:
+      type: object
+      required:
+        - message
+        - errors
+      properties:
+        message:
+          type: string
+          example: The given data was invalid.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          example:
+            kamar_id:
+              - Unit kamar wajib dipilih.
+            tanggal_pemesanan:
+              - Tanggal sewa harus hari ini atau yang akan datang.
+
+    User:
+      type: object
+      required:
+        - id
+        - nama
+        - email
+        - role
+        - aktif
+      properties:
+        id:
+          type: integer
+          example: 1
+        nama:
+          type: string
+          example: Budi Santoso
+        email:
+          type: string
+          format: email
+          example: budi.santoso@example.com
+        telepon:
+          type:
+            - string
+            - "null"
+          example: "081234567890"
+        no_hp:
+          type:
+            - string
+            - "null"
+          example: "081234567890"
+        foto:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://api.kosku.id/storage/avatars/budi.webp
+        role:
+          type: string
+          enum: [pencari, pemilik, admin]
+          example: pencari
+        aktif:
+          type: boolean
+          example: true
+        kos_count:
+          type: integer
+          example: 3
+        pemesanan_count:
+          type: integer
+          example: 5
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T08:00:00.000000Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T08:00:00.000000Z"
+
+    Kos:
+      type: object
+      required:
+        - id
+        - pemilik_id
+        - nama
+        - alamat
+        - jenis
+        - harga
+      properties:
+        id:
+          type: integer
+          example: 1
+        pemilik_id:
+          type: integer
+          example: 2
+        nama:
+          type: string
+          example: Kos Graha Melati Harmoni
+        alamat:
+          type: string
+          example: Jl. Kaliurang KM 5 No. 12, Sleman, Yogyakarta
+        deskripsi:
+          type:
+            - string
+            - "null"
+          example: Hunian eksklusif nyaman dan tenang bagi mahasiswa serta pekerja.
+        jenis:
+          type: string
+          enum: [putra, putri, campur]
+          example: campur
+        harga:
+          type: integer
+          example: 1500000
+        harga_harian:
+          type:
+            - integer
+            - "null"
+          example: 120000
+        harga_mingguan:
+          type:
+            - integer
+            - "null"
+          example: 450000
+        durasi_sewa:
+          type: array
+          items:
+            type: string
+          example: [harian, mingguan, bulanan]
+        rating_rata_rata:
+          type: number
+          format: float
+          example: 4.85
+        ulasan_count:
+          type: integer
+          example: 14
+        latitude:
+          type:
+            - number
+            - "null"
+          format: float
+          example: -7.7554312
+        longitude:
+          type:
+            - number
+            - "null"
+          format: float
+          example: 110.3789123
+        peraturan:
+          type: array
+          items:
+            type: string
+          example: ["Dilarang merokok di dalam kamar", "Jam malam tamu pukul 22:00 WIB"]
+        foto:
+          type: array
+          items:
+            type: string
+            format: uri
+          example:
+            - https://api.kosku.id/storage/uploads/graha_front.webp
+            - https://api.kosku.id/storage/uploads/graha_hall.webp
+        kamar_count:
+          type: integer
+          example: 10
+        kamar_tersedia_count:
+          type: integer
+          example: 4
+        pemilik:
+          $ref: '#/components/schemas/User'
+        fasilitas:
+          type: array
+          items:
+            $ref: '#/components/schemas/Facility'
+        kamar:
+          type: array
+          items:
+            $ref: '#/components/schemas/Room'
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T08:00:00.000000Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T08:00:00.000000Z"
+
+    Room:
+      type: object
+      required:
+        - id
+        - kos_id
+        - nama_kamar
+        - harga
+        - status
+      properties:
+        id:
+          type: integer
+          example: 101
+        kos_id:
+          type: integer
+          example: 1
+        nama_kamar:
+          type: string
+          example: Kamar 01 - Deluxe Lantai 1
+        harga:
+          type: integer
+          example: 1500000
+        harga_harian:
+          type:
+            - integer
+            - "null"
+          example: 120000
+        harga_mingguan:
+          type:
+            - integer
+            - "null"
+          example: 450000
+        durasi_sewa:
+          type: array
+          items:
+            type: string
+          example: [harian, mingguan, bulanan]
+        status:
+          type: string
+          enum: [tersedia, terisi]
+          example: tersedia
+        ukuran:
+          type:
+            - string
+            - "null"
+          example: 3.5 x 4 m
+        foto:
+          type: array
+          items:
+            type: string
+            format: uri
+          example: ["https://api.kosku.id/storage/uploads/room_101.webp"]
+        fasilitas_kamar:
+          type: array
+          items:
+            type: string
+          example: ["Kamar Mandi Dalam", "Water Heater", "Kasur Springbed", "Meja Belajar"]
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T08:00:00.000000Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T08:00:00.000000Z"
+
+    Booking:
+      type: object
+      required:
+        - id
+        - pengguna_id
+        - kos_id
+        - kamar_id
+        - tanggal_pemesanan
+        - durasi_tipe
+        - durasi_jumlah
+        - total_harga
+        - status
+      properties:
+        id:
+          type: integer
+          example: 78
+        pengguna_id:
+          type: integer
+          example: 5
+        kos_id:
+          type: integer
+          example: 1
+        kamar_id:
+          type: integer
+          example: 101
+        tanggal_pemesanan:
+          type: string
+          format: date
+          example: "2026-11-01"
+        durasi_tipe:
+          type: string
+          enum: [harian, mingguan, bulanan]
+          example: bulanan
+        durasi_jumlah:
+          type: integer
+          example: 3
+        tanggal_selesai:
+          type: string
+          format: date
+          example: "2027-02-01"
+        total_harga:
+          type: integer
+          example: 4500000
+        status:
+          type: string
+          enum: [menunggu, disetujui, ditolak, dibatalkan, selesai]
+          example: menunggu
+        pengguna:
+          $ref: '#/components/schemas/User'
+        kos:
+          $ref: '#/components/schemas/Kos'
+        kamar:
+          $ref: '#/components/schemas/Room'
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T10:00:00.000000Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T10:00:00.000000Z"
+
+    Review:
+      type: object
+      required:
+        - id
+        - pengguna_id
+        - kos_id
+        - rating
+        - komentar
+      properties:
+        id:
+          type: integer
+          example: 12
+        pengguna_id:
+          type: integer
+          example: 5
+        kos_id:
+          type: integer
+          example: 1
+        pemesanan_id:
+          type:
+            - integer
+            - "null"
+          example: 78
+        rating:
+          type: integer
+          minimum: 1
+          maximum: 5
+          example: 5
+        komentar:
+          type: string
+          example: Kamar sangat bersih, sirkulasi udara baik, dan pemilik ramah.
+        formatted_date:
+          type: string
+          example: 20 Okt 2026
+        pengguna:
+          $ref: '#/components/schemas/User'
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T10:15:00.000000Z"
+
+    Facility:
+      type: object
+      required:
+        - id
+        - nama
+      properties:
+        id:
+          type: integer
+          example: 1
+        nama:
+          type: string
+          example: WiFi 100 Mbps
+        deskripsi:
+          type:
+            - string
+            - "null"
+          example: Akses internet nirkabel stabil
+        kos_count:
+          type: integer
+          example: 28
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T08:00:00.000000Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-10-20T08:00:00.000000Z"
+
+    PaginationLinks:
+      type: object
+      properties:
+        first:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://api.kosku.id/api/v1/kos?page=1
+        last:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://api.kosku.id/api/v1/kos?page=8
+        prev:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: null
+        next:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://api.kosku.id/api/v1/kos?page=2
+
+    PaginationMeta:
+      type: object
+      properties:
+        current_page:
+          type: integer
+          example: 1
+        from:
+          type:
+            - integer
+            - "null"
+          example: 1
+        last_page:
+          type: integer
+          example: 8
+        path:
+          type: string
+          format: uri
+          example: https://api.kosku.id/api/v1/kos
+        per_page:
+          type: integer
+          example: 12
+        to:
+          type:
+            - integer
+            - "null"
+          example: 12
+        total:
+          type: integer
+          example: 95
