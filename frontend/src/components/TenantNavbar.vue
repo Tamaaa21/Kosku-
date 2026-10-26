@@ -8,16 +8,16 @@
     "
   >
     <div class="h-16 max-w-7xl mx-auto px-margin flex items-center justify-between gap-space-md">
-      <!-- Logo Brand (KosKu with Pin Logo) -->
+      <!-- Logo Brand (Kostara) -->
       <router-link to="/" class="flex items-center gap-2 group">
         <img
           :src="logoUrl"
-          alt="KosKu Logo"
-          class="w-9 h-9 object-contain rounded-lg shadow-xs group-hover:scale-105 transition-transform"
+          alt="Kostara Logo"
+          class="w-9 h-9 object-contain group-hover:scale-105 transition-transform"
         />
         <div class="flex items-center text-xl font-extrabold tracking-tight transition-colors">
           <span :class="isTransparent ? 'text-white' : 'text-[#0B478B]'">Kos</span>
-          <span :class="isTransparent ? 'text-amber-400' : 'text-amber-500'">Ku</span>
+          <span :class="isTransparent ? 'text-amber-400' : 'text-amber-500'">tara</span>
         </div>
       </router-link>
 
@@ -315,7 +315,7 @@ import { useAuthStore } from '../stores/auth'
 import { useFavoritesStore } from '../stores/favorites'
 import { useUiStore } from '../stores/ui'
 import NotificationDropdown from './NotificationDropdown.vue'
-import logoUrl from '../assets/KosKu Housing Pin Logo.png'
+import logoUrl from '../assets/logo.png'
 import {
   PhUser,
   PhSignOut,
@@ -365,7 +365,7 @@ const scrollToSection = (sectionId) => {
 const handleLogout = async () => {
   const confirmed = await ui.confirm({
     title: 'Konfirmasi Keluar',
-    message: 'Apakah Anda yakin ingin keluar dari akun KosKu?',
+    message: 'Apakah Anda yakin ingin keluar dari akun Kostara?',
     confirmText: 'Ya, Keluar',
     cancelText: 'Batal',
     confirmType: 'danger',

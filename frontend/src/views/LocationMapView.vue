@@ -311,7 +311,7 @@ const renderMarkers = () => {
           <span style="font-size: 11px; color: #64748b; display: block; margin-top: 3px;">${kos.alamat}</span>
           <strong style="color: #0f172a; font-size: 12px; margin-top: 5px; display: block;">${formatRupiah(kos.harga)} / bln</strong>
           <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; padding-top: 6px; border-top: 1px solid #e2e8f0;">
-            <button onclick="window.__koskuNavigateTo(${kos.id})" style="background: none; border: none; padding: 0; font-size: 11px; color: #0B478B; font-weight: bold; cursor: pointer; text-decoration: underline;">Detail &rarr;</button>
+            <button onclick="window.__kostaraNavigateTo(${kos.id})" style="background: none; border: none; padding: 0; font-size: 11px; color: #0B478B; font-weight: bold; cursor: pointer; text-decoration: underline;">Detail &rarr;</button>
             <a href="${mapsUrl}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; color: #16a34a; font-weight: bold; text-decoration: underline;">Buka di Maps &nearr;</a>
           </div>
         </div>
@@ -369,7 +369,7 @@ const fetchAllKos = async () => {
 }
 
 onMounted(async () => {
-  window.__koskuNavigateTo = (id) => {
+  window.__kostaraNavigateTo = (id) => {
     router.push(`/kos/${id}`)
   }
 
@@ -378,7 +378,7 @@ onMounted(async () => {
 })
 
 onBeforeUnmount(() => {
-  delete window.__koskuNavigateTo
+  delete window.__kostaraNavigateTo
   if (map) {
     map.remove()
     map = null

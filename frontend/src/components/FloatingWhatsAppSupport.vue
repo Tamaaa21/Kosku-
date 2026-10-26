@@ -23,7 +23,7 @@
                 <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-700"></span>
               </div>
               <div>
-                <h3 class="text-sm font-bold leading-tight">Customer Service KosKu</h3>
+                <h3 class="text-sm font-bold leading-tight">Customer Service Kostara</h3>
                 <div class="flex items-center gap-1.5 text-[11px] text-emerald-100 mt-0.5 font-medium">
                   <span class="w-1.5 h-1.5 rounded-full bg-emerald-300 animate-pulse"></span>
                   <span>Online &bull; Siap Membantu</span>
@@ -140,7 +140,7 @@ const isHidden = computed(() => {
   return auth.isAdmin || route?.path?.startsWith('/dashboard/admin') || route?.name === 'admin-dashboard'
 })
 
-// Default Official KosKu Customer Service WhatsApp number
+// Default Official Kostara Customer Service WhatsApp number
 const csPhoneNumber = '081234567890'
 
 const supportTopics = [

@@ -6,7 +6,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
   const auth = useAuthStore()
 
   const getStorageKey = () => {
-    return auth.user?.id ? `kosku_favorites_${auth.user.id}` : null
+    return auth.user?.id ? `kostara_favorites_${auth.user.id}` : null
   }
 
   const loadFromStorage = () => {
@@ -16,7 +16,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
       const raw = localStorage.getItem(key)
       if (raw) return JSON.parse(raw)
       // Check legacy global key for migration
-      const legacy = localStorage.getItem('kosku_favorites')
+      const legacy = localStorage.getItem('kostara_favorites') || localStorage.getItem('kosku_favorites') || localStorage.getItem(`kosku_favorites_${auth.user?.id}`)
       if (legacy) {
         localStorage.setItem(key, legacy)
         return JSON.parse(legacy)

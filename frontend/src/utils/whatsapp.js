@@ -1,5 +1,5 @@
 /**
- * Helper utility for WhatsApp communication in KosKu
+ * Helper utility for WhatsApp communication in Kostara
  */
 
 export function formatWhatsAppNumber(phone) {
@@ -43,7 +43,7 @@ export function buildInquiryTemplate({ ownerName = 'Pemilik Kos', kosName = '', 
   const lines = [
     `Halo Bapak/Ibu ${ownerName},`,
     '',
-    `Saya tertarik dengan kos *${kosName}*${roomName ? ` (Kamar: ${roomName})` : ''} yang saya temukan melalui aplikasi KosKu.`,
+    `Saya tertarik dengan kos *${kosName}*${roomName ? ` (Kamar: ${roomName})` : ''} yang saya temukan melalui aplikasi Kostara.`,
     'Apakah unit kamar tersebut saat ini masih tersedia untuk disurvei atau disewa?',
   ]
 
@@ -59,7 +59,7 @@ export function buildTenantInquiryTemplate({ ownerName = 'Pemilik Kos', kosName 
   return [
     `Halo Bapak/Ibu ${ownerName},`,
     '',
-    `Saya ingin menanyakan perihal pengajuan sewa kos *${kosName}*${roomName ? ` (Kamar: ${roomName})` : ''}${bookingId ? ` [ID Pesanan: #KOS-${bookingId}]` : ''} di KosKu.`,
+    `Saya ingin menanyakan perihal pengajuan sewa kos *${kosName}*${roomName ? ` (Kamar: ${roomName})` : ''}${bookingId ? ` [ID Pesanan: #KOS-${bookingId}]` : ''} di Kostara.`,
     'Mohon informasinya, terima kasih!',
   ].join('\n')
 }
@@ -68,7 +68,7 @@ export function buildOwnerContactTenantTemplate({ tenantName = 'Calon Penyewa', 
   return [
     `Halo kak ${tenantName},`,
     '',
-    `Saya pengelola/pemilik dari *${kosName}*. Menindaklanjuti pengajuan sewa Anda untuk kamar *${roomName}*${bookingId ? ` (#KOS-${bookingId})` : ''} melalui KosKu.`,
+    `Saya pengelola/pemilik dari *${kosName}*. Menindaklanjuti pengajuan sewa Anda untuk kamar *${roomName}*${bookingId ? ` (#KOS-${bookingId})` : ''} melalui Kostara.`,
     'Apakah ada hal atau informasi yang ingin ditanyakan lebih lanjut?',
   ].join('\n')
 }
@@ -97,19 +97,19 @@ export function getGoogleMapsUrl(location) {
 }
 
 /**
- * Build pre-filled text for KosKu WhatsApp Customer Service
+ * Build pre-filled text for Kostara WhatsApp Customer Service
  */
 export function buildCustomerServiceTemplate(category = 'umum', userName = '') {
   const prefix = userName ? `Saya ${userName}. ` : ''
   switch (category) {
     case 'pencari':
-      return `Halo Tim Customer Service KosKu,\n\n${prefix}Saya membutuhkan bantuan terkait pencarian kos, ketersediaan kamar, atau tata cara pemesanan di KosKu.\n\nMohon bantuannya, terima kasih!`
+      return `Halo Tim Customer Service Kostara,\n\n${prefix}Saya membutuhkan bantuan terkait pencarian kos, ketersediaan kamar, atau tata cara pemesanan di Kostara.\n\nMohon bantuannya, terima kasih!`
     case 'pemilik':
-      return `Halo Tim Customer Service KosKu,\n\n${prefix}Saya mitra pemilik kos dan membutuhkan bantuan terkait pendaftaran properti kos, verifikasi kamar, atau pengelolaan pesanan di KosKu.\n\nTerima kasih!`
+      return `Halo Tim Customer Service Kostara,\n\n${prefix}Saya mitra pemilik kos dan membutuhkan bantuan terkait pendaftaran properti kos, verifikasi kamar, atau pengelolaan pesanan di Kostara.\n\nTerima kasih!`
     case 'kendala':
-      return `Halo Tim Customer Service KosKu,\n\n${prefix}Saya ingin melaporkan kendala teknis atau memiliki pertanyaan terkait aplikasi KosKu.\n\nRincian kendala:\n\nTerima kasih!`
+      return `Halo Tim Customer Service Kostara,\n\n${prefix}Saya ingin melaporkan kendala teknis atau memiliki pertanyaan terkait aplikasi Kostara.\n\nRincian kendala:\n\nTerima kasih!`
     default:
-      return `Halo Tim Customer Service KosKu,\n\n${prefix}Saya pengguna KosKu dan ingin bertanya atau berkonsultasi seputar layanan KosKu.\n\nTerima kasih!`
+      return `Halo Tim Customer Service Kostara,\n\n${prefix}Saya pengguna Kostara dan ingin bertanya atau berkonsultasi seputar layanan Kostara.\n\nTerima kasih!`
   }
 }
 

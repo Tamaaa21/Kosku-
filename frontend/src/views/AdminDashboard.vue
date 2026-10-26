@@ -2313,8 +2313,8 @@ const chatUserWhatsApp = (user) => {
 
   const message =
     user.role === 'pemilik'
-      ? `Halo Bapak/Ibu Mitra KosKu ${user.nama},\n\nKami dari Manajemen Layanan KosKu ingin berkoordinasi mengenai operasional dan data properti kos Anda di platform KosKu.\n\nTerima kasih!`
-      : `Halo Kak ${user.nama},\n\nKami dari tim Layanan Pelanggan KosKu ingin mengonfirmasi terkait akun dan aktivitas pemesanan sewa Anda di KosKu. Apakah ada hal yang membutuhkan bantuan kami?\n\nTerima kasih!`
+      ? `Halo Bapak/Ibu Mitra Kostara ${user.nama},\n\nKami dari Manajemen Layanan Kostara ingin berkoordinasi mengenai operasional dan data properti kos Anda di platform Kostara.\n\nTerima kasih!`
+      : `Halo Kak ${user.nama},\n\nKami dari tim Layanan Pelanggan Kostara ingin mengonfirmasi terkait akun dan aktivitas pemesanan sewa Anda di Kostara. Apakah ada hal yang membutuhkan bantuan kami?\n\nTerima kasih!`
 
   openWhatsAppChat(phone, message)
 }
@@ -2402,7 +2402,7 @@ const chatKosPemilik = (kos) => {
     return
   }
 
-  const message = `Halo Bapak/Ibu Mitra KosKu ${kos.pemilik.nama},\n\nKami dari tim Moderasi & Administrator KosKu ingin berkoordinasi mengenai listing properti Anda: "${kos.nama}" (ID: #KOS-${kos.id}) yang berlokasi di ${kos.alamat}.\n\nMohon konfirmasi ketersediaan dan status operasional terbaru kos Anda.\n\nTerima kasih!`
+  const message = `Halo Bapak/Ibu Mitra Kostara ${kos.pemilik.nama},\n\nKami dari tim Moderasi & Administrator Kostara ingin berkoordinasi mengenai listing properti Anda: "${kos.nama}" (ID: #KOS-${kos.id}) yang berlokasi di ${kos.alamat}.\n\nMohon konfirmasi ketersediaan dan status operasional terbaru kos Anda.\n\nTerima kasih!`
   openWhatsAppChat(phone, message)
 }
 
@@ -2496,7 +2496,7 @@ const chatPenyewaWhatsApp = (booking) => {
     return
   }
 
-  const message = `Halo Kak ${booking.pengguna.nama},\n\nKami dari Administrator Layanan KosKu ingin mengonfirmasi pesanan sewa Anda (#ORD-${booking.id}) untuk properti "${booking.kos?.nama || 'Kos'}" (Kamar: ${booking.kamar?.nama_kamar || '-'}).\n\nStatus pesanan Anda saat ini: ${booking.status.toUpperCase()}.\n\nApakah ada pertanyaan atau kendala yang bisa kami bantu?\n\nTerima kasih!`
+  const message = `Halo Kak ${booking.pengguna.nama},\n\nKami dari Administrator Layanan Kostara ingin mengonfirmasi pesanan sewa Anda (#ORD-${booking.id}) untuk properti "${booking.kos?.nama || 'Kos'}" (Kamar: ${booking.kamar?.nama_kamar || '-'}).\n\nStatus pesanan Anda saat ini: ${booking.status.toUpperCase()}.\n\nApakah ada pertanyaan atau kendala yang bisa kami bantu?\n\nTerima kasih!`
   openWhatsAppChat(phone, message)
 }
 
@@ -2536,7 +2536,7 @@ const exportBookingsToCSV = () => {
   const encodedUri = encodeURI(csvContent)
   const link = document.createElement('a')
   link.setAttribute('href', encodedUri)
-  link.setAttribute('download', `audit_pemesanan_kosku_${new Date().toISOString().slice(0, 10)}.csv`)
+  link.setAttribute('download', `audit_pemesanan_kostara_${new Date().toISOString().slice(0, 10)}.csv`)
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)

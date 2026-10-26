@@ -16,12 +16,12 @@
     >
       <div class="max-w-7xl mx-auto px-margin flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2">
-          <img :src="logoUrl" alt="KosKu Logo" class="w-5 h-5 object-contain" />
-          <span class="font-bold text-primary text-sm">KosKu Indonesia</span>
+          <img :src="logoUrl" alt="Kostara Logo" class="w-6 h-6 object-contain" />
+          <span class="font-bold text-primary text-sm">Kostara Indonesia</span>
           <span>&mdash; Platform Pencarian & Sewa Kos Terpercaya di Seluruh Indonesia</span>
         </div>
         <div class="flex items-center gap-4 text-[11px] text-secondary">
-          <span>&copy; {{ new Date().getFullYear() }} KosKu</span>
+          <span>&copy; {{ new Date().getFullYear() }} Kostara</span>
           <span>&bull;</span>
           <span>Privasi & Keamanan</span>
           <span>&bull;</span>
@@ -46,7 +46,7 @@ import Navbar from './components/Navbar.vue'
 import FloatingWhatsAppSupport from './components/FloatingWhatsAppSupport.vue'
 import ToastContainer from './components/ToastContainer.vue'
 import ConfirmModal from './components/ConfirmModal.vue'
-import logoUrl from './assets/KosKu Housing Pin Logo.png'
+import logoUrl from './assets/logo.png'
 import { useAuthStore } from './stores/auth'
 
 const auth = useAuthStore()

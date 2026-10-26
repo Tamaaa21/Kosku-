@@ -86,7 +86,7 @@ export const useNotificationStore = defineStore('notification', () => {
         list.push({
           id: 'pemilik_welcome',
           type: 'info',
-          title: 'Panel Mitra KosKu Aktif',
+          title: 'Panel Mitra Kostara Aktif',
           message: 'Selamat datang di panel pengelola kos. Anda dapat memantau ketersediaan kamar dan transaksi sewa.',
           time: new Date(Date.now() - 3600000 * 24).toISOString(),
           icon: 'storefront',
@@ -172,7 +172,7 @@ export const useNotificationStore = defineStore('notification', () => {
         list.push({
           id: 'admin_system_healthy',
           type: 'system',
-          title: 'Sistem KosKu Berjalan Normal',
+          title: 'Sistem Kostara Berjalan Normal',
           message: 'Semua layanan REST API, Geocoding OpenStreetMap, dan Database tersinkronisasi optimal.',
           time: new Date().toISOString(),
           icon: 'dns',

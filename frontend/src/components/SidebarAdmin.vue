@@ -20,12 +20,12 @@
           <router-link to="/dashboard/admin" class="flex items-center gap-2.5" @click="isMobileOpen = false">
             <img
               :src="logoUrl"
-              alt="KosKu Logo"
-              class="w-9 h-9 object-contain rounded-xl bg-white/10 p-0.5 shadow-sm"
+              alt="Kostara Logo"
+              class="w-9 h-9 object-contain"
             />
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5 leading-none">
-                <span class="text-lg font-bold text-white tracking-tight">KosKu</span>
+                <span class="text-lg font-bold text-white tracking-tight">Kostara</span>
                 <span class="text-[9px] uppercase font-bold text-white bg-primary px-1.5 py-0.5 rounded tracking-wider">
                   Admin
                 </span>
@@ -194,7 +194,7 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import NotificationDropdown from './NotificationDropdown.vue'
-import logoUrl from '../assets/KosKu Housing Pin Logo.png'
+import logoUrl from '../assets/logo.png'
 import {
   PhX,
   PhSquaresFour,

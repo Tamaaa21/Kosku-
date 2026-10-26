@@ -5,7 +5,7 @@
       <div>
         <h1 class="text-2xl font-bold text-on-surface tracking-tight">Profil Saya</h1>
         <p class="text-xs text-on-surface-variant mt-0.5">
-          Kelola informasi akun pengguna, kontak, foto profil, dan keamanan akses sistem KosKu.
+          Kelola informasi akun pengguna, kontak, foto profil, dan keamanan akses sistem Kostara.
         </p>
       </div>
 
@@ -214,7 +214,7 @@
             <div class="pt-4 flex items-center justify-between border-t border-slate-100">
               <span class="text-[11px] text-on-surface-variant flex items-center gap-1">
                 <PhLock :size="15" class="text-emerald-600" />
-                Data tersinkronisasi dengan REST API KosKu
+                Data tersinkronisasi dengan REST API Kostara
               </span>
               <button
                 type="submit"
@@ -580,7 +580,7 @@ const ui = useUiStore()
 const handleLogout = async () => {
   const confirmed = await ui.confirm({
     title: 'Konfirmasi Keluar Akun',
-    message: 'Apakah Anda yakin ingin keluar dari akun KosKu Anda?',
+    message: 'Apakah Anda yakin ingin keluar dari akun Kostara Anda?',
     confirmText: 'Ya, Keluar',
     cancelText: 'Batal',
     confirmType: 'danger',
