@@ -11,14 +11,15 @@
     >
       <div
         v-if="isOpen"
-        class="absolute bottom-16 right-0 w-80 sm:w-88 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden"
+        @click.stop
+        class="absolute bottom-16 sm:bottom-20 right-0 w-[calc(100vw-3rem)] max-w-sm sm:w-88 bg-white rounded-2xl shadow-2xl border border-slate-100 overflow-hidden"
       >
         <!-- Header -->
         <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 p-4 text-white">
           <div class="flex items-center justify-between">
             <div class="flex items-center gap-3">
-              <div class="relative w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white border border-white/30 shrink-0">
-                <PhHeadset :size="22" weight="bold" />
+              <div class="relative w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white border border-white/30 shrink-0 overflow-hidden">
+                <img :src="csLogo" alt="Customer Service" class="w-full h-full object-cover object-center" />
                 <span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-700"></span>
               </div>
               <div>
@@ -90,37 +91,25 @@
       </div>
     </transition>
 
-    <!-- Floating Trigger Button -->
+    <!-- Floating Trigger Button (Langsung klik logo untuk pop up) -->
     <div class="relative flex items-center justify-end">
-      <!-- Tooltip Pill -->
-      <transition
-        enter-active-class="transition duration-150 ease-out"
-        enter-from-class="opacity-0 translate-x-2"
-        enter-to-class="opacity-100 translate-x-0"
-        leave-active-class="transition duration-100 ease-in"
-        leave-from-class="opacity-100 translate-x-0"
-        leave-to-class="opacity-0 translate-x-2"
-      >
-        <div
-          v-if="!isOpen && showPill"
-          @click="isOpen = true"
-          class="hidden sm:flex items-center gap-2 mr-3 px-3 py-1.5 bg-white text-on-surface font-semibold text-xs rounded-full shadow-lg border border-slate-100 cursor-pointer hover:bg-slate-50 transition"
-        >
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Butuh Bantuan? <strong>Chat CS</strong></span>
-        </div>
-      </transition>
-
       <!-- Main Trigger Button -->
       <button
-        @click="toggleOpen"
+        @click.stop="toggleOpen"
         type="button"
-        class="w-14 h-14 rounded-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-emerald-400/40 active:scale-95 group"
+        class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-white shadow-xl hover:shadow-2xl transition-all duration-300 flex items-center justify-center focus:outline-none focus:ring-4 focus:ring-emerald-400/40 active:scale-95 group overflow-hidden relative border-2 border-emerald-500/20 cursor-pointer"
         :aria-label="isOpen ? 'Tutup bantuan CS' : 'Buka customer service WhatsApp'"
         :title="isOpen ? 'Tutup' : 'Customer Service WhatsApp'"
       >
-        <PhWhatsappLogo v-if="!isOpen" :size="30" weight="fill" class="drop-shadow-xs" />
-        <PhX v-else :size="24" weight="bold" />
+        <template v-if="!isOpen">
+          <img
+            :src="csLogo"
+            alt="Customer Service"
+            class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform"
+          />
+          <span class="absolute top-0.5 right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+        </template>
+        <PhX v-else :size="24" weight="bold" class="text-slate-700" />
       </button>
     </div>
   </div>
@@ -130,6 +119,7 @@
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import csLogo from '../assets/image-cs.png'
 import { openWhatsAppChat, buildCustomerServiceTemplate } from '../utils/whatsapp'
 import {
   PhHeadset,
@@ -144,7 +134,6 @@ import {
 const auth = useAuthStore()
 const route = useRoute()
 const isOpen = ref(false)
-const showPill = ref(true)
 const widgetRef = ref(null)
 
 const isHidden = computed(() => {
@@ -191,7 +180,12 @@ const handleSelectTopic = (topicId) => {
 
 // Close when clicking outside
 const handleClickOutside = (e) => {
-  if (widgetRef.value && !widgetRef.value.contains(e.target)) {
+  if (!isOpen.value) return
+  if (!widgetRef.value) return
+  const path = e.composedPath ? e.composedPath() : []
+  if (path.includes(widgetRef.value)) return
+  if (e.target && !document.contains(e.target)) return
+  if (!widgetRef.value.contains(e.target)) {
     isOpen.value = false
   }
 }

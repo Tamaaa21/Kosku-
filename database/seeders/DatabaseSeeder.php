@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             KosSeeder::class,
             KamarSeeder::class,
             PemesananSeeder::class,
+            HeroBannerSeeder::class,
         ]);
     }
 }

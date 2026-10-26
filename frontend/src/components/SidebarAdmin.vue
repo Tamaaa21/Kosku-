@@ -97,6 +97,17 @@
             <span class="flex-1">Audit Log Pemesanan</span>
           </router-link>
 
+          <!-- 5. Kelola Hero Slider & Banner -->
+          <router-link
+            :to="{ path: '/dashboard/admin', query: { tab: 'banner' } }"
+            @click="isMobileOpen = false"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="($route.path === '/dashboard/admin' && ($route.query.tab === 'banner' || $route.query.tab === 'hero-slider')) ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            <PhSlideshow :size="20" weight="bold" />
+            <span class="flex-1">Banner & Hero Slider</span>
+          </router-link>
+
           <!-- 5. Profil Admin -->
           <router-link
             to="/profil"
@@ -181,6 +192,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useUiStore } from '../stores/ui'
 import NotificationDropdown from './NotificationDropdown.vue'
 import logoUrl from '../assets/KosKu Housing Pin Logo.png'
 import {
@@ -189,18 +201,30 @@ import {
   PhUsersThree,
   PhBuildings,
   PhReceipt,
+  PhSlideshow,
   PhShieldCheck,
   PhSignOut,
   PhList
 } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
+const ui = useUiStore()
 const router = useRouter()
 const isMobileOpen = ref(false)
 
 const handleLogout = async () => {
+  const confirmed = await ui.confirm({
+    title: 'Konfirmasi Keluar',
+    message: 'Apakah Anda yakin ingin mengakhiri sesi dan keluar dari akun?',
+    confirmText: 'Ya, Keluar',
+    cancelText: 'Batal',
+    confirmType: 'danger',
+  })
+  if (!confirmed) return
+
   isMobileOpen.value = false
   await auth.logout()
+  ui.success('Sesi administrator telah diakhiri.')
   router.push({ name: 'home' })
 }
 </script>

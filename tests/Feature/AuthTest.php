@@ -3,8 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Pengguna;
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
@@ -259,5 +262,147 @@ class AuthTest extends TestCase
 
         $this->assertNotNull($user->fresh()->foto);
         $this->assertStringContainsString('avatars/', $user->fresh()->foto);
+    }
+
+    public function test_user_can_request_password_reset_link(): void
+    {
+        Notification::fake();
+
+        $user = Pengguna::factory()->create([
+            'email' => 'user.reset@example.com',
+        ]);
+
+        $response = $this->postJson('/api/v1/auth/forgot-password', [
+            'email' => 'user.reset@example.com',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Tautan untuk mereset kata sandi telah dikirim ke email Anda.',
+            ]);
+
+        Notification::assertSentTo(
+            $user,
+            ResetPasswordNotification::class,
+            function (ResetPasswordNotification $notification) use ($user) {
+                $mail = $notification->toMail($user);
+                $this->assertStringContainsString('/reset-password?token=', $mail->actionUrl);
+                $this->assertStringContainsString(urlencode($user->email), $mail->actionUrl);
+
+                return true;
+            }
+        );
+    }
+
+    public function test_user_can_request_password_reset_link_with_custom_frontend_url(): void
+    {
+        Notification::fake();
+
+        $user = Pengguna::factory()->create([
+            'email' => 'user.custom@example.com',
+        ]);
+
+        $response = $this->postJson('/api/v1/forgot-password', [
+            'email' => 'user.custom@example.com',
+            'frontend_url' => 'https://frontend.kostku.com',
+        ]);
+
+        $response->assertStatus(200);
+
+        Notification::assertSentTo(
+            $user,
+            ResetPasswordNotification::class,
+            function (ResetPasswordNotification $notification) use ($user) {
+                $mail = $notification->toMail($user);
+                $this->assertStringStartsWith('https://frontend.kostku.com/reset-password?token=', $mail->actionUrl);
+
+                return true;
+            }
+        );
+    }
+
+    public function test_forgot_password_fails_if_email_is_invalid_or_not_found(): void
+    {
+        Notification::fake();
+
+        // Validation format error
+        $response = $this->postJson('/api/v1/auth/forgot-password', [
+            'email' => 'bukan-email-valid',
+        ]);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+
+        // User not found
+        $response = $this->postJson('/api/v1/auth/forgot-password', [
+            'email' => 'tidak.terdaftar@example.com',
+        ]);
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['email']);
+
+        Notification::assertNothingSent();
+    }
+
+    public function test_user_can_reset_password_with_valid_token(): void
+    {
+        $user = Pengguna::factory()->create([
+            'email' => 'reset.success@example.com',
+            'password' => Hash::make('password_lama123'),
+        ]);
+
+        // Generate valid token
+        $token = Password::broker()->createToken($user);
+
+        // Also create a dummy personal access token to verify it gets revoked upon password reset
+        $user->createToken('old_device_token');
+        $this->assertCount(1, $user->tokens);
+
+        $response = $this->postJson('/api/v1/auth/reset-password', [
+            'token' => $token,
+            'email' => 'reset.success@example.com',
+            'password' => 'password_baru456',
+            'password_confirmation' => 'password_baru456',
+        ]);
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'message' => 'Kata sandi berhasil diperbarui. Silakan masuk dengan kata sandi baru Anda.',
+            ]);
+
+        // Verify password was changed
+        $this->assertTrue(Hash::check('password_baru456', $user->fresh()->password));
+
+        // Verify previous tokens were revoked
+        $this->assertCount(0, $user->fresh()->tokens);
+    }
+
+    public function test_reset_password_fails_with_invalid_token(): void
+    {
+        Pengguna::factory()->create([
+            'email' => 'reset.fail@example.com',
+            'password' => Hash::make('password_lama123'),
+        ]);
+
+        $response = $this->postJson('/api/v1/auth/reset-password', [
+            'token' => 'invalid-token-12345',
+            'email' => 'reset.fail@example.com',
+            'password' => 'password_baru456',
+            'password_confirmation' => 'password_baru456',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['token']);
+    }
+
+    public function test_reset_password_fails_if_password_confirmation_does_not_match(): void
+    {
+        $response = $this->postJson('/api/v1/auth/reset-password', [
+            'token' => 'any-token',
+            'email' => 'any@example.com',
+            'password' => 'password_baru456',
+            'password_confirmation' => 'password_beda789',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
     }
 }

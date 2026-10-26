@@ -391,6 +391,7 @@
 <script setup>
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useUiStore } from '../stores/ui'
 import {
   PhShieldCheck,
   PhCheckCircle,
@@ -574,8 +575,20 @@ const savePassword = async () => {
   }
 }
 
+const ui = useUiStore()
+
 const handleLogout = async () => {
+  const confirmed = await ui.confirm({
+    title: 'Konfirmasi Keluar Akun',
+    message: 'Apakah Anda yakin ingin keluar dari akun KosKu Anda?',
+    confirmText: 'Ya, Keluar',
+    cancelText: 'Batal',
+    confirmType: 'danger',
+  })
+  if (!confirmed) return
+
   await auth.logout()
+  ui.success('Anda telah berhasil keluar.')
   router.push({ name: 'home' })
 }
 </script>

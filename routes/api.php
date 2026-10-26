@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\AdminUserController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\FacilityController;
+use App\Http\Controllers\Api\V1\HeroBannerController;
 use App\Http\Controllers\Api\V1\KosController;
 use App\Http\Controllers\Api\V1\ReviewController;
 use App\Http\Controllers\Api\V1\RoomController;
@@ -18,10 +19,14 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::prefix('auth')->name('auth.')->group(function (): void {
         Route::post('/register', [AuthController::class, 'register'])->name('register');
         Route::post('/login', [AuthController::class, 'login'])->name('login');
+        Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
+        Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
     });
     // Legacy aliases
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
+    Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 
     // Kos (Properties)
     Route::get('/kos', [KosController::class, 'index'])->name('kos.index');
@@ -35,6 +40,9 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     // Facilities
     Route::get('/facilities', [FacilityController::class, 'index'])->name('facilities.index');
     Route::get('/fasilitas', [FacilityController::class, 'index']); // Legacy alias
+
+    // Hero Banners (Homepage Slider)
+    Route::get('/hero-banners', [HeroBannerController::class, 'publicIndex'])->name('hero-banners.index');
 
     // ------------------------------------------------------------------------
     // Authenticated Endpoints (Sanctum)
@@ -112,6 +120,14 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
             // Kos Moderation
             Route::get('/admin/kos', [AdminKosController::class, 'index'])->name('admin.kos.index');
             Route::delete('/admin/kos/{id}', [AdminKosController::class, 'destroy'])->name('admin.kos.destroy');
+
+            // Hero Banner Slider Management
+            Route::get('/admin/hero-banners', [HeroBannerController::class, 'index'])->name('admin.hero-banners.index');
+            Route::post('/admin/hero-banners', [HeroBannerController::class, 'store'])->name('admin.hero-banners.store');
+            Route::get('/admin/hero-banners/{id}', [HeroBannerController::class, 'show'])->name('admin.hero-banners.show');
+            Route::put('/admin/hero-banners/{id}', [HeroBannerController::class, 'update'])->name('admin.hero-banners.update');
+            Route::patch('/admin/hero-banners/{id}/status', [HeroBannerController::class, 'updateStatus'])->name('admin.hero-banners.update-status');
+            Route::delete('/admin/hero-banners/{id}', [HeroBannerController::class, 'destroy'])->name('admin.hero-banners.destroy');
         });
     });
 });

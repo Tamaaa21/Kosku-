@@ -10,9 +10,10 @@
     >
       <div
         v-if="ui.confirmModal.isOpen"
-        class="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-inverse-surface/60 backdrop-blur-xs"
+        class="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs select-none"
         role="dialog"
         aria-modal="true"
+        @click="ui.handleConfirm(false)"
         @keydown.esc="ui.handleConfirm(false)"
       >
         <div

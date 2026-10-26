@@ -206,10 +206,17 @@ const handleRemove = (kos) => {
   ui.info(`Kos "${kos.nama}" dihapus dari favorit.`)
 }
 
-const confirmClearFavorites = () => {
-  if (confirm('Apakah Anda yakin ingin menghapus semua kos dari daftar favorit?')) {
-    favoritesStore.clearFavorites()
-    ui.info('Daftar kos tersimpan berhasil dikosongkan.')
-  }
+const confirmClearFavorites = async () => {
+  const confirmed = await ui.confirm({
+    title: 'Kosongkan Kos Tersimpan',
+    message: 'Apakah Anda yakin ingin menghapus seluruh properti dari daftar favorit Anda?',
+    confirmText: 'Ya, Hapus Semua',
+    cancelText: 'Batal',
+    confirmType: 'danger',
+  })
+  if (!confirmed) return
+
+  favoritesStore.clearFavorites()
+  ui.info('Daftar kos tersimpan berhasil dikosongkan.')
 }
 </script>

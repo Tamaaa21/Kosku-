@@ -3,13 +3,16 @@
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Auth\ForgotPasswordRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
+use App\Http\Requests\Auth\ResetPasswordRequest;
 use App\Http\Resources\UserResource;
 use App\Models\Pengguna;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
 
@@ -191,6 +194,69 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Kata sandi berhasil diperbarui.',
+        ]);
+    }
+
+    /**
+     * Send a password reset link to the given user.
+     */
+    public function forgotPassword(ForgotPasswordRequest $request): JsonResponse
+    {
+        $status = Password::sendResetLink($request->only('email'));
+
+        if ($status === Password::RESET_LINK_SENT) {
+            return response()->json([
+                'message' => 'Tautan untuk mereset kata sandi telah dikirim ke email Anda.',
+            ]);
+        }
+
+        if ($status === Password::RESET_THROTTLED) {
+            throw ValidationException::withMessages([
+                'email' => ['Harap tunggu beberapa saat sebelum mencoba meminta tautan reset kembali.'],
+            ]);
+        }
+
+        throw ValidationException::withMessages([
+            'email' => ['Kami tidak dapat menemukan pengguna dengan alamat email tersebut.'],
+        ]);
+    }
+
+    /**
+     * Reset the user's password using token.
+     */
+    public function resetPassword(ResetPasswordRequest $request): JsonResponse
+    {
+        $status = Password::reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function (Pengguna $user, string $password): void {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                ])->save();
+
+                $user->tokens()->delete();
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            return response()->json([
+                'message' => 'Kata sandi berhasil diperbarui. Silakan masuk dengan kata sandi baru Anda.',
+            ]);
+        }
+
+        if ($status === Password::INVALID_TOKEN) {
+            throw ValidationException::withMessages([
+                'token' => ['Token reset kata sandi tidak valid atau sudah kedaluwarsa.'],
+            ]);
+        }
+
+        if ($status === Password::INVALID_USER) {
+            throw ValidationException::withMessages([
+                'email' => ['Kami tidak dapat menemukan pengguna dengan alamat email tersebut.'],
+            ]);
+        }
+
+        throw ValidationException::withMessages([
+            'email' => ['Gagal mengatur ulang kata sandi. Silakan coba lagi.'],
         ]);
     }
 }

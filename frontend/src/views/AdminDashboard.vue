@@ -77,6 +77,26 @@
           </svg>
           Segarkan Data
         </button>
+
+        <button
+          v-if="activeTab === 'banner' || activeTab === 'hero-slider'"
+          @click="openAddBannerModal"
+          class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-container text-white text-xs font-semibold px-4 py-2 rounded-xl transition shadow-sm active:scale-95"
+        >
+          <PhPlus :size="16" weight="bold" />
+          <span>Tambah Banner Slider</span>
+        </button>
+        <button
+          v-if="activeTab === 'banner' || activeTab === 'hero-slider'"
+          @click="fetchAdminBanners"
+          :disabled="loadingBanners"
+          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
+        >
+          <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': loadingBanners }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Segarkan Data
+        </button>
       </div>
     </div>
 
@@ -1066,8 +1086,441 @@
     </div>
 
     <!-- ================================================================= -->
-    <!-- MODAL: PRATINJAU DETAIL KOS (MODUL 4) -->
+    <!-- TAB 4: KELOLA HERO BANNER & SLIDER -->
     <!-- ================================================================= -->
+    <div v-else-if="activeTab === 'banner' || activeTab === 'hero-slider'" class="space-y-8">
+      <!-- 1. Interactive Live Slider Preview -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm overflow-hidden">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">
+                Pratinjau Langsung Beranda (Slider Otomatis 5 Detik)
+              </h3>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">
+              Simulasi tampilan hero section beranda dengan background HD dan rotasi tiap 5 detik.
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button
+              @click="toggleAdminPreviewPlayback"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-slate-100 text-xs font-semibold text-slate-700 transition"
+              type="button"
+            >
+              <component :is="adminPreviewPlaying ? PhPause : PhPlay" :size="14" weight="bold" />
+              <span>{{ adminPreviewPlaying ? 'Jeda Slider' : 'Putar Slider' }}</span>
+            </button>
+            <span class="text-xs font-bold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-xl">
+              Slide {{ bannersList.length > 0 ? adminPreviewIndex + 1 : 0 }} / {{ bannersList.length }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Slider Stage -->
+        <div class="relative w-full h-64 sm:h-80 rounded-2xl overflow-hidden shadow-inner flex items-center justify-start p-6 sm:p-10 select-none">
+          <!-- Background image layer with crossfade -->
+          <div
+            v-for="(banner, idx) in (bannersList.length > 0 ? bannersList : adminDefaultBanners)"
+            :key="banner.id || idx"
+            class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out"
+            :class="idx === adminPreviewIndex ? 'opacity-100 z-0' : 'opacity-0 -z-10'"
+            :style="{ backgroundImage: `url('${banner.gambar_url}')` }"
+          ></div>
+
+          <!-- Gradient overlay -->
+          <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/55 to-slate-950/20 z-0"></div>
+
+          <!-- Content overlay -->
+          <div class="relative z-10 max-w-lg text-left">
+            <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/60 backdrop-blur-md border border-white/15 text-white text-[11px] font-medium mb-2.5 shadow-sm">
+              <PhMapPin :size="14" weight="fill" class="text-amber-400 shrink-0" />
+              <span>{{ currentAdminPreviewBanner?.badge_text || 'Cari kos di seluruh Indonesia' }}</span>
+            </div>
+            <h4 class="text-xl sm:text-2xl font-extrabold text-white leading-tight drop-shadow-sm">
+              {{ currentAdminPreviewBanner?.judul || 'Kos Nyaman, Hidup Lebih Mudah' }}
+            </h4>
+            <p class="text-xs text-slate-200/90 mt-2 line-clamp-2 max-w-md">
+              {{ currentAdminPreviewBanner?.subjudul || 'Temukan kos terbaik sesuai kebutuhanmu.' }}
+            </p>
+            <div class="flex items-center gap-1.5 mt-4">
+              <button
+                v-for="(b, idx) in (bannersList.length > 0 ? bannersList : adminDefaultBanners)"
+                :key="idx"
+                @click="adminPreviewIndex = idx"
+                class="h-1.5 rounded-full transition-all duration-300"
+                :class="idx === adminPreviewIndex ? 'w-6 bg-amber-400' : 'w-1.5 bg-white/40 hover:bg-white/70'"
+                type="button"
+              ></button>
+              <span class="text-[10px] text-white/70 ml-2 font-mono">Interval: 5s</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Stats Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Total Slide Hero</span>
+          <div class="text-2xl font-extrabold text-slate-900 tracking-tight">{{ bannersList.length }} Slide</div>
+          <p class="text-xs text-slate-400 mt-1">Total banner terdaftar di sistem</p>
+        </div>
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Slide Aktif di Beranda</span>
+          <div class="text-2xl font-extrabold text-emerald-600 tracking-tight">
+            {{ bannersList.filter(b => b.is_active).length }} Slide
+          </div>
+          <p class="text-xs text-slate-400 mt-1">Ditampilkan pada slider pengunjung publik</p>
+        </div>
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-5 shadow-sm">
+          <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-1">Durasi Interval Slider</span>
+          <div class="text-2xl font-extrabold text-primary tracking-tight">5 Detik</div>
+          <p class="text-xs text-slate-400 mt-1">Rotasi otomatis latar belakang beranda</p>
+        </div>
+      </div>
+
+      <!-- 3. Banners List Grid -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Daftar Banner Latar Belakang HD</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Kelola gambar HD, judul, teks badge, urutan, dan status aktif slide beranda.</p>
+          </div>
+          <button
+            @click="openAddBannerModal"
+            class="inline-flex items-center gap-1.5 bg-primary hover:bg-primary-container text-white text-xs font-bold px-4 py-2.5 rounded-xl transition shadow-sm active:scale-95"
+            type="button"
+          >
+            <PhPlus :size="16" weight="bold" />
+            <span>Tambah Banner Baru</span>
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div v-if="loadingBanners" class="p-12 text-center">
+          <svg class="w-8 h-8 mx-auto animate-spin text-primary mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <p class="text-xs text-slate-500 font-medium">Memuat data banner slider...</p>
+        </div>
+
+        <!-- Empty State -->
+        <div v-else-if="bannersList.length === 0" class="p-12 text-center">
+          <PhImage :size="48" weight="duotone" class="mx-auto text-slate-300 mb-3" />
+          <p class="text-sm font-bold text-slate-700">Belum ada banner slider tersimpan</p>
+          <p class="text-xs text-slate-400 mt-1 max-w-sm mx-auto">Klik tombol "Tambah Banner Baru" untuk memasukkan foto background HD kamar kos.</p>
+        </div>
+
+        <!-- Cards Grid -->
+        <div v-else class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div
+            v-for="(banner, idx) in bannersList"
+            :key="banner.id"
+            class="rounded-2xl border border-slate-200 overflow-hidden bg-slate-50/50 hover:bg-white hover:shadow-md transition-all flex flex-col justify-between"
+          >
+            <!-- Image Header -->
+            <div class="relative w-full aspect-[16/9] bg-slate-200 overflow-hidden group">
+              <img
+                :src="banner.gambar_url"
+                :alt="banner.judul || 'Banner HD'"
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-black/30"></div>
+
+              <!-- Top badges -->
+              <div class="absolute top-3 left-3 flex items-center gap-1.5">
+                <span class="bg-black/60 backdrop-blur-md text-amber-400 font-bold text-[10px] px-2.5 py-0.5 rounded-full border border-white/10">
+                  HD 1080p
+                </span>
+                <span class="bg-black/60 backdrop-blur-md text-white font-bold text-[10px] px-2 py-0.5 rounded-full border border-white/10">
+                  Urutan #{{ banner.urutan }}
+                </span>
+              </div>
+
+              <!-- Active Toggle on Image -->
+              <div class="absolute top-3 right-3">
+                <button
+                  @click="toggleBannerActive(banner)"
+                  class="px-2.5 py-1 rounded-full text-[10px] font-extrabold transition shadow-sm flex items-center gap-1"
+                  :class="banner.is_active ? 'bg-emerald-500 text-white hover:bg-emerald-600' : 'bg-slate-700/80 text-slate-300 hover:bg-slate-800'"
+                  :title="banner.is_active ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan'"
+                  type="button"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full" :class="banner.is_active ? 'bg-white' : 'bg-rose-400'"></span>
+                  <span>{{ banner.is_active ? 'Aktif' : 'Nonaktif' }}</span>
+                </button>
+              </div>
+
+              <!-- Bottom Content Overlay -->
+              <div class="absolute bottom-3 left-3 right-3 text-white">
+                <span v-if="banner.badge_text" class="text-[10px] font-semibold text-amber-300 block mb-0.5">
+                  📍 {{ banner.badge_text }}
+                </span>
+                <h4 class="text-sm font-bold truncate">{{ banner.judul || 'Tanpa Judul' }}</h4>
+              </div>
+            </div>
+
+            <!-- Body Details -->
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+              <p class="text-xs text-slate-600 line-clamp-2">
+                {{ banner.subjudul || 'Tidak ada deskripsi subjudul.' }}
+              </p>
+
+              <!-- Image URL & Actions -->
+              <div class="pt-3 border-t border-slate-200/80 flex items-center justify-between text-xs">
+                <span class="text-[11px] text-slate-400 font-mono truncate max-w-[180px]" :title="banner.gambar_url">
+                  {{ banner.gambar_url }}
+                </span>
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <button
+                    @click="openEditBannerModal(banner)"
+                    class="p-2 rounded-xl text-slate-600 hover:text-primary hover:bg-slate-100 transition cursor-pointer"
+                    title="Edit Banner"
+                    type="button"
+                  >
+                    <PhPencilSimple :size="16" weight="bold" />
+                  </button>
+                  <button
+                    @click="confirmDeleteBanner(banner)"
+                    class="p-2 rounded-xl text-rose-500 hover:text-rose-700 hover:bg-rose-50 transition cursor-pointer"
+                    title="Hapus Banner"
+                    type="button"
+                  >
+                    <PhTrash :size="16" weight="bold" />
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: TAMBAH / EDIT HERO BANNER SLIDER -->
+    <!-- ================================================================= -->
+    <div
+      v-if="showBannerModal"
+      class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+    >
+      <div class="bg-white rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-100 my-auto flex flex-col max-h-[90vh] overflow-hidden">
+        <!-- Header -->
+        <div class="shrink-0 px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-white">
+          <div class="flex items-center gap-2.5">
+            <div class="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+              <PhSlideshow :size="22" weight="bold" />
+            </div>
+            <div>
+              <h3 class="text-base font-bold text-slate-900">
+                {{ editingBannerId ? 'Edit Banner Slider' : 'Tambah Banner Slider Baru' }}
+              </h3>
+              <p class="text-xs text-slate-400">
+                Pengaturan gambar HD dan konten slide latar belakang 5 detik.
+              </p>
+            </div>
+          </div>
+          <button @click="showBannerModal = false" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none cursor-pointer">&times;</button>
+        </div>
+
+        <!-- Body Form -->
+        <form @submit.prevent="handleSaveBanner" class="flex-1 overflow-y-auto p-6 space-y-4">
+          <!-- Judul Banner -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Judul Banner (Pisahkan koma untuk aksen kuning di beranda)
+            </label>
+            <input
+              v-model="bannerForm.judul"
+              type="text"
+              class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary/20 transition"
+              placeholder="Contoh: Kos Nyaman, Hidup Lebih Mudah"
+            />
+            <span class="text-[10px] text-slate-400 mt-1 block">
+              Kata setelah tanda koma otomatis diwarnai kuning aksen seperti pada desain.
+            </span>
+          </div>
+
+          <!-- Subjudul -->
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">
+              Subjudul Deskripsi
+            </label>
+            <textarea
+              v-model="bannerForm.subjudul"
+              rows="2"
+              class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary/20 transition"
+              placeholder="Temukan kos terbaik sesuai kebutuhanmu. Lokasi strategis, fasilitas lengkap, harga transparan."
+            ></textarea>
+          </div>
+
+          <!-- Badge Text & Urutan Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">
+                Teks Badge / Tagline
+              </label>
+              <input
+                v-model="bannerForm.badge_text"
+                type="text"
+                class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary/20 transition"
+                placeholder="Cari kos di seluruh Indonesia"
+              />
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">
+                Urutan Tampilan
+              </label>
+              <input
+                v-model.number="bannerForm.urutan"
+                type="number"
+                min="0"
+                class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary/20 transition"
+              />
+            </div>
+          </div>
+
+          <!-- Status Aktif -->
+          <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+            <input
+              id="banner-is-active"
+              v-model="bannerForm.is_active"
+              type="checkbox"
+              class="w-4 h-4 text-primary rounded border-slate-300 focus:ring-primary cursor-pointer"
+            />
+            <label for="banner-is-active" class="text-xs font-bold text-slate-800 cursor-pointer">
+              Aktifkan slide ini langsung di slider beranda
+            </label>
+          </div>
+
+          <!-- Gambar Background HD -->
+          <div class="space-y-3 pt-2">
+            <label class="block text-xs font-bold text-slate-700">
+              Pilihan Gambar Background HD <span class="text-rose-500">*</span>
+            </label>
+
+            <!-- URL Input -->
+            <div class="space-y-1.5">
+              <input
+                v-model="bannerForm.gambar_url"
+                type="text"
+                class="w-full px-3.5 py-2.5 text-xs rounded-xl border border-slate-200 focus:border-primary focus:ring-1 focus:ring-primary/20 transition"
+                placeholder="https://images.unsplash.com/... atau URL gambar HD"
+                required
+              />
+            </div>
+
+            <!-- Upload File Option -->
+            <div class="p-3 border border-dashed border-slate-300 rounded-2xl bg-slate-50 text-center">
+              <input
+                ref="bannerFileInput"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                class="hidden"
+                @change="handleBannerFileUpload"
+              />
+              <button
+                type="button"
+                @click="$refs.bannerFileInput?.click()"
+                :disabled="uploadingBannerImg"
+                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-100 transition shadow-xs cursor-pointer"
+              >
+                <PhUploadSimple :size="16" weight="bold" />
+                <span>{{ uploadingBannerImg ? 'Mengunggah Berkas...' : 'Unggah File Gambar dari Komputer' }}</span>
+              </button>
+              <p class="text-[10px] text-slate-400 mt-1">Format: JPG, PNG, WEBP (Maksimal 2MB)</p>
+            </div>
+
+            <!-- Preset HD Room Buttons -->
+            <div>
+              <span class="text-[11px] font-bold text-slate-500 block mb-1.5">Pilihan Cepat Foto HD Rekomendasi:</span>
+              <div class="flex flex-wrap gap-1.5">
+                <button
+                  v-for="(preset, pIdx) in hdPresetPhotos"
+                  :key="pIdx"
+                  type="button"
+                  @click="bannerForm.gambar_url = preset.url"
+                  class="px-2.5 py-1 rounded-lg text-[11px] font-semibold border transition cursor-pointer"
+                  :class="bannerForm.gambar_url === preset.url ? 'bg-primary text-white border-primary' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'"
+                >
+                  {{ preset.label }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Live Image Preview -->
+            <div v-if="bannerForm.gambar_url" class="mt-3">
+              <span class="text-[11px] font-bold text-slate-500 block mb-1">Pratinjau Gambar:</span>
+              <div class="relative w-full aspect-[16/9] rounded-2xl overflow-hidden border border-slate-200 bg-slate-100">
+                <img
+                  :src="bannerForm.gambar_url"
+                  alt="Pratinjau"
+                  class="w-full h-full object-cover"
+                />
+                <span class="absolute top-2 left-2 bg-black/60 backdrop-blur-md text-amber-400 font-bold text-[10px] px-2 py-0.5 rounded-full">
+                  HD Preview
+                </span>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Footer -->
+        <div class="shrink-0 px-6 py-3.5 border-t border-slate-100 bg-slate-50/70 flex items-center justify-end gap-2.5">
+          <button
+            type="button"
+            @click="showBannerModal = false"
+            class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-200/60 rounded-xl transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            @click="handleSaveBanner"
+            :disabled="savingBanner || !bannerForm.gambar_url"
+            class="px-5 py-2 text-xs font-bold bg-primary hover:bg-primary-container text-white rounded-xl transition shadow-sm disabled:opacity-50 flex items-center gap-2 cursor-pointer"
+          >
+            <svg v-if="savingBanner" class="w-3.5 h-3.5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            <span>{{ savingBanner ? 'Menyimpan...' : 'Simpan Banner' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL: KONFIRMASI HAPUS BANNER -->
+    <div
+      v-if="showDeleteBannerConfirmModal"
+      class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100 text-center">
+        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center mx-auto mb-3">
+          <PhTrash :size="24" weight="bold" />
+        </div>
+        <h4 class="text-sm font-bold text-slate-900 mb-1">Hapus Banner Slider Ini?</h4>
+        <p class="text-xs text-slate-500 mb-5 leading-relaxed">
+          Banner "{{ bannerToDelete?.judul || 'HD Slider' }}" akan dihapus secara permanen dari rotasi slider beranda.
+        </p>
+        <div class="flex items-center justify-center gap-2">
+          <button
+            type="button"
+            @click="showDeleteBannerConfirmModal = false"
+            class="px-4 py-2 text-xs font-bold text-slate-600 hover:bg-slate-100 rounded-xl transition cursor-pointer"
+          >
+            Batal
+          </button>
+          <button
+            type="button"
+            @click="executeDeleteBanner"
+            :disabled="deletingBanner"
+            class="px-4 py-2 text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white rounded-xl transition shadow-sm disabled:opacity-50 cursor-pointer"
+          >
+            {{ deletingBanner ? 'Menghapus...' : 'Ya, Hapus' }}
+          </button>
+        </div>
+      </div>
+    </div>
     <div
       v-if="showKosPreviewModal"
       class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
@@ -1530,7 +1983,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, reactive, computed, watch } from 'vue'
+import { ref, onMounted, onUnmounted, reactive, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import {
   PhSquaresFour,
@@ -1549,17 +2002,29 @@ import {
   PhMapPin,
   PhCheck,
   PhShieldCheck,
+  PhSlideshow,
+  PhPlus,
+  PhPencilSimple,
+  PhTrash,
+  PhImage,
+  PhUploadSimple,
+  PhPlay,
+  PhPause,
 } from '@phosphor-icons/vue'
 import api from '../services/api'
+import { useUiStore } from '../stores/ui'
 import { openWhatsAppChat } from '../utils/whatsapp'
 
 const route = useRoute()
 const router = useRouter()
+const ui = useUiStore()
 
-const validTabs = ['ringkasan', 'pengguna', 'kos', 'pemesanan']
+const validTabs = ['ringkasan', 'pengguna', 'kos', 'pemesanan', 'banner', 'hero-slider']
 let startTab = 'ringkasan'
 if (route.query.tab === 'pencari' || route.query.tab === 'pemilik') {
   startTab = 'pengguna'
+} else if (route.query.tab === 'banner' || route.query.tab === 'hero-slider') {
+  startTab = 'banner'
 } else if (validTabs.includes(route.query.tab)) {
   startTab = route.query.tab
 }
@@ -1578,6 +2043,8 @@ watch(
       if (newTab === 'pencari') userRoleFilter.value = 'pencari'
       if (newTab === 'pemilik') userRoleFilter.value = 'pemilik'
       fetchUsers()
+    } else if (newTab === 'banner' || newTab === 'hero-slider') {
+      activeTab.value = 'banner'
     } else if (newTab && validTabs.includes(newTab)) {
       activeTab.value = newTab
     }
@@ -1616,6 +2083,14 @@ const activeTabMeta = computed(() => {
         title: 'Audit Log Pemesanan (Audit Trail)',
         badge: `${allBookings.value.length} Transaksi`,
         description: 'Rekapitulasi dan audit transaksi reservasi sewa kos seluruh Indonesia.',
+      }
+    case 'banner':
+    case 'hero-slider':
+      return {
+        icon: PhSlideshow,
+        title: 'Kelola Banner & Hero Slider 5 Detik',
+        badge: `${bannersList.value.length} Slide`,
+        description: 'Kelola gambar background HD, judul, badge, dan urutan slider beranda utama.',
       }
     default:
       return {
@@ -1894,9 +2369,13 @@ const selectKosPreview = (kos) => {
 
 const deleteKosModerasi = async (kos) => {
   if (!kos) return
-  const confirmDelete = window.confirm(
-    `Konfirmasi Moderasi Admin:\n\nApakah Anda yakin ingin MENGHAPUS properti "${kos.nama}" (#KOS-${kos.id})?\n\nTindakan ini bersifat permanen dan akan menghapus seluruh data kamar, fasilitas terkait, dan riwayat pesanan kos ini.`
-  )
+  const confirmDelete = await ui.confirm({
+    title: 'Hapus Properti Kos (Moderasi)',
+    message: `Apakah Anda yakin ingin MENGHAPUS properti "${kos.nama}" (#KOS-${kos.id})?\n\nTindakan ini bersifat permanen dan akan menghapus seluruh data kamar, fasilitas terkait, dan riwayat pesanan kos ini.`,
+    confirmText: 'Ya, Hapus Properti',
+    cancelText: 'Batal',
+    confirmType: 'danger',
+  })
   if (!confirmDelete) return
 
   deletingKosId.value = kos.id
@@ -1981,7 +2460,14 @@ const openBookingDetail = (booking) => {
 
 const updateBookingStatus = async (booking, newStatus) => {
   if (!booking) return
-  if (!confirm(`Konfirmasi Tindakan Admin:\n\nUbah status pemesanan #ORD-${booking.id} menjadi "${newStatus.toUpperCase()}"?`)) {
+  const confirmed = await ui.confirm({
+    title: 'Konfirmasi Status Pemesanan',
+    message: `Ubah status pemesanan #ORD-${booking.id} menjadi "${newStatus.toUpperCase()}"?`,
+    confirmText: 'Ya, Ubah Status',
+    cancelText: 'Batal',
+    confirmType: newStatus === 'ditolak' || newStatus === 'dibatalkan' ? 'danger' : 'primary',
+  })
+  if (!confirmed) {
     return
   }
 
@@ -2089,10 +2575,234 @@ const formatDateOnly = (dateStr) => {
   })
 }
 
+// =========================================================================
+// BANNER & HERO SLIDER MANAGEMENT (MODUL 5)
+// =========================================================================
+const bannersList = ref([])
+const loadingBanners = ref(false)
+const showBannerModal = ref(false)
+const editingBannerId = ref(null)
+const savingBanner = ref(false)
+const uploadingBannerImg = ref(false)
+const bannerFileInput = ref(null)
+
+const bannerForm = reactive({
+  judul: '',
+  subjudul: '',
+  badge_text: '',
+  gambar_url: '',
+  urutan: 1,
+  is_active: true,
+})
+
+const showDeleteBannerConfirmModal = ref(false)
+const bannerToDelete = ref(null)
+const deletingBanner = ref(false)
+
+const adminDefaultBanners = [
+  {
+    id: 1,
+    judul: 'Kos Nyaman, Hidup Lebih Mudah',
+    subjudul: 'Temukan kos terbaik sesuai kebutuhanmu. Lokasi strategis, fasilitas lengkap, harga transparan.',
+    badge_text: 'Cari kos di seluruh Indonesia',
+    gambar_url: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070&auto=format&fit=crop',
+    urutan: 1,
+    is_active: true,
+  },
+  {
+    id: 2,
+    judul: 'Hunian Idaman, Dekat Kampus & Kantor',
+    subjudul: 'Fasilitas lengkap dengan akses mudah, WiFi super cepat, dan lingkungan nyaman.',
+    badge_text: 'Pilihan Hunian Eksklusif & Nyaman',
+    gambar_url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2071&auto=format&fit=crop',
+    urutan: 2,
+    is_active: true,
+  },
+]
+
+const hdPresetPhotos = [
+  {
+    label: 'Kamar Modern & Balkon (Sesuai Desain)',
+    url: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070&auto=format&fit=crop',
+  },
+  {
+    label: 'Kamar Minimalis Aesthetic',
+    url: 'https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?q=80&w=2071&auto=format&fit=crop',
+  },
+  {
+    label: 'Studio Kos Warm & Kayu',
+    url: 'https://images.unsplash.com/photo-1540518614846-7ede433c4ef7?q=80&w=2071&auto=format&fit=crop',
+  },
+  {
+    label: 'Scandinavian Bedroom Cerah',
+    url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?q=80&w=2070&auto=format&fit=crop',
+  },
+]
+
+const adminPreviewIndex = ref(0)
+const adminPreviewPlaying = ref(true)
+let adminPreviewTimer = null
+
+const currentAdminPreviewBanner = computed(() => {
+  const list = bannersList.value.length > 0 ? bannersList.value : adminDefaultBanners
+  return list[adminPreviewIndex.value % list.length]
+})
+
+const startAdminPreviewSlider = () => {
+  stopAdminPreviewSlider()
+  adminPreviewTimer = setInterval(() => {
+    if (adminPreviewPlaying.value) {
+      const total = bannersList.value.length > 0 ? bannersList.value.length : adminDefaultBanners.length
+      if (total > 1) {
+        adminPreviewIndex.value = (adminPreviewIndex.value + 1) % total
+      }
+    }
+  }, 5000)
+}
+
+const stopAdminPreviewSlider = () => {
+  if (adminPreviewTimer) {
+    clearInterval(adminPreviewTimer)
+    adminPreviewTimer = null
+  }
+}
+
+const toggleAdminPreviewPlayback = () => {
+  adminPreviewPlaying.value = !adminPreviewPlaying.value
+}
+
+const fetchAdminBanners = async () => {
+  loadingBanners.value = true
+  try {
+    const res = await api.get('/admin/hero-banners')
+    bannersList.value = res.data?.data || []
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || 'Gagal memuat data banner slider.'
+  } finally {
+    loadingBanners.value = false
+  }
+}
+
+const openAddBannerModal = () => {
+  editingBannerId.value = null
+  bannerForm.judul = 'Kos Nyaman, Hidup Lebih Mudah'
+  bannerForm.subjudul = 'Temukan kos terbaik sesuai kebutuhanmu. Lokasi strategis, fasilitas lengkap, harga transparan.'
+  bannerForm.badge_text = 'Cari kos di seluruh Indonesia'
+  bannerForm.gambar_url = 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=2070&auto=format&fit=crop'
+  bannerForm.urutan = bannersList.value.length + 1
+  bannerForm.is_active = true
+  showBannerModal.value = true
+}
+
+const openEditBannerModal = (banner) => {
+  editingBannerId.value = banner.id
+  bannerForm.judul = banner.judul || ''
+  bannerForm.subjudul = banner.subjudul || ''
+  bannerForm.badge_text = banner.badge_text || ''
+  bannerForm.gambar_url = banner.gambar_url || ''
+  bannerForm.urutan = banner.urutan ?? 0
+  bannerForm.is_active = !!banner.is_active
+  showBannerModal.value = true
+}
+
+const handleSaveBanner = async () => {
+  if (!bannerForm.gambar_url) {
+    errorMsg.value = 'URL atau berkas gambar background HD wajib ditentukan.'
+    return
+  }
+
+  savingBanner.value = true
+  try {
+    if (editingBannerId.value) {
+      await api.put(`/admin/hero-banners/${editingBannerId.value}`, bannerForm)
+      successMsg.value = 'Banner slider berhasil diperbarui.'
+    } else {
+      await api.post('/admin/hero-banners', bannerForm)
+      successMsg.value = 'Banner slider baru berhasil ditambahkan.'
+    }
+    showBannerModal.value = false
+    await fetchAdminBanners()
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || 'Gagal menyimpan banner slider.'
+  } finally {
+    savingBanner.value = false
+  }
+}
+
+const toggleBannerActive = async (banner) => {
+  const newStatus = !banner.is_active
+  banner.is_active = newStatus
+  try {
+    await api.patch(`/admin/hero-banners/${banner.id}/status`, {
+      is_active: newStatus,
+    })
+    successMsg.value = `Status banner #${banner.id} berhasil diubah menjadi ${newStatus ? 'Aktif' : 'Nonaktif'}.`
+  } catch (err) {
+    banner.is_active = !newStatus
+    errorMsg.value = err.response?.data?.message || 'Gagal memperbarui status banner.'
+  }
+}
+
+const confirmDeleteBanner = (banner) => {
+  bannerToDelete.value = banner
+  showDeleteBannerConfirmModal.value = true
+}
+
+const executeDeleteBanner = async () => {
+  if (!bannerToDelete.value) return
+  deletingBanner.value = true
+  try {
+    await api.delete(`/admin/hero-banners/${bannerToDelete.value.id}`)
+    successMsg.value = 'Banner slider berhasil dihapus.'
+    showDeleteBannerConfirmModal.value = false
+    bannerToDelete.value = null
+    await fetchAdminBanners()
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || 'Gagal menghapus banner slider.'
+  } finally {
+    deletingBanner.value = false
+  }
+}
+
+const handleBannerFileUpload = async (e) => {
+  const file = e.target.files?.[0]
+  if (!file) return
+
+  if (file.size > 2 * 1024 * 1024) {
+    errorMsg.value = 'Ukuran berkas gambar melebihi 2MB. Silakan pilih gambar lain.'
+    return
+  }
+
+  uploadingBannerImg.value = true
+  const formData = new FormData()
+  formData.append('images[]', file)
+
+  try {
+    const res = await api.post('/uploads/images', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+    if (res.data?.urls?.[0]) {
+      bannerForm.gambar_url = res.data.urls[0]
+      successMsg.value = 'Gambar berhasil diunggah!'
+    }
+  } catch (err) {
+    errorMsg.value = err.response?.data?.message || 'Gagal mengunggah berkas gambar.'
+  } finally {
+    uploadingBannerImg.value = false
+    if (e.target) e.target.value = ''
+  }
+}
+
 onMounted(() => {
   fetchStats()
   fetchUsers()
   fetchKos()
   fetchAllBookings()
+  fetchAdminBanners()
+  startAdminPreviewSlider()
+})
+
+onUnmounted(() => {
+  stopAdminPreviewSlider()
 })
 </script>

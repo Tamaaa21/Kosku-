@@ -173,6 +173,7 @@
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import { useUiStore } from '../stores/ui'
 import NotificationDropdown from './NotificationDropdown.vue'
 import logoUrl from '../assets/KosKu Housing Pin Logo.png'
 import {
@@ -187,6 +188,7 @@ import {
 } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
+const ui = useUiStore()
 const route = useRoute()
 const router = useRouter()
 const isMobileOpen = ref(false)
@@ -200,8 +202,18 @@ const currentPageTitle = computed(() => {
 })
 
 const handleLogout = async () => {
+  const confirmed = await ui.confirm({
+    title: 'Konfirmasi Keluar',
+    message: 'Apakah Anda yakin ingin keluar dari akun?',
+    confirmText: 'Ya, Keluar',
+    cancelText: 'Batal',
+    confirmType: 'danger',
+  })
+  if (!confirmed) return
+
   isMobileOpen.value = false
   await auth.logout()
+  ui.success('Anda telah berhasil keluar.')
   router.push({ name: 'home' })
 }
 </script>
