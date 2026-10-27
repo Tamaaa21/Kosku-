@@ -2,10 +2,7 @@
   <div class="min-h-screen flex flex-col bg-background text-on-surface antialiased font-sans">
     <Navbar />
 
-    <main
-      class="flex-grow transition-all duration-300"
-      :class="{ 'lg:pl-64': auth.isPemilik || auth.isAdmin }"
-    >
+    <main class="flex-grow transition-all duration-300">
       <router-view />
     </main>
 

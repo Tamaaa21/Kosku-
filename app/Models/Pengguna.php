@@ -32,7 +32,13 @@ class Pengguna extends Authenticatable
         return [
             'password' => 'hashed',
             'aktif' => 'boolean',
+            'verified_at' => 'datetime',
         ];
+    }
+
+    public function isVerifiedOwner(): bool
+    {
+        return $this->role === 'pemilik' && $this->status_verifikasi === 'verified';
     }
 
     public function kos(): HasMany

@@ -16,6 +16,7 @@ import OwnerDashboard from '../views/OwnerDashboard.vue'
 import ManageKosView from '../views/ManageKosView.vue'
 import ManageRoomsView from '../views/ManageRoomsView.vue'
 import BookingRequestsView from '../views/BookingRequestsView.vue'
+import PropertyVerificationView from '../views/PropertyVerificationView.vue'
 
 const routes = [
   {
@@ -88,22 +89,28 @@ const routes = [
     meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
   },
   {
+    path: '/dashboard/pemilik/verifikasi',
+    name: 'pemilik-verifikasi',
+    component: PropertyVerificationView,
+    meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
+  },
+  {
     path: '/dashboard/pemilik/kos',
     name: 'kelola-kos',
     component: ManageKosView,
-    meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
+    meta: { requiresAuth: true, roles: ['pemilik', 'admin'], requiresVerified: true },
   },
   {
     path: '/dashboard/pemilik/kamar',
     name: 'kelola-kamar',
     component: ManageRoomsView,
-    meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
+    meta: { requiresAuth: true, roles: ['pemilik', 'admin'], requiresVerified: true },
   },
   {
     path: '/dashboard/pemilik/pemesanan',
     name: 'kelola-pemesanan',
     component: BookingRequestsView,
-    meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
+    meta: { requiresAuth: true, roles: ['pemilik', 'admin'], requiresVerified: true },
   },
   {
     path: '/dashboard/admin',
@@ -142,6 +149,13 @@ router.beforeEach((to, from, next) => {
     if (to.meta.roles && !to.meta.roles.includes(authStore.role)) {
       alert('Akses ditolak untuk peran akun Anda.')
       return next({ name: 'home' })
+    }
+
+    if (to.meta.requiresVerified && authStore.isPemilik && !authStore.isVerified) {
+      return next({
+        name: 'pemilik-verifikasi',
+        query: { locked: '1', from: to.path }
+      })
     }
   }
 

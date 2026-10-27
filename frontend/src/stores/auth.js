@@ -15,6 +15,11 @@ export const useAuthStore = defineStore('auth', {
     isPencari: (state) => state.user?.role === 'pencari',
     isPemilik: (state) => state.user?.role === 'pemilik',
     isAdmin: (state) => state.user?.role === 'admin',
+    isVerified: (state) => {
+      if (state.user?.role === 'admin') return true
+      return state.user?.status_verifikasi === 'verified'
+    },
+    verificationStatus: (state) => state.user?.status_verifikasi || 'unverified',
   },
 
   actions: {

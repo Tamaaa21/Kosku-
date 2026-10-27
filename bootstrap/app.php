@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsureOwnerVerified;
 use App\Http\Middleware\EnsureUserRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -16,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
             'role' => EnsureUserRole::class,
+            'verified_owner' => EnsureOwnerVerified::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

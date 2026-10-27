@@ -1,17 +1,26 @@
 <template>
   <div>
-    <!-- Mobile Backdrop Overlay -->
-    <div
-      v-if="isMobileOpen"
-      @click="isMobileOpen = false"
-      class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-40 lg:hidden transition-opacity"
-    ></div>
+    <!-- Backdrop Overlay (Both Mobile & Desktop when drawer opened) -->
+    <transition
+      enter-active-class="transition-opacity duration-200 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-150 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="isMobileOpen"
+        @click="isMobileOpen = false"
+        class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-40 transition-opacity cursor-pointer"
+      ></div>
+    </transition>
 
-    <!-- Left Sidebar (Desktop Fixed & Mobile Drawer) -->
+    <!-- Left Sidebar (Desktop & Mobile Drawer - Collapsible for full-width view) -->
     <aside
       :class="[
-        'fixed top-0 bottom-0 left-0 w-64 bg-slate-950 text-slate-100 z-50 flex flex-col justify-between shadow-2xl transition-transform duration-300 select-none border-r border-slate-800/80',
-        isMobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+        'fixed top-0 bottom-0 left-0 w-64 bg-slate-950 text-slate-100 z-50 flex flex-col justify-between shadow-2xl transition-transform duration-300 ease-in-out select-none border-r border-slate-800/80',
+        isMobileOpen ? 'translate-x-0' : '-translate-x-full'
       ]"
     >
       <div class="flex flex-col flex-1 min-h-0">
@@ -34,11 +43,12 @@
             </div>
           </router-link>
 
-          <!-- Mobile Close Button -->
+          <!-- Close Button (Both Mobile & Desktop) -->
           <button
             @click="isMobileOpen = false"
-            class="lg:hidden p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            class="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
             type="button"
+            aria-label="Tutup Menu"
           >
             <PhX :size="20" weight="bold" />
           </button>
@@ -75,7 +85,18 @@
             <span class="flex-1">Manajemen Pengguna</span>
           </router-link>
 
-          <!-- 3. Data & Moderasi Kos -->
+          <!-- 3. Verifikasi Kepemilikan Pemilik Kos -->
+          <router-link
+            :to="{ path: '/dashboard/admin', query: { tab: 'verifikasi' } }"
+            @click="isMobileOpen = false"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="($route.path === '/dashboard/admin' && $route.query.tab === 'verifikasi') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            <PhCertificate :size="20" weight="bold" />
+            <span class="flex-1">Verifikasi Pemilik</span>
+          </router-link>
+
+          <!-- 4. Data & Moderasi Kos -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'kos' } }"
             @click="isMobileOpen = false"
@@ -135,53 +156,59 @@
       </div>
     </aside>
 
-    <!-- Top Bar Header for Admin (Spans right of sidebar) -->
-    <header class="fixed top-0 left-0 lg:left-64 right-0 h-16 bg-surface-container-lowest/95 backdrop-blur-md border-b border-surface-container-high/40 z-30 px-4 sm:px-6 flex items-center justify-between shadow-xs">
-      <div class="flex items-center gap-3 min-w-0">
-        <!-- Hamburger Button (Mobile Only) -->
+    <!-- Top Bar Header for Admin (Spans full width like Owner page - matches ui-dashboard-admin.png) -->
+    <header class="fixed top-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 z-30 px-4 sm:px-6 lg:px-8 flex items-center justify-between shadow-2xs">
+      <div class="flex items-center gap-3 sm:gap-4 min-w-0">
+        <!-- Hamburger Button (Visible on both desktop & mobile) -->
         <button
-          @click="isMobileOpen = true"
-          class="lg:hidden p-2 rounded-lg text-on-surface hover:bg-surface-container transition shrink-0"
+          @click="isMobileOpen = !isMobileOpen"
+          class="p-2 rounded-xl text-slate-700 hover:text-slate-900 hover:bg-slate-100 transition shrink-0 cursor-pointer"
           type="button"
-          aria-label="Buka Menu Sidebar"
+          aria-label="Buka / Tutup Menu Navigasi"
+          title="Buka / Tutup Menu"
         >
           <PhList :size="22" weight="bold" />
         </button>
 
-        <!-- Title & Subtitle in Header -->
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="flex items-center gap-2 shrink-0">
-            <h1 class="text-sm sm:text-base font-bold text-on-surface tracking-tight leading-tight">
-              Dashboard Administrator
-            </h1>
-            <span class="bg-primary-fixed text-on-primary-fixed text-[10px] font-extrabold px-2 py-0.5 rounded-full shrink-0">
-              System Admin
-            </span>
-          </div>
-          <span class="hidden xl:inline text-slate-300 font-bold">&bull;</span>
-          <p class="hidden xl:inline text-xs text-slate-500 truncate max-w-xl">
-            Ringkasan eksekutif, kelola akun pencari, kemitraan pemilik kos, master fasilitas, dan audit transaksi.
-          </p>
+        <!-- Search Input Pill (Matching ui-dashboard-admin.png) -->
+        <div class="relative w-56 sm:w-72 md:w-80">
+          <PhMagnifyingGlass :size="16" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 select-none pointer-events-none" />
+          <input
+            v-model="adminSearchQuery"
+            @keydown.enter="handleAdminSearch"
+            type="text"
+            placeholder="Cari pengguna, properti, atau reservasi..."
+            class="w-full pl-9 pr-4 py-2 bg-slate-50 hover:bg-slate-100/70 focus:bg-white text-xs rounded-full border border-slate-200/80 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none text-slate-800 placeholder:text-slate-400"
+          />
         </div>
       </div>
 
       <!-- Right Header Actions -->
-      <div class="flex items-center gap-3 shrink-0">
+      <div class="flex items-center gap-3 sm:gap-4 shrink-0">
         <!-- Notification Dropdown -->
         <NotificationDropdown />
 
+        <!-- Date Range Pill Dropdown -->
+        <div class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 select-none">
+          <PhCalendarBlank :size="15" class="text-slate-500" />
+          <span>{{ currentPeriodDateRange }}</span>
+          <PhCaretDown :size="12" class="text-slate-400" />
+        </div>
+
+        <!-- Admin Profile Dropdown Link -->
         <router-link
           to="/profil"
-          class="flex items-center gap-2 pl-2 pr-1 py-1 rounded-full hover:bg-surface-container transition group"
+          class="flex items-center gap-2.5 pl-1.5 pr-2 py-1 rounded-full hover:bg-slate-100 transition group cursor-pointer"
           title="Profil Administrator"
         >
-          <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs uppercase overflow-hidden">
+          <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs uppercase overflow-hidden shadow-xs">
             <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-            <PhUsersThree v-else :size="18" weight="bold" />
+            <span v-else>A</span>
           </div>
-          <span class="text-xs font-semibold text-on-surface hidden md:inline max-w-[120px] truncate">
-            {{ auth.user?.nama }}
+          <span class="text-xs font-bold text-slate-800 hidden md:inline">
+            Admin
           </span>
+          <PhCaretDown :size="12" class="text-slate-400 hidden md:inline" />
         </router-link>
       </div>
     </header>
@@ -189,7 +216,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
@@ -204,13 +231,35 @@ import {
   PhSlideshow,
   PhShieldCheck,
   PhSignOut,
-  PhList
+  PhList,
+  PhCertificate,
+  PhMagnifyingGlass,
+  PhCalendarBlank,
+  PhCaretDown
 } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
 const ui = useUiStore()
 const router = useRouter()
 const isMobileOpen = ref(false)
+const adminSearchQuery = ref('')
+
+const currentPeriodDateRange = computed(() => {
+  const now = new Date()
+  const start = new Date(now.getFullYear(), now.getMonth(), 1)
+  const formatOpts = { day: '2-digit', month: 'short', year: 'numeric' }
+  const startStr = start.toLocaleDateString('id-ID', formatOpts)
+  const endStr = now.toLocaleDateString('id-ID', formatOpts)
+  return `${startStr} - ${endStr}`
+})
+
+const handleAdminSearch = () => {
+  if (!adminSearchQuery.value.trim()) return
+  router.push({
+    path: '/dashboard/admin',
+    query: { tab: 'pengguna', q: adminSearchQuery.value.trim() },
+  })
+}
 
 const handleLogout = async () => {
   const confirmed = await ui.confirm({

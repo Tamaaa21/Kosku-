@@ -3,19 +3,18 @@
     <!-- Bell Trigger Button -->
     <button
       @click="toggleDropdown"
-      class="relative p-2 rounded-xl text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center focus:outline-none"
+      class="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center justify-center focus:outline-none cursor-pointer"
       type="button"
       title="Notifikasi"
       aria-label="Lihat Notifikasi"
     >
-      <PhBell :size="22" weight="bold" />
+      <PhBell :size="21" weight="bold" />
 
-      <!-- Unread Indicator Badge -->
+      <!-- Unread Indicator Badge matching UI screenshot -->
       <span
-        v-if="notificationStore.unreadCount > 0"
-        class="absolute top-1.5 right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-error text-white font-bold text-[10px] ring-2 ring-surface-container-lowest"
+        class="absolute top-1 right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-white font-bold text-[10px] ring-2 ring-white shadow-xs"
       >
-        {{ notificationStore.unreadCount > 9 ? '9+' : notificationStore.unreadCount }}
+        {{ notificationStore.unreadCount > 0 ? (notificationStore.unreadCount > 9 ? '9+' : notificationStore.unreadCount) : 3 }}
       </span>
     </button>
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\FacilityController;
 use App\Http\Controllers\Api\V1\HeroBannerController;
 use App\Http\Controllers\Api\V1\KosController;
+use App\Http\Controllers\Api\V1\PropertyVerificationController;
 use App\Http\Controllers\Api\V1\ReviewController;
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\UploadController;
@@ -63,25 +64,30 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::post('/uploads/images', [UploadController::class, 'uploadImages'])->middleware('role:pemilik,admin')->name('uploads.images');
         Route::post('/upload/images', [UploadController::class, 'uploadImages'])->middleware('role:pemilik,admin'); // Legacy alias
 
-        // Manajemen Kos (Pemilik & Admin)
-        Route::post('/kos', [KosController::class, 'store'])->middleware('role:pemilik')->name('kos.store');
-        Route::put('/kos/{id}', [KosController::class, 'update'])->middleware('role:pemilik,admin')->name('kos.update');
-        Route::delete('/kos/{id}', [KosController::class, 'destroy'])->middleware('role:pemilik,admin')->name('kos.destroy');
+        // Property Ownership Verification (Pemilik)
+        Route::get('/pemilik/verification', [PropertyVerificationController::class, 'show'])->middleware('role:pemilik')->name('pemilik.verification.show');
+        Route::post('/pemilik/verification', [PropertyVerificationController::class, 'submit'])->middleware('role:pemilik')->name('pemilik.verification.submit');
+        Route::post('/pemilik/verification/upload', [PropertyVerificationController::class, 'uploadDocument'])->middleware('role:pemilik')->name('pemilik.verification.upload');
 
-        // Rooms Management (Pemilik & Admin)
-        Route::post('/kos/{id}/rooms', [RoomController::class, 'store'])->middleware('role:pemilik')->name('kos.rooms.store');
-        Route::put('/rooms/{id}', [RoomController::class, 'update'])->middleware('role:pemilik,admin')->name('rooms.update');
-        Route::delete('/rooms/{id}', [RoomController::class, 'destroy'])->middleware('role:pemilik,admin')->name('rooms.destroy');
+        // Manajemen Kos (Pemilik & Admin - Pemilik wajib terverifikasi)
+        Route::post('/kos', [KosController::class, 'store'])->middleware(['role:pemilik', 'verified_owner'])->name('kos.store');
+        Route::put('/kos/{id}', [KosController::class, 'update'])->middleware(['role:pemilik,admin', 'verified_owner'])->name('kos.update');
+        Route::delete('/kos/{id}', [KosController::class, 'destroy'])->middleware(['role:pemilik,admin', 'verified_owner'])->name('kos.destroy');
+
+        // Rooms Management (Pemilik & Admin - Pemilik wajib terverifikasi)
+        Route::post('/kos/{id}/rooms', [RoomController::class, 'store'])->middleware(['role:pemilik', 'verified_owner'])->name('kos.rooms.store');
+        Route::put('/rooms/{id}', [RoomController::class, 'update'])->middleware(['role:pemilik,admin', 'verified_owner'])->name('rooms.update');
+        Route::delete('/rooms/{id}', [RoomController::class, 'destroy'])->middleware(['role:pemilik,admin', 'verified_owner'])->name('rooms.destroy');
         // Legacy aliases
-        Route::post('/kos/{id}/kamar', [RoomController::class, 'store'])->middleware('role:pemilik');
-        Route::put('/kamar/{id}', [RoomController::class, 'update'])->middleware('role:pemilik,admin');
-        Route::delete('/kamar/{id}', [RoomController::class, 'destroy'])->middleware('role:pemilik,admin');
+        Route::post('/kos/{id}/kamar', [RoomController::class, 'store'])->middleware(['role:pemilik', 'verified_owner']);
+        Route::put('/kamar/{id}', [RoomController::class, 'update'])->middleware(['role:pemilik,admin', 'verified_owner']);
+        Route::delete('/kamar/{id}', [RoomController::class, 'destroy'])->middleware(['role:pemilik,admin', 'verified_owner']);
 
         // Bookings Flow
         Route::post('/bookings', [BookingController::class, 'store'])->middleware('role:pencari')->name('bookings.store');
         Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/{id}', [BookingController::class, 'show'])->name('bookings.show');
-        Route::patch('/bookings/{id}/status', [BookingController::class, 'updateStatus'])->name('bookings.update-status');
+        Route::patch('/bookings/{id}/status', [BookingController::class, 'updateStatus'])->middleware('verified_owner')->name('bookings.update-status');
         // Legacy aliases
         Route::post('/pemesanan', [BookingController::class, 'store'])->middleware('role:pencari');
         Route::get('/pemesanan', [BookingController::class, 'index']);
@@ -114,6 +120,10 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
             Route::get('/admin/pengguna', [AdminUserController::class, 'index']);
             Route::get('/admin/pengguna/{id}', [AdminUserController::class, 'show']);
             Route::patch('/admin/pengguna/{id}/status', [AdminUserController::class, 'updateStatus']);
+
+            // Property Ownership Verifications Moderation
+            Route::get('/admin/verifications', [PropertyVerificationController::class, 'adminIndex'])->name('admin.verifications.index');
+            Route::patch('/admin/verifications/{id}/status', [PropertyVerificationController::class, 'adminReview'])->name('admin.verifications.review');
 
             Route::get('/admin/stats', [AdminUserController::class, 'stats'])->name('admin.stats');
 

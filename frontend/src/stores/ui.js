@@ -5,6 +5,9 @@ let nextToastId = 1
 export const useUiStore = defineStore('ui', {
   state: () => ({
     toasts: [],
+    ownerSidebarOpen: false,
+    dashboardSearchQuery: '',
+    selectedDateRange: '26 Okt 2024 - 26 Nov 2024',
     confirmModal: {
       isOpen: false,
       title: '',
@@ -17,6 +20,22 @@ export const useUiStore = defineStore('ui', {
   }),
 
   actions: {
+    toggleOwnerSidebar() {
+      this.ownerSidebarOpen = !this.ownerSidebarOpen
+    },
+
+    openOwnerSidebar() {
+      this.ownerSidebarOpen = true
+    },
+
+    closeOwnerSidebar() {
+      this.ownerSidebarOpen = false
+    },
+
+    setDateRange(range) {
+      this.selectedDateRange = range
+    },
+
     showToast(message, type = 'success', duration = 3500) {
       const id = nextToastId++
       this.toasts.push({ id, message, type })
