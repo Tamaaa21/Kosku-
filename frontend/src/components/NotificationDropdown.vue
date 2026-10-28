@@ -12,9 +12,10 @@
 
       <!-- Unread Indicator Badge matching UI screenshot -->
       <span
+        v-if="notificationStore.unreadCount > 0"
         class="absolute top-1 right-1 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-rose-500 text-white font-bold text-[10px] ring-2 ring-white shadow-xs"
       >
-        {{ notificationStore.unreadCount > 0 ? (notificationStore.unreadCount > 9 ? '9+' : notificationStore.unreadCount) : 3 }}
+        {{ notificationStore.unreadCount > 9 ? '9+' : notificationStore.unreadCount }}
       </span>
     </button>
 
@@ -177,7 +178,13 @@ import {
   PhCheckCircle,
   PhWarning,
   PhHouse,
-  PhUser
+  PhUser,
+  PhChatText,
+  PhStorefront,
+  PhXCircle,
+  PhClock,
+  PhLightbulb,
+  PhDesktop
 } from '@phosphor-icons/vue'
 
 const router = useRouter()
@@ -189,12 +196,25 @@ const dropdownRef = ref(null)
 
 const resolveNotificationIcon = (iconName) => {
   switch (iconName) {
-    case 'receipt_long':
-    case 'receipt':
-      return PhReceipt
+    case 'mark_chat_unread':
+      return PhChatText
+    case 'storefront':
+      return PhStorefront
+    case 'verified':
     case 'check_circle':
     case 'check':
       return PhCheckCircle
+    case 'cancel':
+      return PhXCircle
+    case 'schedule':
+      return PhClock
+    case 'lightbulb':
+      return PhLightbulb
+    case 'dns':
+      return PhDesktop
+    case 'receipt_long':
+    case 'receipt':
+      return PhReceipt
     case 'warning':
     case 'alert':
       return PhWarning

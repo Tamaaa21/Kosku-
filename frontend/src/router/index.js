@@ -10,6 +10,8 @@ import BookingFormView from '../views/BookingFormView.vue'
 import UserProfileView from '../views/UserProfileView.vue'
 import LoginView from '../views/LoginView.vue'
 import RegisterView from '../views/RegisterView.vue'
+import ForgotPasswordView from '../views/ForgotPasswordView.vue'
+import ResetPasswordView from '../views/ResetPasswordView.vue'
 import TenantDashboard from '../views/TenantDashboard.vue'
 import AdminDashboard from '../views/AdminDashboard.vue'
 import OwnerDashboard from '../views/OwnerDashboard.vue'
@@ -40,7 +42,6 @@ const routes = [
     alias: '/tersimpan',
     name: 'favorit',
     component: FavoritesView,
-    meta: { requiresAuth: true },
   },
   {
     path: '/peta',
@@ -76,6 +77,18 @@ const routes = [
     path: '/register',
     name: 'register',
     component: RegisterView,
+    meta: { guestOnly: true },
+  },
+  {
+    path: '/forgot-password',
+    name: 'forgot-password',
+    component: ForgotPasswordView,
+    meta: { guestOnly: true },
+  },
+  {
+    path: '/reset-password',
+    name: 'reset-password',
+    component: ResetPasswordView,
     meta: { guestOnly: true },
   },
   {

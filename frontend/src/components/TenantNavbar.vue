@@ -122,38 +122,138 @@
         </router-link>
 
         <template v-if="auth.isAuthenticated">
-          <!-- Notification Dropdown (Desktop Only) -->
-          <div class="hidden md:block">
-            <NotificationDropdown />
-          </div>
+          <!-- Notification Dropdown -->
+          <NotificationDropdown />
 
-          <!-- Profile Link (Desktop Only) -->
-          <router-link
-            to="/profil"
-            class="hidden md:flex items-center gap-2 pl-2 pr-1.5 py-1 rounded-full transition group"
-            :class="isTransparent ? 'hover:bg-white/15' : 'hover:bg-slate-100'"
-            title="Profil Akun"
-          >
-            <div
-              class="w-8 h-8 rounded-full border flex items-center justify-center font-bold text-xs uppercase overflow-hidden transition-colors"
+          <!-- Profile Avatar Dropdown (Desktop Only) -->
+          <div ref="profileDropdownRef" class="relative hidden md:block">
+            <!-- Avatar Button (Avatar only, no user name) -->
+            <button
+              @click="isProfileDropdownOpen = !isProfileDropdownOpen"
+              type="button"
+              class="flex items-center justify-center p-0.5 rounded-full transition-all cursor-pointer focus:outline-none"
               :class="
                 isTransparent
-                  ? 'bg-white/20 border-white/40 text-white'
-                  : 'bg-primary/10 border-primary/20 text-primary'
+                  ? 'hover:ring-2 hover:ring-white/40 active:scale-95'
+                  : 'hover:ring-2 hover:ring-primary/30 active:scale-95'
               "
+              aria-label="Menu Profil Akun"
+              title="Akun Saya"
             >
-              <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-              <PhUser v-else :size="18" weight="bold" />
-            </div>
-            <span
-              class="text-xs font-semibold hidden lg:inline max-w-[120px] truncate"
-              :class="isTransparent ? 'text-white' : 'text-slate-800'"
-            >
-              {{ auth.user?.nama }}
-            </span>
-          </router-link>
+              <div
+                class="w-9 h-9 rounded-full border-2 flex items-center justify-center font-bold text-xs uppercase overflow-hidden transition-all shadow-xs"
+                :class="
+                  isTransparent
+                    ? 'bg-white/20 border-white/60 text-white backdrop-blur-xs'
+                    : 'bg-primary/10 border-primary/30 text-primary'
+                "
+              >
+                <img
+                  v-if="auth.user?.foto"
+                  :src="auth.user.foto"
+                  :alt="auth.user?.nama"
+                  class="w-full h-full object-cover"
+                />
+                <span v-else-if="auth.user?.nama" class="text-sm font-black">
+                  {{ auth.user.nama.charAt(0).toUpperCase() }}
+                </span>
+                <PhUser v-else :size="18" weight="bold" />
+              </div>
+            </button>
 
-          <!-- Desktop Logout Button (Desktop Only) -->
+            <!-- Dropdown Menu Card -->
+            <transition
+              enter-active-class="transition duration-150 ease-out"
+              enter-from-class="transform scale-95 opacity-0"
+              enter-to-class="transform scale-100 opacity-100"
+              leave-active-class="transition duration-100 ease-in"
+              leave-from-class="transform scale-100 opacity-100"
+              leave-to-class="transform scale-95 opacity-0"
+            >
+              <div
+                v-if="isProfileDropdownOpen"
+                class="absolute right-0 mt-2.5 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 overflow-hidden text-left"
+              >
+                <!-- Mini User Info Header -->
+                <div class="px-4 py-3 bg-gradient-to-br from-slate-50 to-blue-50/40 border-b border-slate-100 flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-sm uppercase overflow-hidden shrink-0 shadow-2xs">
+                    <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
+                    <span v-else-if="auth.user?.nama">{{ auth.user.nama.charAt(0).toUpperCase() }}</span>
+                    <PhUser v-else :size="20" weight="bold" />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="text-xs font-bold text-slate-900 truncate leading-tight">{{ auth.user?.nama }}</p>
+                    <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ auth.user?.email }}</p>
+                    <span class="inline-block mt-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100/80 text-blue-700">
+                      Pencari Kos
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Menu Items -->
+                <div class="py-1">
+                  <!-- 1. Profil Akun -->
+                  <router-link
+                    to="/profil"
+                    @click="isProfileDropdownOpen = false"
+                    class="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-primary transition group"
+                  >
+                    <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                      <PhUser :size="16" weight="bold" />
+                    </div>
+                    <span>Profil Akun</span>
+                  </router-link>
+
+                  <!-- 2. Riwayat Pesanan -->
+                  <router-link
+                    to="/pesanan"
+                    @click="isProfileDropdownOpen = false"
+                    class="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-primary transition group"
+                  >
+                    <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                      <PhReceipt :size="16" weight="bold" />
+                    </div>
+                    <span>Riwayat Pesanan</span>
+                  </router-link>
+
+                  <!-- 3. Kos Favorit -->
+                  <router-link
+                    to="/favorit"
+                    @click="isProfileDropdownOpen = false"
+                    class="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-primary transition group"
+                  >
+                    <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-rose-50 group-hover:text-rose-600 transition-colors">
+                      <PhHeart :size="16" weight="bold" />
+                    </div>
+                    <span class="flex-1">Kos Favorit</span>
+                    <span
+                      v-if="favoritesStore.count > 0"
+                      class="px-1.5 py-0.2 text-[10px] font-bold bg-rose-500 text-white rounded-full"
+                    >
+                      {{ favoritesStore.count }}
+                    </span>
+                  </router-link>
+                </div>
+
+                <!-- Divider -->
+                <div class="border-t border-slate-100 my-1"></div>
+
+                <!-- 4. Logout Button -->
+                <div class="px-1.5 py-0.5">
+                  <button
+                    @click="handleProfileLogout"
+                    type="button"
+                    class="w-full flex items-center gap-3 px-3 py-2 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                  >
+                    <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
+                      <PhSignOut :size="16" weight="bold" />
+                    </div>
+                    <span>Keluar (Logout)</span>
+                  </button>
+                </div>
+              </div>
+            </transition>
+          </div>
         
         </template>
 
@@ -309,7 +409,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useFavoritesStore } from '../stores/favorites'
@@ -318,6 +418,7 @@ import NotificationDropdown from './NotificationDropdown.vue'
 import logoUrl from '../assets/logo.png'
 import {
   PhUser,
+  PhReceipt,
   PhSignOut,
   PhX,
   PhList,
@@ -332,6 +433,23 @@ const router = useRouter()
 const route = useRoute()
 const mobileMenuOpen = ref(false)
 
+const isProfileDropdownOpen = ref(false)
+const profileDropdownRef = ref(null)
+
+const handleClickOutside = (e) => {
+  if (profileDropdownRef.value && !profileDropdownRef.value.contains(e.target)) {
+    isProfileDropdownOpen.value = false
+  }
+}
+
+watch(
+  () => route.path,
+  () => {
+    isProfileDropdownOpen.value = false
+    mobileMenuOpen.value = false
+  }
+)
+
 // Scroll detection for transparent to solid white transition
 const isScrolled = ref(false)
 
@@ -342,10 +460,12 @@ const handleScroll = () => {
 onMounted(() => {
   handleScroll()
   window.addEventListener('scroll', handleScroll, { passive: true })
+  document.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
+  document.removeEventListener('click', handleClickOutside)
 })
 
 // Only transparent at the top of the homepage where the dark hero background is present
@@ -362,6 +482,11 @@ const scrollToSection = (sectionId) => {
   }
 }
 
+const handleProfileLogout = () => {
+  isProfileDropdownOpen.value = false
+  handleLogout()
+}
+
 const handleLogout = async () => {
   const confirmed = await ui.confirm({
     title: 'Konfirmasi Keluar',
@@ -373,6 +498,7 @@ const handleLogout = async () => {
   if (!confirmed) return
 
   mobileMenuOpen.value = false
+  isProfileDropdownOpen.value = false
   await auth.logout()
   ui.success('Anda telah berhasil keluar.')
   router.push({ name: 'home' })

@@ -332,11 +332,6 @@ const kosList = ref([])
 const availableFasilitas = ref([])
 
 const handleToggleFavorite = (kos) => {
-  if (!auth.isAuthenticated) {
-    ui.warning('Silakan masuk terlebih dahulu untuk menyimpan kos favorit.')
-    router.push({ name: 'login', query: { redirect: route.fullPath } })
-    return
-  }
   const isAdded = favoritesStore.toggleFavorite(kos)
   if (isAdded) {
     ui.success(`Kos "${kos.nama}" disimpan ke favorit!`)

@@ -6,17 +6,51 @@ export const useFavoritesStore = defineStore('favorites', () => {
   const auth = useAuthStore()
 
   const getStorageKey = () => {
-    return auth.user?.id ? `kostara_favorites_${auth.user.id}` : null
+    return auth.user?.id ? `kostara_favorites_${auth.user.id}` : 'kostara_favorites_guest'
+  }
+
+  const mergeGuestFavorites = (userKey) => {
+    try {
+      const guestRaw = localStorage.getItem('kostara_favorites_guest')
+      if (guestRaw) {
+        const guestItems = JSON.parse(guestRaw)
+        if (Array.isArray(guestItems) && guestItems.length > 0) {
+          const userRaw = localStorage.getItem(userKey)
+          const userItems = userRaw ? JSON.parse(userRaw) : []
+          const merged = [...userItems]
+          guestItems.forEach((g) => {
+            if (!merged.some((u) => Number(u.id) === Number(g.id))) {
+              merged.push(g)
+            }
+          })
+          localStorage.setItem(userKey, JSON.stringify(merged))
+          localStorage.removeItem('kostara_favorites_guest')
+          return merged
+        }
+      }
+    } catch {
+      // Ignore parse error
+    }
+    return null
   }
 
   const loadFromStorage = () => {
     const key = getStorageKey()
-    if (!key) return []
     try {
+      if (auth.user?.id) {
+        const merged = mergeGuestFavorites(key)
+        if (merged) return merged
+      }
+
       const raw = localStorage.getItem(key)
       if (raw) return JSON.parse(raw)
+
       // Check legacy global key for migration
-      const legacy = localStorage.getItem('kostara_favorites') || localStorage.getItem('kosku_favorites') || localStorage.getItem(`kosku_favorites_${auth.user?.id}`)
+      const legacy =
+        localStorage.getItem('kostara_favorites') ||
+        localStorage.getItem('kosku_favorites') ||
+        (auth.user?.id ? localStorage.getItem(`kosku_favorites_${auth.user.id}`) : null)
+
       if (legacy) {
         localStorage.setItem(key, legacy)
         return JSON.parse(legacy)
@@ -29,21 +63,16 @@ export const useFavoritesStore = defineStore('favorites', () => {
 
   const favorites = ref(loadFromStorage())
 
-  // Keep favorites in sync with the logged-in user
+  // Keep favorites in sync when user logs in, switches accounts, or logs out
   watch(
     () => auth.user?.id,
-    (newUserId) => {
-      if (newUserId) {
-        favorites.value = loadFromStorage()
-      } else {
-        favorites.value = []
-      }
+    () => {
+      favorites.value = loadFromStorage()
     }
   )
 
   const persist = () => {
     const key = getStorageKey()
-    if (!key) return
     try {
       localStorage.setItem(key, JSON.stringify(favorites.value))
     } catch {
@@ -51,16 +80,16 @@ export const useFavoritesStore = defineStore('favorites', () => {
     }
   }
 
-  const count = computed(() => (auth.isAuthenticated ? favorites.value.length : 0))
+  const count = computed(() => favorites.value.length)
 
   const isFavorite = (kosId) => {
-    if (!auth.isAuthenticated) return false
+    if (!kosId) return false
     const id = Number(kosId)
     return favorites.value.some((item) => Number(item.id) === id)
   }
 
   const toggleFavorite = (kos) => {
-    if (!auth.isAuthenticated || !kos || !kos.id) return false
+    if (!kos || !kos.id) return false
 
     const id = Number(kos.id)
     const index = favorites.value.findIndex((item) => Number(item.id) === id)
@@ -85,7 +114,8 @@ export const useFavoritesStore = defineStore('favorites', () => {
         ulasan_count: kos.ulasan_count,
         fasilitas: kos.fasilitas || [],
         foto: kos.foto || [],
-        kamar_tersedia_count: kos.kamar_tersedia_count ?? kos.kamar?.filter(k => k.status === 'tersedia')?.length ?? 0,
+        kamar_tersedia_count:
+          kos.kamar_tersedia_count ?? kos.kamar?.filter((k) => k.status === 'tersedia')?.length ?? 0,
         saved_at: new Date().toISOString(),
       })
       persist()
@@ -94,7 +124,7 @@ export const useFavoritesStore = defineStore('favorites', () => {
   }
 
   const removeFavorite = (kosId) => {
-    if (!auth.isAuthenticated) return
+    if (!kosId) return
     const id = Number(kosId)
     const index = favorites.value.findIndex((item) => Number(item.id) === id)
     if (index >= 0) {
@@ -104,7 +134,6 @@ export const useFavoritesStore = defineStore('favorites', () => {
   }
 
   const clearFavorites = () => {
-    if (!auth.isAuthenticated) return
     favorites.value = []
     persist()
   }

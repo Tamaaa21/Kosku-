@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useAuthStore } from './auth'
 import api from '../services/api'
 
@@ -35,6 +35,19 @@ export const useNotificationStore = defineStore('notification', () => {
     return notifications.value.filter((n) => !n.isRead).length
   })
 
+  // Automatically refresh/clear notifications on login/logout
+  watch(
+    () => auth.user?.id,
+    (newUserId) => {
+      readIds.value = getReadIds()
+      if (newUserId) {
+        fetchNotifications()
+      } else {
+        notifications.value = []
+      }
+    }
+  )
+
   // Fetch notifications based on role
   const fetchNotifications = async () => {
     if (!auth.isAuthenticated) {
@@ -60,7 +73,7 @@ export const useNotificationStore = defineStore('notification', () => {
               id: `booking_pending_${b.id}`,
               type: 'booking_request',
               title: 'Permintaan Sewa Baru',
-              message: `${b.user?.nama || 'Calon Penghuni'} mengajukan sewa untuk ${b.kamar?.nama_kamar || 'kamar'} di ${b.kos?.nama || 'kos Anda'}.`,
+              message: `${b.pengguna?.nama || b.user?.nama || 'Calon Penghuni'} mengajukan sewa untuk ${b.kamar?.nama_kamar || 'kamar'} di ${b.kos?.nama || 'kos Anda'}.`,
               time: b.created_at || new Date().toISOString(),
               icon: 'mark_chat_unread',
               iconBg: 'bg-amber-100 text-amber-700',
@@ -72,7 +85,7 @@ export const useNotificationStore = defineStore('notification', () => {
               id: `booking_approved_${b.id}`,
               type: 'booking_approved',
               title: 'Pemesanan Dikonfirmasi',
-              message: `Reservasi #${b.id} untuk ${b.user?.nama || 'penyewa'} telah Anda setujui.`,
+              message: `Reservasi #${b.id} untuk ${b.pengguna?.nama || b.user?.nama || 'penyewa'} telah Anda setujui.`,
               time: b.created_at || new Date().toISOString(),
               icon: 'check_circle',
               iconBg: 'bg-emerald-100 text-emerald-700',
@@ -160,7 +173,7 @@ export const useNotificationStore = defineStore('notification', () => {
             id: `admin_booking_${b.id}`,
             type: 'admin_audit',
             title: `Transaksi Reservasi Masuk #${b.id}`,
-            message: `Pemesanan baru oleh ${b.user?.nama || 'User'} pada ${b.kos?.nama || 'Kos'} (Status: ${b.status}).`,
+            message: `Pemesanan baru oleh ${b.pengguna?.nama || b.user?.nama || 'User'} pada ${b.kos?.nama || 'Kos'} (Status: ${b.status}).`,
             time: b.created_at || new Date().toISOString(),
             icon: 'receipt_long',
             iconBg: 'bg-slate-200 text-slate-800',

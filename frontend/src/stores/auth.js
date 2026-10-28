@@ -130,6 +130,34 @@ export const useAuthStore = defineStore('auth', {
       }
     },
 
+    async forgotPassword(data) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await api.post('/auth/forgot-password', data)
+        return response.data
+      } catch (err) {
+        this.error = err.response?.data?.message || err.response?.data?.errors?.email?.[0] || 'Gagal mengirim tautan reset kata sandi.'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async resetPassword(data) {
+      this.loading = true
+      this.error = null
+      try {
+        const response = await api.post('/auth/reset-password', data)
+        return response.data
+      } catch (err) {
+        this.error = err.response?.data?.message || err.response?.data?.errors?.password?.[0] || err.response?.data?.errors?.token?.[0] || 'Gagal mengatur ulang kata sandi.'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
     async logout() {
       try {
         if (this.token) {

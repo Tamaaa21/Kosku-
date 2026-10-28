@@ -770,11 +770,6 @@ const shareKos = () => {
 
 const toggleFavorite = () => {
   if (!kos.value) return
-  if (!auth.isAuthenticated) {
-    ui.warning('Silakan masuk terlebih dahulu untuk menyimpan kos favorit.')
-    router.push({ name: 'login', query: { redirect: route.fullPath } })
-    return
-  }
   const isAdded = favoritesStore.toggleFavorite(kos.value)
   if (isAdded) {
     ui.success(`Kos "${kos.value.nama}" berhasil disimpan ke daftar favorit!`)

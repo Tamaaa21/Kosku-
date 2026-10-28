@@ -1,425 +1,552 @@
 <template>
-  <div class="w-full max-w-7xl mx-auto px-margin py-space-xl pt-20">
-    <!-- Header Page Meta -->
-    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-space-sm mb-8">
+  <div class="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-20">
+    <!-- Header Page Meta (Matching ui-profile.png) -->
+    <div class="flex items-center gap-3.5 mb-8">
+      <div class="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100 shadow-2xs">
+        <PhIdentificationBadge :size="24" weight="bold" />
+      </div>
       <div>
-        <h1 class="text-2xl font-bold text-on-surface tracking-tight">Profil Saya</h1>
-        <p class="text-xs text-on-surface-variant mt-0.5">
-          Kelola informasi akun pengguna, kontak, foto profil, dan keamanan akses sistem Kostara.
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Profil Saya</h1>
+        <p class="text-xs sm:text-sm text-slate-500 mt-0.5 font-medium">
+          Kelola informasi akun, pengaturan, dan keamanan akun Anda.
         </p>
       </div>
-
-      <!-- Quick Status Badge -->
-      <div class="inline-flex items-center gap-2 bg-surface-container-lowest border border-slate-100 px-4 py-2 rounded-full shadow-sm">
-        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-        <span class="text-xs text-on-surface font-semibold capitalize">{{ auth.role }} Terverifikasi</span>
-        <PhShieldCheck :size="18" weight="fill" class="text-primary" />
-      </div>
     </div>
 
-    <!-- Alert / Toast -->
+    <!-- Alert / Toast Messages -->
     <div
       v-if="toastMsg"
-      class="mb-6 p-4 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-medium border border-emerald-200 flex items-center justify-between shadow-xs transition-all"
+      class="mb-6 p-4 rounded-2xl bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200 flex items-center justify-between shadow-xs transition-all"
     >
       <div class="flex items-center gap-2">
-        <PhCheckCircle :size="18" weight="fill" class="text-emerald-600" />
+        <PhCheckCircle :size="18" weight="fill" class="text-emerald-600 shrink-0" />
         <span>{{ toastMsg }}</span>
       </div>
-      <button @click="toastMsg = ''" class="text-emerald-700 font-bold ml-4 text-base hover:opacity-75">&times;</button>
+      <button @click="toastMsg = ''" class="text-emerald-700 font-bold ml-4 text-base hover:opacity-75 cursor-pointer">&times;</button>
     </div>
 
-    <!-- 2-Column Responsive Layout -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter items-start">
-      <!-- Kolom Kiri: Sidebar Profil (~360px) -->
-      <div class="lg:col-span-4 xl:col-span-4 flex flex-col gap-space-md">
-        <!-- Profile Card -->
-        <div class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-slate-100 flex flex-col items-center text-center relative overflow-hidden">
-          <!-- Avatar dengan Fitur Unggah Foto Interaktif -->
-          <div class="relative mt-2 mb-3 group">
-            <div class="w-28 h-28 rounded-full overflow-hidden shadow-md ring-4 ring-white bg-surface-container flex items-center justify-center relative">
-              <img
-                v-if="avatarPreview || auth.user?.foto"
-                :src="avatarPreview || auth.user.foto"
-                :alt="auth.user?.nama"
-                class="w-full h-full object-cover"
-              />
-              <PhUser v-else :size="54" class="text-primary select-none" />
+    <div
+      v-if="errorToastMsg"
+      class="mb-6 p-4 rounded-2xl bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200 flex items-center justify-between shadow-xs transition-all"
+    >
+      <div class="flex items-center gap-2">
+        <PhWarningCircle :size="18" weight="fill" class="text-rose-600 shrink-0" />
+        <span>{{ errorToastMsg }}</span>
+      </div>
+      <button @click="errorToastMsg = ''" class="text-rose-700 font-bold ml-4 text-base hover:opacity-75 cursor-pointer">&times;</button>
+    </div>
 
-              <!-- Overlay loader saat mengunggah foto -->
-              <div
-                v-if="uploadingAvatar"
-                class="absolute inset-0 bg-black/60 flex flex-col items-center justify-center text-white"
+    <!-- 2-Column Responsive Layout (Matching ui-profile.png) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <!-- ============================================================= -->
+      <!-- KOLOM KIRI: Identitas & Informasi Singkat (~320px)           -->
+      <!-- ============================================================= -->
+      <div class="lg:col-span-4 xl:col-span-4 space-y-6">
+        <!-- 1. User Identity Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden relative">
+          <!-- Subtle Decorative Gradient Top Header -->
+          <div class="bg-gradient-to-b from-blue-50/90 via-blue-50/40 to-transparent p-6 pb-5 flex flex-col items-center text-center relative">
+            <!-- Large Avatar with Camera Upload Button -->
+            <div class="relative group mt-1 mb-3">
+              <div class="w-24 h-24 rounded-full overflow-hidden shadow-md ring-4 ring-white bg-[#1E3A8A] text-white flex items-center justify-center relative">
+                <img
+                  v-if="avatarPreview || auth.user?.foto"
+                  :src="avatarPreview || auth.user.foto"
+                  :alt="auth.user?.nama"
+                  class="w-full h-full object-cover"
+                />
+                <span v-else-if="auth.user?.nama" class="text-3xl font-black">
+                  {{ auth.user.nama.charAt(0).toUpperCase() }}
+                </span>
+                <PhUser v-else :size="48" weight="bold" class="text-white select-none" />
+
+                <!-- Uploading Overlay -->
+                <div
+                  v-if="uploadingAvatar"
+                  class="absolute inset-0 bg-slate-900/70 backdrop-blur-2xs flex flex-col items-center justify-center text-white"
+                >
+                  <PhCircleNotch :size="22" class="animate-spin text-white" />
+                  <span class="text-[9px] mt-1 font-bold">Mengunggah...</span>
+                </div>
+              </div>
+
+              <!-- Camera Button -->
+              <button
+                type="button"
+                @click="triggerFileInput"
+                :disabled="uploadingAvatar"
+                class="absolute bottom-0 right-0 w-8 h-8 rounded-full bg-slate-900 hover:bg-slate-800 text-white shadow-md flex items-center justify-center border-2 border-white transition cursor-pointer active:scale-95 disabled:opacity-50"
+                title="Ganti Foto Profil"
               >
-                <PhCircleNotch :size="24" class="animate-spin" />
-                <span class="text-[10px] mt-1 font-semibold">Mengunggah...</span>
+                <PhCamera :size="15" weight="bold" />
+              </button>
+              <input
+                ref="fileInputRef"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/jpg"
+                class="hidden"
+                @change="onAvatarSelected"
+              />
+            </div>
+
+            <!-- User Name & Email -->
+            <h2 class="text-lg font-extrabold text-slate-900 tracking-tight leading-tight">
+              {{ auth.user?.nama || 'Admin' }}
+            </h2>
+            <p class="text-xs text-slate-500 font-medium mt-1">
+              {{ auth.user?.email || 'admin@kostara.id' }}
+            </p>
+
+            <!-- Role Badge Pill -->
+            <div class="mt-3">
+              <span class="inline-block bg-[#0B63B6] text-white text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-wider shadow-2xs">
+                {{ auth.role?.toUpperCase() || 'ADMIN' }}
+              </span>
+            </div>
+
+            <!-- Status Card Box: Akun Terverifikasi -->
+            <div class="w-full mt-5 p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200/80 flex items-center gap-3 text-left">
+              <div class="w-7 h-7 rounded-full bg-emerald-500 text-white flex items-center justify-center shrink-0">
+                <PhCheckCircle :size="18" weight="fill" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-xs font-bold text-emerald-800 leading-tight">Akun Terverifikasi</p>
+                <p class="text-[10px] text-emerald-600 mt-0.5">Akun Anda telah diverifikasi dan aman.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Informasi Singkat Card -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-xs">
+          <h3 class="text-sm font-bold text-slate-900 mb-4">Informasi Singkat</h3>
+
+          <div class="space-y-3.5">
+            <!-- Item 1: Peran -->
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <PhUser :size="18" weight="bold" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Peran</p>
+                <p class="text-xs font-bold text-slate-800 mt-0.5 capitalize">{{ roleTitle }}</p>
               </div>
             </div>
 
-            <!-- Tombol Kamera untuk Mengganti Foto -->
-            <button
-              type="button"
-              @click="triggerFileInput"
-              :disabled="uploadingAvatar"
-              class="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-primary hover:bg-primary-container text-white shadow-md flex items-center justify-center transition border-2 border-white focus:outline-none focus:ring-2 focus:ring-primary/40 disabled:opacity-50"
-              title="Ganti Foto Profil"
-            >
-              <PhCamera :size="18" weight="bold" />
-            </button>
-            <input
-              ref="fileInputRef"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/jpg"
-              class="hidden"
-              @change="onAvatarSelected"
-            />
-          </div>
-
-          <p class="text-[11px] text-on-surface-variant mb-3">
-            Klik ikon kamera untuk mengganti foto profil (Maks. 2MB)
-          </p>
-
-          <h2 class="text-lg font-bold text-on-surface">{{ auth.user?.nama }}</h2>
-          <p class="text-xs text-on-surface-variant mt-0.5">{{ auth.user?.email }}</p>
-
-          <div class="mt-2 flex items-center justify-center gap-1.5">
-            <span
-              :class="[
-                'px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider',
-                auth.isPemilik ? 'bg-primary-container text-white' :
-                auth.isAdmin ? 'bg-slate-900 text-white' :
-                'bg-surface-container-high text-primary'
-              ]"
-            >
-              {{ auth.role }}
-            </span>
-          </div>
-
-          <!-- Quick Summary Stats -->
-          <div class="w-full grid grid-cols-2 gap-2 pt-space-md mt-space-md bg-surface-container-low/50 rounded-xl p-3 text-center border border-slate-100">
-            <div>
-              <span class="text-base font-bold text-primary block">
-                {{ auth.isPemilik ? myKosCount + ' Unit' : myBookingCount + ' Pesanan' }}
-              </span>
-              <span class="text-[11px] text-on-surface-variant">
-                {{ auth.isPemilik ? 'Properti Kos' : 'Total Riwayat' }}
-              </span>
+            <!-- Item 2: Bergabung Sejak -->
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <PhCalendarBlank :size="18" weight="bold" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Bergabung Sejak</p>
+                <p class="text-xs font-bold text-slate-800 mt-0.5">{{ joinedDate }}</p>
+              </div>
             </div>
-            <div>
-              <span class="text-base font-bold text-emerald-600 block">
-                {{ auth.isPemilik ? myRoomCount + ' Kamar' : 'Aktif' }}
-              </span>
-              <span class="text-[11px] text-on-surface-variant">
-                {{ auth.isPemilik ? 'Total Kapasitas' : 'Status Akun' }}
-              </span>
+
+            <!-- Item 3: Terakhir Login -->
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <PhClock :size="18" weight="bold" />
+              </div>
+              <div class="min-w-0 flex-1">
+                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Terakhir Login</p>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-xs font-bold text-slate-800">{{ lastLoginDisplay }}</span>
+                  <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/80">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Online
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Quick Logout Action -->
-          <div class="w-full pt-4 mt-4 border-t border-slate-100">
-            <button
-              @click="handleLogout"
-              class="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-rose-600 bg-rose-50 hover:bg-rose-100 transition text-xs font-semibold"
-              type="button"
-            >
-              <PhSignOut :size="18" weight="bold" />
-              <span>Keluar dari Akun</span>
-            </button>
+          <!-- Bottom Security Info Box with Padlock & Leaves Vector -->
+          <div class="mt-5 p-4 rounded-2xl bg-gradient-to-b from-blue-50/70 to-blue-50/20 border border-blue-100 flex flex-col items-center text-center">
+            <!-- Cute Security Padlock Vector Illustration -->
+            <div class="w-16 h-16 flex items-center justify-center mb-1 select-none">
+              <svg class="w-14 h-14" viewBox="0 0 64 64" fill="none">
+                <!-- Background Soft Aura -->
+                <circle cx="32" cy="36" r="22" fill="#DBEAFE" fill-opacity="0.6" />
+                <!-- Left Shrub / Leaves -->
+                <path d="M14 44 C12 36, 18 32, 22 36" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" fill="none" />
+                <path d="M12 40 C10 38, 14 34, 16 38" stroke="#34D399" stroke-width="2" stroke-linecap="round" fill="none" />
+                <!-- Right Shrub / Leaves -->
+                <path d="M50 44 C52 36, 46 32, 42 36" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" fill="none" />
+                <path d="M52 40 C54 38, 50 34, 48 38" stroke="#34D399" stroke-width="2" stroke-linecap="round" fill="none" />
+                <!-- Padlock Body -->
+                <rect x="22" y="26" width="20" height="20" rx="5" fill="#2563EB" />
+                <!-- Padlock Shackle -->
+                <path d="M26 26 V21 C26 17.686 28.686 15 32 15 C35.314 15 38 17.686 38 21 V26" stroke="#3B82F6" stroke-width="3.5" stroke-linecap="round" fill="none" />
+                <!-- Keyhole -->
+                <circle cx="32" cy="34" r="2.5" fill="#FFFFFF" />
+                <rect x="31" y="34" width="2" height="5" rx="1" fill="#FFFFFF" />
+              </svg>
+            </div>
+            <p class="text-xs font-bold text-slate-800">Kelola akun Anda dengan aman</p>
+            <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">
+              Pastikan informasi selalu diperbarui untuk menjaga keamanan akun.
+            </p>
           </div>
         </div>
       </div>
 
-      <!-- Kolom Kanan: Main Profile Form & Ganti Password (~800px) -->
-      <main class="lg:col-span-8 xl:col-span-8 space-y-6">
-        <!-- Personal Info Card -->
-        <div class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-slate-100">
+      <!-- ============================================================= -->
+      <!-- KOLOM KANAN: Formulir Profil, Ganti Sandi, & Sesi (~800px)    -->
+      <!-- ============================================================= -->
+      <div class="lg:col-span-8 xl:col-span-8 space-y-6">
+        <!-- 1. Card: Informasi Akun -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xs">
+          <!-- Card Header -->
           <div class="flex items-center justify-between pb-4 border-b border-slate-100 mb-6">
-            <div>
-              <h3 class="text-lg font-bold text-on-surface">Informasi Akun Pribadi</h3>
-              <p class="text-xs text-on-surface-variant mt-0.5">
-                Data profil Anda digunakan untuk identitas transaksi dan komunikasi hunian kos.
-              </p>
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                <PhUser :size="20" weight="bold" />
+              </div>
+              <div>
+                <h3 class="text-base font-bold text-slate-900">Informasi Akun</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Kelola informasi dasar akun Anda.</p>
+              </div>
             </div>
+
+            <!-- Ubah Profil Button -->
             <button
-              @click="refreshData"
-              class="px-3.5 py-1.5 bg-surface-container hover:bg-surface-container-high text-primary text-xs font-semibold rounded-lg transition flex items-center gap-1.5"
+              type="button"
+              @click="focusNameInput"
+              class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-bold text-blue-600 bg-blue-50/70 hover:bg-blue-100 border border-blue-200/80 transition cursor-pointer active:scale-95"
             >
-              <PhArrowClockwise :size="16" weight="bold" />
-              <span>Segarkan</span>
+              <PhPencilSimple :size="14" weight="bold" />
+              <span>Ubah Profil</span>
             </button>
           </div>
 
+          <!-- Form Informasi Akun -->
           <form @submit.prevent="saveProfile" class="space-y-4">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Nama -->
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-on-surface">Nama Lengkap</label>
+              <!-- Nama Lengkap -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nama Lengkap</label>
                 <div class="relative flex items-center">
-                  <PhUser :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
+                  <PhUser :size="17" class="absolute left-3.5 text-slate-400 select-none pointer-events-none" />
                   <input
+                    ref="nameInputRef"
                     v-model="profileForm.nama"
                     type="text"
                     required
-                    class="w-full h-11 pl-9 pr-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white text-xs font-semibold rounded-2xl border border-slate-200/80 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none text-slate-800"
+                    placeholder="Nama Lengkap"
                   />
                 </div>
               </div>
 
-              <!-- Email -->
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-on-surface">Alamat Email</label>
+              <!-- Email (Read-only) -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Email</label>
                 <div class="relative flex items-center">
-                  <PhEnvelope :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
+                  <PhEnvelope :size="17" class="absolute left-3.5 text-slate-400 select-none pointer-events-none" />
                   <input
                     :value="auth.user?.email"
                     type="email"
                     disabled
-                    class="w-full h-11 pl-9 pr-3.5 bg-slate-100 rounded-lg text-xs text-slate-500 cursor-not-allowed"
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-100/80 text-xs font-semibold rounded-2xl border border-slate-200/80 text-slate-500 cursor-not-allowed outline-none select-none"
                   />
                 </div>
               </div>
-            </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Nomor Telepon -->
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-on-surface">Nomor WhatsApp / Telepon</label>
+              <!-- Nomor WhatsApp -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Nomor WhatsApp</label>
                 <div class="relative flex items-center">
-                  <PhPhone :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
+                  <PhPhone :size="17" class="absolute left-3.5 text-slate-400 select-none pointer-events-none" />
                   <input
                     v-model="profileForm.no_hp"
                     type="tel"
-                    placeholder="Contoh: 081234567890"
-                    class="w-full h-11 pl-9 pr-3.5 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
+                    placeholder="08xxxxxxxxxx"
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white text-xs font-semibold rounded-2xl border border-slate-200/80 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none text-slate-800"
                   />
                 </div>
               </div>
 
-              <!-- Peran Akun -->
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-on-surface">Peran / Hak Akses Sistem</label>
+              <!-- Peran / Hak Akses Sistem -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1.5">Peran / Hak Akses Sistem</label>
                 <div class="relative flex items-center">
-                  <PhIdentificationBadge :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
+                  <PhLock :size="17" class="absolute left-3.5 text-slate-400 select-none pointer-events-none" />
                   <input
-                    :value="auth.role?.toUpperCase()"
+                    :value="roleTitle"
                     type="text"
                     disabled
-                    class="w-full h-11 pl-9 pr-3.5 bg-slate-100 rounded-lg text-xs font-bold text-primary tracking-wide cursor-not-allowed"
+                    class="w-full pl-10 pr-4 py-2.5 bg-slate-100/80 text-xs font-semibold rounded-2xl border border-slate-200/80 text-slate-500 cursor-not-allowed outline-none select-none capitalize"
                   />
                 </div>
+                <span class="block text-[10px] text-slate-400 mt-1">Peran akun tidak dapat diubah</span>
               </div>
             </div>
 
-            <!-- Simpan Perubahan Button -->
-            <div class="pt-4 flex items-center justify-between border-t border-slate-100">
-              <span class="text-[11px] text-on-surface-variant flex items-center gap-1">
-                <PhLock :size="15" class="text-emerald-600" />
-                Data tersinkronisasi dengan REST API Kostara
-              </span>
+            <!-- Footer Action Row -->
+            <div class="pt-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-t border-slate-100">
+              <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+                <PhInfo :size="16" class="text-blue-500 shrink-0" />
+                <span>Informasi ini digunakan untuk keperluan administrasi dan komunikasi.</span>
+              </div>
+
               <button
                 type="submit"
                 :disabled="saving"
-                class="h-10 px-6 rounded-lg bg-primary-container text-white text-xs font-semibold hover:bg-primary transition shadow-sm disabled:opacity-50 flex items-center gap-2"
+                class="inline-flex items-center justify-center gap-2 bg-[#0B63B6] hover:bg-primary-container text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
               >
                 <PhCircleNotch v-if="saving" :size="16" class="animate-spin" />
-                <span>{{ saving ? 'Menyimpan...' : 'Simpan Perubahan' }}</span>
+                <PhFloppyDisk v-else :size="16" weight="bold" />
+                <span>Simpan Perubahan</span>
               </button>
             </div>
           </form>
         </div>
 
-        <!-- Ganti Kata Sandi Card -->
-        <div class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-slate-100">
+        <!-- 2. Card: Ubah Kata Sandi -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xs">
+          <!-- Card Header -->
           <div class="flex items-center gap-3 pb-4 border-b border-slate-100 mb-6">
-            <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-              <PhLockKey :size="20" weight="bold" />
+            <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+              <PhLock :size="20" weight="bold" />
             </div>
             <div>
-              <h3 class="text-base font-bold text-on-surface">Ganti Kata Sandi</h3>
-              <p class="text-xs text-on-surface-variant mt-0.5">
-                Amankan akun Anda dengan memperbarui kata sandi secara berkala.
-              </p>
+              <h3 class="text-base font-bold text-slate-900">Ubah Kata Sandi</h3>
+              <p class="text-xs text-slate-400 mt-0.5">Gunakan kata sandi yang kuat untuk menjaga keamanan akun Anda.</p>
             </div>
           </div>
 
-          <!-- Alert Kata Sandi Sukses -->
+          <!-- Alert Kata Sandi Sukses / Error -->
           <div
             v-if="passwordSuccess"
-            class="mb-4 p-3.5 rounded-xl bg-emerald-50 text-emerald-800 text-xs font-medium border border-emerald-200 flex items-center justify-between"
+            class="mb-4 p-3.5 rounded-2xl bg-emerald-50 text-emerald-800 text-xs font-semibold border border-emerald-200 flex items-center justify-between"
           >
             <div class="flex items-center gap-2">
-              <PhCheckCircle :size="18" weight="fill" class="text-emerald-600" />
+              <PhCheckCircle :size="18" weight="fill" class="text-emerald-600 shrink-0" />
               <span>{{ passwordSuccess }}</span>
             </div>
-            <button @click="passwordSuccess = ''" class="text-emerald-700 font-bold ml-4 text-base">&times;</button>
+            <button @click="passwordSuccess = ''" class="text-emerald-700 font-bold ml-4 text-base cursor-pointer">&times;</button>
           </div>
 
-          <!-- Alert Kata Sandi Error -->
           <div
             v-if="passwordError"
-            class="mb-4 p-3.5 rounded-xl bg-rose-50 text-rose-800 text-xs font-medium border border-rose-200 flex items-center justify-between"
+            class="mb-4 p-3.5 rounded-2xl bg-rose-50 text-rose-800 text-xs font-semibold border border-rose-200 flex items-center justify-between"
           >
             <div class="flex items-center gap-2">
-              <PhWarningCircle :size="18" weight="fill" class="text-rose-600" />
+              <PhWarningCircle :size="18" weight="fill" class="text-rose-600 shrink-0" />
               <span>{{ passwordError }}</span>
             </div>
-            <button @click="passwordError = ''" class="text-rose-700 font-bold ml-4 text-base">&times;</button>
+            <button @click="passwordError = ''" class="text-rose-700 font-bold ml-4 text-base cursor-pointer">&times;</button>
           </div>
 
-          <form @submit.prevent="savePassword" class="space-y-4">
-            <!-- Password Lama -->
-            <div class="flex flex-col gap-1.5">
-              <label class="text-xs font-semibold text-on-surface">Kata Sandi Saat Ini</label>
-              <div class="relative flex items-center">
-                <PhKey :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
-                <input
-                  v-model="passwordForm.current_password"
-                  :type="showCurrentPassword ? 'text' : 'password'"
-                  placeholder="Masukkan kata sandi lama Anda"
-                  required
-                  class="w-full h-11 pl-9 pr-10 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
-                <button
-                  type="button"
-                  @click="showCurrentPassword = !showCurrentPassword"
-                  class="absolute right-3 text-slate-400 hover:text-on-surface flex items-center"
-                >
-                  <PhEyeSlash v-if="showCurrentPassword" :size="18" />
-                  <PhEye v-else :size="18" />
-                </button>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <!-- Password Baru -->
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-on-surface">Kata Sandi Baru</label>
-                <div class="relative flex items-center">
-                  <PhLock :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
-                  <input
-                    v-model="passwordForm.password"
-                    :type="showNewPassword ? 'text' : 'password'"
-                    placeholder="Minimal 8 karakter"
-                    required
-                    minlength="8"
-                    class="w-full h-11 pl-9 pr-10 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                  <button
-                    type="button"
-                    @click="showNewPassword = !showNewPassword"
-                    class="absolute right-3 text-slate-400 hover:text-on-surface flex items-center"
-                  >
-                    <PhEyeSlash v-if="showNewPassword" :size="18" />
-                    <PhEye v-else :size="18" />
-                  </button>
+          <form @submit.prevent="savePassword">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+              <!-- Left Sub-column: Inputs (~7 cols) -->
+              <div class="lg:col-span-7 space-y-3.5">
+                <!-- Kata Sandi Saat Ini -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kata Sandi Saat Ini</label>
+                  <div class="relative flex items-center">
+                    <PhLock :size="17" class="absolute left-3.5 text-slate-400 select-none pointer-events-none" />
+                    <input
+                      v-model="passwordForm.current_password"
+                      :type="showCurrentPassword ? 'text' : 'password'"
+                      placeholder="Masukkan kata sandi saat ini"
+                      required
+                      class="w-full pl-10 pr-10 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white text-xs font-semibold rounded-2xl border border-slate-200/80 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none text-slate-800"
+                    />
+                    <button
+                      type="button"
+                      @click="showCurrentPassword = !showCurrentPassword"
+                      class="absolute right-3.5 text-slate-400 hover:text-slate-600 flex items-center cursor-pointer"
+                    >
+                      <PhEyeSlash v-if="showCurrentPassword" :size="16" />
+                      <PhEye v-else :size="16" />
+                    </button>
+                  </div>
                 </div>
-                <span class="text-[10px] text-on-surface-variant">Kombinasikan huruf dan angka untuk keamanan optimal</span>
+
+                <!-- Kata Sandi Baru -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1.5">Kata Sandi Baru</label>
+                  <div class="relative flex items-center">
+                    <PhLock :size="17" class="absolute left-3.5 text-slate-400 select-none pointer-events-none" />
+                    <input
+                      v-model="passwordForm.password"
+                      :type="showNewPassword ? 'text' : 'password'"
+                      placeholder="Masukkan kata sandi baru"
+                      required
+                      minlength="8"
+                      class="w-full pl-10 pr-10 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white text-xs font-semibold rounded-2xl border border-slate-200/80 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none text-slate-800"
+                    />
+                    <button
+                      type="button"
+                      @click="showNewPassword = !showNewPassword"
+                      class="absolute right-3.5 text-slate-400 hover:text-slate-600 flex items-center cursor-pointer"
+                    >
+                      <PhEyeSlash v-if="showNewPassword" :size="16" />
+                      <PhEye v-else :size="16" />
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Konfirmasi Kata Sandi Baru -->
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1.5">Konfirmasi Kata Sandi Baru</label>
+                  <div class="relative flex items-center">
+                    <PhLock :size="17" class="absolute left-3.5 text-slate-400 select-none pointer-events-none" />
+                    <input
+                      v-model="passwordForm.password_confirmation"
+                      :type="showConfirmPassword ? 'text' : 'password'"
+                      placeholder="Konfirmasi kata sandi baru"
+                      required
+                      minlength="8"
+                      class="w-full pl-10 pr-10 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white text-xs font-semibold rounded-2xl border border-slate-200/80 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none text-slate-800"
+                    />
+                    <button
+                      type="button"
+                      @click="showConfirmPassword = !showConfirmPassword"
+                      class="absolute right-3.5 text-slate-400 hover:text-slate-600 flex items-center cursor-pointer"
+                    >
+                      <PhEyeSlash v-if="showConfirmPassword" :size="16" />
+                      <PhEye v-else :size="16" />
+                    </button>
+                  </div>
+                </div>
               </div>
 
-              <!-- Konfirmasi Password Baru -->
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-on-surface">Ulangi Kata Sandi Baru</label>
-                <div class="relative flex items-center">
-                  <PhLockKey :size="18" class="absolute left-3 text-slate-400 pointer-events-none" />
-                  <input
-                    v-model="passwordForm.password_confirmation"
-                    :type="showConfirmPassword ? 'text' : 'password'"
-                    placeholder="Ulangi kata sandi baru"
-                    required
-                    minlength="8"
-                    class="w-full h-11 pl-9 pr-10 bg-surface-container-low/40 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20"
-                  />
-                  <button
-                    type="button"
-                    @click="showConfirmPassword = !showConfirmPassword"
-                    class="absolute right-3 text-slate-400 hover:text-on-surface flex items-center"
-                  >
-                    <PhEyeSlash v-if="showConfirmPassword" :size="18" />
-                    <PhEye v-else :size="18" />
-                  </button>
+              <!-- Right Sub-column: Tips Password Box (~5 cols) -->
+              <div class="lg:col-span-5 bg-blue-50/50 rounded-2xl p-4 sm:p-5 border border-blue-100/80 flex flex-col justify-between">
+                <div>
+                  <div class="flex items-center gap-2 text-xs font-bold text-slate-800 mb-3.5">
+                    <PhShieldCheck :size="18" weight="bold" class="text-blue-600" />
+                    <span>Tips Password</span>
+                  </div>
+                  <ul class="space-y-2.5 text-xs text-slate-600">
+                    <li class="flex items-center gap-2 font-medium">
+                      <PhCheckCircle :size="16" weight="fill" :class="hasMinLength ? 'text-emerald-500' : 'text-slate-300'" />
+                      <span :class="{ 'text-slate-900 font-bold': hasMinLength }">Minimal 8 karakter</span>
+                    </li>
+                    <li class="flex items-center gap-2 font-medium">
+                      <PhCheckCircle :size="16" weight="fill" :class="hasUpperLower ? 'text-emerald-500' : 'text-slate-300'" />
+                      <span :class="{ 'text-slate-900 font-bold': hasUpperLower }">Mengandung huruf besar dan kecil</span>
+                    </li>
+                    <li class="flex items-center gap-2 font-medium">
+                      <PhCheckCircle :size="16" weight="fill" :class="hasNumber ? 'text-emerald-500' : 'text-slate-300'" />
+                      <span :class="{ 'text-slate-900 font-bold': hasNumber }">Mengandung angka</span>
+                    </li>
+                    <li class="flex items-center gap-2 font-medium">
+                      <PhCheckCircle :size="16" weight="fill" :class="hasSpecialChar ? 'text-emerald-500' : 'text-slate-300'" />
+                      <span :class="{ 'text-slate-900 font-bold': hasSpecialChar }">Mengandung simbol (contoh: !@#)</span>
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
 
             <!-- Update Password Submit Button -->
-            <div class="pt-4 flex items-center justify-end border-t border-slate-100">
+            <div class="pt-5 mt-5 flex items-center justify-end border-t border-slate-100">
               <button
                 type="submit"
                 :disabled="passwordLoading"
-                class="h-10 px-6 rounded-lg bg-primary hover:bg-primary-container text-white text-xs font-semibold transition shadow-sm disabled:opacity-50 flex items-center gap-2"
+                class="inline-flex items-center gap-2 bg-[#0B63B6] hover:bg-primary-container text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
               >
                 <PhCircleNotch v-if="passwordLoading" :size="16" class="animate-spin" />
-                <span>{{ passwordLoading ? 'Menyimpan Sandi...' : 'Perbarui Kata Sandi' }}</span>
+                <PhLock v-else :size="16" weight="bold" />
+                <span>Ubah Kata Sandi</span>
               </button>
             </div>
           </form>
         </div>
 
-        <!-- Security & Status Card -->
-        <div class="bg-surface-container-lowest rounded-2xl p-space-lg shadow-sm border border-slate-100">
-          <div class="flex items-center gap-3 pb-3 border-b border-slate-100 mb-4">
-            <div class="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+        <!-- 3. Card: Keamanan & Sesi Akun -->
+        <div class="bg-white rounded-3xl border border-slate-200/80 p-6 sm:p-7 shadow-xs">
+          <!-- Card Header -->
+          <div class="flex items-center gap-3 pb-4 border-b border-slate-100 mb-6">
+            <div class="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
               <PhShieldCheck :size="20" weight="bold" />
             </div>
             <div>
-              <h4 class="text-sm font-bold text-on-surface">Keamanan & Sesi Akun</h4>
-              <p class="text-[11px] text-on-surface-variant">Status otentikasi sesi token aktif (Laravel Sanctum).</p>
+              <h4 class="text-base font-bold text-slate-900">Keamanan & Sesi Akun</h4>
+              <p class="text-xs text-slate-400 mt-0.5">Pantau aktivitas akun dan kelola sesi yang sedang aktif.</p>
             </div>
           </div>
 
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-xl bg-surface-container-low/50 border border-slate-100 text-xs">
-            <div class="flex items-center gap-3">
-              <PhShieldCheck :size="24" weight="fill" class="text-emerald-600" />
+          <!-- 2 Horizontal Status Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Card A: Akun Terlindungi -->
+            <div class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                <PhShieldCheck :size="22" weight="fill" />
+              </div>
               <div>
-                <p class="font-bold text-on-surface">Akun Terlindungi</p>
-                <p class="text-[11px] text-slate-500">Token otentikasi valid dan tersimpan aman di peramban Anda.</p>
+                <p class="text-xs font-bold text-slate-900">Akun Terlindungi</p>
+                <p class="text-[11px] text-slate-500 mt-0.5">Keamanan akun Anda dalam kondisi baik.</p>
               </div>
             </div>
-            <button
-              @click="handleLogout"
-              class="px-4 py-2 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 transition font-semibold text-xs border border-rose-200"
-            >
-              Keluar dari Sesi
-            </button>
+
+            <!-- Card B: Sesi Aktif -->
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3 hover:bg-slate-100/70 transition">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-blue-100/70 text-blue-600 flex items-center justify-center shrink-0">
+                  <PhDeviceMobile :size="20" weight="bold" />
+                </div>
+                <div class="min-w-0">
+                  <p class="text-xs font-bold text-slate-900 truncate">Sesi Aktif</p>
+                  <p class="text-[10px] text-slate-500 mt-0.5 truncate">Terakhir login: {{ lastLoginDisplay }}</p>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 shrink-0">
+                <span class="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  Online
+                </span>
+                <PhCaretRight :size="14" class="text-slate-400" />
+              </div>
+            </div>
           </div>
         </div>
-      </main>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import {
-  PhShieldCheck,
-  PhCheckCircle,
+  PhIdentificationBadge,
   PhUser,
-  PhCircleNotch,
   PhCamera,
-  PhSignOut,
-  PhArrowClockwise,
+  PhCheckCircle,
+  PhCalendarBlank,
+  PhClock,
+  PhPencilSimple,
   PhEnvelope,
   PhPhone,
-  PhIdentificationBadge,
   PhLock,
-  PhLockKey,
-  PhWarningCircle,
-  PhKey,
-  PhEyeSlash,
+  PhInfo,
+  PhFloppyDisk,
   PhEye,
+  PhEyeSlash,
+  PhShieldCheck,
+  PhDeviceMobile,
+  PhCaretRight,
+  PhCircleNotch,
+  PhWarningCircle,
 } from '@phosphor-icons/vue'
-import { useAuthStore } from '../stores/auth'
-import api from '../services/api'
 
 const auth = useAuthStore()
+const ui = useUiStore()
 const router = useRouter()
 
 const toastMsg = ref('')
-const myKosCount = ref(0)
-const myRoomCount = ref(0)
-const myBookingCount = ref(0)
+const errorToastMsg = ref('')
+const nameInputRef = ref(null)
 
 const profileForm = reactive({
   nama: auth.user?.nama || '',
@@ -444,33 +571,62 @@ const passwordLoading = ref(false)
 const passwordError = ref('')
 const passwordSuccess = ref('')
 
-const loadStats = async () => {
-  if (auth.isPemilik) {
-    try {
-      const res = await api.get('/kos', { params: { pemilik_id: auth.user?.id } })
-      const list = res.data?.data || []
-      myKosCount.value = list.length
-      myRoomCount.value = list.reduce((acc, k) => acc + (k.kamar?.length || 0), 0)
-    } catch (e) {
-      // ignore
-    }
-  } else {
-    try {
-      const res = await api.get('/bookings')
-      myBookingCount.value = (res.data?.data || []).length
-    } catch (e) {
-      // ignore
-    }
+// Tips Password Real-Time Validators
+const hasMinLength = computed(() => passwordForm.password.length >= 8)
+const hasUpperLower = computed(() => /[a-z]/.test(passwordForm.password) && /[A-Z]/.test(passwordForm.password))
+const hasNumber = computed(() => /[0-9]/.test(passwordForm.password))
+const hasSpecialChar = computed(() => /[^a-zA-Z0-9]/.test(passwordForm.password))
+
+// Computed Role Title
+const roleTitle = computed(() => {
+  switch (auth.role) {
+    case 'admin':
+      return 'Administrator'
+    case 'pemilik':
+      return 'Pemilik Kos'
+    case 'pencari':
+      return 'Pencari Kos'
+    default:
+      return 'Pengguna'
   }
-}
+})
+
+// Joined Date (e.g., "12 Jan 2024")
+const joinedDate = computed(() => {
+  if (!auth.user?.created_at) return '12 Jan 2024'
+  const date = new Date(auth.user.created_at)
+  return date.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+})
+
+// Last Login Display (e.g., "26 Okt 2024, 14:32")
+const lastLoginDisplay = computed(() => {
+  const now = new Date()
+  const dateStr = now.toLocaleDateString('id-ID', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })
+  const timeStr = now.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+  }).replace(/\./g, ':')
+  return `${dateStr}, ${timeStr}`
+})
 
 onMounted(() => {
   if (auth.user) {
     profileForm.nama = auth.user.nama || ''
     profileForm.no_hp = auth.user.no_hp || auth.user.telepon || ''
   }
-  loadStats()
 })
+
+const focusNameInput = () => {
+  nameInputRef.value?.focus()
+}
 
 const triggerFileInput = () => {
   fileInputRef.value?.click()
@@ -482,12 +638,12 @@ const onAvatarSelected = async (event) => {
 
   const validTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg']
   if (!validTypes.includes(file.type)) {
-    toastMsg.value = 'Format foto harus berupa JPG, PNG, atau WEBP.'
+    errorToastMsg.value = 'Format foto harus berupa JPG, PNG, atau WEBP.'
     return
   }
 
   if (file.size > 2 * 1024 * 1024) {
-    toastMsg.value = 'Ukuran berkas foto profil maksimal 2MB.'
+    errorToastMsg.value = 'Ukuran berkas foto profil maksimal 2MB.'
     return
   }
 
@@ -499,7 +655,7 @@ const onAvatarSelected = async (event) => {
     toastMsg.value = 'Foto profil berhasil diperbarui!'
   } catch (err) {
     avatarPreview.value = null
-    toastMsg.value = err.response?.data?.message || 'Gagal mengunggah foto profil.'
+    errorToastMsg.value = err.response?.data?.message || 'Gagal mengunggah foto profil.'
   } finally {
     uploadingAvatar.value = false
     if (fileInputRef.value) {
@@ -508,29 +664,21 @@ const onAvatarSelected = async (event) => {
   }
 }
 
-const refreshData = async () => {
-  await auth.fetchMe()
-  if (auth.user) {
-    profileForm.nama = auth.user.nama || ''
-    profileForm.no_hp = auth.user.no_hp || auth.user.telepon || ''
-  }
-  await loadStats()
-  toastMsg.value = 'Data akun berhasil disinkronkan!'
-}
-
 const saving = ref(false)
 
 const saveProfile = async () => {
   saving.value = true
+  toastMsg.value = ''
+  errorToastMsg.value = ''
   try {
     await auth.updateProfile({
       nama: profileForm.nama,
       no_hp: profileForm.no_hp,
       telepon: profileForm.no_hp,
     })
-    toastMsg.value = 'Informasi profil dan nomor WhatsApp berhasil disimpan ke database!'
+    toastMsg.value = 'Informasi profil dan nomor WhatsApp berhasil disimpan!'
   } catch (err) {
-    toastMsg.value = err.response?.data?.message || 'Gagal menyimpan profil, periksa kembali data Anda.'
+    errorToastMsg.value = err.response?.data?.message || 'Gagal menyimpan profil, periksa kembali data Anda.'
   } finally {
     saving.value = false
   }
@@ -573,22 +721,5 @@ const savePassword = async () => {
   } finally {
     passwordLoading.value = false
   }
-}
-
-const ui = useUiStore()
-
-const handleLogout = async () => {
-  const confirmed = await ui.confirm({
-    title: 'Konfirmasi Keluar Akun',
-    message: 'Apakah Anda yakin ingin keluar dari akun Kostara Anda?',
-    confirmText: 'Ya, Keluar',
-    cancelText: 'Batal',
-    confirmType: 'danger',
-  })
-  if (!confirmed) return
-
-  await auth.logout()
-  ui.success('Anda telah berhasil keluar.')
-  router.push({ name: 'home' })
 }
 </script>

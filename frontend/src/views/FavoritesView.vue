@@ -9,7 +9,7 @@
       </nav>
 
       <!-- Page Header -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 bg-surface-container-lowest p-6 rounded-2xl border border-slate-100 shadow-xs">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 bg-surface-container-lowest p-6 rounded-2xl border border-slate-100 shadow-xs">
         <div>
           <div class="flex items-center gap-2.5">
             <div class="w-10 h-10 rounded-xl bg-rose-50 text-error flex items-center justify-center shrink-0">
@@ -34,13 +34,32 @@
           <button
             v-if="favoritesStore.count > 0"
             @click="confirmClearFavorites"
-            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-error hover:bg-error-container/20 border border-error/20 transition"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-error hover:bg-error-container/20 border border-error/20 transition cursor-pointer"
             type="button"
           >
             <PhTrash :size="15" weight="bold" />
             <span>Hapus Semua</span>
           </button>
         </div>
+      </div>
+
+      <!-- Guest Sync Banner -->
+      <div
+        v-if="!auth.isAuthenticated && favoritesStore.count > 0"
+        class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200 text-xs text-primary flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
+      >
+        <div class="flex items-center gap-2.5">
+          <PhInfo :size="20" weight="bold" class="text-primary shrink-0" />
+          <span class="leading-relaxed">
+            Anda sedang melihat kos tersimpan sebagai <strong>tamu</strong>. Masuk ke akun Anda agar daftar favorit ini otomatis tersimpan secara permanen.
+          </span>
+        </div>
+        <router-link
+          to="/login?redirect=/favorit"
+          class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white font-bold transition shadow-xs text-center shrink-0"
+        >
+          Masuk Sekarang
+        </router-link>
       </div>
 
       <!-- Empty State -->
@@ -78,7 +97,8 @@
         <article
           v-for="kos in favoritesStore.favorites"
           :key="kos.id"
-          class="bg-surface-container-lowest rounded-2xl shadow-xs hover:shadow-md transition-all flex flex-col overflow-hidden group border border-slate-100"
+          @click="router.push(`/kos/${kos.id}`)"
+          class="bg-surface-container-lowest rounded-2xl shadow-xs hover:shadow-md transition-all flex flex-col overflow-hidden group border border-slate-100 cursor-pointer"
         >
           <!-- Thumbnail Image -->
           <div class="relative w-full aspect-[4/3] overflow-hidden bg-surface-container">
@@ -93,8 +113,8 @@
 
             <!-- Remove from Favorite Button -->
             <button
-              @click.stop="handleRemove(kos)"
-              class="absolute top-3 right-3 min-w-[36px] min-h-[36px] rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-error hover:bg-error hover:text-white flex items-center justify-center shadow-sm transition-all"
+              @click.stop.prevent="handleRemove(kos)"
+              class="absolute top-3 right-3 min-w-[36px] min-h-[36px] rounded-full bg-surface-container-lowest/90 backdrop-blur-sm text-error hover:bg-error hover:text-white flex items-center justify-center shadow-sm transition-all cursor-pointer"
               title="Hapus dari Tersimpan"
               type="button"
             >
@@ -108,6 +128,7 @@
               <div class="flex items-center justify-between gap-space-xs mb-1">
                 <router-link
                   :to="`/kos/${kos.id}`"
+                  @click.stop
                   class="text-base font-bold text-on-surface group-hover:text-primary transition-colors truncate"
                 >
                   {{ kos.nama }}
@@ -153,6 +174,7 @@
 
               <router-link
                 :to="`/kos/${kos.id}`"
+                @click.stop
                 class="px-4 py-2 rounded-xl bg-primary-container text-white text-xs font-bold hover:bg-primary transition shadow-xs"
               >
                 Lihat Detail
@@ -166,6 +188,8 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '../stores/auth'
 import { useFavoritesStore } from '../stores/favorites'
 import { useUiStore } from '../stores/ui'
 import GenderBadge from '../components/GenderBadge.vue'
@@ -176,9 +200,12 @@ import {
   PhMapPin,
   PhCheckCircle,
   PhTrash,
-  PhMagnifyingGlass
+  PhMagnifyingGlass,
+  PhInfo
 } from '@phosphor-icons/vue'
 
+const router = useRouter()
+const auth = useAuthStore()
 const favoritesStore = useFavoritesStore()
 const ui = useUiStore()
 
@@ -193,7 +220,8 @@ const getImageForKos = (kos) => {
   if (kos.foto && Array.isArray(kos.foto) && kos.foto.length > 0) {
     return kos.foto[0]
   }
-  return samplePhotos[(Number(kos.id) - 1) % samplePhotos.length]
+  const idNum = Math.max(Number(kos.id) || 1, 1)
+  return samplePhotos[(idNum - 1) % samplePhotos.length]
 }
 
 const formatRupiah = (val) => {

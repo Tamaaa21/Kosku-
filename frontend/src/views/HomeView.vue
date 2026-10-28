@@ -81,8 +81,8 @@
             </div>
           </div>
 
-          <!-- Bottom: Floating Search Bar Card (Desktop Pill & Mobile 1-Line) -->
-          <div class="w-full max-w-[740px] mr-auto mt-6 sm:mt-8 -translate-y-4 sm:-translate-y-6 lg:-translate-y-8">
+          <!-- Bottom: Floating Search Bar Card (Desktop Pill & Mobile 1-Line - Centered & Wider) -->
+          <div class="w-full max-w-4xl mx-auto mt-6 sm:mt-8 -translate-y-4 sm:-translate-y-6 lg:-translate-y-8">
             <!-- 1. Mobile 1-Line Search Bar (cukup satu baris, klik untuk pop up detail) -->
             <div
               @click="openMobileSearchModal"
@@ -110,10 +110,10 @@
               </div>
             </div>
 
-            <!-- 2. Desktop Full Pill Search Bar (Layar Besar lg+) -->
-            <div class="hidden lg:flex w-full bg-white/95 backdrop-blur-md rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.22)] p-2 sm:p-2.5 border border-white/40 items-center gap-2 transition-all">
+            <!-- 2. Desktop Full Pill Search Bar (Layar Besar lg+ - Centered & Spacious) -->
+            <div class="hidden lg:flex w-full bg-white/95 backdrop-blur-md rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.22)] p-2 sm:p-2.5 border border-white/40 items-center gap-2.5 transition-all">
               <!-- Location Search -->
-              <div class="flex-1 flex items-center gap-2.5 px-3.5 py-2 sm:py-2.5 bg-slate-50/90 hover:bg-slate-100/80 rounded-full focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/20 transition-all group/loc">
+              <div class="flex-1 flex items-center gap-2.5 px-4 py-2 sm:py-2.5 bg-slate-50/90 hover:bg-slate-100/80 rounded-full focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/20 transition-all group/loc">
                 <PhMapPin :size="20" weight="fill" class="text-primary/70 group-focus-within/loc:text-primary transition-colors select-none shrink-0" />
                 <div class="flex-1 flex flex-col justify-center min-w-0">
                   <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Lokasi / Area</span>
@@ -140,7 +140,7 @@
               <div class="w-px h-8 bg-slate-200/90 shrink-0"></div>
 
               <!-- Jenis Kos Dropdown (Bed Icon) -->
-              <div class="flex items-center gap-2.5 px-3.5 py-2 sm:py-2.5 bg-slate-50/90 hover:bg-slate-100/80 rounded-full min-w-[135px] relative group/type cursor-pointer focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white transition-all">
+              <div class="flex items-center gap-2.5 px-3.5 py-2 sm:py-2.5 bg-slate-50/90 hover:bg-slate-100/80 rounded-full min-w-[145px] relative group/type cursor-pointer focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white transition-all">
                 <PhBed :size="19" weight="bold" class="text-slate-500 group-focus-within/type:text-primary transition-colors select-none shrink-0" />
                 <div class="flex-1 flex flex-col justify-center min-w-0 pr-4">
                   <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Tipe Hunian</span>
@@ -162,7 +162,7 @@
               <div class="w-px h-8 bg-slate-200/90 shrink-0"></div>
 
               <!-- Rentang Harga Dropdown (Coin / Dollar Icon) -->
-              <div class="flex items-center gap-2.5 px-3.5 py-2 sm:py-2.5 bg-slate-50/90 hover:bg-slate-100/80 rounded-full min-w-[145px] relative group/price cursor-pointer focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white transition-all">
+              <div class="flex items-center gap-2.5 px-3.5 py-2 sm:py-2.5 bg-slate-50/90 hover:bg-slate-100/80 rounded-full min-w-[155px] relative group/price cursor-pointer focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white transition-all">
                 <PhCurrencyCircleDollar :size="19" weight="bold" class="text-slate-500 group-focus-within/price:text-primary transition-colors select-none shrink-0" />
                 <div class="flex-1 flex flex-col justify-center min-w-0 pr-4">
                   <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Budget</span>
@@ -183,16 +183,16 @@
               <!-- Search Button -->
               <button
                 @click="handleSearch"
-                class="bg-gradient-to-r from-primary to-[#095296] hover:from-[#095296] hover:to-primary text-white px-6 sm:px-7 py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:shadow-primary/30 active:scale-95 whitespace-nowrap cursor-pointer shrink-0"
+                class="bg-gradient-to-r from-primary to-[#095296] hover:from-[#095296] hover:to-primary text-white px-7 sm:px-8 py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:shadow-primary/30 active:scale-95 whitespace-nowrap cursor-pointer shrink-0"
                 type="button"
               >
                 <PhMagnifyingGlass :size="18" weight="bold" class="select-none" />
-                <span>Cari</span>
+                <span>Cari Kos</span>
               </button>
             </div>
 
-            <!-- Popular Search Quick Chips (Single line horizontal scroll on mobile) -->
-            <div class="flex items-center gap-2 mt-3 pt-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-nowrap lg:flex-wrap max-w-full pb-1">
+            <!-- Popular Search Quick Chips (Single line horizontal scroll on mobile, centered on desktop) -->
+            <div class="flex items-center gap-2 mt-3 pt-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-nowrap lg:flex-wrap max-w-full pb-1 justify-start lg:justify-center">
               <span class="text-xs font-semibold text-white/85 hidden sm:inline-block shrink-0">Pencarian Populer:</span>
               <button
                 v-for="(tag, tIdx) in quickTags"
@@ -748,11 +748,6 @@ const fetchHeroBanners = async () => {
 }
 
 const handleToggleFavorite = (kos) => {
-  if (!auth.isAuthenticated) {
-    ui.warning('Silakan masuk terlebih dahulu untuk menyimpan kos favorit.')
-    router.push({ name: 'login', query: { redirect: route.fullPath } })
-    return
-  }
   const isAdded = favoritesStore.toggleFavorite(kos)
   if (isAdded) {
     ui.success(`Kos "${kos.nama}" disimpan ke favorit!`)

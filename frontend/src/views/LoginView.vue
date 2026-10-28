@@ -52,7 +52,15 @@
         </div>
 
         <div>
-          <label class="block text-xs font-semibold text-on-surface mb-1">Kata Sandi</label>
+          <div class="flex items-center justify-between mb-1">
+            <label class="block text-xs font-semibold text-on-surface">Kata Sandi</label>
+            <router-link
+              to="/forgot-password"
+              class="text-[11px] font-semibold text-primary hover:underline hover:text-primary-hover transition"
+            >
+              Lupa Kata Sandi?
+            </router-link>
+          </div>
           <input
             type="password"
             v-model="form.password"
