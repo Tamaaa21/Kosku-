@@ -1,0 +1,80 @@
+@startuml KosKu_UseCase_Admin
+' ========================================================
+' PlantUML Use Case Diagram: Administrator
+' Mengikuti Gaya Desain docs/contoh-usecase.png
+' ========================================================
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial, Helvetica, sans-serif
+
+' Styling Persis Referensi contoh-usecase.png
+skinparam actor {
+    BorderColor #000000
+    BackgroundColor #FFFFFF
+    FontColor #000000
+    FontSize 13
+}
+
+skinparam usecase {
+    BackgroundColor #56C0FC
+    BorderColor #000000
+    FontColor #000000
+    FontSize 12
+    ArrowColor #000000
+    ArrowFontSize 11
+}
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #000000
+    FontColor #000000
+    FontSize 14
+    FontStyle bold
+}
+
+actor "Admin" as Admin
+
+rectangle "Use Case Administrator" {
+
+    ' Use Case Utama
+    usecase "Login" as UC_Login
+    usecase "Moderasi Verifikasi" as UC_ModVerif
+    usecase "Moderasi Kos" as UC_ModKos
+    usecase "Kelola Pengguna" as UC_KelolaUser
+    usecase "Kelola Fasilitas" as UC_Fasilitas
+    usecase "Kelola Banner" as UC_Banner
+    usecase "Statistik Platform" as UC_Stats
+
+    ' Use Case Spesifikasi / Extend Sisi Kanan
+    usecase "Setujui Berkas" as UC_ApproveVerif
+    usecase "Tolak Berkas" as UC_RejectVerif
+    usecase "Hapus Kos Pelanggaran" as UC_HapusKos
+    usecase "Suspend Akun" as UC_SuspendUser
+
+    ' Relasi Aktor ke Use Case Utama
+    Admin --> UC_Login
+    Admin --> UC_ModVerif
+    Admin --> UC_ModKos
+    Admin --> UC_KelolaUser
+    Admin --> UC_Fasilitas
+    Admin --> UC_Banner
+    Admin --> UC_Stats
+
+    ' Relasi <<include>>
+    UC_ModVerif ..> UC_Login : <<include>>
+    UC_ModKos ..> UC_Login : <<include>>
+    UC_KelolaUser ..> UC_Login : <<include>>
+    UC_Fasilitas ..> UC_Login : <<include>>
+    UC_Banner ..> UC_Login : <<include>>
+    UC_Stats ..> UC_Login : <<include>>
+
+    ' Relasi <<extend>>
+    UC_ApproveVerif .> UC_ModVerif : <<extend>>
+    UC_RejectVerif .> UC_ModVerif : <<extend>>
+    UC_HapusKos .> UC_ModKos : <<extend>>
+    UC_SuspendUser .> UC_KelolaUser : <<extend>>
+}
+
+@enduml

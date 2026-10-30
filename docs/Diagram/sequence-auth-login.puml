@@ -1,0 +1,86 @@
+@startuml KosKu_Sequence_Auth_Login
+' ========================================================
+' PlantUML Sequence Diagram: Autentikasi & Login (Sanctum)
+' ========================================================
+
+autonumber
+skinparam handwritten false
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", Arial, sans-serif
+
+skinparam sequence {
+    ArrowColor #0284C7
+    ActorBorderColor #0284C7
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #0284C7
+    ParticipantBackgroundColor #F8FAFC
+    ParticipantFontColor #0F172A
+    BoxBorderColor #CBD5E1
+    BoxBackgroundColor #F8FAFC
+}
+
+actor "Pengguna" as User
+box "Frontend (Vue 3 SPA)" #EFF6FF
+    participant "LoginModal.vue" as UI
+    participant "authStore.ts" as Store
+end box
+
+box "Backend (Laravel API)" #F0FDF4
+    participant "Route (api.php)" as Route
+    participant "AuthController" as Controller
+    participant "Pengguna (Model)" as Model
+end box
+
+database "MySQL Database" as DB
+
+User -> UI: Masukkan Email & Password
+activate UI
+UI -> UI: Validasi Form di Sisi Klien
+UI -> Store: login({ email, password })
+activate Store
+
+Store -> Route: POST /api/v1/auth/login\n[JSON: email, password]
+activate Route
+
+Route -> Controller: login(LoginRequest $request)
+activate Controller
+
+Controller -> Model: where('email', $email)->first()
+activate Model
+
+Model -> DB: SELECT * FROM pengguna WHERE email = ?
+activate DB
+DB --> Model: Data Record Pengguna
+deactivate DB
+
+alt Pengguna Tidak Ditemukan / Password Salah
+    Model --> Controller: Null / Kredensial Tidak Cocok
+    Controller --> Route: HTTP 401 Unauthorized\n{"message": "Kredensial tidak valid"}
+    Route --> Store: Response Error JSON
+    Store --> UI: Lempar Exception / Error
+    UI --> User: Tampilkan Pesan "Email atau Password Salah"
+else Kredensial Valid & Akun Aktif
+    Model --> Controller: Instance Pengguna Valid
+    Controller -> Model: createToken('auth_token')
+    Model -> DB: INSERT INTO personal_access_tokens
+    activate DB
+    DB --> Model: ID Token & Token Hash
+    deactivate DB
+    Model --> Controller: plainTextToken (Bearer String)
+    deactivate Model
+
+    Controller --> Route: HTTP 200 OK\n{"user": {...}, "token": "Bearer eyJ..."}
+    deactivate Controller
+    Route --> Store: Response Sukses Berisi Token & Profil
+    deactivate Route
+
+    Store -> Store: Simpan Token di LocalStorage & Pinia State
+    Store --> UI: Status Sukses & Data Role User
+    deactivate Store
+
+    UI --> User: Redirect ke Dashboard Sesuai Role (Pencari / Pemilik / Admin)
+    deactivate UI
+end
+
+@enduml

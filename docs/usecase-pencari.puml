@@ -1,0 +1,79 @@
+@startuml KosKu_UseCase_Pencari
+' ========================================================
+' PlantUML Use Case Diagram: Pencari Kos
+' Mengikuti Gaya Desain docs/contoh-usecase.png
+' ========================================================
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial, Helvetica, sans-serif
+
+' Styling Persis Referensi contoh-usecase.png
+skinparam actor {
+    BorderColor #000000
+    BackgroundColor #FFFFFF
+    FontColor #000000
+    FontSize 13
+}
+
+skinparam usecase {
+    BackgroundColor #56C0FC
+    BorderColor #000000
+    FontColor #000000
+    FontSize 12
+    ArrowColor #000000
+    ArrowFontSize 11
+}
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #000000
+    FontColor #000000
+    FontSize 14
+    FontStyle bold
+}
+
+actor "Pencari Kos" as User
+
+rectangle "Use Case Pencari Kos" {
+
+    ' Use Case Utama
+    usecase "Registrasi" as UC_Register
+    usecase "Validasi Data" as UC_Validasi
+    usecase "Login" as UC_Login
+    usecase "Cari Kos" as UC_Cari
+    usecase "Detail Kos" as UC_Detail
+    usecase "Reservasi Sewa" as UC_Reservasi
+    usecase "Riwayat Sewa" as UC_Riwayat
+    usecase "Ulasan Kos" as UC_Ulasan
+
+    ' Use Case Extend / Spesifikasi Sisi Kanan
+    usecase "Filter Fasilitas & Harga" as UC_Filter
+    usecase "Peta Lokasi GPS" as UC_Peta
+    usecase "WhatsApp Pemilik" as UC_WA
+
+    ' Relasi Aktor ke Use Case Utama
+    User --> UC_Register
+    User --> UC_Login
+    User --> UC_Cari
+    User --> UC_Detail
+    User --> UC_Reservasi
+    User --> UC_Riwayat
+    User --> UC_Ulasan
+
+    ' Relasi <<include>> (Panah Putus-putus)
+    UC_Register ..> UC_Validasi : <<include>>
+    UC_Login ..> UC_Register : <<include>>
+    UC_Reservasi ..> UC_Login : <<include>>
+    UC_Riwayat ..> UC_Login : <<include>>
+    UC_Ulasan ..> UC_Login : <<include>>
+
+    ' Relasi <<extend>> (Menuju Use Case Utama)
+    UC_Filter .> UC_Cari : <<extend>>
+    UC_Peta .> UC_Cari : <<extend>>
+    UC_WA .> UC_Detail : <<extend>>
+    UC_Ulasan .> UC_Reservasi : <<extend>>
+}
+
+@enduml

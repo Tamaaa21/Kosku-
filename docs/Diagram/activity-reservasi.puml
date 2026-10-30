@@ -1,0 +1,77 @@
+@startuml KosKu_Activity_Reservasi
+' ========================================================
+' PlantUML Activity Diagram: Alur Reservasi Sewa Kos
+' ========================================================
+
+skinparam handwritten false
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", Arial, sans-serif
+
+skinparam activity {
+    BackgroundColor #F0FDF4
+    BorderColor #16A34A
+    FontColor #0F172A
+    FontSize 12
+}
+
+skinparam activityDiamond {
+    BackgroundColor #FEF3C7
+    BorderColor #D97706
+    FontColor #0F172A
+}
+
+skinparam partition {
+    BackgroundColor #F8FAFC
+    BorderColor #94A3B8
+    FontColor #0F172A
+    FontSize 13
+}
+
+|#E0F2FE|Pencari Kos|
+start
+:Buka Halaman Detail Kos & Pilih Unit Kamar;
+:Klik Tombol "Ajukan Sewa / Reservasi";
+
+if (Sudah Login?) then (belum)
+    :Isi Form Login / Registrasi;
+    :Autentikasi Berhasil;
+else (sudah)
+endif
+
+:Isi Tanggal Mulai, Durasi Sewa, dan Catatan;
+:Kirim Pengajuan Reservasi;
+
+|#F1F5F9|Sistem KosKu|
+:Validasi Data Input & Ketersediaan Kamar;
+
+if (Kamar Tersedia?) then (ya)
+    :Simpan Data Pemesanan (status: 'menunggu');
+    :Kirim Notifikasi ke Dashboard Pemilik Kos;
+else (penuh/tidak tersedia)
+    :Tampilkan Pesan Peringatan "Kamar Penuh";
+    stop
+endif
+
+|#FEF9C3|Mitra Pemilik Kos|
+:Buka Notifikasi / Daftar Reservasi Masuk;
+:Evaluasi Data Pengajuan & Profil Pencari;
+
+if (Keputusan Pemilik?) then (Setujui)
+    :Klik "Setujui Permohonan Sewa";
+    |#F1F5F9|Sistem KosKu|
+    :Update Status Pemesanan -> 'disetujui';
+    :Kurangi Stok Kamar Tersedia;
+    :Buka Akses Tombol Chat WhatsApp Instan;
+    |#E0F2FE|Pencari Kos|
+    :Menerima Status "Disetujui";
+    :Koordinasi Check-in via WhatsApp;
+else (Tolak)
+    :Pilih "Tolak" & Masukkan Alasan Penolakan;
+    |#F1F5F9|Sistem KosKu|
+    :Update Status Pemesanan -> 'ditolak';
+    |#E0F2FE|Pencari Kos|
+    :Menerima Status "Ditolak" beserta Alasan;
+endif
+
+stop
+@enduml

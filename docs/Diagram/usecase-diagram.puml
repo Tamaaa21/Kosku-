@@ -1,0 +1,103 @@
+@startuml KosKu_UseCase_Diagram
+' ========================================================
+' PlantUML Use Case Diagram: Platform KosKu
+' Mengikuti Gaya Desain docs/contoh-usecase.png
+' ========================================================
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial, Helvetica, sans-serif
+
+' Styling Persis Referensi contoh-usecase.png
+skinparam actor {
+    BorderColor #000000
+    BackgroundColor #FFFFFF
+    FontColor #000000
+    FontSize 13
+}
+
+skinparam usecase {
+    BackgroundColor #56C0FC
+    BorderColor #000000
+    FontColor #000000
+    FontSize 12
+    ArrowColor #000000
+    ArrowFontSize 11
+}
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #000000
+    FontColor #000000
+    FontSize 14
+    FontStyle bold
+}
+
+' Aktor Sisi Kiri
+actor "Pengunjung" as Guest
+actor "Pencari Kos" as Pencari
+Guest <|-- Pencari
+
+' Aktor Sisi Kanan
+actor "Pemilik Kos" as Pemilik
+actor "Admin" as Admin
+
+rectangle "Use Case Sistem Informasi KosKu" {
+
+    ' Use Case Publik & Pencari
+    usecase "Registrasi" as UC_Register
+    usecase "Login" as UC_Login
+    usecase "Cari Kos" as UC_Cari
+    usecase "Detail Kos" as UC_Detail
+    usecase "Reservasi Sewa" as UC_Reservasi
+    usecase "Ulasan Kos" as UC_Ulasan
+
+    ' Use Case Pemilik Kos
+    usecase "Verifikasi Akun" as UC_Verif
+    usecase "Kelola Kos" as UC_Kos
+    usecase "Kelola Kamar" as UC_Kamar
+    usecase "Konfirmasi Sewa" as UC_KonfirmSewa
+
+    ' Use Case Admin
+    usecase "Moderasi Verifikasi" as UC_ModVerif
+    usecase "Moderasi Listing" as UC_ModKos
+    usecase "Kelola Pengguna" as UC_KelolaUser
+    usecase "Statistik Platform" as UC_Stats
+
+    ' Relasi Antar Use Case
+    UC_Reservasi ..> UC_Login : <<include>>
+    UC_Ulasan ..> UC_Login : <<include>>
+    UC_Verif ..> UC_Login : <<include>>
+    UC_Kos ..> UC_Verif : <<include>>
+    UC_Kamar ..> UC_Kos : <<include>>
+    UC_KonfirmSewa ..> UC_Login : <<include>>
+    UC_ModVerif ..> UC_Login : <<include>>
+    UC_ModKos ..> UC_Login : <<include>>
+    UC_KelolaUser ..> UC_Login : <<include>>
+    UC_Stats ..> UC_Login : <<include>>
+}
+
+' Relasi Aktor Kiri
+Guest --> UC_Register
+Guest --> UC_Login
+Guest --> UC_Cari
+Guest --> UC_Detail
+
+Pencari --> UC_Reservasi
+Pencari --> UC_Ulasan
+
+' Relasi Aktor Kanan
+Pemilik --> UC_Login
+Pemilik --> UC_Verif
+Pemilik --> UC_Kos
+Pemilik --> UC_Kamar
+Pemilik --> UC_KonfirmSewa
+
+Admin --> UC_Login
+Admin --> UC_ModVerif
+Admin --> UC_ModKos
+Admin --> UC_KelolaUser
+Admin --> UC_Stats
+
+@enduml

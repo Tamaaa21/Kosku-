@@ -15,15 +15,17 @@ info:
 servers:
   - url: https://api.kosku.id/api/v1
     description: Server Produksi
+  - url: https://backend-kos.ddev.site/api/v1
+    description: Server Pengembangan DDEV Lokal
   - url: http://127.0.0.1:8000/api/v1
-    description: Server Pengembangan Lokal
+    description: Server Pengembangan Lokal (php artisan serve / Laragon)
 
 security:
   - bearerAuth: []
 
 tags:
   - name: Authentication & Profile
-    description: Pengelolaan akun, login, logout, dan profil pengguna.
+    description: Pengelolaan akun, login, logout, reset password, dan profil pengguna.
   - name: Properties (Kos)
     description: Pencarian, katalog, dan manajemen properti indekos.
   - name: Rooms (Kamar)
@@ -34,10 +36,14 @@ tags:
     description: Penilaian rating dan komentar dari penyewa terverifikasi.
   - name: Facilities (Fasilitas)
     description: Master fasilitas bersama untuk properti kos.
+  - name: Hero Banners
+    description: Slider banner beranda untuk promosi publik dan manajemen admin.
+  - name: Property Ownership Verification
+    description: Alur pengajuan bukti kepemilikan kos oleh mitra pemilik dan verifikasi admin.
   - name: Media Upload
-    description: Pengunggahan berkas gambar foto kos dan kamar.
+    description: Pengunggahan berkas gambar foto kos, kamar, dan dokumen verifikasi.
   - name: Admin Moderation
-    description: Panel kontrol admin untuk moderasi akun, kos, dan statistik platform.
+    description: Panel kontrol admin untuk moderasi akun, kos, verifikasi pemilik, banner, dan statistik platform.
 
 paths:
   # ---------------------------------------------------------------------------
@@ -158,6 +164,96 @@ paths:
                 $ref: '#/components/schemas/Error'
               example:
                 message: Akun Anda dinonaktifkan oleh administrator.
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /auth/forgot-password:
+    post:
+      tags:
+        - Authentication & Profile
+      summary: Permintaan Tautan Reset Kata Sandi
+      description: Mengirimkan email berisi tautan token reset kata sandi ke alamat email pengguna yang terdaftar.
+      operationId: forgotPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: budi.santoso@example.com
+                frontend_url:
+                  type: string
+                  format: uri
+                  example: http://localhost:5173/reset-password
+      responses:
+        '200':
+          description: Tautan reset kata sandi berhasil dikirim.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Tautan untuk mereset kata sandi telah dikirim ke email Anda.
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /auth/reset-password:
+    post:
+      tags:
+        - Authentication & Profile
+      summary: Reset Kata Sandi Baru
+      description: Memperbarui kata sandi akun pengguna dengan memvalidasi token dan email yang diberikan.
+      operationId: resetPassword
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - token
+                - email
+                - password
+                - password_confirmation
+              properties:
+                token:
+                  type: string
+                  example: 60b37abcdef...
+                email:
+                  type: string
+                  format: email
+                  example: budi.santoso@example.com
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: Rahasia123!
+                password_confirmation:
+                  type: string
+                  format: password
+                  minLength: 8
+                  example: Rahasia123!
+      responses:
+        '200':
+          description: Kata sandi berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Kata sandi Anda berhasil direset. Silakan masuk dengan kata sandi baru.
         '422':
           $ref: '#/components/responses/ValidationErrorResponse'
 
@@ -1715,6 +1811,513 @@ paths:
         '404':
           $ref: '#/components/responses/NotFoundResponse'
 
+  # ---------------------------------------------------------------------------
+  # Hero Banners (Homepage Slider)
+  # ---------------------------------------------------------------------------
+  /hero-banners:
+    get:
+      tags:
+        - Hero Banners
+      summary: Daftar Banner Slider Beranda (Publik)
+      description: Menampilkan seluruh slide banner beranda aktif yang diurutkan berdasarkan prioritas urutan tampil.
+      operationId: getPublicHeroBanners
+      security: []
+      responses:
+        '200':
+          description: Data banner beranda berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HeroBanner'
+
+  /admin/hero-banners:
+    get:
+      tags:
+        - Admin Moderation
+        - Hero Banners
+      summary: Kelola Semua Banner Slider (Admin)
+      description: Menampilkan daftar seluruh banner slider (aktif maupun non-aktif) untuk pengelolaan konten beranda.
+      operationId: getAdminHeroBanners
+      responses:
+        '200':
+          description: Daftar banner admin berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HeroBanner'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+
+    post:
+      tags:
+        - Admin Moderation
+        - Hero Banners
+      summary: Tambah Banner Slider Baru (Admin)
+      description: Membuat slide banner promosi baru untuk beranda platform.
+      operationId: createHeroBanner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gambar_url
+              properties:
+                judul:
+                  type: string
+                  maxLength: 255
+                  example: Kos Nyaman, Hidup Lebih Mudah
+                subjudul:
+                  type: string
+                  maxLength: 1000
+                  example: Temukan kos terbaik sesuai kebutuhanmu dengan fasilitas lengkap.
+                badge_text:
+                  type: string
+                  maxLength: 255
+                  example: Cari kos di seluruh Indonesia
+                gambar_url:
+                  type: string
+                  format: uri
+                  example: https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf
+                urutan:
+                  type: integer
+                  minimum: 0
+                  default: 0
+                  example: 1
+                is_active:
+                  type: boolean
+                  default: true
+                  example: true
+      responses:
+        '201':
+          description: Banner slider berhasil dibuat.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Banner slider berhasil ditambahkan.
+                  data:
+                    $ref: '#/components/schemas/HeroBanner'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /admin/hero-banners/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID banner slider
+        schema:
+          type: integer
+        example: 1
+    get:
+      tags:
+        - Admin Moderation
+        - Hero Banners
+      summary: Detail Banner Slider (Admin)
+      description: Menampilkan rincian konfigurasi banner slider berdasarkan ID.
+      operationId: getAdminHeroBannerById
+      responses:
+        '200':
+          description: Data banner berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/HeroBanner'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+    put:
+      tags:
+        - Admin Moderation
+        - Hero Banners
+      summary: Perbarui Banner Slider (Admin)
+      description: Memperbarui judul, subjudul, gambar, atau urutan banner slider.
+      operationId: updateHeroBanner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - gambar_url
+              properties:
+                judul:
+                  type: string
+                  maxLength: 255
+                  example: Kos Nyaman, Hidup Lebih Mudah
+                subjudul:
+                  type: string
+                  maxLength: 1000
+                  example: Temukan kos terbaik sesuai kebutuhanmu dengan fasilitas lengkap.
+                badge_text:
+                  type: string
+                  maxLength: 255
+                  example: Cari kos di seluruh Indonesia
+                gambar_url:
+                  type: string
+                  format: uri
+                  example: https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf
+                urutan:
+                  type: integer
+                  minimum: 0
+                  example: 1
+                is_active:
+                  type: boolean
+                  example: true
+      responses:
+        '200':
+          description: Banner slider berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Banner slider berhasil diperbarui.
+                  data:
+                    $ref: '#/components/schemas/HeroBanner'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+    delete:
+      tags:
+        - Admin Moderation
+        - Hero Banners
+      summary: Hapus Banner Slider (Admin)
+      description: Menghapus slide banner dari basis data sistem.
+      operationId: deleteHeroBanner
+      responses:
+        '200':
+          description: Banner berhasil dihapus.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Banner slider berhasil dihapus.
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+
+  /admin/hero-banners/{id}/status:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID banner slider
+        schema:
+          type: integer
+        example: 1
+    patch:
+      tags:
+        - Admin Moderation
+        - Hero Banners
+      summary: Toggle Status Aktif Banner Slider (Admin)
+      description: Mengaktifkan atau menonaktifkan penayangan banner slider di beranda secara instan.
+      operationId: toggleHeroBannerStatus
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - is_active
+              properties:
+                is_active:
+                  type: boolean
+                  example: false
+      responses:
+        '200':
+          description: Status banner slider berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Status banner slider berhasil diubah.
+                  data:
+                    $ref: '#/components/schemas/HeroBanner'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  # ---------------------------------------------------------------------------
+  # Property Ownership Verification
+  # ---------------------------------------------------------------------------
+  /pemilik/verification:
+    get:
+      tags:
+        - Property Ownership Verification
+      summary: Status Verifikasi Kepemilikan (Pemilik)
+      description: Menampilkan status pengajuan verifikasi dokumen kepemilikan kos untuk akun pemilik yang sedang login.
+      operationId: getOwnerVerificationStatus
+      responses:
+        '200':
+          description: Status verifikasi berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/VerificationStatus'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+
+    post:
+      tags:
+        - Property Ownership Verification
+      summary: Ajukan Verifikasi Kepemilikan Kos (Pemilik)
+      description: Mengirimkan dokumen NIK (16 digit), foto e-KTP, bukti kepemilikan properti (PBB/listrik), dan foto lokasi kos untuk ditinjau oleh administrator.
+      operationId: submitOwnerVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nik
+                - foto_ktp
+                - bukti_properti
+                - foto_properti
+              properties:
+                nik:
+                  type: string
+                  minLength: 16
+                  maxLength: 20
+                  example: "3404123456780001"
+                foto_ktp:
+                  type: string
+                  maxLength: 500
+                  example: https://api.kosku.id/storage/verifikasi/ktp_123.jpg
+                bukti_properti:
+                  type: string
+                  maxLength: 500
+                  example: https://api.kosku.id/storage/verifikasi/pbb_123.jpg
+                foto_properti:
+                  type: string
+                  maxLength: 500
+                  example: https://api.kosku.id/storage/verifikasi/properti_123.jpg
+                catatan_verifikasi:
+                  type: string
+                  maxLength: 500
+                  nullable: true
+                  example: Kos milik pribadi atas nama di KTP.
+      responses:
+        '200':
+          description: Pengajuan verifikasi berhasil dikirim.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Pengajuan verifikasi kepemilikan properti berhasil dikirim. Tim Kostara akan meninjau dokumen Anda dalam 1x24 jam.
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /pemilik/verification/upload:
+    post:
+      tags:
+        - Property Ownership Verification
+        - Media Upload
+      summary: Unggah Dokumen Verifikasi (Pemilik)
+      description: Mengunggah berkas gambar (KTP, PBB, atau foto properti) dalam format JPG/PNG/WEBP maks 3MB.
+      operationId: uploadVerificationDocument
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - file
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: Berkas gambar dokumen verifikasi (JPG, PNG, WEBP maks 3MB)
+      responses:
+        '201':
+          description: Dokumen berhasil diunggah.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Dokumen berhasil diunggah.
+                  url:
+                    type: string
+                    format: uri
+                    example: https://backend-kos.ddev.site/storage/verifikasi/doc_123.jpg
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
+  /admin/verifications:
+    get:
+      tags:
+        - Admin Moderation
+        - Property Ownership Verification
+      summary: Daftar Pengajuan Verifikasi Mitra Pemilik (Admin)
+      description: Menampilkan antrean permohonan verifikasi identitas & properti dari mitra pemilik dengan filter status dan kata kunci pencarian.
+      operationId: getAdminVerifications
+      parameters:
+        - name: status
+          in: query
+          description: Filter status verifikasi
+          required: false
+          schema:
+            type: string
+            enum: [unverified, pending, verified, rejected]
+          example: pending
+        - name: q
+          in: query
+          description: Pencarian nama, email, atau NIK pemilik
+          required: false
+          schema:
+            type: string
+          example: Budi
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200':
+          description: Daftar antrean verifikasi berhasil diambil.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/User'
+                  meta:
+                    $ref: '#/components/schemas/PaginationMeta'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+
+  /admin/verifications/{id}/status:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        description: ID pengguna pemilik kos
+        schema:
+          type: integer
+        example: 2
+    patch:
+      tags:
+        - Admin Moderation
+        - Property Ownership Verification
+      summary: Tinjau dan Update Status Verifikasi Pemilik (Admin)
+      description: Menyetujui (*verified*) atau menolak (*rejected*) permohonan verifikasi properti pemilik kos.
+      operationId: reviewOwnerVerification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum: [verified, rejected]
+                  example: verified
+                alasan_penolakan:
+                  type: string
+                  maxLength: 500
+                  description: Wajib diisi jika status bernilai rejected.
+                  example: Foto KTP buram dan tidak sesuai dengan nama tagihan PBB.
+      responses:
+        '200':
+          description: Status verifikasi pemilik berhasil diperbarui.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Verifikasi kepemilikan untuk Budi Santoso berhasil disetujui. Fitur kelola kos telah aktif.
+                  data:
+                    $ref: '#/components/schemas/User'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '422':
+          $ref: '#/components/responses/ValidationErrorResponse'
+
 # -----------------------------------------------------------------------------
 # Components (Schemas, Parameters, Responses, SecuritySchemes)
 # -----------------------------------------------------------------------------
@@ -1871,6 +2474,49 @@ components:
         aktif:
           type: boolean
           example: true
+        nik:
+          type:
+            - string
+            - "null"
+          example: "3404123456780001"
+        foto_ktp:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://backend-kos.ddev.site/storage/verifikasi/ktp.jpg
+        bukti_properti:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://backend-kos.ddev.site/storage/verifikasi/pbb.jpg
+        foto_properti:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://backend-kos.ddev.site/storage/verifikasi/properti.jpg
+        catatan_verifikasi:
+          type:
+            - string
+            - "null"
+          example: Kos milik pribadi atas nama di KTP.
+        status_verifikasi:
+          type: string
+          enum: [unverified, pending, verified, rejected]
+          example: verified
+        alasan_penolakan:
+          type:
+            - string
+            - "null"
+          example: null
+        verified_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          example: "2026-10-27T10:00:00.000000Z"
         kos_count:
           type: integer
           example: 3
@@ -2246,3 +2892,100 @@ components:
         total:
           type: integer
           example: 95
+
+    HeroBanner:
+      type: object
+      required:
+        - id
+        - gambar_url
+        - is_active
+      properties:
+        id:
+          type: integer
+          example: 1
+        judul:
+          type:
+            - string
+            - "null"
+          example: Kos Nyaman, Hidup Lebih Mudah
+        subjudul:
+          type:
+            - string
+            - "null"
+          example: Temukan kos terbaik sesuai kebutuhanmu dengan fasilitas lengkap.
+        badge_text:
+          type:
+            - string
+            - "null"
+          example: Cari kos di seluruh Indonesia
+        gambar_url:
+          type: string
+          format: uri
+          example: https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf
+        urutan:
+          type: integer
+          example: 0
+        is_active:
+          type: boolean
+          example: true
+        created_at:
+          type: string
+          format: date-time
+          example: "2026-10-25T14:00:00.000000Z"
+        updated_at:
+          type: string
+          format: date-time
+          example: "2026-10-25T14:00:00.000000Z"
+
+    VerificationStatus:
+      type: object
+      required:
+        - status_verifikasi
+        - is_verified
+      properties:
+        status_verifikasi:
+          type: string
+          enum: [unverified, pending, verified, rejected]
+          example: verified
+        is_verified:
+          type: boolean
+          example: true
+        nik:
+          type:
+            - string
+            - "null"
+          example: "3404123456780001"
+        foto_ktp:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://backend-kos.ddev.site/storage/verifikasi/ktp_123.jpg
+        bukti_properti:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://backend-kos.ddev.site/storage/verifikasi/pbb_123.jpg
+        foto_properti:
+          type:
+            - string
+            - "null"
+          format: uri
+          example: https://backend-kos.ddev.site/storage/verifikasi/properti_123.jpg
+        catatan_verifikasi:
+          type:
+            - string
+            - "null"
+          example: Kos milik pribadi atas nama di KTP.
+        alasan_penolakan:
+          type:
+            - string
+            - "null"
+          example: null
+        verified_at:
+          type:
+            - string
+            - "null"
+          format: date-time
+          example: "2026-10-27T10:00:00.000000Z"

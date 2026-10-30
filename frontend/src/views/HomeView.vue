@@ -74,14 +74,11 @@
                 :title="`Pindah ke slide ${idx + 1}`"
                 type="button"
               ></button>
-              <span class="text-[11px] font-semibold text-white/70 ml-2 hidden sm:inline-flex items-center gap-1.5 bg-black/40 backdrop-blur-xs px-2.5 py-0.5 rounded-full border border-white/10">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span>Auto Slide 5s</span>
-              </span>
+              
             </div>
           </div>
 
-          <!-- Bottom: Floating Search Bar Card (Desktop Pill & Mobile 1-Line - Centered & Wider) -->
+          <!-- Bottom: Floating Search Bar Card (Desktop Segmented Pill & Mobile 1-Line - Clean & Spacious) -->
           <div class="w-full max-w-4xl mx-auto mt-6 sm:mt-8 -translate-y-4 sm:-translate-y-6 lg:-translate-y-8">
             <!-- 1. Mobile 1-Line Search Bar (cukup satu baris, klik untuk pop up detail) -->
             <div
@@ -110,13 +107,13 @@
               </div>
             </div>
 
-            <!-- 2. Desktop Full Pill Search Bar (Layar Besar lg+ - Centered & Spacious) -->
-            <div class="hidden lg:flex w-full bg-white/95 backdrop-blur-md rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.22)] p-2 sm:p-2.5 border border-white/40 items-center gap-2.5 transition-all">
+            <!-- 2. Desktop Segmented Search Bar (Pristine White Seamless Pill) -->
+            <div class="hidden lg:flex w-full bg-white/95 backdrop-blur-md rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-2 border border-white/60 items-center transition-all focus-within:ring-4 focus-within:ring-primary/15 focus-within:bg-white">
               <!-- Location Search -->
-              <div class="flex-1 flex items-center gap-2.5 px-4 py-2 sm:py-2.5 bg-slate-50/90 hover:bg-slate-100/80 rounded-full focus-within:bg-white focus-within:ring-2 focus-within:ring-primary/20 transition-all group/loc">
+              <div class="flex-1 flex items-center gap-3 px-5 py-2.5 rounded-full hover:bg-slate-50/80 focus-within:bg-slate-50/80 transition-colors group/loc cursor-text">
                 <PhMapPin :size="20" weight="fill" class="text-primary/70 group-focus-within/loc:text-primary transition-colors select-none shrink-0" />
                 <div class="flex-1 flex flex-col justify-center min-w-0">
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Lokasi / Area</span>
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-1">Lokasi / Area</span>
                   <input
                     v-model="searchQuery"
                     type="text"
@@ -136,18 +133,18 @@
                 </button>
               </div>
 
-              <!-- Divider Desktop -->
-              <div class="w-px h-8 bg-slate-200/90 shrink-0"></div>
+              <!-- Divider 1 -->
+              <div class="w-px h-8 bg-slate-200/80 shrink-0"></div>
 
-              <!-- Jenis Kos Dropdown (Bed Icon) -->
-              <div class="flex items-center gap-2.5 px-3.5 py-2 sm:py-2.5 bg-slate-50/90 hover:bg-slate-100/80 rounded-full min-w-[145px] relative group/type cursor-pointer focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white transition-all">
-                <PhBed :size="19" weight="bold" class="text-slate-500 group-focus-within/type:text-primary transition-colors select-none shrink-0" />
+              <!-- Jenis Kos Dropdown -->
+              <div class="flex items-center gap-3 px-4 py-2.5 rounded-full hover:bg-slate-50/80 focus-within:bg-slate-50/80 transition-colors min-w-[150px] relative group/type cursor-pointer">
+                <PhBed :size="20" weight="bold" class="text-slate-500 group-focus-within/type:text-primary transition-colors select-none shrink-0" />
                 <div class="flex-1 flex flex-col justify-center min-w-0 pr-4">
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Tipe Hunian</span>
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-1">Tipe Hunian</span>
                   <select
                     v-model="selectedJenis"
                     style="background-image: none !important;"
-                    class="w-full bg-transparent bg-none [background-image:none] text-xs sm:text-sm font-semibold text-slate-700 border-none focus:outline-none focus:ring-0 p-0 cursor-pointer appearance-none truncate leading-tight"
+                    class="w-full bg-transparent text-sm font-semibold text-slate-700 border-none focus:outline-none focus:ring-0 p-0 cursor-pointer appearance-none truncate leading-tight"
                   >
                     <option value="">Semua Tipe</option>
                     <option value="putra">Putra</option>
@@ -155,21 +152,21 @@
                     <option value="campur">Campur</option>
                   </select>
                 </div>
-                <PhCaretDown :size="13" weight="bold" class="absolute right-3.5 text-slate-400 pointer-events-none" />
+                <PhCaretDown :size="13" weight="bold" class="absolute right-4 text-slate-400 group-hover/type:text-slate-600 pointer-events-none transition-colors" />
               </div>
 
-              <!-- Divider Desktop -->
-              <div class="w-px h-8 bg-slate-200/90 shrink-0"></div>
+              <!-- Divider 2 -->
+              <div class="w-px h-8 bg-slate-200/80 shrink-0"></div>
 
-              <!-- Rentang Harga Dropdown (Coin / Dollar Icon) -->
-              <div class="flex items-center gap-2.5 px-3.5 py-2 sm:py-2.5 bg-slate-50/90 hover:bg-slate-100/80 rounded-full min-w-[155px] relative group/price cursor-pointer focus-within:ring-2 focus-within:ring-primary/20 focus-within:bg-white transition-all">
-                <PhCurrencyCircleDollar :size="19" weight="bold" class="text-slate-500 group-focus-within/price:text-primary transition-colors select-none shrink-0" />
+              <!-- Rentang Harga Dropdown -->
+              <div class="flex items-center gap-3 px-4 py-2.5 rounded-full hover:bg-slate-50/80 focus-within:bg-slate-50/80 transition-colors min-w-[160px] relative group/price cursor-pointer">
+                <PhCurrencyCircleDollar :size="20" weight="bold" class="text-slate-500 group-focus-within/price:text-primary transition-colors select-none shrink-0" />
                 <div class="flex-1 flex flex-col justify-center min-w-0 pr-4">
-                  <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-0.5">Budget</span>
+                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-1">Budget</span>
                   <select
                     v-model="selectedPriceRange"
                     style="background-image: none !important;"
-                    class="w-full bg-transparent bg-none [background-image:none] text-xs sm:text-sm font-semibold text-slate-700 border-none focus:outline-none focus:ring-0 p-0 cursor-pointer appearance-none truncate leading-tight"
+                    class="w-full bg-transparent text-sm font-semibold text-slate-700 border-none focus:outline-none focus:ring-0 p-0 cursor-pointer appearance-none truncate leading-tight"
                   >
                     <option value="">Semua Harga</option>
                     <option value="under500">&lt; Rp 500rb</option>
@@ -177,13 +174,13 @@
                     <option value="above1000">&gt; Rp 1jt</option>
                   </select>
                 </div>
-                <PhCaretDown :size="13" weight="bold" class="absolute right-3.5 text-slate-400 pointer-events-none" />
+                <PhCaretDown :size="13" weight="bold" class="absolute right-4 text-slate-400 group-hover/price:text-slate-600 pointer-events-none transition-colors" />
               </div>
 
               <!-- Search Button -->
               <button
                 @click="handleSearch"
-                class="bg-gradient-to-r from-primary to-[#095296] hover:from-[#095296] hover:to-primary text-white px-7 sm:px-8 py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:shadow-primary/30 active:scale-95 whitespace-nowrap cursor-pointer shrink-0"
+                class="bg-gradient-to-r from-primary to-[#095296] hover:from-[#095296] hover:to-primary text-white px-7 sm:px-8 py-3.5 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:shadow-primary/30 active:scale-95 whitespace-nowrap cursor-pointer shrink-0 ml-1.5"
                 type="button"
               >
                 <PhMagnifyingGlass :size="18" weight="bold" class="select-none" />
@@ -191,15 +188,19 @@
               </button>
             </div>
 
-            <!-- Popular Search Quick Chips (Single line horizontal scroll on mobile, centered on desktop) -->
+            <!-- Popular Search Quick Chips (Modern Glassmorphic Chips) -->
             <div class="flex items-center gap-2 mt-3 pt-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-nowrap lg:flex-wrap max-w-full pb-1 justify-start lg:justify-center">
-              <span class="text-xs font-semibold text-white/85 hidden sm:inline-block shrink-0">Pencarian Populer:</span>
+              <span class="text-xs font-semibold text-white/90 hidden sm:inline-flex items-center gap-1 shrink-0 drop-shadow-xs">
+                <span>🔥 Pencarian Populer:</span>
+              </span>
               <button
                 v-for="(tag, tIdx) in quickTags"
                 :key="tIdx"
                 @click="applyQuickTag(tag)"
-                class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium transition shadow-xs cursor-pointer active:scale-95 border shrink-0 whitespace-nowrap"
-                :class="isTagActive(tag) ? 'bg-amber-400 text-slate-900 border-amber-300 font-bold shadow-md' : 'bg-black/40 hover:bg-black/60 text-white/95 border-white/20 backdrop-blur-xs'"
+                class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium transition cursor-pointer active:scale-95 border shrink-0 whitespace-nowrap backdrop-blur-md"
+                :class="isTagActive(tag)
+                  ? 'bg-amber-400 text-slate-900 border-amber-300 font-bold shadow-md ring-2 ring-amber-400/30'
+                  : 'bg-white/15 hover:bg-white/25 text-white border-white/25 shadow-xs'"
                 type="button"
               >
                 <span>{{ tag.label }}</span>
@@ -604,8 +605,8 @@ const handleMobileSearchSubmit = () => {
 
 // Popular Quick Tags
 const quickTags = [
-  { label: 'Jakarta', type: 'city', val: 'Jakarta' },
   { label: 'Yogyakarta', type: 'city', val: 'Yogyakarta' },
+  { label: 'Jakarta', type: 'city', val: 'Jakarta' },
   { label: 'Bandung', type: 'city', val: 'Bandung' },
   { label: 'Kos Putri', type: 'jenis', val: 'putri' },
   { label: 'Kos Putra', type: 'jenis', val: 'putra' },
@@ -748,6 +749,11 @@ const fetchHeroBanners = async () => {
 }
 
 const handleToggleFavorite = (kos) => {
+  if (!auth.isAuthenticated) {
+    ui.warning('Silakan masuk (login) terlebih dahulu untuk menyimpan kos ke favorit.')
+    router.push({ name: 'login', query: { redirect: route.fullPath } })
+    return
+  }
   const isAdded = favoritesStore.toggleFavorite(kos)
   if (isAdded) {
     ui.success(`Kos "${kos.nama}" disimpan ke favorit!`)

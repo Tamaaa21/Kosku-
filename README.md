@@ -158,63 +158,107 @@ docker compose down
 
 ---
 
-### 💻 Metode 2: Instalasi Manual / Lokal (Tanpa Docker)
+### 💻 Metode 2: Instalasi Manual / Lokal (Laragon, XAMPP, atau DDEV)
+
+Metode ini cocok untuk pengembangan harian di Windows/macOS/Linux menggunakan web server lokal seperti **Laragon** atau **XAMPP**.
 
 #### 1. Prasyarat Sistem
 - **PHP** >= 8.3
 - **Composer** >= 2.x
 - **Node.js** >= 18.x dan **npm**
-- **DDEV** (opsional) atau Web Server lokal (Apache/Nginx + MariaDB/MySQL)
+- **Laragon** (direkomendasikan di Windows) / **XAMPP** / **DDEV**
 
 ---
 
-#### 2. Pengaturan Backend (Laravel)
+#### 2. Pengaturan Backend (Laravel via Laragon / MySQL)
 
-```bash
-# 1. Masuk ke direktori utama
-cd backend-kos
+1. **Jalankan Laragon & Buat Database:**
+   - Buka aplikasi Laragon, lalu klik **Start All**.
+   - Buka manajer database (klik tombol **Database** / HeidiSQL).
+   - Buat database baru dengan nama `kosku` (collation: `utf8mb4_unicode_ci`).
 
-# 2. Pasang dependensi PHP
-composer install
+2. **Salin & Sesuaikan File Lingkungan (`.env`):**
+   ```bash
+   cd kosku-
+   cp .env.example .env
+   ```
+   Pastikan pengaturan database di `.env` sudah sesuai (secara bawaan template `.env.example` sudah disesuaikan untuk Laragon):
+   ```env
+   DB_CONNECTION=mysql
+   DB_HOST=127.0.0.1
+   DB_PORT=3306
+   DB_DATABASE=kostara
+   DB_USERNAME=root
+   DB_PASSWORD=
+   ```
 
-# 3. Salin file lingkungan
-cp .env.example .env
+3. **Pasang Dependensi, Migrasi Database, & Storage Link:**
+   ```bash
+   # 1. Pasang dependensi PHP
+   composer install
 
-# 4. Generate Application Key
-php artisan key:generate
+   # 2. Generate Application Key
+   php artisan key:generate
 
-# 5. Jalankan migrasi dan seeder database
-php artisan migrate --seed
+   # 3. Jalankan migrasi dan seeder database (mengisi data kos dummy & akun awal)
+   php artisan migrate --seed
 
-# 6. Jalankan server backend (jika tanpa DDEV)
-php artisan serve
-```
+   # 4. Buat symlink storage (Wajib agar foto kos & gambar kamar bisa ditampilkan)
+   php artisan storage:link
 
-> *Jika menggunakan **DDEV**:*
+   # 5. Jalankan server Laravel backend
+   php artisan serve
+   ```
+   Server backend akan aktif di: 👉 **`http://127.0.0.1:8000`**
+
+> 💡 *Jika menggunakan **DDEV**:*
 > ```bash
 > ddev start
 > ddev artisan migrate --seed
+> ddev artisan storage:link
 > ```
 
 ---
 
 #### 3. Pengaturan Frontend (Vue 3)
 
-```bash
-# 1. Masuk ke folder frontend
-cd frontend
+1. **Masuk ke direktori frontend & pasang dependensi:**
+   ```bash
+   cd frontend
+   npm install
+   ```
 
-# 2. Pasang dependensi JavaScript
-npm install
+2. **Konfigurasi Environment Frontend (Opsional):**
+   Salin template environment jika ingin mengubah konfigurasi target API:
+   ```bash
+   cp .env.example .env
+   ```
 
-# 3. Jalankan server pengembang (HMR)
-npm run dev
+3. **Jalankan Frontend Dev Server:**
+   ```bash
+   npm run dev
+   ```
+   Aplikasi frontend dapat diakses melalui peramban di: 👉 **`http://localhost:5173`**
 
-# Atau lakukan build untuk produksi
-npm run build
-```
+---
 
-Setelah dijalankan, buka peramban Anda di `http://localhost:5173` (atau domain DDEV Anda).
+#### ⚠️ Catatan Sangat Penting: Penyesuaian `api.js` & Endpoint API Frontend
+
+Agar data kos, kamar, dan fitur login dapat muncul di frontend, aplikasi Vue harus terhubung dengan benar ke backend API:
+
+- Periksa konfigurasi di file `frontend/src/services/api.js` atau file `frontend/.env`.
+- Pastikan endpoint API menyertakan prefix **`/api/v1`**:
+  ```env
+  # Default jika menjalankan backend via 'php artisan serve':
+  VITE_API_URL=http://127.0.0.1:8000/api/v1
+
+  # Jika menggunakan domain Virtual Host otomatis Laragon:
+  # VITE_API_URL=http://backend-kos.test/api/v1
+
+  # Jika menggunakan DDEV:
+  # VITE_API_URL=https://backend-kos.ddev.site/api/v1
+  ```
+> ❗ **Penting:** Jika akhiran `/api/v1` tertinggal (misalnya hanya diatur ke `http://127.0.0.1:8000`), semua panggilan API seperti data kos (`/kos`), reservasi (`/bookings`), dan profil (`/me`) akan menghasilkan status **404 Not Found**, sehingga katalog kos dan data dashboard akan tampak kosong / tidak muncul.
 
 ---
 

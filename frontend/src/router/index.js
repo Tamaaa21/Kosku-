@@ -42,6 +42,7 @@ const routes = [
     alias: '/tersimpan',
     name: 'favorit',
     component: FavoritesView,
+    meta: { requiresAuth: true },
   },
   {
     path: '/peta',

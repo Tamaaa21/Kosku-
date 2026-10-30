@@ -1,0 +1,168 @@
+@startuml KosKu_ERD_Diagram
+' ========================================================
+' PlantUML Entity Relationship Diagram (ERD): KosKu Database
+' Notation: Crow's Foot & Orthogonal Router
+' ========================================================
+
+skinparam linetype ortho
+skinparam shadowing false
+skinparam roundcorner 6
+skinparam defaultFontName "Segoe UI", Arial, sans-serif
+
+' Styling Entitas Database
+skinparam entity {
+    BackgroundColor #FFFFFF
+    BorderColor #0284C7
+    FontColor #0F172A
+    HeaderBackgroundColor #E0F2FE
+    ArrowColor #334155
+    FontSize 11
+}
+
+' ========================================================
+' Definisi Tabel / Entitas
+' ========================================================
+
+entity "pengguna" as pengguna {
+    * id : BIGINT UNSIGNED <<PK, AUTO_INCREMENT>>
+    --
+    * nama : VARCHAR(150)
+    * email : VARCHAR(191) <<UNIQUE>>
+    * password : VARCHAR(255)
+    * role : ENUM('pencari','pemilik','admin')
+    nomor_telepon : VARCHAR(20)
+    foto_profil : VARCHAR(255)
+    status_verifikasi : ENUM('unverified','pending','verified','rejected')
+    dokumen_verifikasi : VARCHAR(255)
+    catatan_verifikasi : TEXT
+    verified_at : TIMESTAMP
+    * aktif : BOOLEAN = true
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity "kos" as kos {
+    * id : BIGINT UNSIGNED <<PK, AUTO_INCREMENT>>
+    --
+    * pemilik_id : BIGINT UNSIGNED <<FK>>
+    * nama : VARCHAR(150)
+    slug : VARCHAR(191)
+    * alamat : TEXT
+    kota : VARCHAR(100)
+    deskripsi : TEXT
+    * jenis : ENUM('putra','putri','campur')
+    * harga : INT UNSIGNED
+    latitude : DECIMAL(10, 7)
+    longitude : DECIMAL(10, 7)
+    foto : JSON
+    peraturan : JSON
+    status : ENUM('aktif','nonaktif','menunggu_verifikasi')
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity "kamar" as kamar {
+    * id : BIGINT UNSIGNED <<PK, AUTO_INCREMENT>>
+    --
+    * kos_id : BIGINT UNSIGNED <<FK>>
+    * nama_kamar : VARCHAR(50)
+    tipe_kamar : VARCHAR(50)
+    luas_kamar : VARCHAR(50)
+    * harga : INT UNSIGNED
+    total_kamar : INT UNSIGNED
+    sisa_kamar : INT UNSIGNED
+    * status : ENUM('tersedia','terisi') = 'tersedia'
+    fasilitas_kamar : JSON
+    foto_kamar : JSON
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity "fasilitas" as fasilitas {
+    * id : BIGINT UNSIGNED <<PK, AUTO_INCREMENT>>
+    --
+    * nama : VARCHAR(100)
+    icon : VARCHAR(100)
+    kategori : VARCHAR(50)
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity "kos_fasilitas" as kos_fasilitas {
+    * id : BIGINT UNSIGNED <<PK, AUTO_INCREMENT>>
+    --
+    * kos_id : BIGINT UNSIGNED <<FK>>
+    * fasilitas_id : BIGINT UNSIGNED <<FK>>
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity "pemesanan" as pemesanan {
+    * id : BIGINT UNSIGNED <<PK, AUTO_INCREMENT>>
+    --
+    * pengguna_id : BIGINT UNSIGNED <<FK>>
+    * kos_id : BIGINT UNSIGNED <<FK>>
+    * kamar_id : BIGINT UNSIGNED <<FK>>
+    * tanggal_pemesanan : DATE
+    * tanggal_mulai : DATE
+    tanggal_selesai : DATE
+    durasi_jumlah : INT
+    durasi_satuan : VARCHAR(20)
+    * total_harga : INT UNSIGNED
+    * status : ENUM('menunggu','disetujui','ditolak','selesai','dibatalkan')
+    catatan : TEXT
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity "ulasan" as ulasan {
+    * id : BIGINT UNSIGNED <<PK, AUTO_INCREMENT>>
+    --
+    * pengguna_id : BIGINT UNSIGNED <<FK>>
+    * kos_id : BIGINT UNSIGNED <<FK>>
+    * pemesanan_id : BIGINT UNSIGNED <<FK>>
+    * rating : TINYINT UNSIGNED
+    komentar : TEXT
+    foto_ulasan : JSON
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+entity "hero_banners" as hero_banners {
+    * id : BIGINT UNSIGNED <<PK, AUTO_INCREMENT>>
+    --
+    * judul : VARCHAR(150)
+    subjudul : VARCHAR(255)
+    * gambar_url : VARCHAR(255)
+    tautan_url : VARCHAR(255)
+    urutan : INT = 0
+    * aktif : BOOLEAN = true
+    created_at : TIMESTAMP
+    updated_at : TIMESTAMP
+}
+
+' ========================================================
+' Hubungan Relasi Crow's Foot (Cardinality)
+' ========================================================
+
+' 1 pemilik memiliki banyak kos
+pengguna ||--o{ kos : "pemilik_id"
+
+' 1 kos memiliki banyak kamar
+kos ||--|{ kamar : "kos_id"
+
+' Relasi Many-to-Many Kos & Fasilitas via Pivot
+kos ||--o{ kos_fasilitas : "kos_id"
+fasilitas ||--o{ kos_fasilitas : "fasilitas_id"
+
+' Relasi Pemesanan
+pengguna ||--o{ pemesanan : "pengguna_id"
+kos ||--o{ pemesanan : "kos_id"
+kamar ||--o{ pemesanan : "kamar_id"
+
+' Relasi Ulasan
+pemesanan ||--o| ulasan : "pemesanan_id"
+pengguna ||--o{ ulasan : "pengguna_id"
+kos ||--o{ ulasan : "kos_id"
+
+@enduml

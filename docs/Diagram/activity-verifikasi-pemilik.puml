@@ -1,0 +1,75 @@
+@startuml KosKu_Activity_Verifikasi_Pemilik
+' ========================================================
+' PlantUML Activity Diagram: Verifikasi Legalitas Pemilik Kos
+' ========================================================
+
+skinparam handwritten false
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", Arial, sans-serif
+
+skinparam activity {
+    BackgroundColor #FEF3C7
+    BorderColor #D97706
+    FontColor #0F172A
+    FontSize 12
+}
+
+skinparam activityDiamond {
+    BackgroundColor #E0F2FE
+    BorderColor #0284C7
+    FontColor #0F172A
+}
+
+skinparam partition {
+    BackgroundColor #F8FAFC
+    BorderColor #94A3B8
+    FontColor #0F172A
+    FontSize 13
+}
+
+|#FEF9C3|Mitra Pemilik Kos|
+start
+:Login ke Akun Pemilik Kos;
+:Buka Menu "Verifikasi Identitas & Properti";
+:Unggah Berkas KTP dan Dokumen Legalitas Properti;
+:Klik "Kirim Permohonan Verifikasi";
+
+|#F1F5F9|Sistem KosKu|
+:Validasi Format File & Ukuran Berkas Dokumen;
+
+if (Berkas Valid?) then (tidak)
+    :Tampilkan Pesan Error Validasi Dokumen;
+    |#FEF9C3|Mitra Pemilik Kos|
+    :Perbaiki Format / Ukuran Berkas;
+    stop
+else (ya)
+    |#F1F5F9|Sistem KosKu|
+    :Simpan Berkas Dokumen ke Storage;
+    :Ubah Status Akun -> 'pending';
+    :Kirim Tiket Verifikasi ke Antrean Admin;
+endif
+
+|#FEE2E2|Administrator|
+:Buka Halaman Moderasi Verifikasi Berkas;
+:Periksa Kecocokan Identitas KTP & Dokumen Kepemilikan;
+
+if (Hasil Audit Dokumen?) then (Lolos / Valid)
+    :Pilih Tindakan "Setujui Verifikasi";
+    |#F1F5F9|Sistem KosKu|
+    :Ubah Status Verifikasi -> 'verified';
+    :Catat Timestamp verified_at;
+    |#FEF9C3|Mitra Pemilik Kos|
+    :Status Akun Menjadi 'Terverifikasi';
+    :Hak Akses Tambah & Kelola Kos Terbuka Penuh;
+else (Ditolak / Tidak Sesuai)
+    :Pilih "Tolak" & Tulis Catatan Kekurangan Dokumen;
+    |#F1F5F9|Sistem KosKu|
+    :Ubah Status Verifikasi -> 'rejected';
+    :Simpan Catatan Alasan Penolakan;
+    |#FEF9C3|Mitra Pemilik Kos|
+    :Menerima Pemberitahuan Penolakan & Catatan Admin;
+    :Dapat Mengajukan Verifikasi Ulang;
+endif
+
+stop
+@enduml

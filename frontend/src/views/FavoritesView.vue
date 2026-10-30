@@ -43,25 +43,6 @@
         </div>
       </div>
 
-      <!-- Guest Sync Banner -->
-      <div
-        v-if="!auth.isAuthenticated && favoritesStore.count > 0"
-        class="mb-6 p-4 rounded-xl bg-blue-50 border border-blue-200 text-xs text-primary flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs"
-      >
-        <div class="flex items-center gap-2.5">
-          <PhInfo :size="20" weight="bold" class="text-primary shrink-0" />
-          <span class="leading-relaxed">
-            Anda sedang melihat kos tersimpan sebagai <strong>tamu</strong>. Masuk ke akun Anda agar daftar favorit ini otomatis tersimpan secara permanen.
-          </span>
-        </div>
-        <router-link
-          to="/login?redirect=/favorit"
-          class="inline-flex items-center justify-center px-4 py-2 rounded-lg bg-primary hover:bg-primary-hover text-white font-bold transition shadow-xs text-center shrink-0"
-        >
-          Masuk Sekarang
-        </router-link>
-      </div>
-
       <!-- Empty State -->
       <div
         v-if="favoritesStore.count === 0"
@@ -200,8 +181,7 @@ import {
   PhMapPin,
   PhCheckCircle,
   PhTrash,
-  PhMagnifyingGlass,
-  PhInfo
+  PhMagnifyingGlass
 } from '@phosphor-icons/vue'
 
 const router = useRouter()

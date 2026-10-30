@@ -1,0 +1,162 @@
+@startuml KosKu_Class_Diagram
+' ========================================================
+' PlantUML Class Diagram: Arsitektur Model KosKu
+' Layout: Orthogonal & Layered Architecture (Rapi & Terstruktur)
+' ========================================================
+
+skinparam handwritten false
+skinparam shadowing false
+skinparam linetype ortho
+skinparam classAttributeIconSize 0
+skinparam defaultFontName "Segoe UI", Arial, sans-serif
+
+' Styling Tema
+skinparam package {
+    BackgroundColor #F8FAFC
+    BorderColor #94A3B8
+    FontColor #1E293B
+    FontStyle bold
+    FontSize 12
+}
+
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #0284C7
+    FontColor #0F172A
+    HeaderBackgroundColor #E0F2FE
+    ArrowColor #334155
+    FontSize 11
+    AttributeFontSize 10
+}
+
+package "Entitas Pengguna & Autentikasi" {
+    class Pengguna {
+        +id: bigint
+        +nama: string
+        +email: string
+        +nomor_telepon: string
+        +role: enum('pencari','pemilik','admin')
+        +status_verifikasi: enum('unverified','pending','verified','rejected')
+        +dokumen_verifikasi: string
+        +foto_profil: string
+        +aktif: boolean
+        --
+        +isVerifiedOwner(): bool
+        +kos(): HasMany
+        +pemesanan(): HasMany
+        +ulasan(): HasMany
+    }
+}
+
+package "Entitas Properti & Fasilitas" {
+    class Kos {
+        +id: bigint
+        +pemilik_id: bigint
+        +nama: string
+        +slug: string
+        +deskripsi: text
+        +jenis: enum('putra','putri','campur')
+        +harga: int
+        +alamat: text
+        +kota: string
+        +latitude: decimal
+        +longitude: decimal
+        +foto: json
+        +status: enum('aktif','nonaktif','menunggu_verifikasi')
+        --
+        +pemilik(): BelongsTo
+        +kamar(): HasMany
+        +fasilitas(): BelongsToMany
+        +pemesanan(): HasMany
+        +ulasan(): HasMany
+    }
+
+    class Kamar {
+        +id: bigint
+        +kos_id: bigint
+        +nama_kamar: string
+        +tipe_kamar: string
+        +luas_kamar: string
+        +harga: int
+        +total_kamar: int
+        +sisa_kamar: int
+        +status: enum('tersedia','terisi')
+        +fasilitas_kamar: json
+        --
+        +kos(): BelongsTo
+        +pemesanan(): HasMany
+    }
+
+    class Fasilitas {
+        +id: bigint
+        +nama: string
+        +icon: string
+        +kategori: string
+        --
+        +kos(): BelongsToMany
+    }
+}
+
+package "Entitas Transaksi & Interaksi" {
+    class Pemesanan {
+        +id: bigint
+        +pengguna_id: bigint
+        +kos_id: bigint
+        +kamar_id: bigint
+        +tanggal_pemesanan: date
+        +tanggal_mulai: date
+        +tanggal_selesai: date
+        +durasi_jumlah: int
+        +durasi_satuan: string
+        +total_harga: int
+        +status: enum('menunggu','disetujui','ditolak','selesai')
+        --
+        +pengguna(): BelongsTo
+        +kos(): BelongsTo
+        +kamar(): BelongsTo
+        +ulasan(): HasOne
+    }
+
+    class Ulasan {
+        +id: bigint
+        +pengguna_id: bigint
+        +kos_id: bigint
+        +pemesanan_id: bigint
+        +rating: int
+        +komentar: text
+        +foto_ulasan: json
+        --
+        +pengguna(): BelongsTo
+        +kos(): BelongsTo
+        +pemesanan(): BelongsTo
+    }
+}
+
+package "Entitas Konten & Promosi" {
+    class HeroBanner {
+        +id: bigint
+        +judul: string
+        +subjudul: string
+        +gambar_url: string
+        +tautan_url: string
+        +urutan: int
+        +aktif: boolean
+    }
+}
+
+' ========================================================
+' Definisi Relasi Terarah (Orthogonal Navigation)
+' ========================================================
+
+Pengguna "1" -right-> "0..*" Kos : "memiliki kos (pemilik_id)"
+Kos "1" *-down-> "1..*" Kamar : "memiliki unit (kos_id)"
+Kos "1..*" -right-> "0..*" Fasilitas : "dilengkapi (kos_fasilitas)"
+
+Pengguna "1" -down-> "0..*" Pemesanan : "mengajukan (pengguna_id)"
+Kos "1" -down-> "0..*" Pemesanan : "menerima sewa (kos_id)"
+Kamar "1" -down-> "0..*" Pemesanan : "dipesan (kamar_id)"
+
+Pemesanan "1" -right-> "0..1" Ulasan : "menghasilkan review"
+Pengguna "1" .down.> "0..*" Ulasan : "menulis ulasan"
+
+@enduml

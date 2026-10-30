@@ -1,0 +1,105 @@
+@startuml KosKu_Sequence_Konfirmasi_Reservasi
+' ========================================================
+' PlantUML Sequence Diagram: Konfirmasi Pengajuan Reservasi
+' ========================================================
+
+autonumber
+skinparam handwritten false
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", Arial, sans-serif
+
+skinparam sequence {
+    ArrowColor #D97706
+    ActorBorderColor #D97706
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #D97706
+    ParticipantBackgroundColor #FFFBEB
+    ParticipantFontColor #0F172A
+    BoxBorderColor #CBD5E1
+    BoxBackgroundColor #F8FAFC
+}
+
+actor "Mitra Pemilik Kos" as Owner
+box "Frontend (Vue 3 SPA)" #EFF6FF
+    participant "OwnerBookings.vue" as UI
+    participant "bookingStore.ts" as Store
+end box
+
+box "Backend (Laravel API)" #F0FDF4
+    participant "Route & VerifiedOwner" as Route
+    participant "BookingController" as Controller
+    participant "Pemesanan (Model)" as ModelPemesanan
+    participant "Kamar (Model)" as ModelKamar
+end box
+
+database "MySQL Database" as DB
+
+Owner -> UI: Klik "Setujui" atau "Tolak" pada Item Pengajuan
+activate UI
+UI -> Store: updateBookingStatus(bookingId, status)
+activate Store
+
+Store -> Route: PATCH /api/v1/bookings/{id}/status\n[Bearer Token + JSON: { status: 'disetujui' }]
+activate Route
+
+Route -> Route: Verifikasi Token & Middleware 'verified_owner'
+Route -> Controller: updateStatus(Request $request, $id)
+activate Controller
+
+Controller -> ModelPemesanan: with(['kos', 'kamar'])->findOrFail($id)
+activate ModelPemesanan
+
+ModelPemesanan -> DB: SELECT * FROM pemesanan WHERE id = ?
+activate DB
+DB --> ModelPemesanan: Data Pemesanan
+deactivate DB
+
+alt Bukan Pemilik Kos dari Kamar Terkait
+    ModelPemesanan --> Controller: Otorisasi Gagal (Forbidden)
+    Controller --> Route: HTTP 403 Forbidden\n{"message": "Anda bukan pemilik kos ini"}
+    Route --> Store: Response Error JSON
+    Store --> UI: Lempar Error Akses
+    UI --> Owner: Tampilkan Peringatan "Akses Ditolak"
+else Otorisasi Pemilik Valid
+    ModelPemesanan --> Controller: Instance Pemesanan Valid
+    deactivate ModelPemesanan
+
+    alt Status Disetujui
+        Controller -> ModelPemesanan: update(['status' => 'disetujui'])
+        activate ModelPemesanan
+        ModelPemesanan -> DB: UPDATE pemesanan SET status = 'disetujui'
+        activate DB
+        DB --> ModelPemesanan: OK
+        deactivate DB
+        deactivate ModelPemesanan
+
+        Controller -> ModelKamar: decrement('sisa_kamar')
+        activate ModelKamar
+        ModelKamar -> DB: UPDATE kamar SET sisa_kamar = sisa_kamar - 1 WHERE id = ?
+        activate DB
+        DB --> ModelKamar: OK
+        deactivate DB
+        deactivate ModelKamar
+    else Status Ditolak
+        Controller -> ModelPemesanan: update(['status' => 'ditolak', 'catatan' => $alasan])
+        activate ModelPemesanan
+        ModelPemesanan -> DB: UPDATE pemesanan SET status = 'ditolak'
+        activate DB
+        DB --> ModelPemesanan: OK
+        deactivate DB
+        deactivate ModelPemesanan
+    end
+
+    Controller --> Route: HTTP 200 OK (BookingResource JSON)
+    deactivate Controller
+    Route --> Store: Response Sukses JSON
+    deactivate Route
+
+    Store --> UI: Perbarui State Daftar Pemesanan
+    deactivate Store
+    UI --> Owner: Tampilkan Label Status Terkini ('Disetujui' / 'Ditolak')
+    deactivate UI
+end
+
+@enduml

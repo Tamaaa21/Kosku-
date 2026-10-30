@@ -1,0 +1,77 @@
+@startuml KosKu_UseCase_Pemilik
+' ========================================================
+' PlantUML Use Case Diagram: Mitra Pemilik Kos
+' Mengikuti Gaya Desain docs/contoh-usecase.png
+' ========================================================
+
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam defaultFontName Arial, Helvetica, sans-serif
+
+' Styling Persis Referensi contoh-usecase.png
+skinparam actor {
+    BorderColor #000000
+    BackgroundColor #FFFFFF
+    FontColor #000000
+    FontSize 13
+}
+
+skinparam usecase {
+    BackgroundColor #56C0FC
+    BorderColor #000000
+    FontColor #000000
+    FontSize 12
+    ArrowColor #000000
+    ArrowFontSize 11
+}
+
+skinparam rectangle {
+    BackgroundColor #FFFFFF
+    BorderColor #000000
+    FontColor #000000
+    FontSize 14
+    FontStyle bold
+}
+
+actor "Pemilik Kos" as Owner
+
+rectangle "Use Case Pemilik Kos" {
+
+    ' Use Case Utama
+    usecase "Login" as UC_Login
+    usecase "Verifikasi Akun" as UC_Verif
+    usecase "Kelola Kos" as UC_Kos
+    usecase "Kelola Kamar" as UC_Kamar
+    usecase "Kelola Reservasi" as UC_Reservasi
+
+    ' Use Case Spesifikasi / Extend Sisi Kanan
+    usecase "Upload KTP & Sertifikat" as UC_UploadBerkas
+    usecase "Upload Foto Kos" as UC_UploadFoto
+    usecase "Atur Stok & Tarif" as UC_AturKamar
+    usecase "Setujui Sewa" as UC_Approve
+    usecase "Tolak Sewa" as UC_Reject
+
+    ' Relasi Aktor ke Use Case Utama
+    Owner --> UC_Login
+    Owner --> UC_Verif
+    Owner --> UC_Kos
+    Owner --> UC_Kamar
+    Owner --> UC_Reservasi
+
+    ' Relasi <<include>>
+    UC_Verif ..> UC_Login : <<include>>
+    UC_Kos ..> UC_Login : <<include>>
+    UC_Kos ..> UC_Verif : <<include>>
+    UC_Kamar ..> UC_Kos : <<include>>
+    UC_Reservasi ..> UC_Login : <<include>>
+
+    ' Relasi <<extend>>
+    UC_UploadBerkas .> UC_Verif : <<extend>>
+    UC_UploadFoto .> UC_Kos : <<extend>>
+    UC_AturKamar .> UC_Kamar : <<extend>>
+    UC_Approve .> UC_Reservasi : <<extend>>
+    UC_Reject .> UC_Reservasi : <<extend>>
+}
+
+@enduml

@@ -101,26 +101,6 @@
         <!-- Search Icon Button (Desktop Only) -->
       
 
-        <!-- Wishlist / Favorite Icon Button (Desktop Only) -->
-        <router-link
-          to="/favorit"
-          class="hidden md:flex relative w-9 h-9 rounded-full items-center justify-center transition cursor-pointer"
-          :class="isTransparent ? 'text-white hover:bg-white/15' : 'text-slate-700 hover:bg-slate-100'"
-          title="Kos Favorit"
-        >
-          <PhHeart
-            :size="19"
-            :weight="favoritesStore.count > 0 ? 'fill' : 'bold'"
-            :class="favoritesStore.count > 0 ? 'text-rose-500' : ''"
-          />
-          <span
-            v-if="favoritesStore.count > 0"
-            class="absolute -top-0.5 -right-0.5 px-1.5 py-0.2 min-w-[16px] text-[10px] font-bold bg-rose-500 text-white rounded-full leading-tight text-center"
-          >
-            {{ favoritesStore.count }}
-          </span>
-        </router-link>
-
         <template v-if="auth.isAuthenticated">
           <!-- Notification Dropdown -->
           <NotificationDropdown />
@@ -328,24 +308,6 @@
       >
         Peta Lokasi
       </router-link>
-      <router-link
-        to="/favorit"
-        @click="mobileMenuOpen = false"
-        class="px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-between"
-        :class="($route.path === '/favorit' || $route.path === '/tersimpan') ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-      >
-        <div class="flex items-center gap-2">
-          <PhHeart :size="18" :weight="favoritesStore.count > 0 ? 'fill' : 'bold'" :class="favoritesStore.count > 0 ? 'text-rose-500' : ''" />
-          <span>Favorit</span>
-        </div>
-        <span
-          v-if="favoritesStore.count > 0"
-          class="px-2 py-0.5 text-[11px] font-bold bg-rose-500 text-white rounded-full"
-        >
-          {{ favoritesStore.count }}
-        </span>
-      </router-link>
-
       <a
         href="#tentang"
         @click="mobileMenuOpen = false; scrollToSection('tentang')"
@@ -369,6 +331,23 @@
           :class="$route.path.startsWith('/pesanan') ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
         >
           Riwayat Pesanan
+        </router-link>
+        <router-link
+          to="/favorit"
+          @click="mobileMenuOpen = false"
+          class="px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-between"
+          :class="($route.path === '/favorit' || $route.path === '/tersimpan') ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
+        >
+          <div class="flex items-center gap-2">
+            <PhHeart :size="18" :weight="favoritesStore.count > 0 ? 'fill' : 'bold'" :class="favoritesStore.count > 0 ? 'text-rose-500' : ''" />
+            <span>Kos Favorit</span>
+          </div>
+          <span
+            v-if="favoritesStore.count > 0"
+            class="px-2 py-0.5 text-[11px] font-bold bg-rose-500 text-white rounded-full"
+          >
+            {{ favoritesStore.count }}
+          </span>
         </router-link>
         <router-link
           to="/profil"

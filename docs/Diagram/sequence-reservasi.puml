@@ -1,0 +1,82 @@
+@startuml KosKu_Sequence_Reservasi
+' ========================================================
+' PlantUML Sequence Diagram: Pengajuan Reservasi Sewa Kos
+' ========================================================
+
+autonumber
+skinparam handwritten false
+skinparam shadowing false
+skinparam defaultFontName "Segoe UI", Arial, sans-serif
+
+skinparam sequence {
+    ArrowColor #0284C7
+    ActorBorderColor #0284C7
+    LifeLineBorderColor #64748B
+    LifeLineBackgroundColor #F1F5F9
+    ParticipantBorderColor #0284C7
+    ParticipantBackgroundColor #F8FAFC
+    ParticipantFontColor #0F172A
+    BoxBorderColor #CBD5E1
+    BoxBackgroundColor #F8FAFC
+}
+
+actor "Pencari Kos" as User
+box "Frontend (Vue 3 SPA)" #EFF6FF
+    participant "BookingModal.vue" as UI
+    participant "bookingStore.ts" as Store
+end box
+
+box "Backend (Laravel API)" #F0FDF4
+    participant "Route & Sanctum" as Route
+    participant "BookingController" as Controller
+    participant "Pemesanan & Kamar (Model)" as Model
+end box
+
+database "MySQL Database" as DB
+
+User -> UI: Input Tanggal Mulai, Durasi & Klik "Pesan"
+activate UI
+UI -> Store: createBooking(payload)
+activate Store
+
+Store -> Route: POST /api/v1/bookings\n[Bearer Token + JSON Payload]
+activate Route
+
+Route -> Route: Verifikasi Token Sanctum & Hak Akses 'pencari'
+Route -> Controller: store(StoreBookingRequest $request)
+activate Controller
+
+Controller -> Model: checkRoomAvailability(kamar_id, tanggal)
+activate Model
+
+Model -> DB: SELECT sisa_kamar, status FROM kamar WHERE id = ?
+activate DB
+DB --> Model: Data Stok & Status Kamar
+deactivate DB
+
+alt Kamar Penuh / Tidak Tersedia
+    Model --> Controller: Kamar tidak tersedia
+    Controller --> Route: HTTP 422 Unprocessable Entity
+    Route --> Store: Response Error JSON
+    Store --> UI: Lempar Pesan Error
+    UI --> User: Tampilkan Notifikasi "Kamar Penuh / Tidak Tersedia"
+else Kamar Tersedia
+    Model -> DB: INSERT INTO pemesanan\n(status: 'menunggu', total_harga, ...)
+    activate DB
+    DB --> Model: ID Pemesanan & Timestamp
+    deactivate DB
+    Model --> Controller: Instance Data Pemesanan
+    deactivate Model
+
+    Controller --> Route: HTTP 201 Created (BookingResource JSON)
+    deactivate Controller
+    Route --> Store: Response Sukses JSON
+    deactivate Route
+
+    Store --> UI: State Pemesanan Tersimpan
+    deactivate Store
+    UI --> User: Tampilkan Dialog Sukses & Arahkan ke Riwayat
+    deactivate UI
+end
+
+@enduml
