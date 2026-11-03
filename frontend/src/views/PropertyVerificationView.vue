@@ -34,7 +34,7 @@
           <PhShieldCheck :size="24" weight="fill" class="text-blue-600" />
         </h1>
         <p class="text-xs text-slate-500 mt-1">
-          Langkah resmi untuk memastikan kepemilikan sah kos dan membuka seluruh akses fitur kelola kos di Kostara.
+          Langkah resmi untuk memastikan kepemilikan sah kos dan membuka seluruh akses fitur kelola kos di <span class="font-bold"><span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span></span>.
         </p>
       </div>
 
@@ -109,7 +109,7 @@
           <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 inline-block mb-1">
             Dalam Peninjauan Admin
           </span>
-          <h2 class="text-base font-bold text-slate-900">Dokumen Verifikasi Anda Sedang Ditinjau Tim Kostara</h2>
+          <h2 class="text-base font-bold text-slate-900">Dokumen Verifikasi Anda Sedang Ditinjau Tim <span class="font-bold"><span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span></span></h2>
           <p class="text-xs text-slate-500 mt-1 leading-relaxed">
             Pengajuan verifikasi kepemilikan Anda telah kami terima pada {{ formattedUpdatedDate }}. Tim admin kami sedang memvalidasi kesesuaian dokumen identitas dan properti (estimasi maksimal 1x24 jam).
           </p>

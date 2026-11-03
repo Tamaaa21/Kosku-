@@ -34,7 +34,9 @@
             />
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5 leading-none">
-                <span class="text-lg font-bold text-white tracking-tight">Kostara</span>
+                <span class="text-lg font-extrabold tracking-tight">
+                  <span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span>
+                </span>
                 <span class="text-[9px] uppercase font-bold text-white bg-primary px-1.5 py-0.5 rounded tracking-wider">
                   Admin
                 </span>
@@ -195,20 +197,24 @@
           <PhCaretDown :size="12" class="text-slate-400" />
         </div>
 
-        <!-- Admin Profile Dropdown Link -->
+        <!-- Admin Profile Avatar Link -->
         <router-link
           to="/profil"
-          class="flex items-center gap-2.5 pl-1.5 pr-2 py-1 rounded-full hover:bg-slate-100 transition group cursor-pointer"
-          title="Profil Administrator"
+          class="flex items-center focus:outline-none cursor-pointer group"
+          :title="auth.user?.nama || 'Profil Administrator'"
         >
-          <div class="w-8 h-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs uppercase overflow-hidden shadow-xs">
-            <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-            <span v-else>A</span>
+          <div class="w-9 h-9 rounded-full bg-primary/10 text-primary border-2 border-primary/30 flex items-center justify-center font-bold text-xs uppercase overflow-hidden transition-all shadow-xs group-hover:scale-105">
+            <img
+              v-if="auth.user?.foto"
+              :src="auth.user.foto"
+              :alt="auth.user?.nama"
+              class="w-full h-full object-cover"
+            />
+            <span v-else-if="auth.user?.nama" class="text-sm font-black">
+              {{ auth.user.nama.charAt(0).toUpperCase() }}
+            </span>
+            <span v-else class="text-sm font-black">A</span>
           </div>
-          <span class="text-xs font-bold text-slate-800 hidden md:inline">
-            Admin
-          </span>
-          <PhCaretDown :size="12" class="text-slate-400 hidden md:inline" />
         </router-link>
       </div>
     </header>

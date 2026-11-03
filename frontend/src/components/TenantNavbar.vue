@@ -16,8 +16,8 @@
           class="w-9 h-9 object-contain group-hover:scale-105 transition-transform"
         />
         <div class="flex items-center text-xl font-extrabold tracking-tight transition-colors">
-          <span :class="isTransparent ? 'text-white' : 'text-[#0B478B]'">Kos</span>
-          <span :class="isTransparent ? 'text-amber-400' : 'text-amber-500'">tara</span>
+          <span :class="isTransparent ? 'text-[#017E91] drop-shadow-xs' : 'text-[#017E91]'">Kos</span>
+          <span :class="isTransparent ? 'text-[#E68202] drop-shadow-xs' : 'text-[#E68202]'">tara</span>
         </div>
       </router-link>
 

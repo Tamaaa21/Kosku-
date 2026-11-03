@@ -94,21 +94,31 @@
 
           <!-- Informational Section Tabs -->
           <div class="w-full bg-surface-container-lowest rounded-xl shadow-sm p-space-md sm:p-space-lg flex flex-col gap-space-lg border border-slate-100">
-            <!-- Tab Bar -->
-            <div class="flex items-center gap-space-xs bg-surface-container-low p-1 rounded-xl">
-              <button
-                v-for="tab in ['deskripsi', 'fasilitas', 'peraturan', 'ulasan', 'lokasi', 'pemilik']"
-                :key="tab"
-                @click="activeTab = tab"
-                :class="[
-                  'flex-1 py-2 px-space-sm rounded-lg text-xs text-center transition-all capitalize',
-                  activeTab === tab
-                    ? 'bg-surface-container-lowest text-primary shadow-sm font-semibold'
-                    : 'text-on-surface-variant hover:text-on-surface font-normal'
-                ]"
-              >
-                {{ tab }}
-              </button>
+            <!-- Tab Bar: Responsive Horizontal Scroll Menu -->
+            <div class="relative w-full">
+              <div class="flex items-center gap-1.5 sm:gap-2 overflow-x-auto no-scrollbar p-1.5 bg-slate-100 rounded-2xl border border-slate-200/80 scroll-smooth">
+                <button
+                  v-for="tab in tabsList"
+                  :key="tab.id"
+                  :id="'tab-nav-' + tab.id"
+                  @click="selectTab(tab.id)"
+                  type="button"
+                  :class="[
+                    'flex items-center gap-1.5 py-2 px-3.5 sm:px-4 rounded-xl text-xs font-semibold whitespace-nowrap shrink-0 transition-all duration-200 cursor-pointer select-none',
+                    activeTab === tab.id
+                      ? 'bg-white text-[#017E91] shadow-xs font-bold border border-slate-200/70'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-white/60'
+                  ]"
+                >
+                  <PhInfo v-if="tab.id === 'deskripsi'" :size="15" :weight="activeTab === tab.id ? 'fill' : 'bold'" :class="activeTab === tab.id ? 'text-[#017E91]' : 'text-slate-400'" />
+                  <PhCheckCircle v-else-if="tab.id === 'fasilitas'" :size="15" :weight="activeTab === tab.id ? 'fill' : 'bold'" :class="activeTab === tab.id ? 'text-[#017E91]' : 'text-slate-400'" />
+                  <PhShieldCheck v-else-if="tab.id === 'peraturan'" :size="15" :weight="activeTab === tab.id ? 'fill' : 'bold'" :class="activeTab === tab.id ? 'text-[#017E91]' : 'text-slate-400'" />
+                  <PhStar v-else-if="tab.id === 'ulasan'" :size="15" :weight="activeTab === tab.id ? 'fill' : 'bold'" :class="activeTab === tab.id ? 'text-[#017E91]' : 'text-slate-400'" />
+                  <PhMapPin v-else-if="tab.id === 'lokasi'" :size="15" :weight="activeTab === tab.id ? 'fill' : 'bold'" :class="activeTab === tab.id ? 'text-[#017E91]' : 'text-slate-400'" />
+                  <PhChatTeardropText v-else-if="tab.id === 'pemilik'" :size="15" :weight="activeTab === tab.id ? 'fill' : 'bold'" :class="activeTab === tab.id ? 'text-[#017E91]' : 'text-slate-400'" />
+                  <span>{{ tab.label }}</span>
+                </button>
+              </div>
             </div>
 
             <!-- Tab Content: Deskripsi -->
@@ -665,6 +675,27 @@ const kos = ref(null)
 const loading = ref(true)
 const activeTab = ref(route.query.tab || 'deskripsi')
 const selectedKamar = ref(null)
+
+const tabsList = [
+  { id: 'deskripsi', label: 'Deskripsi' },
+  { id: 'fasilitas', label: 'Fasilitas' },
+  { id: 'peraturan', label: 'Peraturan' },
+  { id: 'ulasan', label: 'Ulasan' },
+  { id: 'lokasi', label: 'Lokasi & Peta' },
+  { id: 'pemilik', label: 'Pemilik Kos' },
+]
+
+const selectTab = (tabId) => {
+  activeTab.value = tabId
+  const el = document.getElementById('tab-nav-' + tabId)
+  if (el) {
+    el.scrollIntoView({
+      behavior: 'smooth',
+      inline: 'center',
+      block: 'nearest',
+    })
+  }
+}
 const isFavorite = computed(() => {
   return kos.value ? favoritesStore.isFavorite(kos.value.id) : false
 })

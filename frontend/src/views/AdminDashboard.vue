@@ -189,7 +189,7 @@
             <span class="inline-block animate-wave origin-bottom-right">👋</span>
           </h2>
           <p class="text-xs sm:text-sm text-slate-500 mt-1 font-medium">
-            Berikut ringkasan aktivitas dan performa platform Kostara hari ini.
+            Berikut ringkasan aktivitas dan performa platform <span class="font-bold"><span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span></span> hari ini.
           </p>
         </div>
 

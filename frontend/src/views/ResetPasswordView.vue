@@ -5,7 +5,7 @@
         <img :src="logoUrl" alt="Kostara Logo" class="w-14 h-14 object-contain mx-auto mb-3" />
         <h2 class="text-2xl font-bold text-on-surface tracking-tight">Atur Ulang Kata Sandi</h2>
         <p class="text-xs text-on-surface-variant mt-1">
-          Buat kata sandi baru yang aman untuk akun Kostara Anda.
+          Buat kata sandi baru yang aman untuk akun <span class="font-bold"><span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span></span> Anda.
         </p>
       </div>
 

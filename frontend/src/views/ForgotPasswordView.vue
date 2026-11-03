@@ -5,7 +5,7 @@
         <img :src="logoUrl" alt="Kostara Logo" class="w-14 h-14 object-contain mx-auto mb-3" />
         <h2 class="text-2xl font-bold text-on-surface tracking-tight">Lupa Kata Sandi</h2>
         <p class="text-xs text-on-surface-variant mt-1">
-          Masukkan alamat email yang terdaftar untuk menerima tautan atur ulang kata sandi.
+          Masukkan alamat email akun <span class="font-bold"><span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span></span> Anda untuk menerima tautan atur ulang kata sandi.
         </p>
       </div>
 

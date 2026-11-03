@@ -3,7 +3,9 @@
     <div class="bg-surface-container-lowest p-8 rounded-2xl border border-slate-100 shadow-md max-w-md w-full">
       <div class="text-center mb-8">
         <img :src="logoUrl" alt="Kostara Logo" class="w-14 h-14 object-contain mx-auto mb-3" />
-        <h2 class="text-2xl font-bold text-on-surface tracking-tight">Daftar Akun Kostara</h2>
+        <h2 class="text-2xl font-bold text-on-surface tracking-tight">
+          Daftar Akun <span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span>
+        </h2>
         <p class="text-xs text-on-surface-variant mt-1">Bergabunglah sebagai pencari kos atau pemilik kos.</p>
       </div>
 

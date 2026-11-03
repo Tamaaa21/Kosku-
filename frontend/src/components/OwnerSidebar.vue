@@ -34,7 +34,9 @@
             />
             <div class="flex flex-col">
               <div class="flex items-center gap-1.5 leading-none">
-                <span class="text-lg font-bold text-white tracking-tight">Kostara</span>
+                <span class="text-lg font-extrabold tracking-tight">
+                  <span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span>
+                </span>
                 <span class="text-[9px] uppercase font-bold text-primary bg-primary-fixed px-1.5 py-0.5 rounded tracking-wider">
                   Partner
                 </span>
@@ -236,21 +238,26 @@
           </div>
         </div>
 
-        <!-- User Profile Pill with Dropdown -->
+        <!-- User Profile Avatar with Dropdown -->
         <div class="relative" ref="profileRef">
           <button
             @click="isProfileMenuOpen = !isProfileMenuOpen"
-            class="flex items-center gap-2 pl-1.5 pr-2.5 py-1 bg-white border border-slate-200/90 hover:border-slate-300 rounded-full text-xs font-bold text-slate-800 shadow-xs hover:bg-slate-50 transition cursor-pointer group"
+            class="flex items-center focus:outline-none cursor-pointer group"
             type="button"
+            :title="auth.user?.nama || 'Profil Pemilik Kos'"
           >
-            <div class="w-7 h-7 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs overflow-hidden shrink-0">
-              <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-              <PhUser v-else :size="15" weight="bold" />
+            <div class="w-9 h-9 rounded-full bg-primary/10 text-primary border-2 border-primary/30 flex items-center justify-center font-bold text-xs uppercase overflow-hidden transition-all shadow-xs group-hover:scale-105">
+              <img
+                v-if="auth.user?.foto"
+                :src="auth.user.foto"
+                :alt="auth.user?.nama"
+                class="w-full h-full object-cover"
+              />
+              <span v-else-if="auth.user?.nama" class="text-sm font-black">
+                {{ auth.user.nama.charAt(0).toUpperCase() }}
+              </span>
+              <PhUser v-else :size="18" weight="bold" />
             </div>
-            <span class="hidden md:inline max-w-[130px] truncate group-hover:text-primary transition">
-              {{ auth.user?.nama || 'Pemilik Kos' }}
-            </span>
-            <PhCaretDown :size="13" weight="bold" class="text-slate-400 transition-transform" :class="{ 'rotate-180': isProfileMenuOpen }" />
           </button>
 
           <!-- Profile Dropdown Menu -->

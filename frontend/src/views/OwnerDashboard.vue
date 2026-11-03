@@ -136,7 +136,7 @@
           </div>
           <p class="text-xs text-slate-600 mt-0.5 leading-relaxed">
             <span v-if="verificationStatus === 'pending'">
-              Dokumen identitas dan bukti PBB/Listrik kos Anda sedang divalidasi oleh tim Kostara. Fitur kelola kos dan kamar akan terbuka otomatis setelah disetujui.
+              Dokumen identitas dan bukti PBB/Listrik kos Anda sedang divalidasi oleh tim <span class="font-bold"><span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span></span>. Fitur kelola kos dan kamar akan terbuka otomatis setelah disetujui.
             </span>
             <span v-else-if="verificationStatus === 'rejected'">
               Catatan Admin: <strong>"{{ auth.user?.alasan_penolakan || 'Dokumen belum sesuai.' }}"</strong>. Silakan perbaiki foto dokumen dan ajukan ulang.
