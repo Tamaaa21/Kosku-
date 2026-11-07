@@ -14,7 +14,7 @@ web
 
 ## Product Purpose
 
-KosKu adalah platform pencarian dan penyewaan kos modern di Indonesia yang menjembatani pencari kos dengan mitra pemilik kos secara transparan, cepat, dan terpercaya. Kesuksesan produk didefinisikan oleh kemudahan pencari dalam menemukan kamar ideal serta efisiensi pemilik dalam mengelola dan menyewakan propertinya.
+Kostara adalah platform pencarian dan penyewaan kos modern di Indonesia yang menjembatani pencari kos dengan mitra pemilik kos secara transparan, cepat, dan terpercaya. Kesuksesan produk didefinisikan oleh kemudahan pencari dalam menemukan kamar ideal serta efisiensi pemilik dalam mengelola dan menyewakan propertinya.
 
 ## Positioning
 
@@ -38,15 +38,15 @@ Kombinasi eksplorasi visual interaktif (peta Leaflet & rute Google Maps turn-by-
 
 ## Brand Commitments
 
-- **Nama**: KosKu (Platform Pencarian & Sewa Kos Indonesia).
+- **Nama**: Kostara (Platform Pencarian & Sewa Kos Indonesia).
 - **Tone & Voice**: Hangat, ramah, jelas, komunikatif, dan terpercaya.
-- **Identitas Visual**: Palet utama bernuansa Emerald / Teal yang segar dan bersih, visualisasi kartu properti terstruktur, dan tata letak yang mengutamakan kemudahan navigasi di layar ponsel maupun desktop.
+- **Identitas Visual**: Palet utama bernuansa Deep Blue dan Warm Yellow-Orange khas logo Kostara, visualisasi kartu properti terstruktur, dan tata letak yang mengutamakan kemudahan navigasi di layar ponsel maupun desktop.
 
 ## Evidence on Hand
 
 - Repositori frontend aktif di [`frontend/`](file:///home/pratama/Downloads/project/backend-kos/frontend) (Vue 3, Tailwind CSS).
 - Dokumentasi teknis & spesifikasi: [`README.md`](file:///home/pratama/Downloads/project/backend-kos/README.md), [`plan.md`](file:///home/pratama/Downloads/project/backend-kos/plan.md), [`REST_API_DESIGN_WORKSHEET.md`](file:///home/pratama/Downloads/project/backend-kos/REST_API_DESIGN_WORKSHEET.md), dan [`database_schema_migration_specification.md`](file:///home/pratama/Downloads/project/backend-kos/database_schema_migration_specification.md).
-- Folder aset antarmuka referensi: `ui admin/` dan `ui pemilik/` (Mockup Stitch KosKu Boarding Platform UI/UX).
+- Folder aset antarmuka referensi: `ui admin/` dan `ui pemilik/` (Mockup Stitch Kostara Boarding Platform UI/UX).
 
 ## Product Principles
 
