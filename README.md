@@ -1,4 +1,4 @@
-# KosKu &mdash; Platform Pencarian & Sewa Kos Indonesia
+# Kostara &mdash; Platform Pencarian & Sewa Kos Indonesia
 
 <p align="center">
   <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtAMGcNImL28Wkcksd1pB136MBTXtxAeUZZdLwny2E0TfcGGRkdrMA_JR6pVnktaHUu8Ffua13FdN3HdgZd29vhkeFDWM4WJtQJFMuZndi8o1HB2GXyn8ikhIgK45eAlZmqqiEVYkjMe7_m-Cvw0nxPY6cKLGKCrWp2Ch2dtBIlIqQb5pKjNVS1WaRhbnQPFyDftN7_uvVGXkv3Z_JUnsJpPxReDktVkZYw0eJ1YRW7caBLYvFdhslDw" alt="KosKu Banner" width="100%" style="border-radius: 12px; max-height: 380px; object-fit: cover;" />
@@ -20,9 +20,9 @@
 
 ---
 
-## 📌 Tentang KosKu
+## 📌 Tentang Kostara
 
-**KosKu** adalah aplikasi web modern yang menjembatani pencari hunian sewa (mahasiswa, pekerja, keluarga) dengan mitra pemilik kos di seluruh wilayah Indonesia. Dibangun dengan arsitektur decoupled **Laravel 11 REST API** pada sisi backend dan **Vue 3 SPA (Single Page Application)** pada sisi frontend.
+**Kostara** (sebelumnya dikembangkan dengan nama *KosKu*) adalah aplikasi web modern yang menjembatani pencari hunian sewa (mahasiswa, pekerja, keluarga) dengan mitra pemilik kos di seluruh wilayah Indonesia. Dibangun dengan arsitektur decoupled **Laravel 11 REST API** pada sisi backend dan **Vue 3 SPA (Single Page Application)** pada sisi frontend.
 
 Sistem dirancang responsif, cepat, aman, dan mudah digunakan dengan integrasi komunikasi WhatsApp langsung serta panduan rute navigasi Google Maps.
 

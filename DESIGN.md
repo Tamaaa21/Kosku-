@@ -1,5 +1,5 @@
 ---
-name: KosKu
+name: Kostara
 description: Platform Pencarian & Sewa Kos Terintegrasi Indonesia
 colors:
   primary: "#0B478B"
@@ -91,13 +91,13 @@ components:
     padding: "16px"
 ---
 
-# Design System: KosKu
+# Design System: Kostara
 
 ## Overview
 
 **Creative North Star: "The Nusantara Living Compass"**
 
-KosKu dirancang sebagai pemandu arah hunian yang jernih, tenang, dan tepercaya di Indonesia. Identitas visualnya berakar langsung dari logo resmi KosKu, memadukan ketegasan **Deep Blue (#0B478B)** sebagai lambang kestabilan dan keamanan hunian, dengan kehangatan **Kuning Ke-orangan (#FF9900)** sebagai aksen ramah khas nusantara.
+Kostara dirancang sebagai pemandu arah hunian yang jernih, tenang, dan tepercaya di Indonesia. Identitas visualnya berakar langsung dari logo resmi Kostara, memadukan ketegasan **Deep Blue (#0B478B)** sebagai lambang kestabilan dan keamanan hunian, dengan kehangatan **Kuning Ke-orangan (#FF9900)** sebagai aksen ramah khas nusantara.
 
 Setiap permukaan antarmuka memprioritaskan keterbacaan data properti, kepastian lokasi peta, dan kemudahan akses komunikasi langsung antara pencari kos dan pemilik.
 
@@ -110,15 +110,15 @@ Setiap permukaan antarmuka memprioritaskan keterbacaan data properti, kepastian 
 
 ## Colors
 
-Palet warna KosKu dibangun dari warna brand logo resmi KosKu dan palet netral Slate:
+Palet warna Kostara dibangun dari warna brand logo resmi Kostara dan palet netral Slate:
 
 ### Primary (Brand Logo)
-- **KosKu Deep Blue** (`#0B478B`): Digunakan untuk identitas merek utama, tombol utama, tautan aktif, border fokus, dan status prioritas tinggi. Menghadirkan rasio kontras 9.17:1 di atas putih (melampaui WCAG AAA).
+- **Kostara Deep Blue** (`#0B478B`): Digunakan untuk identitas merek utama, tombol utama, tautan aktif, border fokus, dan status prioritas tinggi. Menghadirkan rasio kontras 9.17:1 di atas putih (melampaui WCAG AAA).
 - **Interactive Deep Blue Container** (`#0D52A0`): Wadah interaktif untuk tombol submit/pencarian dengan feedback hover mendalam (`#083569`).
 - **Primary Fixed Soft Tint** (`#e0edff`): Latar belakang sorotan lembut untuk tag aktif dan badge properti.
 
 ### Accent & Tertiary (Brand Logo)
-- **KosKu Warm Yellow-Orange** (`#FF9900`): Aksen hangat khas logo KosKu untuk sorotan rating bintang, badge pilihan/top-rated, notifikasi perhatian, dan status sewa aktif.
+- **Kostara Warm Yellow-Orange** (`#FF9900`): Aksen hangat khas logo Kostara untuk sorotan rating bintang, badge pilihan/top-rated, notifikasi perhatian, dan status sewa aktif.
 - **Accent Container** (`#FFF4E5`): Latar belakang badge halus berpadu kontras tinggi dengan teks oranye gelap (`#9A3412`).
 
 ### Secondary & Neutrals
@@ -148,7 +148,7 @@ Palet warna KosKu dibangun dari warna brand logo resmi KosKu dan palet netral Sl
 
 ## Layout
 
-KosKu mengadopsi struktur kisi adaptif mobile-first dengan kontainer terpusat untuk publik dan tata letak kanvas terpisah untuk dashboard operasional:
+Kostara mengadopsi struktur kisi adaptif mobile-first dengan kontainer terpusat untuk publik dan tata letak kanvas terpisah untuk dashboard operasional:
 
 - **Max Container Width**: 1280px (`max-w-7xl`) dengan margin lateral 24px (`px-margin` / 1.5rem) pada desktop, dan 16px pada ponsel.
 - **Rhythm & Spacing Scale**:

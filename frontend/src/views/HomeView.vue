@@ -1,10 +1,12 @@
 <template>
   <div class="w-full">
-    <!-- Hero Section with 5-Second HD Background Slider -->
+    <!-- Hero Section with Background Slider & Stable Visual Anchor -->
     <section
       class="relative w-full overflow-hidden group select-none"
       @mouseenter="isHovered = true"
       @mouseleave="isHovered = false"
+      @touchstart="onTouchStart"
+      @touchend="onTouchEnd"
     >
       <div class="relative w-full min-h-[540px] sm:min-h-[580px] lg:min-h-[640px] flex items-center justify-center">
         <!-- Background Slider Layer (Smooth Crossfade Transitions) -->
@@ -25,7 +27,7 @@
         <button
           v-if="activeBanners.length > 1"
           @click.stop="prevSlide"
-          class="hidden lg:flex absolute left-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-slate-900/40 hover:bg-slate-900/80 backdrop-blur-md text-white items-center justify-center border border-white/20 transition-all opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 shadow-lg"
+          class="hidden lg:flex absolute left-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-slate-900/40 hover:bg-slate-900/80 backdrop-blur-md text-white items-center justify-center border border-white/20 transition-all opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
           title="Slide Sebelumnya"
           type="button"
         >
@@ -34,7 +36,7 @@
         <button
           v-if="activeBanners.length > 1"
           @click.stop="nextSlide"
-          class="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-slate-900/40 hover:bg-slate-900/80 backdrop-blur-md text-white items-center justify-center border border-white/20 transition-all opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 shadow-lg"
+          class="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 rounded-full bg-slate-900/40 hover:bg-slate-900/80 backdrop-blur-md text-white items-center justify-center border border-white/20 transition-all opacity-0 group-hover:opacity-100 hover:scale-105 active:scale-95 shadow-lg cursor-pointer"
           title="Slide Selanjutnya"
           type="button"
         >
@@ -48,33 +50,49 @@
             <!-- Badge: Location Pill -->
             <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/60 backdrop-blur-md border border-white/15 text-white/95 text-xs sm:text-sm font-medium mb-4 sm:mb-5 shadow-sm">
               <PhMapPin :size="16" weight="fill" class="text-amber-400 select-none shrink-0" />
-              <span>{{ currentBanner.badge_text || 'Cari kos di seluruh Indonesia' }}</span>
+              <span>Cari kos di seluruh Indonesia</span>
             </div>
 
-            <!-- Headline: Kos Nyaman, Hidup Lebih Mudah -->
+            <!-- Headline: Kos Nyaman, Hidup Lebih Mudah (Stable Anchor) -->
             <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15] drop-shadow-sm">
-              <span>{{ formattedTitle.part1 }}</span>
-              <br v-if="formattedTitle.part2" />
-              <span v-if="formattedTitle.part2" class="text-amber-400">{{ formattedTitle.part2 }}</span>
+              <span>Kos Nyaman,</span>
+              <br />
+              <span class="text-amber-400">Hidup Lebih Mudah</span>
             </h1>
 
-            <!-- Subtitle -->
-            <p class="text-sm sm:text-base lg:text-lg text-slate-200/95 max-w-xl mt-3 sm:mt-3.5 leading-relaxed font-normal drop-shadow-xs whitespace-pre-line">
-              {{ currentBanner.subjudul || 'Temukan kos terbaik sesuai kebutuhanmu.\nLokasi strategis, fasilitas lengkap, harga transparan.' }}
+            <!-- Subtitle (Stable Authoritative Copy) -->
+            <p class="text-sm sm:text-base lg:text-lg text-slate-200/95 max-w-xl mt-3 sm:mt-3.5 leading-relaxed font-normal drop-shadow-xs">
+              Temukan kos terbaik sesuai kebutuhanmu di seluruh Indonesia. Lokasi strategis, fasilitas lengkap, dan harga transparan langsung dari pemilik.
             </p>
 
-            <!-- 5s Slider Indicators (Dots & Progress) -->
-            <div v-if="activeBanners.length > 1" class="flex items-center gap-2 mt-4 sm:mt-5">
+            <!-- Slider Indicators & Accessible Controls -->
+            <div v-if="activeBanners.length > 1" class="flex items-center gap-2.5 mt-4 sm:mt-5">
+              <div class="flex items-center gap-1.5 p-1 bg-slate-900/50 backdrop-blur-md rounded-full border border-white/10">
+                <button
+                  v-for="(b, idx) in activeBanners"
+                  :key="idx"
+                  @click="goToSlide(idx)"
+                  class="h-7 px-1 flex items-center justify-center cursor-pointer focus:outline-none"
+                  :title="`Pindah ke foto ${idx + 1}`"
+                  type="button"
+                >
+                  <span
+                    class="h-2 rounded-full transition-all duration-300 block"
+                    :class="idx === currentSlideIndex ? 'w-7 bg-amber-400' : 'w-2 bg-white/40 hover:bg-white/80'"
+                  ></span>
+                </button>
+              </div>
+
+              <!-- Pause / Play Toggle Button -->
               <button
-                v-for="(b, idx) in activeBanners"
-                :key="idx"
-                @click="goToSlide(idx)"
-                class="h-2 rounded-full transition-all duration-300 cursor-pointer focus:outline-none"
-                :class="idx === currentSlideIndex ? 'w-8 bg-amber-400' : 'w-2 bg-white/40 hover:bg-white/80'"
-                :title="`Pindah ke slide ${idx + 1}`"
+                @click="toggleAutoPlay"
+                class="w-7 h-7 rounded-full bg-slate-900/50 hover:bg-slate-900/80 backdrop-blur-md text-white/80 hover:text-white flex items-center justify-center border border-white/10 transition-colors cursor-pointer"
+                :title="isAutoPlayPaused ? 'Lanjutkan rotasi otomatis latar' : 'Jeda rotasi otomatis latar'"
                 type="button"
-              ></button>
-              
+              >
+                <PhPause v-if="!isAutoPlayPaused" :size="12" weight="bold" />
+                <PhPlay v-else :size="12" weight="bold" />
+              </button>
             </div>
           </div>
 
@@ -92,11 +110,11 @@
                 <div class="min-w-0 flex-1 text-left">
                   <template v-if="activeSearchSummary">
                     <p class="text-xs font-bold text-slate-800 truncate">{{ activeSearchSummary.title }}</p>
-                    <p class="text-[10px] text-slate-500 font-medium truncate">{{ activeSearchSummary.subtitle }}</p>
+                    <p class="text-[11px] text-slate-500 font-medium truncate">{{ activeSearchSummary.subtitle }}</p>
                   </template>
                   <template v-else>
                     <p class="text-xs sm:text-sm font-semibold text-slate-700 truncate">Mau cari kos di mana?</p>
-                    <p class="text-[10px] text-slate-400 font-medium">Lokasi &bull; Tipe &bull; Budget</p>
+                    <p class="text-[11px] text-slate-500 font-medium">Lokasi &bull; Tipe &bull; Budget</p>
                   </template>
                 </div>
               </div>
@@ -107,91 +125,272 @@
               </div>
             </div>
 
-            <!-- 2. Desktop Segmented Search Bar (Pristine White Seamless Pill) -->
-            <div class="hidden lg:flex w-full bg-white/95 backdrop-blur-md rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.2)] p-2 border border-white/60 items-center transition-all focus-within:ring-4 focus-within:ring-primary/15 focus-within:bg-white">
-              <!-- Location Search -->
-              <div class="flex-1 flex items-center gap-3 px-5 py-2.5 rounded-full hover:bg-slate-50/80 focus-within:bg-slate-50/80 transition-colors group/loc cursor-text">
-                <PhMapPin :size="20" weight="fill" class="text-primary/70 group-focus-within/loc:text-primary transition-colors select-none shrink-0" />
+            <!-- 2. Desktop Segmented Search Bar (Pristine, Clean & Premium) -->
+            <div
+              ref="searchBarContainerRef"
+              class="hidden lg:flex relative w-full bg-white rounded-full shadow-[0_14px_38px_-6px_rgba(15,23,42,0.14),0_4px_12px_-2px_rgba(15,23,42,0.06)] border border-slate-200/90 p-1.5 items-center transition-all"
+            >
+              <!-- Segment 1: Lokasi / Area -->
+              <div
+                @click="focusLocationInput"
+                class="flex-1 flex items-center gap-3 px-4 py-2 rounded-full cursor-text transition-colors group/loc relative"
+                :class="activeDropdown === 'location' ? 'bg-slate-50' : 'hover:bg-slate-50/80'"
+              >
+                <div
+                  class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
+                  :class="searchQuery ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500 group-hover/loc:text-primary'"
+                >
+                  <PhMapPin :size="16" weight="bold" />
+                </div>
                 <div class="flex-1 flex flex-col justify-center min-w-0">
-                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-1">Lokasi / Area</span>
+                  <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block leading-none mb-1">
+                    Lokasi / Area
+                  </span>
                   <input
+                    ref="locationInputRef"
                     v-model="searchQuery"
                     type="text"
                     class="w-full bg-transparent text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal border-none focus:outline-none focus:ring-0 p-0 leading-tight"
                     placeholder="Kota, area, atau kampus..."
+                    @focus="activeDropdown = 'location'"
                     @keyup.enter="handleSearch"
                   />
                 </div>
                 <button
                   v-if="searchQuery"
-                  @click="searchQuery = ''"
+                  @click.stop="searchQuery = ''"
                   class="p-1 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 transition shrink-0 cursor-pointer"
-                  title="Hapus pencarian"
+                  title="Hapus lokasi"
                   type="button"
                 >
                   <PhXCircle :size="16" weight="fill" />
                 </button>
+
+                <!-- Location Suggestions Popover -->
+                <transition
+                  enter-active-class="transition duration-150 ease-out"
+                  enter-from-class="transform scale-95 opacity-0 -translate-y-1"
+                  enter-to-class="transform scale-100 opacity-100 translate-y-0"
+                  leave-active-class="transition duration-100 ease-in"
+                  leave-from-class="transform scale-100 opacity-100 translate-y-0"
+                  leave-to-class="transform scale-95 opacity-0 -translate-y-1"
+                >
+                  <div
+                    v-if="activeDropdown === 'location'"
+                    class="absolute top-full left-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-40 text-left select-none"
+                    @click.stop
+                  >
+                    <div class="flex items-center justify-between mb-2.5">
+                      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Kota Populer</span>
+                      <span class="text-[11px] text-slate-500">Pilih cepat</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1.5">
+                      <button
+                        v-for="city in popularCities"
+                        :key="city"
+                        type="button"
+                        @click.stop="selectCity(city)"
+                        class="flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer text-left"
+                        :class="searchQuery.toLowerCase() === city.toLowerCase()
+                          ? 'bg-primary/10 text-primary font-bold'
+                          : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'"
+                      >
+                        <PhMapPin :size="13" weight="fill" class="text-primary/70 shrink-0" />
+                        <span class="truncate">{{ city }}</span>
+                      </button>
+                    </div>
+                  </div>
+                </transition>
               </div>
 
               <!-- Divider 1 -->
-              <div class="w-px h-8 bg-slate-200/80 shrink-0"></div>
+              <div
+                class="w-px h-7 bg-slate-200/80 shrink-0 transition-opacity"
+                :class="{ 'opacity-0': activeDropdown === 'location' || activeDropdown === 'jenis' }"
+              ></div>
 
-              <!-- Jenis Kos Dropdown -->
-              <div class="flex items-center gap-3 px-4 py-2.5 rounded-full hover:bg-slate-50/80 focus-within:bg-slate-50/80 transition-colors min-w-[150px] relative group/type cursor-pointer">
-                <PhBed :size="20" weight="bold" class="text-slate-500 group-focus-within/type:text-primary transition-colors select-none shrink-0" />
-                <div class="flex-1 flex flex-col justify-center min-w-0 pr-4">
-                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-1">Tipe Hunian</span>
-                  <select
-                    v-model="selectedJenis"
-                    style="background-image: none !important;"
-                    class="w-full bg-transparent text-sm font-semibold text-slate-700 border-none focus:outline-none focus:ring-0 p-0 cursor-pointer appearance-none truncate leading-tight"
+              <!-- Segment 2: Tipe Hunian (Custom Clean Dropdown) -->
+              <div class="relative min-w-[160px]">
+                <button
+                  type="button"
+                  @click.stop="toggleDropdown('jenis')"
+                  class="w-full flex items-center justify-between gap-2 px-4 py-2 rounded-full text-left transition-colors cursor-pointer group/type"
+                  :class="activeDropdown === 'jenis' ? 'bg-slate-50' : 'hover:bg-slate-50/80'"
+                >
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <div
+                      class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
+                      :class="selectedJenis ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500 group-hover/type:text-primary'"
+                    >
+                      <PhBed :size="16" weight="bold" />
+                    </div>
+                    <div class="flex flex-col justify-center min-w-0">
+                      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block leading-none mb-1">
+                        Tipe Hunian
+                      </span>
+                      <span
+                        class="text-sm font-semibold truncate leading-tight"
+                        :class="selectedJenis ? 'text-primary' : 'text-slate-700'"
+                      >
+                        {{ getJenisLabel(selectedJenis) }}
+                      </span>
+                    </div>
+                  </div>
+                  <PhCaretDown
+                    :size="12"
+                    weight="bold"
+                    class="text-slate-400 transition-transform duration-200 shrink-0"
+                    :class="{ 'rotate-180 text-primary': activeDropdown === 'jenis' }"
+                  />
+                </button>
+
+                <!-- Tipe Hunian Dropdown Menu -->
+                <transition
+                  enter-active-class="transition duration-150 ease-out"
+                  enter-from-class="transform scale-95 opacity-0 -translate-y-1"
+                  enter-to-class="transform scale-100 opacity-100 translate-y-0"
+                  leave-active-class="transition duration-100 ease-in"
+                  leave-from-class="transform scale-100 opacity-100 translate-y-0"
+                  leave-to-class="transform scale-95 opacity-0 -translate-y-1"
+                >
+                  <div
+                    v-if="activeDropdown === 'jenis'"
+                    class="absolute top-full left-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-40 select-none"
+                    @click.stop
                   >
-                    <option value="">Semua Tipe</option>
-                    <option value="putra">Putra</option>
-                    <option value="putri">Putri</option>
-                    <option value="campur">Campur</option>
-                  </select>
-                </div>
-                <PhCaretDown :size="13" weight="bold" class="absolute right-4 text-slate-400 group-hover/type:text-slate-600 pointer-events-none transition-colors" />
+                    <div class="px-3 py-1.5 mb-1 border-b border-slate-100 flex items-center justify-between">
+                      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Filter Tipe Kos</span>
+                      <button
+                        v-if="selectedJenis"
+                        @click.stop="selectJenis('')"
+                        class="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                        type="button"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                    <button
+                      v-for="opt in jenisOptions"
+                      :key="opt.val"
+                      type="button"
+                      @click.stop="selectJenis(opt.val)"
+                      class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer text-left"
+                      :class="selectedJenis === opt.val
+                        ? 'bg-primary/10 text-primary font-bold'
+                        : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'"
+                    >
+                      <div>
+                        <p class="leading-snug">{{ opt.val ? `Kos ${opt.label}` : 'Semua Tipe' }}</p>
+                        <p class="text-[11px] font-normal text-slate-500">{{ opt.desc }}</p>
+                      </div>
+                      <PhCheck v-if="selectedJenis === opt.val" :size="14" weight="bold" class="text-primary shrink-0" />
+                    </button>
+                  </div>
+                </transition>
               </div>
 
               <!-- Divider 2 -->
-              <div class="w-px h-8 bg-slate-200/80 shrink-0"></div>
+              <div
+                class="w-px h-7 bg-slate-200/80 shrink-0 transition-opacity"
+                :class="{ 'opacity-0': activeDropdown === 'jenis' || activeDropdown === 'price' }"
+              ></div>
 
-              <!-- Rentang Harga Dropdown -->
-              <div class="flex items-center gap-3 px-4 py-2.5 rounded-full hover:bg-slate-50/80 focus-within:bg-slate-50/80 transition-colors min-w-[160px] relative group/price cursor-pointer">
-                <PhCurrencyCircleDollar :size="20" weight="bold" class="text-slate-500 group-focus-within/price:text-primary transition-colors select-none shrink-0" />
-                <div class="flex-1 flex flex-col justify-center min-w-0 pr-4">
-                  <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block leading-none mb-1">Budget</span>
-                  <select
-                    v-model="selectedPriceRange"
-                    style="background-image: none !important;"
-                    class="w-full bg-transparent text-sm font-semibold text-slate-700 border-none focus:outline-none focus:ring-0 p-0 cursor-pointer appearance-none truncate leading-tight"
+              <!-- Segment 3: Rentang Budget (Custom Clean Dropdown) -->
+              <div class="relative min-w-[170px]">
+                <button
+                  type="button"
+                  @click.stop="toggleDropdown('price')"
+                  class="w-full flex items-center justify-between gap-2 px-4 py-2 rounded-full text-left transition-colors cursor-pointer group/price"
+                  :class="activeDropdown === 'price' ? 'bg-slate-50' : 'hover:bg-slate-50/80'"
+                >
+                  <div class="flex items-center gap-2.5 min-w-0">
+                    <div
+                      class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
+                      :class="selectedPriceRange ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500 group-hover/price:text-primary'"
+                    >
+                      <PhCurrencyCircleDollar :size="16" weight="bold" />
+                    </div>
+                    <div class="flex flex-col justify-center min-w-0">
+                      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block leading-none mb-1">
+                        Budget
+                      </span>
+                      <span
+                        class="text-sm font-semibold truncate leading-tight"
+                        :class="selectedPriceRange ? 'text-primary' : 'text-slate-700'"
+                      >
+                        {{ getPriceLabel(selectedPriceRange) }}
+                      </span>
+                    </div>
+                  </div>
+                  <PhCaretDown
+                    :size="12"
+                    weight="bold"
+                    class="text-slate-400 transition-transform duration-200 shrink-0"
+                    :class="{ 'rotate-180 text-primary': activeDropdown === 'price' }"
+                  />
+                </button>
+
+                <!-- Budget Dropdown Menu -->
+                <transition
+                  enter-active-class="transition duration-150 ease-out"
+                  enter-from-class="transform scale-95 opacity-0 -translate-y-1"
+                  enter-to-class="transform scale-100 opacity-100 translate-y-0"
+                  leave-active-class="transition duration-100 ease-in"
+                  leave-from-class="transform scale-100 opacity-100 translate-y-0"
+                  leave-to-class="transform scale-95 opacity-0 -translate-y-1"
+                >
+                  <div
+                    v-if="activeDropdown === 'price'"
+                    class="absolute top-full left-0 mt-3 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-40 select-none"
+                    @click.stop
                   >
-                    <option value="">Semua Harga</option>
-                    <option value="under500">&lt; Rp 500rb</option>
-                    <option value="500-1000">Rp 500rb - 1jt</option>
-                    <option value="above1000">&gt; Rp 1jt</option>
-                  </select>
-                </div>
-                <PhCaretDown :size="13" weight="bold" class="absolute right-4 text-slate-400 group-hover/price:text-slate-600 pointer-events-none transition-colors" />
+                    <div class="px-3 py-1.5 mb-1 border-b border-slate-100 flex items-center justify-between">
+                      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider">Rentang Budget</span>
+                      <button
+                        v-if="selectedPriceRange"
+                        @click.stop="selectPrice('')"
+                        class="text-[11px] font-semibold text-primary hover:underline cursor-pointer"
+                        type="button"
+                      >
+                        Reset
+                      </button>
+                    </div>
+                    <button
+                      v-for="pOpt in priceOptions"
+                      :key="pOpt.val"
+                      type="button"
+                      @click.stop="selectPrice(pOpt.val)"
+                      class="w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer text-left"
+                      :class="selectedPriceRange === pOpt.val
+                        ? 'bg-primary/10 text-primary font-bold'
+                        : 'text-slate-700 hover:bg-slate-50 hover:text-slate-900'"
+                    >
+                      <div>
+                        <p class="leading-snug">{{ pOpt.label }}</p>
+                        <p class="text-[11px] font-normal text-slate-500">{{ pOpt.desc }}</p>
+                      </div>
+                      <PhCheck v-if="selectedPriceRange === pOpt.val" :size="14" weight="bold" class="text-primary shrink-0" />
+                    </button>
+                  </div>
+                </transition>
               </div>
 
-              <!-- Search Button -->
+              <!-- Search CTA Button -->
               <button
                 @click="handleSearch"
-                class="bg-gradient-to-r from-primary to-[#095296] hover:from-[#095296] hover:to-primary text-white px-7 sm:px-8 py-3.5 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:shadow-primary/30 active:scale-95 whitespace-nowrap cursor-pointer shrink-0 ml-1.5"
+                class="bg-primary hover:bg-[#083569] text-white px-7 py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md hover:shadow-primary/20 active:scale-95 whitespace-nowrap cursor-pointer shrink-0 ml-1.5"
                 type="button"
               >
-                <PhMagnifyingGlass :size="18" weight="bold" class="select-none" />
+                <PhMagnifyingGlass :size="17" weight="bold" class="select-none" />
                 <span>Cari Kos</span>
               </button>
             </div>
 
-            <!-- Popular Search Quick Chips (Modern Glassmorphic Chips) -->
+            <!-- Popular Search Quick Chips (Clean Glass Minimal) -->
             <div class="flex items-center gap-2 mt-3 pt-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-nowrap lg:flex-wrap max-w-full pb-1 justify-start lg:justify-center">
-              <span class="text-xs font-semibold text-white/90 hidden sm:inline-flex items-center gap-1 shrink-0 drop-shadow-xs">
-                <span>🔥 Pencarian Populer:</span>
+              <span class="text-xs font-medium text-slate-200/90 hidden sm:inline-flex items-center gap-1.5 shrink-0 drop-shadow-xs">
+                <PhTrendUp :size="14" weight="bold" class="text-amber-400 select-none" />
+                <span>Pencarian Populer:</span>
               </span>
               <button
                 v-for="(tag, tIdx) in quickTags"
@@ -199,8 +398,8 @@
                 @click="applyQuickTag(tag)"
                 class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium transition cursor-pointer active:scale-95 border shrink-0 whitespace-nowrap backdrop-blur-md"
                 :class="isTagActive(tag)
-                  ? 'bg-amber-400 text-slate-900 border-amber-300 font-bold shadow-md ring-2 ring-amber-400/30'
-                  : 'bg-white/15 hover:bg-white/25 text-white border-white/25 shadow-xs'"
+                  ? 'bg-amber-400 text-slate-900 border-amber-300 font-bold shadow-sm ring-1 ring-amber-400/40'
+                  : 'bg-slate-900/40 hover:bg-slate-900/65 text-slate-200 hover:text-white border-white/10 shadow-2xs'"
                 type="button"
               >
                 <span>{{ tag.label }}</span>
@@ -213,6 +412,10 @@
 
     <!-- Platform Advantages Band -->
     <section id="tentang" class="max-w-7xl mx-auto w-full px-margin py-space-xl">
+      <div class="text-center max-w-xl mx-auto mb-space-lg">
+        <h2 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">Keunggulan Kostara</h2>
+        <p class="text-xs text-on-surface-variant mt-1">Standar layanan hunian sewa yang jernih, transparan, dan tepercaya di Indonesia</p>
+      </div>
       <div class="bg-surface-container-lowest rounded-2xl p-space-lg sm:p-space-xl border border-slate-200/80 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-space-lg">
         <!-- Item 1 -->
         <div class="flex items-start gap-space-md">
@@ -274,7 +477,7 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-space-lg">
-        <div v-for="i in 6" :key="i" class="h-80 bg-white rounded-xl border border-slate-100 animate-pulse"></div>
+        <div v-for="i in 6" :key="i" class="h-80 bg-white rounded-2xl border border-slate-100 animate-pulse"></div>
       </div>
 
       <!-- Cards Grid -->
@@ -282,10 +485,10 @@
         <article
           v-for="kos in kosList"
           :key="kos.id"
-          class="bg-surface-container-lowest rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden group border border-slate-100"
+          class="bg-surface-container-lowest rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden group border border-slate-100"
         >
-          <!-- Thumbnail Image -->
-          <div class="relative w-full aspect-[4/3] overflow-hidden bg-surface-container">
+          <!-- Thumbnail Image (16:9 Cinematic Aspect Video) -->
+          <div class="relative w-full aspect-video overflow-hidden bg-surface-container">
             <img
               :src="getImageForKos(kos.id)"
               :alt="kos.nama"
@@ -351,25 +554,61 @@
             </div>
 
             <!-- Price & Action -->
-            <div class="pt-space-sm border-t border-slate-100 flex items-center justify-between">
-              <div>
+            <div class="pt-space-sm border-t border-slate-100 flex items-center justify-between gap-2">
+              <div class="min-w-0">
                 <span class="text-base font-bold text-primary">{{ formatRupiah(kos.harga) }}</span>
                 <span class="text-xs text-on-surface-variant font-normal"> / bln</span>
               </div>
-              <router-link
-                :to="`/kos/${kos.id}`"
-                class="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container text-primary text-xs font-semibold rounded-lg transition"
-              >
-                Lihat Detail
-              </router-link>
+              <div class="flex items-center gap-1.5 shrink-0">
+                <button
+                  @click.stop.prevent="handleWhatsAppInquiry(kos)"
+                  class="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 hover:text-emerald-800 text-xs font-semibold rounded-lg transition-colors flex items-center gap-1 border border-emerald-200/80 cursor-pointer active:scale-95 shadow-2xs"
+                  title="Hubungi Pemilik via WhatsApp"
+                  type="button"
+                >
+                  <PhWhatsappLogo :size="15" weight="fill" class="shrink-0 text-emerald-600" />
+                  <span>WA</span>
+                </button>
+                <router-link
+                  :to="`/kos/${kos.id}`"
+                  class="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container text-primary text-xs font-semibold rounded-lg transition-colors"
+                >
+                  Lihat Detail
+                </router-link>
+              </div>
             </div>
           </div>
         </article>
       </div>
 
       <!-- Empty State -->
-      <div v-else class="text-center py-12 bg-white rounded-xl border border-slate-100">
+      <div v-else class="text-center py-12 bg-white rounded-2xl border border-slate-100">
         <p class="text-sm text-on-surface-variant">Belum ada properti kos yang tersedia.</p>
+      </div>
+    </section>
+
+    <!-- Campus & City Quick Shortcuts -->
+    <section class="max-w-7xl mx-auto w-full px-margin pb-space-xl">
+      <div class="bg-surface-container-low/60 rounded-2xl p-space-lg sm:p-space-xl border border-slate-200/70">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-space-md">
+          <div>
+            <h2 class="text-lg sm:text-xl font-bold text-on-surface tracking-tight">Cari Kos Dekat Kampus Populer</h2>
+            <p class="text-xs text-on-surface-variant mt-0.5">Temukan hunian kos terdekat dengan kampus impian Anda di berbagai kota</p>
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="campus in popularCampuses"
+            :key="campus.name"
+            @click="searchByCampus(campus.query)"
+            type="button"
+            class="px-3.5 py-2 rounded-xl bg-white hover:bg-primary hover:text-white border border-slate-200/90 text-slate-700 text-xs font-semibold shadow-2xs transition-all flex items-center gap-1.5 cursor-pointer active:scale-95 group"
+          >
+            <PhGraduationCap :size="16" weight="bold" class="text-primary group-hover:text-white transition-colors" />
+            <span>{{ campus.name }}</span>
+            <span class="text-[10px] text-slate-400 group-hover:text-white/80 font-normal">({{ campus.city }})</span>
+          </button>
+        </div>
       </div>
     </section>
 
@@ -399,7 +638,8 @@
             <button
               @click="closeMobileSearchModal"
               type="button"
-              class="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
+              class="w-10 h-10 min-w-[40px] rounded-full flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-200/70 transition cursor-pointer active:scale-95"
+              aria-label="Tutup pencarian"
               title="Tutup"
             >
               <PhX :size="18" weight="bold" />
@@ -460,15 +700,18 @@
                   class="py-2.5 px-3 rounded-xl text-xs font-semibold text-left transition border cursor-pointer flex items-center justify-between"
                   :class="selectedPriceRange === pOpt.val ? 'bg-primary text-white border-primary shadow-xs' : 'bg-slate-50 text-slate-700 border-slate-200/80 hover:bg-slate-100'"
                 >
-                  <span>{{ pOpt.label }}</span>
-                  <span v-if="selectedPriceRange === pOpt.val" class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>
+                  <div class="min-w-0">
+                    <p class="truncate leading-tight">{{ pOpt.label }}</p>
+                    <p class="text-[10px] opacity-75 font-normal truncate">{{ pOpt.desc }}</p>
+                  </div>
+                  <span v-if="selectedPriceRange === pOpt.val" class="w-2 h-2 rounded-full bg-amber-400 shrink-0 ml-1"></span>
                 </button>
               </div>
             </div>
 
             <!-- 4. Pencarian Populer (1 Baris Scrollable) -->
             <div class="space-y-1.5 pt-1">
-              <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider">Pilihan Cepat Populer</label>
+              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">Pilihan Cepat Populer</label>
               <div class="flex items-center gap-1.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-nowrap pb-1">
                 <button
                   v-for="(tag, tIdx) in quickTags"
@@ -496,7 +739,7 @@
             <button
               @click="handleMobileSearchSubmit"
               type="button"
-              class="flex-1 py-3 px-5 rounded-xl bg-gradient-to-r from-primary to-[#095296] text-white text-sm font-bold shadow-md hover:shadow-lg active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
+              class="flex-1 py-3 px-5 rounded-xl bg-primary hover:bg-[#083569] text-white text-sm font-bold shadow-md hover:shadow-lg active:scale-95 transition flex items-center justify-center gap-2 cursor-pointer"
             >
               <PhMagnifyingGlass :size="18" weight="bold" />
               <span>Tampilkan Kos</span>
@@ -516,6 +759,7 @@ import { useFavoritesStore } from '../stores/favorites'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
 import GenderBadge from '../components/GenderBadge.vue'
+import { openWhatsAppChat, buildInquiryTemplate } from '../utils/whatsapp'
 import {
   PhMagnifyingGlass,
   PhBed,
@@ -527,12 +771,17 @@ import {
   PhHeart,
   PhStar,
   PhCheckCircle,
+  PhCheck,
+  PhTrendUp,
   PhCaretDown,
   PhCaretLeft,
   PhCaretRight,
   PhXCircle,
   PhSlidersHorizontal,
-  PhX
+  PhX,
+  PhPause,
+  PhPlay,
+  PhGraduationCap
 } from '@phosphor-icons/vue'
 
 const router = useRouter()
@@ -547,6 +796,59 @@ const selectedPriceRange = ref('')
 const kosList = ref([])
 const loading = ref(false)
 
+// Desktop Dropdowns & Popovers
+const searchBarContainerRef = ref(null)
+const locationInputRef = ref(null)
+const activeDropdown = ref(null) // 'location' | 'jenis' | 'price' | null
+
+const popularCities = ['Yogyakarta', 'Jakarta', 'Bandung', 'Surabaya', 'Malang', 'Semarang']
+
+const toggleDropdown = (name) => {
+  if (activeDropdown.value === name) {
+    activeDropdown.value = null
+  } else {
+    activeDropdown.value = name
+  }
+}
+
+const selectJenis = (val) => {
+  selectedJenis.value = val
+  activeDropdown.value = null
+}
+
+const selectPrice = (val) => {
+  selectedPriceRange.value = val
+  activeDropdown.value = null
+}
+
+const selectCity = (city) => {
+  searchQuery.value = city
+  activeDropdown.value = null
+}
+
+const focusLocationInput = () => {
+  activeDropdown.value = 'location'
+  locationInputRef.value?.focus()
+}
+
+const getJenisLabel = (val) => {
+  if (!val) return 'Semua Tipe'
+  const found = jenisOptions.find((o) => o.val === val)
+  return found ? (found.val ? `Kos ${found.label}` : 'Semua Tipe') : 'Semua Tipe'
+}
+
+const getPriceLabel = (val) => {
+  if (!val) return 'Semua Harga'
+  const found = priceOptions.find((o) => o.val === val)
+  return found ? found.label : 'Semua Harga'
+}
+
+const handleClickOutside = (e) => {
+  if (searchBarContainerRef.value && !searchBarContainerRef.value.contains(e.target)) {
+    activeDropdown.value = null
+  }
+}
+
 // Mobile Search Modal State
 const isMobileSearchOpen = ref(false)
 
@@ -559,17 +861,18 @@ const closeMobileSearchModal = () => {
 }
 
 const jenisOptions = [
-  { label: 'Semua', val: '' },
-  { label: 'Putra', val: 'putra' },
-  { label: 'Putri', val: 'putri' },
-  { label: 'Campur', val: 'campur' }
+  { label: 'Semua', val: '', desc: 'Semua tipe hunian' },
+  { label: 'Putra', val: 'putra', desc: 'Khusus pria' },
+  { label: 'Putri', val: 'putri', desc: 'Khusus wanita' },
+  { label: 'Campur', val: 'campur', desc: 'Pria & wanita' }
 ]
 
 const priceOptions = [
-  { label: 'Semua Harga', val: '' },
-  { label: '< Rp 500rb', val: 'under500' },
-  { label: 'Rp 500rb - 1jt', val: '500-1000' },
-  { label: '> Rp 1jt', val: 'above1000' }
+  { label: 'Semua Harga', val: '', desc: 'Tanpa batas budget' },
+  { label: '< Rp 1 Juta', val: 'under1000', desc: 'Hemat & ekonomis' },
+  { label: 'Rp 1 - 2 Juta', val: '1000-2000', desc: 'Standar paling populer' },
+  { label: 'Rp 2 - 3.5 Juta', val: '2000-3500', desc: 'Kamar mandi dalam & AC' },
+  { label: '> Rp 3.5 Juta', val: 'above3500', desc: 'Eksklusif & premium' }
 ]
 
 const activeSearchSummary = computed(() => {
@@ -579,9 +882,10 @@ const activeSearchSummary = computed(() => {
     const formatted = selectedJenis.value.charAt(0).toUpperCase() + selectedJenis.value.slice(1)
     parts.push(`Kos ${formatted}`)
   }
-  if (selectedPriceRange.value === 'under500') parts.push('< Rp 500rb')
-  else if (selectedPriceRange.value === '500-1000') parts.push('Rp 500rb - 1jt')
-  else if (selectedPriceRange.value === 'above1000') parts.push('> Rp 1jt')
+  if (selectedPriceRange.value === 'under1000') parts.push('< Rp 1jt')
+  else if (selectedPriceRange.value === '1000-2000') parts.push('Rp 1 - 2jt')
+  else if (selectedPriceRange.value === '2000-3500') parts.push('Rp 2 - 3.5jt')
+  else if (selectedPriceRange.value === 'above3500') parts.push('> Rp 3.5jt')
 
   if (parts.length > 0) {
     return {
@@ -610,8 +914,25 @@ const quickTags = [
   { label: 'Bandung', type: 'city', val: 'Bandung' },
   { label: 'Kos Putri', type: 'jenis', val: 'putri' },
   { label: 'Kos Putra', type: 'jenis', val: 'putra' },
-  { label: '< Rp 1 Juta', type: 'price', val: '500-1000' }
+  { label: '< Rp 1 Juta', type: 'price', val: 'under1000' }
 ]
+
+// Popular Campus Directory
+const popularCampuses = [
+  { name: 'UGM', city: 'Yogyakarta', query: 'UGM' },
+  { name: 'UI', city: 'Depok', query: 'UI' },
+  { name: 'ITB', city: 'Bandung', query: 'ITB' },
+  { name: 'UNDIP', city: 'Semarang', query: 'UNDIP' },
+  { name: 'UNAIR', city: 'Surabaya', query: 'UNAIR' },
+  { name: 'Univ. Brawijaya', city: 'Malang', query: 'Brawijaya' },
+  { name: 'UNS', city: 'Surakarta', query: 'UNS' },
+  { name: 'UNY', city: 'Yogyakarta', query: 'UNY' }
+]
+
+const searchByCampus = (query) => {
+  searchQuery.value = query
+  handleSearch()
+}
 
 const isTagActive = (tag) => {
   if (tag.type === 'city') return searchQuery.value.trim().toLowerCase() === tag.val.toLowerCase()
@@ -709,6 +1030,34 @@ const prevSlide = () => {
   currentSlideIndex.value = (currentSlideIndex.value - 1 + activeBanners.value.length) % activeBanners.value.length
 }
 
+const isAutoPlayPaused = ref(false)
+
+const toggleAutoPlay = () => {
+  isAutoPlayPaused.value = !isAutoPlayPaused.value
+}
+
+let touchStartX = 0
+let touchEndX = 0
+
+const onTouchStart = (e) => {
+  isHovered.value = true
+  if (e.changedTouches && e.changedTouches[0]) {
+    touchStartX = e.changedTouches[0].screenX
+  }
+}
+
+const onTouchEnd = (e) => {
+  isHovered.value = false
+  if (e.changedTouches && e.changedTouches[0]) {
+    touchEndX = e.changedTouches[0].screenX
+    if (touchStartX - touchEndX > 50) {
+      nextSlide()
+    } else if (touchEndX - touchStartX > 50) {
+      prevSlide()
+    }
+  }
+}
+
 const goToSlide = (idx) => {
   currentSlideIndex.value = idx
   startSlider()
@@ -717,10 +1066,16 @@ const goToSlide = (idx) => {
 const startSlider = () => {
   stopSlider()
   sliderTimer = setInterval(() => {
-    if (!isHovered.value && activeBanners.value.length > 1) {
+    if (
+      !isHovered.value &&
+      !isAutoPlayPaused.value &&
+      activeDropdown.value === null &&
+      !isMobileSearchOpen.value &&
+      activeBanners.value.length > 1
+    ) {
       nextSlide()
     }
-  }, 5000)
+  }, 6000)
 }
 
 const stopSlider = () => {
@@ -746,6 +1101,25 @@ const fetchHeroBanners = async () => {
   } catch (err) {
     // Graceful fallback to defaultSlides
   }
+}
+
+const handleWhatsAppInquiry = (kos) => {
+  const phone = kos.pemilik?.telepon || kos.pemilik?.no_hp
+  const ownerName = kos.pemilik?.nama || 'Pemilik Kos'
+  const kosUrl = `${window.location.origin}/kos/${kos.id}`
+  const message = buildInquiryTemplate({
+    ownerName,
+    kosName: kos.nama || 'Kos',
+    kosUrl,
+  })
+
+  if (!phone) {
+    ui.info(`Nomor WhatsApp pemilik ${kos.nama} belum tersedia. Silakan periksa halaman detail properti.`)
+    router.push(`/kos/${kos.id}`)
+    return
+  }
+
+  openWhatsAppChat(phone, message)
 }
 
 const handleToggleFavorite = (kos) => {
@@ -780,17 +1154,21 @@ const formatRupiah = (val) => {
 }
 
 const handleSearch = () => {
+  activeDropdown.value = null
   const query = {}
   if (searchQuery.value) query.q = searchQuery.value
   if (selectedJenis.value) query.jenis = selectedJenis.value
 
-  if (selectedPriceRange.value === 'under500') {
-    query.harga_max = 500000
-  } else if (selectedPriceRange.value === '500-1000') {
-    query.harga_min = 500000
+  if (selectedPriceRange.value === 'under1000') {
     query.harga_max = 1000000
-  } else if (selectedPriceRange.value === 'above1000') {
+  } else if (selectedPriceRange.value === '1000-2000') {
     query.harga_min = 1000000
+    query.harga_max = 2000000
+  } else if (selectedPriceRange.value === '2000-3500') {
+    query.harga_min = 2000000
+    query.harga_max = 3500000
+  } else if (selectedPriceRange.value === 'above3500') {
+    query.harga_min = 3500000
   }
 
   router.push({ path: '/kos', query })
@@ -812,9 +1190,11 @@ onMounted(() => {
   fetchPopularKos()
   fetchHeroBanners()
   startSlider()
+  window.addEventListener('click', handleClickOutside)
 })
 
 onUnmounted(() => {
   stopSlider()
+  window.removeEventListener('click', handleClickOutside)
 })
 </script>
