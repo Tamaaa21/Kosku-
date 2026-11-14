@@ -11,6 +11,7 @@ use App\Services\GeocodingService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
 
 class KosController extends Controller
@@ -79,7 +80,58 @@ class KosController extends Controller
             $query->where('pemilik_id', $request->input('pemilik_id'));
         }
 
-        // Pengurutan (Sorting)
+        $perPage = min(max((int) $request->input('per_page', 12), 1), 100);
+
+        // Jika terdapat parameter koordinat lokasi pengguna (latitude & longitude)
+        if ($request->filled('latitude') && $request->filled('longitude')) {
+            $userLat = (float) $request->input('latitude');
+            $userLon = (float) $request->input('longitude');
+            $radius = $request->filled('radius') ? (float) $request->input('radius') : null;
+
+            $allResults = $query->get()->map(function (Kos $kos) use ($userLat, $userLon) {
+                if ($kos->latitude !== null && $kos->longitude !== null) {
+                    $kos->jarak_km = self::haversineDistance($userLat, $userLon, (float) $kos->latitude, (float) $kos->longitude);
+                } else {
+                    $kos->jarak_km = null;
+                }
+
+                return $kos;
+            });
+
+            // Filter berdasarkan batas radius kilometer jika ditentukan
+            if ($radius !== null) {
+                $allResults = $allResults->filter(function (Kos $kos) use ($radius) {
+                    return $kos->jarak_km !== null && $kos->jarak_km <= $radius;
+                });
+            }
+
+            // Pengurutan khusus jarak jika diminta atau secara default saat filter lokasi aktif
+            if ($request->input('sort') === 'terdekat' || ! $request->filled('sort')) {
+                $allResults = $allResults->sortBy(function (Kos $kos) {
+                    return $kos->jarak_km ?? 999999;
+                })->values();
+            } elseif ($request->input('sort') === 'harga_asc') {
+                $allResults = $allResults->sortBy('harga')->values();
+            } elseif ($request->input('sort') === 'harga_desc') {
+                $allResults = $allResults->sortByDesc('harga')->values();
+            }
+
+            $page = max((int) $request->input('page', 1), 1);
+            $total = $allResults->count();
+            $items = $allResults->slice(($page - 1) * $perPage, $perPage)->values();
+
+            $paginated = new LengthAwarePaginator(
+                $items,
+                $total,
+                $perPage,
+                $page,
+                ['path' => $request->url(), 'query' => $request->query()]
+            );
+
+            return KosResource::collection($paginated);
+        }
+
+        // Pengurutan standar berbasis database query
         match ($request->input('sort')) {
             'harga_asc' => $query->orderBy('harga', 'asc'),
             'harga_desc' => $query->orderBy('harga', 'desc'),
@@ -88,10 +140,25 @@ class KosController extends Controller
             default => $request->filled('pemilik_id') ? $query->orderBy('id', 'asc') : $query->latest(),
         };
 
-        $perPage = min(max((int) $request->input('per_page', 12), 1), 100);
         $kosList = $query->paginate($perPage);
 
         return KosResource::collection($kosList);
+    }
+
+    /**
+     * Hitung jarak dua titik koordinat permukaan bumi menggunakan formula Haversine (km).
+     */
+    public static function haversineDistance(float $lat1, float $lon1, float $lat2, float $lon2): float
+    {
+        $earthRadius = 6371; // km
+        $dLat = deg2rad($lat2 - $lat1);
+        $dLon = deg2rad($lon2 - $lon1);
+        $a = sin($dLat / 2) * sin($dLat / 2) +
+            cos(deg2rad($lat1)) * cos(deg2rad($lat2)) *
+            sin($dLon / 2) * sin($dLon / 2);
+        $c = 2 * atan2(sqrt($a), sqrt(1 - $a));
+
+        return round($earthRadius * $c, 2);
     }
 
     /**
