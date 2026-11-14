@@ -19,12 +19,19 @@ import ManageKosView from '../views/ManageKosView.vue'
 import ManageRoomsView from '../views/ManageRoomsView.vue'
 import BookingRequestsView from '../views/BookingRequestsView.vue'
 import PropertyVerificationView from '../views/PropertyVerificationView.vue'
+import AboutView from '../views/AboutView.vue'
 
 const routes = [
   {
     path: '/',
     name: 'home',
     component: HomeView,
+  },
+  {
+    path: '/about',
+    alias: '/tentang',
+    name: 'about',
+    component: AboutView,
   },
   {
     path: '/kos',
