@@ -84,11 +84,13 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::delete('/kamar/{id}', [RoomController::class, 'destroy'])->middleware(['role:pemilik,admin', 'verified_owner']);
 
         // Bookings Flow
+        Route::get('/bookings/export', [BookingController::class, 'exportCsv'])->name('bookings.export');
         Route::post('/bookings', [BookingController::class, 'store'])->middleware('role:pencari')->name('bookings.store');
         Route::get('/bookings', [BookingController::class, 'index'])->name('bookings.index');
         Route::get('/bookings/{id}', [BookingController::class, 'show'])->name('bookings.show');
         Route::patch('/bookings/{id}/status', [BookingController::class, 'updateStatus'])->middleware('verified_owner')->name('bookings.update-status');
         // Legacy aliases
+        Route::get('/pemesanan/export', [BookingController::class, 'exportCsv']);
         Route::post('/pemesanan', [BookingController::class, 'store'])->middleware('role:pencari');
         Route::get('/pemesanan', [BookingController::class, 'index']);
         Route::get('/pemesanan/{id}', [BookingController::class, 'show']);
