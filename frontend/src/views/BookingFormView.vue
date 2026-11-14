@@ -192,13 +192,13 @@
                       type="number"
                       v-model.number="form.durasi_jumlah"
                       min="1"
-                      max="365"
+                      :max="maxDuration"
                       required
                       class="w-full text-center text-xs border-y border-slate-200 p-2 bg-white font-bold"
                     />
                     <button
                       type="button"
-                      @click="form.durasi_jumlah = form.durasi_jumlah + 1"
+                      @click="form.durasi_jumlah = Math.min(maxDuration, form.durasi_jumlah + 1)"
                       class="px-3 py-2 bg-slate-200 hover:bg-slate-300 rounded-r-lg text-xs font-bold text-slate-700 transition"
                     >
                       +
@@ -282,6 +282,12 @@ const agreeTerms = ref(true)
 
 const todayDate = computed(() => {
   return new Date().toISOString().split('T')[0]
+})
+
+const maxDuration = computed(() => {
+  if (form.durasi_tipe === 'harian') return 30
+  if (form.durasi_tipe === 'mingguan') return 52
+  return 36
 })
 
 const form = reactive({
