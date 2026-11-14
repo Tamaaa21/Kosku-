@@ -74,9 +74,23 @@
           ></span>
         </router-link>
 
-     
+        <router-link
+          to="/about"
+          class="relative py-1 text-sm font-medium transition-colors"
+          :class="
+            isTransparent
+              ? ($route.path === '/about' ? 'text-white font-bold' : 'text-white/85 hover:text-white')
+              : ($route.path === '/about' ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
+          "
+        >
+          <span>Tentang Kami</span>
+          <span
+            v-if="$route.path === '/about'"
+            class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
+            :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
+          ></span>
+        </router-link>
 
-    
         <router-link
           v-if="auth.isAuthenticated"
           to="/pesanan"
@@ -308,13 +322,14 @@
       >
         Peta Lokasi
       </router-link>
-      <a
-        href="#tentang"
-        @click="mobileMenuOpen = false; scrollToSection('tentang')"
-        class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition cursor-pointer"
+      <router-link
+        to="/about"
+        @click="mobileMenuOpen = false"
+        class="px-3 py-2 rounded-lg text-sm font-medium transition"
+        :class="$route.path === '/about' ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
       >
-        Tentang
-      </a>
+        Tentang Kami
+      </router-link>
       <a
         href="#bantuan"
         @click="mobileMenuOpen = false; scrollToSection('bantuan')"
