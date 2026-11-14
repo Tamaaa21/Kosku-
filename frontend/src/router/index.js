@@ -20,6 +20,8 @@ import ManageRoomsView from '../views/ManageRoomsView.vue'
 import BookingRequestsView from '../views/BookingRequestsView.vue'
 import PropertyVerificationView from '../views/PropertyVerificationView.vue'
 import AboutView from '../views/AboutView.vue'
+import NotFoundView from '../views/NotFoundView.vue'
+import ForbiddenView from '../views/ForbiddenView.vue'
 
 const routes = [
   {
@@ -140,8 +142,14 @@ const routes = [
     meta: { requiresAuth: true, roles: ['admin'] },
   },
   {
+    path: '/403',
+    name: 'forbidden',
+    component: ForbiddenView,
+  },
+  {
     path: '/:pathMatch(.*)*',
-    redirect: '/',
+    name: 'not-found',
+    component: NotFoundView,
   },
 ]
 
@@ -168,8 +176,7 @@ router.beforeEach((to, from, next) => {
     }
 
     if (to.meta.roles && !to.meta.roles.includes(authStore.role)) {
-      alert('Akses ditolak untuk peran akun Anda.')
-      return next({ name: 'home' })
+      return next({ name: 'forbidden' })
     }
 
     if (to.meta.requiresVerified && authStore.isPemilik && !authStore.isVerified) {
