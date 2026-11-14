@@ -1,7 +1,7 @@
 # Kostara &mdash; Platform Pencarian & Sewa Kos Indonesia
 
 <p align="center">
-  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtAMGcNImL28Wkcksd1pB136MBTXtxAeUZZdLwny2E0TfcGGRkdrMA_JR6pVnktaHUu8Ffua13FdN3HdgZd29vhkeFDWM4WJtQJFMuZndi8o1HB2GXyn8ikhIgK45eAlZmqqiEVYkjMe7_m-Cvw0nxPY6cKLGKCrWp2Ch2dtBIlIqQb5pKjNVS1WaRhbnQPFyDftN7_uvVGXkv3Z_JUnsJpPxReDktVkZYw0eJ1YRW7caBLYvFdhslDw" alt="KosKu Banner" width="100%" style="border-radius: 12px; max-height: 380px; object-fit: cover;" />
+  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtAMGcNImL28Wkcksd1pB136MBTXtxAeUZZdLwny2E0TfcGGRkdrMA_JR6pVnktaHUu8Ffua13FdN3HdgZd29vhkeFDWM4WJtQJFMuZndi8o1HB2GXyn8ikhIgK45eAlZmqqiEVYkjMe7_m-Cvw0nxPY6cKLGKCrWp2Ch2dtBIlIqQb5pKjNVS1WaRhbnQPFyDftN7_uvVGXkv3Z_JUnsJpPxReDktVkZYw0eJ1YRW7caBLYvFdhslDw" alt="Kostara Banner" width="100%" style="border-radius: 12px; max-height: 380px; object-fit: cover;" />
 </p>
 
 <p align="center">
@@ -10,12 +10,12 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/Laravel-11-FF2D20?style=for-the-badge&logo=laravel&logoColor=white" alt="Laravel 11" />
-  <img src="https://img.shields.io/badge/PHP-8.3-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.3" />
+  <img src="https://img.shields.io/badge/PHP-8.4%20%7C%208.5-777BB4?style=for-the-badge&logo=php&logoColor=white" alt="PHP 8.4 / 8.5" />
   <img src="https://img.shields.io/badge/Vue.js-3-4FC08D?style=for-the-badge&logo=vuedotjs&logoColor=white" alt="Vue 3" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-3-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white" alt="Tailwind CSS 4" />
+  <img src="https://img.shields.io/badge/Vite-8-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite 8" />
   <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker Ready" />
-  <img src="https://img.shields.io/badge/Sanctum-Token_Auth-blue?style=for-the-badge" alt="Sanctum Auth" />
-  <img src="https://img.shields.io/badge/Tests-58_Passed-success?style=for-the-badge" alt="Tests" />
+  <img src="https://img.shields.io/badge/Tests-102_Passed-success?style=for-the-badge" alt="102 Tests Passed" />
 </p>
 
 ---
@@ -24,7 +24,7 @@
 
 **Kostara** (sebelumnya dikembangkan dengan nama *KosKu*) adalah aplikasi web modern yang menjembatani pencari hunian sewa (mahasiswa, pekerja, keluarga) dengan mitra pemilik kos di seluruh wilayah Indonesia. Dibangun dengan arsitektur decoupled **Laravel 11 REST API** pada sisi backend dan **Vue 3 SPA (Single Page Application)** pada sisi frontend.
 
-Sistem dirancang responsif, cepat, aman, dan mudah digunakan dengan integrasi komunikasi WhatsApp langsung serta panduan rute navigasi Google Maps.
+Sistem dirancang responsif, cepat, aman, dan mudah digunakan dengan integrasi geocoding OpenStreetMap Nominatim, pencegahan transaksi ganda (*pessimistic locking*), serta komunikasi langsung via WhatsApp.
 
 ---
 
@@ -32,33 +32,28 @@ Sistem dirancang responsif, cepat, aman, dan mudah digunakan dengan integrasi ko
 
 ### 1. 👥 Navigasi Berbasis Peran (*Role-Based Access Control*)
 Antarmuka beradaptasi secara otomatis sesuai hak akses pengguna:
-- **Pencari Kos & Publik**: Bilah navigasi atas (*top navbar*) dengan menu jelajah, katalog kos, peta interaktif, dan riwayat pesanan.
-- **Mitra Pemilik Kos**: Bilah samping (*responsive sidebar drawer*) khusus pengelola yang memuat ringkasan performa properti, manajemen kamar, dan daftar pemesanan masuk.
-- **Administrator**: Panel kontrol sistem untuk pengawasan seluruh transaksi dan data kos.
+- **Pencari Kos & Publik**: Bilah navigasi atas (*top navbar*) dengan menu jelajah, katalog kos, peta interaktif, halaman Tentang Kami (`/about`), dan riwayat pemesanan.
+- **Mitra Pemilik Kos**: Bilah samping (*responsive sidebar drawer*) khusus pengelola yang memuat ringkasan performa properti, verifikasi kepemilikan kos, manajemen kamar, dan daftar pemesanan masuk.
+- **Administrator**: Panel kontrol sistem untuk pengawasan seluruh transaksi, moderasi kos, manajemen pengguna, dan banner slider.
 
-### 2. 🔍 Pencarian & Peta Lokasi Nasional
+### 2. 🔍 Pencarian, Filter Radius Geografis & Peta Interaktif
 - **Jangkauan Seluruh Indonesia**: Eksplorasi kos di kota-kota besar (Jakarta, Yogyakarta, Bandung, Surabaya, Semarang, Bali, dll.).
-- **Filter Fleksibel**: Pencarian berdasarkan nama, alamat, jenis kos (Putri, Putra, Campur), rentang harga sewa bulanan, dan fasilitas.
-- **Peta Interaktif Leaflet**: Visualisasi sebaran kos berbasis OpenStreetMap dengan *pinpoint* akurat, *clustering*, dan *popup preview*.
+- **Filter Radius Jarak (Haversine)**: Parameter query `latitude`, `longitude`, dan `radius` untuk menyaring kos terdekat dari kampus atau lokasi pengguna dengan informasi jarak riil (`jarak_km`).
+- **Peta Interaktif Leaflet**: Visualisasi sebaran kos berbasis OpenStreetMap dengan pinpoint akurat dan preview popup.
+- **Geocoding Otomatis**: Integrasi Nominatim OpenStreetMap untuk konversi alamat ke koordinat GPS secara otomatis dengan fail-open fallback.
 
-### 3. 💬 Komunikasi WhatsApp Terintegrasi
-- **Tanya Pemilik via WhatsApp**: Tombol instan pada halaman detail kos dengan template pesan otomatis (*nama kos, tipe kamar, dan tautan halaman*).
-- **Hubungi Calon Penyewa**: Pemilik kos dapat langsung menyapa pemohon sewa melalui 1-klik tombol WhatsApp di daftar pesanan.
-- **Floating Customer Service (CS)**: Widget bantuan mengambang di pojok kanan bawah untuk layanan cepat seputar kendala akun, transaksi, dan panduan sewa.
+### 3. 🛡️ Proteksi Transaksi Pemesanan (Anti Double-Booking)
+- Mekanisme database transaction atomik (`DB::transaction`) dan *pessimistic locking* (`lockForUpdate`) pada saat pemesanan kamar untuk menjamin tidak ada kamar yang dipesan ganda secara bersamaan.
+- Validasi durasi sewa fleksibel (harian, mingguan, bulanan) dengan batas maksimum wajar dan pencegahan tanggal masa lalu.
 
-### 4. 🗺️ Navigasi GPS "Buka di Google Maps"
-- Tombol **"Buka di Google Maps"** pada tab lokasi detail kos dan popup marker peta interaktif.
-- Membuka aplikasi Google Maps bawaan pada ponsel dengan koordinat GPS presisi untuk panduan rute *turn-by-turn*.
+### 4. 📊 Ekspor Rekapitulasi Data (CSV Streaming)
+- Fitur ekspor riwayat pemesanan (`GET /api/v1/bookings/export`) untuk pemilik kos dan admin.
+- Format streaming CSV ber-UTF-8 BOM yang langsung terbaca rapi pada Microsoft Excel dan aplikasi spreadsheet offline.
 
-### 5. 🔔 Sistem Notifikasi Real-time
-- Dropdown notifikasi dinamis dengan indikator hitungan belum dibaca (*unread counter*).
-- Pembaruan status pemesanan untuk pencari (Menunggu, Disetujui, Ditolak).
-- Pemberitahuan reservasi masuk baru untuk mitra pemilik kos.
-
-### 6. 🏠 Manajemen Properti & Kamar (Pemilik)
-- Pengelolaan data kos lengkap: fasilitas, alamat, koordinat peta, dan deskripsi.
-- Pengelolaan unit kamar: penamaan, penetapan harga, dan status ketersediaan (*tersedia / terisi*).
-- Tindak lanjut pemesanan: konfirmasi persetujuan atau penolakan dengan sinkronisasi status otomatis.
+### 5. ⚡ Performa & Pengalaman Pengguna (UX)
+- **Route Lazy Loading**: Pembagian kode modular (*code splitting*) pada Vue Router yang menurunkan ukuran bundle awal dari 1.2 MB menjadi 237 kB.
+- **Halaman Error Terpadu**: Halaman Error 404 (Not Found) dan Error 403 (Forbidden) kustom yang ramah pengguna menggantikan browser pop-up.
+- **Halaman Tentang Kami (`/about`)**: Informasi profil platform, visi, misi, dan pilar keunggulan sistem.
 
 ---
 
@@ -66,260 +61,140 @@ Antarmuka beradaptasi secara otomatis sesuai hak akses pengguna:
 
 | Bagian | Teknologi | Keterangan |
 | :--- | :--- | :--- |
-| **Backend Framework** | Laravel 11.x | PHP 8.3 dengan arsitektur RESTful API & Form Requests |
+| **Backend Framework** | Laravel 11.35.0 | PHP 8.4 / 8.5 dengan arsitektur RESTful API & Form Requests |
 | **Authentication** | Laravel Sanctum | Otentikasi token berbasis Bearer Token yang aman |
-| **Database** | MariaDB / MySQL / SQLite | Didukung Eloquent ORM, Migrations, dan Seeders |
+| **Database** | MariaDB / MySQL / SQLite | Didukung Eloquent ORM, Migrations, dan Seeders 3NF |
 | **Frontend Framework** | Vue 3 (Composition API) | SPA reaktif dengan `<script setup>` |
-| **Build Tool** | Vite 5.x | Hot Module Replacement (HMR) & build produksi optimal |
-| **State Management** | Pinia | Manajemen sesi login, peran, dan notifikasi |
-| **Styling** | Tailwind CSS 3 | Desain sistem KosKu modern, konsisten, dan responsif |
-| **Peta Digital** | Leaflet.js | Visualisasi peta interaktif & OpenStreetMap Nominatim |
-| **Container & Deploy** | Docker & Compose | Multi-container: PHP 8.3-FPM, Nginx (SPA Reverse Proxy), MariaDB 11.4 |
-| **Code Formatter & Test** | Laravel Pint & PHPUnit | 58 Automated Feature Tests & standar PSR-12 |
+| **Build Tool** | Vite 8.x | Dynamic chunking, HMR, dan build produksi optimal |
+| **State Management** | Pinia | Manajemen sesi login, peran, dan status autentikasi |
+| **Styling & Ikon** | Tailwind CSS 4 & Phosphor Icons | Desain antarmuka modern, tipografi Satoshi, dan palet brand |
+| **Peta Digital** | Leaflet.js | Visualisasi peta interaktif & geocoding Nominatim |
+| **Container & Deploy** | Docker & Compose | Multi-container: PHP 8.4-FPM, Nginx, MariaDB |
+| **Automated Testing** | PHPUnit | **102 Automated Feature Tests** (520 Assertions) & Pint Style Formatter |
 
 ---
 
-## 📁 Struktur Direktori Utama
+## 👥 Tim Pengembang & Kontributor
 
-```
-backend-kos/
-├── app/
-│   ├── Http/
-│   │   ├── Controllers/Api/V1/    # Controller REST API (Auth, Kos, Kamar, Pemesanan, Fasilitas)
-│   │   ├── Requests/              # Validasi FormRequest (Auth, Kos, Kamar, Pemesanan)
-│   │   └── Resources/             # Eloquent API Resources (Kos, Kamar, Pengguna, dll.)
-│   ├── Models/                    # Model Eloquent (Pengguna, Kos, Kamar, Pemesanan, Fasilitas)
-│   └── Services/                  # Business services (GeocodingService, dll.)
-├── database/
-│   ├── factories/                 # Factory data uji otomatis
-│   ├── migrations/                # Skema tabel database
-│   └── seeders/                   # Data awal (Administrator, Pemilik, Pencari, Kos Melati)
-├── frontend/
-│   ├── src/
-│   │   ├── assets/                # CSS kustom & stylesheet Tailwind
-│   │   ├── components/            # Komponen UI (NavbarPencari, SidebarPemilik, FloatingCS, Maps, dll.)
-│   │   ├── router/                # Konfigurasi Vue Router & route guards
-│   │   ├── services/              # Axios HTTP client terkonfigurasi
-│   │   ├── stores/                # Pinia store (auth.js, notification.js)
-│   │   ├── utils/                 # Helper fungsi (whatsapp.js, maps, formatting)
-│   │   └── views/                 # Halaman view (Home, Katalog, Detail, Dashboard, Profil, Peta)
-│   └── package.json
-├── routes/
-│   └── api.php                    # Rute API v1 terproteksi Sanctum
-└── tests/
-    └── Feature/                   # Pengujian fungsional (Auth, RBAC, Kos, Booking, Geocoding)
-```
+| No | Nama | Username GitHub | Peran Utama |
+| :---: | :--- | :--- | :--- |
+| 1 | **Sigit Pratama** | [`Tamaaa21`](https://github.com/Tamaaa21) | Backend Architect & DevOps Specialist |
+| 2 | **Naufal Miftahul Arsyi** | [`Naufal-Arsyi`](https://github.com/Naufal-Arsyi) | Fullstack Lead & UI Architect (Ketua) |
+| 3 | **Nurul Salma Afifah** | [`nurulsalmaafifah-oss`](https://github.com/nurulsalmaafifah-oss) | API Designer & QA Specialist |
+| 4 | **Putri Areka Sandra** | [`arekaa333-ux`](https://github.com/arekaa333-ux) | Frontend & Data Analytics Specialist |
 
 ---
 
-## ⚙️ Panduan Instalasi & Menjalankan Proyek
+## 📦 Panduan Instalasi & Menjalankan Aplikasi
 
-### 🐳 Metode 1: Menggunakan Docker (Direkomendasikan untuk Deploy & Server)
+### Prasyarat Sistem
+- **PHP** >= 8.3 (direkomendasikan PHP 8.4) dengan ekstensi `pdo`, `mbstring`, `openssl`, `tokenizer`, `xml`, `ctype`, `json`, `curl`.
+- **Composer** >= 2.x
+- **Node.js** >= 18.x & **npm** >= 9.x
+- **Basis Data**: MariaDB / MySQL atau SQLite.
 
-Cara paling praktis menjalankan seluruh stack aplikasi (**Backend Laravel 11**, **Frontend Vue 3 SPA**, dan **Database MariaDB 11.4**) tanpa perlu menginstal PHP, Node.js, atau database di komputer lokal/server:
-
+### 1. Clone Repositori
 ```bash
-# 1. Masuk ke direktori repositori
-cd backend-kos
+git clone https://github.com/Tamaaa21/Kosku-.git
+cd Kosku-
+```
 
-# 2. Salin template konfigurasi Docker
-cp .env.docker.example .env
+### 2. Setup Backend (Laravel)
+```bash
+# Salin environment file
+cp .env.example .env
 
-# 3. Build image dan jalankan seluruh container di background
+# Pasang dependensi PHP
+composer install
+
+# Buat encryption key
+php artisan key:generate
+
+# Konfigurasi database di file .env, kemudian jalankan migrasi & seeder
+php artisan migrate --seed
+
+# Jalankan backend development server (port 8000)
+php artisan serve
+```
+
+### 3. Setup Frontend (Vue 3 SPA)
+```bash
+cd frontend
+
+# Pasang dependensi JavaScript
+npm install
+
+# Jalankan frontend development server dengan Vite (port 5173)
+npm run dev
+```
+
+Akses aplikasi pada peramban web di: `http://localhost:5173`
+
+### 4. Menjalankan via Docker & Docker Compose (Opsional)
+```bash
+# Jalankan seluruh service (PHP-FPM, Nginx, MariaDB)
 docker compose up -d --build
 
-# 4. Pantau log inisialisasi awal (migrasi database & seeder otomatis)
-docker compose logs -f app
+# Jalankan migrasi di dalam kontainer app
+docker compose exec app php artisan migrate --seed
 ```
 
-Setelah kontainer aktif, aplikasi langsung dapat diakses di:
-👉 **`http://localhost:8080`** (atau `http://<IP_SERVER>:8080`)
+---
 
-#### 💡 Perintah Operasional Docker:
+## 🧪 Menjalankan Automated Tests & Linting
+
 ```bash
-# Melihat status kontainer aktif
-docker compose ps
+# Menjalankan seluruh test suite PHPUnit (102 tests)
+php artisan test
 
-# Menjalankan perintah Artisan di dalam kontainer app
-docker compose exec app php artisan <perintah>
+# Format kode sesuai standar Laravel Pint
+vendor/bin/pint --dirty --format agent
 
-# Menjalankan migrasi database ulang & seeder secara manual
-docker compose exec app php artisan migrate --seed --force
-
-# Backup data MariaDB ke file SQL
-docker compose exec db mariadb-dump -u kosku -psecret_password_kosku kosku > backup.sql
-
-# Update kode terbaru dari repo
-git pull origin main && docker compose up -d --build
-
-# Menghentikan seluruh kontainer
-docker compose down
+# Build aset frontend produksi
+cd frontend && npm run build
 ```
 
 ---
 
-### 💻 Metode 2: Instalasi Manual / Lokal (Laragon, XAMPP, atau DDEV)
+## 📡 Ringkasan Spesifikasi API (`/api/v1`)
 
-Metode ini cocok untuk pengembangan harian di Windows/macOS/Linux menggunakan web server lokal seperti **Laragon** atau **XAMPP**.
+Dokumentasi lengkap kontrak OpenAPI 3.1.0 tersedia pada berkas [docs/openapi.yaml](docs/openapi.yaml).
 
-#### 1. Prasyarat Sistem
-- **PHP** >= 8.3
-- **Composer** >= 2.x
-- **Node.js** >= 18.x dan **npm**
-- **Laragon** (direkomendasikan di Windows) / **XAMPP** / **DDEV**
-
----
-
-#### 2. Pengaturan Backend (Laravel via Laragon / MySQL)
-
-1. **Jalankan Laragon & Buat Database:**
-   - Buka aplikasi Laragon, lalu klik **Start All**.
-   - Buka manajer database (klik tombol **Database** / HeidiSQL).
-   - Buat database baru dengan nama `kosku` (collation: `utf8mb4_unicode_ci`).
-
-2. **Salin & Sesuaikan File Lingkungan (`.env`):**
-   ```bash
-   cd kosku-
-   cp .env.example .env
-   ```
-   Pastikan pengaturan database di `.env` sudah sesuai (secara bawaan template `.env.example` sudah disesuaikan untuk Laragon):
-   ```env
-   DB_CONNECTION=mysql
-   DB_HOST=127.0.0.1
-   DB_PORT=3306
-   DB_DATABASE=kostara
-   DB_USERNAME=root
-   DB_PASSWORD=
-   ```
-
-3. **Pasang Dependensi, Migrasi Database, & Storage Link:**
-   ```bash
-   # 1. Pasang dependensi PHP
-   composer install
-
-   # 2. Generate Application Key
-   php artisan key:generate
-
-   # 3. Jalankan migrasi dan seeder database (mengisi data kos dummy & akun awal)
-   php artisan migrate --seed
-
-   # 4. Buat symlink storage (Wajib agar foto kos & gambar kamar bisa ditampilkan)
-   php artisan storage:link
-
-   # 5. Jalankan server Laravel backend
-   php artisan serve
-   ```
-   Server backend akan aktif di: 👉 **`http://127.0.0.1:8000`**
-
-> 💡 *Jika menggunakan **DDEV**:*
-> ```bash
-> ddev start
-> ddev artisan migrate --seed
-> ddev artisan storage:link
-> ```
-
----
-
-#### 3. Pengaturan Frontend (Vue 3)
-
-1. **Masuk ke direktori frontend & pasang dependensi:**
-   ```bash
-   cd frontend
-   npm install
-   ```
-
-2. **Konfigurasi Environment Frontend (Opsional):**
-   Salin template environment jika ingin mengubah konfigurasi target API:
-   ```bash
-   cp .env.example .env
-   ```
-
-3. **Jalankan Frontend Dev Server:**
-   ```bash
-   npm run dev
-   ```
-   Aplikasi frontend dapat diakses melalui peramban di: 👉 **`http://localhost:5173`**
-
----
-
-#### ⚠️ Catatan Sangat Penting: Penyesuaian `api.js` & Endpoint API Frontend
-
-Agar data kos, kamar, dan fitur login dapat muncul di frontend, aplikasi Vue harus terhubung dengan benar ke backend API:
-
-- Periksa konfigurasi di file `frontend/src/services/api.js` atau file `frontend/.env`.
-- Pastikan endpoint API menyertakan prefix **`/api/v1`**:
-  ```env
-  # Default jika menjalankan backend via 'php artisan serve':
-  VITE_API_URL=http://127.0.0.1:8000/api/v1
-
-  # Jika menggunakan domain Virtual Host otomatis Laragon:
-  # VITE_API_URL=http://backend-kos.test/api/v1
-
-  # Jika menggunakan DDEV:
-  # VITE_API_URL=https://backend-kos.ddev.site/api/v1
-  ```
-> ❗ **Penting:** Jika akhiran `/api/v1` tertinggal (misalnya hanya diatur ke `http://127.0.0.1:8000`), semua panggilan API seperti data kos (`/kos`), reservasi (`/bookings`), dan profil (`/me`) akan menghasilkan status **404 Not Found**, sehingga katalog kos dan data dashboard akan tampak kosong / tidak muncul.
-
----
-
-## 🔑 Kredensial Akun Bawaan (Hasil Seeder)
-
-Semua akun menggunakan kata sandi bawaan: **`password`**
-
-| Peran (*Role*) | Email | Kata Sandi | Keterangan |
+### Autentikasi & Profil
+| Method | Endpoint | Deskripsi | Akses |
 | :--- | :--- | :--- | :--- |
-| **Administrator** | `admin@kos.test` | `password` | Akses penuh panel kontrol & master fasilitas |
-| **Mitra Pemilik** | `pemilik@kos.test` | `password` | Pengelola Kos Melati Harmoni & kamar |
-| **Pencari Kos** | `pencari@kos.test` | `password` | Akun pengguna untuk reservasi hunian sewa |
+| `POST` | `/api/v1/auth/register` | Pendaftaran akun pencari/pemilik kos | Publik |
+| `POST` | `/api/v1/auth/login` | Masuk akun & penerbitan Bearer Token | Publik |
+| `POST` | `/api/v1/auth/logout` | Revoke token autentikasi | Auth |
+| `GET` | `/api/v1/auth/me` | Informasi profil pengguna aktif | Auth |
+| `PUT` | `/api/v1/me` | Pembaruan data profil dan nomor telepon | Auth |
+| `POST` | `/api/v1/me/avatar` | Unggah foto profil pengguna | Auth |
+| `PUT` | `/api/v1/me/password` | Ubah kata sandi akun | Auth |
 
----
+### Properti Kos & Unit Kamar
+| Method | Endpoint | Deskripsi | Akses |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/v1/kos` | Daftar kos (mendukung filter `q`, `lokasi`, `harga_min`, `harga_max`, `latitude`, `longitude`, `radius`, `sort`) | Publik |
+| `GET` | `/api/v1/kos/{id}` | Detail properti kos, fasilitas, kamar, dan ulasan | Publik |
+| `POST` | `/api/v1/kos` | Tambah kos baru dengan auto-geocoding alamat | Pemilik |
+| `PUT` | `/api/v1/kos/{id}` | Perbarui data kos | Pemilik / Admin |
+| `DELETE` | `/api/v1/kos/{id}` | Hapus properti kos | Pemilik / Admin |
+| `GET` | `/api/v1/kos/{id}/rooms` | Daftar kamar pada kos tertentu | Publik |
+| `POST` | `/api/v1/kos/{id}/rooms` | Tambah unit kamar kos | Pemilik |
+| `PUT` | `/api/v1/rooms/{id}` | Perbarui status dan harga kamar | Pemilik / Admin |
+| `DELETE` | `/api/v1/rooms/{id}` | Hapus unit kamar | Pemilik / Admin |
 
-## 📡 Daftar Endpoint REST API Utama (`/api/v1`)
-
-### Autentikasi & Akun
-- `POST /api/v1/register` &mdash; Registrasi pengguna baru (`pencari` atau `pemilik`)
-- `POST /api/v1/login` &mdash; Masuk dan mendapatkan Sanctum Bearer Token
-- `POST /api/v1/logout` &mdash; Cabut token sesi aktif
-- `GET /api/v1/me` &mdash; Informasi profil pengguna terotentikasi
-- `PUT /api/v1/me` &mdash; Pembaruan nama dan nomor WhatsApp/telepon
-
-### Properti Kos & Kamar
-- `GET /api/v1/kos` &mdash; Daftar kos dengan filter pencarian (`q`, `jenis`, `harga_min`, `harga_max`, `fasilitas`)
-- `GET /api/v1/kos/{id}` &mdash; Rincian detail kos, pemilik, kamar, dan fasilitas
-- `POST /api/v1/kos` &mdash; Tambah properti kos baru *(Khusus Pemilik)*
-- `PUT /api/v1/kos/{id}` &mdash; Perbarui data kos *(Pemilik & Admin)*
-- `DELETE /api/v1/kos/{id}` &mdash; Hapus data kos *(Pemilik & Admin)*
-- `POST /api/v1/kos/{id}/kamar` &mdash; Tambah unit kamar ke properti *(Khusus Pemilik)*
-- `PUT /api/v1/kamar/{id}` &mdash; Perbarui data kamar *(Pemilik & Admin)*
-- `DELETE /api/v1/kamar/{id}` &mdash; Hapus unit kamar *(Pemilik & Admin)*
-
-### Alur Pemesanan (*Booking*)
-- `POST /api/v1/pemesanan` &mdash; Ajukan pemesanan kamar baru *(Khusus Pencari)*
-- `GET /api/v1/pemesanan` &mdash; Riwayat pesanan (pencari) atau pesanan masuk (pemilik/admin)
-- `GET /api/v1/pemesanan/{id}` &mdash; Rincian reservasi pemesanan
-- `PATCH /api/v1/pemesanan/{id}/status` &mdash; Update status (`disetujui`, `ditolak`, `dibatalkan`)
-
-### Fasilitas & Administrasi
-- `GET /api/v1/fasilitas` &mdash; Master data fasilitas kos
-- `POST /api/v1/fasilitas` &mdash; Tambah fasilitas baru *(Khusus Admin)*
-- `GET /api/v1/admin/pengguna` &mdash; Manajemen pengguna *(Khusus Admin)*
-
----
-
-## 🧪 Pengujian Otomatis (*Automated Testing*)
-
-Proyek ini dilengkapi dengan rangkaian pengujian fitur (*feature tests*) yang mencakup alur otentikasi, validasi hak akses per peran (RBAC), transaksi sewa, integritas database, geocoding, dan pencarian:
-
-```bash
-# Menjalankan seluruh pengujian (52 tests)
-php artisan test --compact
-
-# Atau melalui DDEV
-ddev artisan test --compact
-```
+### Alur Reservasi Pemesanan (*Bookings*)
+| Method | Endpoint | Deskripsi | Akses |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/api/v1/bookings` | Pengajuan reservasi kamar (transaksi atomik anti-bentrok) | Pencari |
+| `GET` | `/api/v1/bookings` | Daftar riwayat pemesanan pengguna/pemilik | Auth |
+| `GET` | `/api/v1/bookings/{id}` | Detail informasi pemesanan | Auth |
+| `PATCH` | `/api/v1/bookings/{id}/status` | Persetujuan/penolakan reservasi (`disetujui`, `ditolak`, `dibatalkan`) | Pemilik / Pencari |
+| `GET` | `/api/v1/bookings/export` | **Ekspor rekap riwayat pemesanan ke format CSV** | Pemilik / Admin |
 
 ---
 
 ## 📄 Lisensi
 
-Proyek ini dikembangkan di bawah lisensi terbuka [MIT License](LICENSE).
+Proyek Kostara dikembangkan untuk keperluan akademik dan kolaboratif. Bebas digunakan dan dimodifikasi sesuai ketentuan repositori.
