@@ -1,27 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 
-import HomeView from '../views/HomeView.vue'
-import KosListView from '../views/KosListView.vue'
-import KosDetailView from '../views/KosDetailView.vue'
-import FavoritesView from '../views/FavoritesView.vue'
-import LocationMapView from '../views/LocationMapView.vue'
-import BookingFormView from '../views/BookingFormView.vue'
-import UserProfileView from '../views/UserProfileView.vue'
-import LoginView from '../views/LoginView.vue'
-import RegisterView from '../views/RegisterView.vue'
-import ForgotPasswordView from '../views/ForgotPasswordView.vue'
-import ResetPasswordView from '../views/ResetPasswordView.vue'
-import TenantDashboard from '../views/TenantDashboard.vue'
-import AdminDashboard from '../views/AdminDashboard.vue'
-import OwnerDashboard from '../views/OwnerDashboard.vue'
-import ManageKosView from '../views/ManageKosView.vue'
-import ManageRoomsView from '../views/ManageRoomsView.vue'
-import BookingRequestsView from '../views/BookingRequestsView.vue'
-import PropertyVerificationView from '../views/PropertyVerificationView.vue'
-import AboutView from '../views/AboutView.vue'
-import NotFoundView from '../views/NotFoundView.vue'
-import ForbiddenView from '../views/ForbiddenView.vue'
+const HomeView = () => import('../views/HomeView.vue')
+const KosListView = () => import('../views/KosListView.vue')
+const KosDetailView = () => import('../views/KosDetailView.vue')
+const FavoritesView = () => import('../views/FavoritesView.vue')
+const LocationMapView = () => import('../views/LocationMapView.vue')
+const BookingFormView = () => import('../views/BookingFormView.vue')
+const UserProfileView = () => import('../views/UserProfileView.vue')
+const LoginView = () => import('../views/LoginView.vue')
+const RegisterView = () => import('../views/RegisterView.vue')
+const ForgotPasswordView = () => import('../views/ForgotPasswordView.vue')
+const ResetPasswordView = () => import('../views/ResetPasswordView.vue')
+const TenantDashboard = () => import('../views/TenantDashboard.vue')
+const AdminDashboard = () => import('../views/AdminDashboard.vue')
+const OwnerDashboard = () => import('../views/OwnerDashboard.vue')
+const ManageKosView = () => import('../views/ManageKosView.vue')
+const ManageRoomsView = () => import('../views/ManageRoomsView.vue')
+const BookingRequestsView = () => import('../views/BookingRequestsView.vue')
+const PropertyVerificationView = () => import('../views/PropertyVerificationView.vue')
+const AboutView = () => import('../views/AboutView.vue')
+const NotFoundView = () => import('../views/NotFoundView.vue')
+const ForbiddenView = () => import('../views/ForbiddenView.vue')
 
 const routes = [
   {
