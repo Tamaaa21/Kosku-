@@ -14,6 +14,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class BookingController extends Controller
 {
@@ -82,6 +83,88 @@ class BookingController extends Controller
         $pemesananList = $query->paginate($perPage);
 
         return BookingResource::collection($pemesananList);
+    }
+
+    /**
+     * Export rekapitulasi data riwayat pemesanan ke format file CSV streaming.
+     */
+    public function exportCsv(Request $request): StreamedResponse|JsonResponse
+    {
+        $user = $request->user();
+
+        if (! in_array($user->role, ['pemilik', 'admin'], true)) {
+            return response()->json([
+                'message' => 'Hanya mitra pemilik kos dan administrator yang dapat mengekspor rekap pemesanan.',
+            ], 403);
+        }
+
+        $query = Pemesanan::query()->with(['pengguna', 'kos', 'kamar'])->orderBy('id', 'asc');
+
+        if ($user->role === 'pemilik') {
+            $query->whereHas('kos', function ($q) use ($user) {
+                $q->where('pemilik_id', $user->id);
+            });
+        }
+
+        if ($request->filled('status') && $request->input('status') !== 'all') {
+            $query->where('status', $request->input('status'));
+        }
+
+        if ($request->filled('periode') && $request->input('periode') !== 'all') {
+            match ($request->input('periode')) {
+                'today' => $query->whereDate('created_at', Carbon::today()),
+                '7d' => $query->where('created_at', '>=', Carbon::today()->subDays(6)->startOfDay()),
+                '30d' => $query->where('created_at', '>=', Carbon::today()->subDays(29)->startOfDay()),
+                default => null,
+            };
+        }
+
+        $fileName = 'rekap-pemesanan-kostara-'.now()->format('Ymd-His').'.csv';
+
+        return response()->streamDownload(function () use ($query): void {
+            $handle = fopen('php://output', 'w');
+            // Write UTF-8 BOM for Microsoft Excel compatibility
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            fputcsv($handle, [
+                'ID Pemesanan',
+                'Nama Penyewa',
+                'Email Penyewa',
+                'Telepon Penyewa',
+                'Nama Properti Kos',
+                'Nama Unit Kamar',
+                'Tanggal Mulai (Check-in)',
+                'Durasi Sewa',
+                'Estimasi Check-out',
+                'Total Harga (Rp)',
+                'Status Reservasi',
+                'Waktu Pengajuan',
+            ]);
+
+            $query->chunk(100, function ($pemesananChunk) use ($handle): void {
+                foreach ($pemesananChunk as $p) {
+                    $durasi = ($p->durasi_jumlah ?? 1).' '.ucfirst($p->durasi_tipe ?? 'bulanan');
+                    fputcsv($handle, [
+                        $p->id,
+                        $p->pengguna?->nama ?? '-',
+                        $p->pengguna?->email ?? '-',
+                        $p->pengguna?->telepon ?? '-',
+                        $p->kos?->nama ?? '-',
+                        $p->kamar?->nama_kamar ?? '-',
+                        $p->tanggal_pemesanan,
+                        $durasi,
+                        $p->tanggal_selesai ?? '-',
+                        $p->total_harga,
+                        ucfirst($p->status),
+                        $p->created_at?->format('Y-m-d H:i:s'),
+                    ]);
+                }
+            });
+
+            fclose($handle);
+        }, $fileName, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+        ]);
     }
 
     /**
