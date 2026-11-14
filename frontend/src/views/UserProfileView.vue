@@ -99,7 +99,7 @@
 
             <!-- Role Badge Pill -->
             <div class="mt-3">
-              <span class="inline-block bg-[#0B63B6] text-white text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-wider shadow-2xs">
+              <span class="inline-block bg-primary text-white text-[10px] font-bold px-4 py-1 rounded-full uppercase tracking-wider shadow-2xs">
                 {{ auth.role?.toUpperCase() || 'ADMIN' }}
               </span>
             </div>
@@ -294,7 +294,7 @@
               <button
                 type="submit"
                 :disabled="saving"
-                class="inline-flex items-center justify-center gap-2 bg-[#0B63B6] hover:bg-primary-container text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
+                class="inline-flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer shrink-0"
               >
                 <PhCircleNotch v-if="saving" :size="16" class="animate-spin" />
                 <PhFloppyDisk v-else :size="16" weight="bold" />
@@ -450,7 +450,7 @@
               <button
                 type="submit"
                 :disabled="passwordLoading"
-                class="inline-flex items-center gap-2 bg-[#0B63B6] hover:bg-primary-container text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
+                class="inline-flex items-center gap-2 bg-primary hover:bg-primary-hover text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition shadow-xs active:scale-95 disabled:opacity-50 cursor-pointer"
               >
                 <PhCircleNotch v-if="passwordLoading" :size="16" class="animate-spin" />
                 <PhLock v-else :size="16" weight="bold" />

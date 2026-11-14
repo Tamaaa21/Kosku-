@@ -108,7 +108,12 @@
                             </span>
                         </li>
                     </ul>
-                    <ul class="flex gap-3 text-sm leading-normal">
+                    <ul class="flex flex-wrap gap-3 text-sm leading-normal">
+                        <li>
+                            <a href="{{ route('api.test') }}" class="inline-block bg-[#017E91] hover:bg-[#016877] text-white px-5 py-1.5 rounded-sm font-semibold text-sm leading-normal shadow-sm">
+                                Buka API Test Playground
+                            </a>
+                        </li>
                         <li>
                             <a href="https://cloud.laravel.com" target="_blank" class="inline-block dark:bg-[#eeeeec] dark:border-[#eeeeec] dark:text-[#1C1C1A] dark:hover:bg-white dark:hover:border-white hover:bg-black hover:border-black px-5 py-1.5 bg-[#1b1b18] rounded-sm border border-black text-white text-sm leading-normal">
                                 Deploy now

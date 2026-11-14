@@ -12,7 +12,7 @@
       <div class="flex items-center gap-3">
         <button
           @click="openAddModal"
-          class="h-10 px-5 rounded-lg bg-primary-container text-white text-xs font-semibold flex items-center gap-2 shadow-md hover:bg-primary transition active:scale-[0.98]"
+          class="h-10 px-5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold flex items-center gap-2 shadow-md transition active:scale-[0.98] cursor-pointer"
         >
           <PhPlus :size="18" weight="bold" />
           <span>Tambah Kos Baru</span>
@@ -207,9 +207,19 @@
               </td>
 
               <td class="py-4 px-space-md text-center">
-                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-[#DCFCE7] text-[#15803D]">
-                  <span class="w-1.5 h-1.5 rounded-full bg-[#15803D]"></span>
-                  {{ getAvailableKamarCount(kos) }} Tersedia
+                <span
+                  v-if="getAvailableKamarCount(kos) > 0"
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-2xs"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                  Aktif ({{ getAvailableKamarCount(kos) }} Tersedia)
+                </span>
+                <span
+                  v-else
+                  class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200"
+                >
+                  <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
+                  Penuh (0 Tersedia)
                 </span>
               </td>
 

@@ -1066,16 +1066,24 @@
                     :class="[
                       'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold border capitalize',
                       kos.jenis === 'putri' ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                      kos.jenis === 'putra' ? 'bg-sky-50 text-sky-700 border-sky-200' :
-                      'bg-indigo-50 text-indigo-700 border-indigo-200'
+                      kos.jenis === 'putra' ? 'bg-teal-50 text-[#017E91] border-teal-200' :
+                      'bg-amber-50 text-[#E68202] border-amber-200'
                     ]"
                   >
                     {{ kos.jenis }}
                   </span>
                 </td>
                 <td class="py-3.5 px-4 text-center">
-                  <span class="inline-flex items-center gap-1 text-[11px] font-bold text-slate-700 font-mono">
-                    {{ kos.kamar_tersedia_count ?? 0 }} / {{ kos.kamar_count || (kos.kamar || []).length }}
+                  <span
+                    :class="[
+                      'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border font-mono',
+                      (kos.kamar_tersedia_count ?? 0) > 0
+                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                        : 'bg-rose-50 text-rose-700 border-rose-200'
+                    ]"
+                  >
+                    <span :class="['w-1.5 h-1.5 rounded-full', (kos.kamar_tersedia_count ?? 0) > 0 ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500']"></span>
+                    {{ (kos.kamar_tersedia_count ?? 0) > 0 ? 'Aktif' : 'Penuh' }} ({{ kos.kamar_tersedia_count ?? 0 }}/{{ kos.kamar_count || (kos.kamar || []).length }})
                   </span>
                 </td>
                 <td class="py-3.5 px-4 text-right pr-6 space-x-1 whitespace-nowrap">

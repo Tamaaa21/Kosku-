@@ -44,17 +44,17 @@
           :class="[
             'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold capitalize shadow-xs',
             currentStatus === 'verified' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' :
-            currentStatus === 'pending' ? 'bg-blue-100 text-blue-800 border border-blue-200' :
+            currentStatus === 'pending' ? 'bg-amber-100 text-amber-800 border border-amber-200' :
             currentStatus === 'rejected' ? 'bg-rose-100 text-rose-800 border border-rose-200' :
-            'bg-amber-100 text-amber-800 border border-amber-200'
+            'bg-slate-100 text-slate-700 border border-slate-200'
           ]"
         >
           <span
             :class="[
               'w-2 h-2 rounded-full',
               currentStatus === 'verified' ? 'bg-emerald-500' :
-              currentStatus === 'pending' ? 'bg-blue-500 animate-pulse' :
-              currentStatus === 'rejected' ? 'bg-rose-500' : 'bg-amber-500'
+              currentStatus === 'pending' ? 'bg-amber-500 animate-pulse' :
+              currentStatus === 'rejected' ? 'bg-rose-500' : 'bg-slate-400'
             ]"
           ></span>
           <span>Status: {{ statusLabel }}</span>
@@ -81,7 +81,7 @@
         <div class="mt-4 flex flex-wrap items-center gap-3">
           <router-link
             to="/dashboard/pemilik/kos"
-            class="px-5 py-2.5 rounded-xl bg-primary hover:bg-blue-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5"
+            class="px-5 py-2.5 rounded-xl bg-primary hover:bg-primary-hover text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 cursor-pointer"
           >
             <span>Kelola Properti Kos</span>
             <PhArrowRight :size="14" weight="bold" />
@@ -99,15 +99,15 @@
     <!-- STATUS 2: SEDANG DITINJAU (PENDING) -->
     <div
       v-else-if="currentStatus === 'pending'"
-      class="bg-white rounded-3xl p-6 sm:p-8 border border-blue-100 shadow-xs relative overflow-hidden"
+      class="bg-white rounded-3xl p-6 sm:p-8 border border-amber-200/80 shadow-xs relative overflow-hidden"
     >
       <div class="flex items-start gap-4">
-        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 border border-blue-100">
+        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-200">
           <PhClock :size="26" weight="duotone" />
         </div>
         <div>
-          <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-700 inline-block mb-1">
-            Dalam Peninjauan Admin
+          <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-800 inline-block mb-1">
+            Dalam Peninjauan Admin (Menunggu)
           </span>
           <h2 class="text-base font-bold text-slate-900">Dokumen Verifikasi Anda Sedang Ditinjau Tim <span class="font-bold"><span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span></span></h2>
           <p class="text-xs text-slate-500 mt-1 leading-relaxed">

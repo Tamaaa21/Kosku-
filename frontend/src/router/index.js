@@ -22,6 +22,7 @@ const PropertyVerificationView = () => import('../views/PropertyVerificationView
 const AboutView = () => import('../views/AboutView.vue')
 const NotFoundView = () => import('../views/NotFoundView.vue')
 const ForbiddenView = () => import('../views/ForbiddenView.vue')
+const ApiTestView = () => import('../views/ApiTestView.vue')
 
 const routes = [
   {
@@ -34,6 +35,12 @@ const routes = [
     alias: '/tentang',
     name: 'about',
     component: AboutView,
+  },
+  {
+    path: '/api-test',
+    alias: ['/api-tester', '/api-docs', '/docs/api'],
+    name: 'api-test',
+    component: ApiTestView,
   },
   {
     path: '/kos',

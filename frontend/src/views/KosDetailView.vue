@@ -444,8 +444,17 @@
                 <h3 class="text-base font-bold text-on-surface">Pilihan Unit Kamar</h3>
                 <p class="text-xs text-on-surface-variant">Pilih nomor kamar untuk melanjutkan proses pemesanan.</p>
               </div>
-              <span class="text-xs font-semibold px-2.5 py-1 rounded-full bg-surface-container text-primary">
-                {{ availableRoomsCount }} Kamar Tersedia
+              <span
+                v-if="availableRoomsCount > 0"
+                class="text-xs font-bold px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200"
+              >
+                {{ availableRoomsCount }} Kamar Tersedia (Aktif)
+              </span>
+              <span
+                v-else
+                class="text-xs font-bold px-3 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200"
+              >
+                Kamar Penuh
               </span>
             </div>
 
@@ -606,7 +615,7 @@
               <button
                 @click="handleProceedBooking"
                 :disabled="!selectedKamar"
-                class="w-full bg-primary-container hover:bg-primary text-white py-3 rounded-lg text-sm font-bold shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2"
+                class="w-full bg-primary hover:bg-primary-hover text-white py-3.5 rounded-xl text-sm font-bold shadow-md transition disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer active:scale-98"
               >
                 <PhReceipt :size="20" weight="bold" />
                 <span>Ajukan Sewa Sekarang</span>

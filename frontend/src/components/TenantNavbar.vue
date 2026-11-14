@@ -74,22 +74,9 @@
           ></span>
         </router-link>
 
-        <router-link
-          to="/about"
-          class="relative py-1 text-sm font-medium transition-colors"
-          :class="
-            isTransparent
-              ? ($route.path === '/about' ? 'text-white font-bold' : 'text-white/85 hover:text-white')
-              : ($route.path === '/about' ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
-          "
-        >
-          <span>Tentang Kami</span>
-          <span
-            v-if="$route.path === '/about'"
-            class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
-            :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
-          ></span>
-        </router-link>
+
+
+       
 
         <router-link
           v-if="auth.isAuthenticated"
@@ -227,6 +214,18 @@
                       {{ favoritesStore.count }}
                     </span>
                   </router-link>
+
+                  <!-- 4. API Test Playground -->
+                  <router-link
+                    to="/api-test"
+                    @click="isProfileDropdownOpen = false"
+                    class="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-primary transition group"
+                  >
+                    <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                      <PhCode :size="16" weight="bold" />
+                    </div>
+                    <span>API Test Playground</span>
+                  </router-link>
                 </div>
 
                 <!-- Divider -->
@@ -255,7 +254,7 @@
           <!-- Masuk / Daftar Pill Button (Desktop Only) -->
           <router-link
             to="/login"
-            class="hidden md:inline-flex items-center justify-center px-5 py-2 rounded-full bg-[#0B63B6] hover:bg-primary-container text-white text-xs sm:text-sm font-semibold transition-all shadow-sm active:scale-95 whitespace-nowrap"
+            class="hidden md:inline-flex items-center justify-center px-5 py-2 rounded-full bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-semibold transition-all shadow-sm active:scale-95 whitespace-nowrap"
           >
             Masuk / Daftar
           </router-link>
@@ -330,6 +329,14 @@
       >
         Tentang Kami
       </router-link>
+      <router-link
+        to="/api-test"
+        @click="mobileMenuOpen = false"
+        class="px-3 py-2 rounded-lg text-sm font-medium transition"
+        :class="$route.path.startsWith('/api-test') ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
+      >
+        API Test Playground
+      </router-link>
       <a
         href="#bantuan"
         @click="mobileMenuOpen = false; scrollToSection('bantuan')"
@@ -385,14 +392,14 @@
           <router-link
             to="/login"
             @click="mobileMenuOpen = false"
-            class="flex-1 text-center px-4 py-2 text-sm font-semibold text-[#0B63B6] bg-slate-100 rounded-full"
+            class="flex-1 text-center px-4 py-2 text-sm font-semibold text-primary bg-slate-100 hover:bg-slate-200 rounded-full transition"
           >
             Masuk
           </router-link>
           <router-link
             to="/register"
             @click="mobileMenuOpen = false"
-            class="flex-1 text-center px-4 py-2 text-sm font-semibold text-white bg-[#0B63B6] rounded-full"
+            class="flex-1 text-center px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover rounded-full transition"
           >
             Daftar
           </router-link>
@@ -417,7 +424,8 @@ import {
   PhX,
   PhList,
   PhHeart,
-  PhMagnifyingGlass
+  PhMagnifyingGlass,
+  PhCode
 } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()

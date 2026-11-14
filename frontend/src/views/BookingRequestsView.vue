@@ -247,19 +247,21 @@
               <td class="py-4 px-4 text-center">
                 <span
                   :class="[
-                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold capitalize',
-                    booking.status === 'menunggu' ? 'bg-amber-50 text-amber-700' :
-                    booking.status === 'diterima' ? 'bg-emerald-50 text-emerald-700' :
-                    booking.status === 'ditolak' ? 'bg-rose-50 text-rose-700' :
-                    'bg-slate-100 text-slate-700'
+                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold capitalize border',
+                    booking.status === 'menunggu' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                    (booking.status === 'disetujui' || booking.status === 'diterima') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                    (booking.status === 'ditolak' || booking.status === 'dibatalkan') ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                    booking.status === 'selesai' ? 'bg-teal-50 text-teal-800 border-teal-200' :
+                    'bg-slate-100 text-slate-700 border-slate-200'
                   ]"
                 >
                   <span
                     :class="[
                       'w-1.5 h-1.5 rounded-full',
                       booking.status === 'menunggu' ? 'bg-amber-500' :
-                      booking.status === 'diterima' ? 'bg-emerald-500' :
-                      booking.status === 'ditolak' ? 'bg-rose-500' : 'bg-slate-400'
+                      (booking.status === 'disetujui' || booking.status === 'diterima') ? 'bg-emerald-500' :
+                      (booking.status === 'ditolak' || booking.status === 'dibatalkan') ? 'bg-rose-500' :
+                      booking.status === 'selesai' ? 'bg-teal-500' : 'bg-slate-400'
                     ]"
                   ></span>
                   {{ booking.status }}

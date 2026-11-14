@@ -45,25 +45,66 @@
 
         <!-- Main Hero Content -->
         <div class="relative z-10 max-w-7xl mx-auto w-full px-margin pt-24 sm:pt-28 lg:pt-30 pb-6 sm:pb-8 lg:pb-10 flex flex-col justify-between min-h-[520px] sm:min-h-[560px] lg:min-h-[620px]">
-          <!-- Top Left Content: Badge, H1, Subtitle -->
-          <div class="max-w-3xl flex flex-col items-start text-left">
-            <!-- Badge: Location Pill -->
-            <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/60 backdrop-blur-md border border-white/15 text-white/95 text-xs sm:text-sm font-medium mb-4 sm:mb-5 shadow-sm">
-              <PhMapPin :size="16" weight="fill" class="text-amber-400 select-none shrink-0" />
-              <span>Cari kos di seluruh Indonesia</span>
-            </div>
+          <!-- Top Left Content: Badge, H1, Subtitle (Dynamic from Admin Hero Banner) -->
+          <div class="max-w-3xl flex flex-col items-start text-left min-h-[200px] sm:min-h-[230px]">
+            <!-- Badge: Location Pill / Custom Badge Text from Admin -->
+            <transition
+              enter-active-class="transition duration-500 ease-out"
+              enter-from-class="opacity-0 -translate-y-2"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition duration-200 ease-in"
+              leave-from-class="opacity-100"
+              leave-to-class="opacity-0"
+              mode="out-in"
+            >
+              <div
+                :key="currentSlideIndex + '-badge'"
+                class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-900/60 backdrop-blur-md border border-white/15 text-white/95 text-xs sm:text-sm font-medium mb-4 sm:mb-5 shadow-sm"
+              >
+                <PhMapPin :size="16" weight="fill" class="text-amber-400 select-none shrink-0" />
+                <span>{{ currentBanner?.badge_text || 'Cari kos di seluruh Indonesia' }}</span>
+              </div>
+            </transition>
 
-            <!-- Headline: Kos Nyaman, Hidup Lebih Mudah (Stable Anchor) -->
-            <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15] drop-shadow-sm">
-              <span>Kos Nyaman,</span>
-              <br />
-              <span class="text-amber-400">Hidup Lebih Mudah</span>
-            </h1>
+            <!-- Headline: Dynamic with Admin Judul & Amber accent highlight -->
+            <transition
+              enter-active-class="transition duration-500 ease-out"
+              enter-from-class="opacity-0 -translate-y-2"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition duration-200 ease-in"
+              leave-from-class="opacity-100"
+              leave-to-class="opacity-0"
+              mode="out-in"
+            >
+              <h1
+                :key="currentSlideIndex + '-title'"
+                class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-white leading-[1.15] drop-shadow-sm"
+              >
+                <span>{{ formattedTitle.part1 }}</span>
+                <template v-if="formattedTitle.part2">
+                  <br />
+                  <span class="text-amber-400">{{ formattedTitle.part2 }}</span>
+                </template>
+              </h1>
+            </transition>
 
-            <!-- Subtitle (Stable Authoritative Copy) -->
-            <p class="text-sm sm:text-base lg:text-lg text-slate-200/95 max-w-xl mt-3 sm:mt-3.5 leading-relaxed font-normal drop-shadow-xs">
-              Temukan kos terbaik sesuai kebutuhanmu di seluruh Indonesia. Lokasi strategis, fasilitas lengkap, dan harga transparan langsung dari pemilik.
-            </p>
+            <!-- Subtitle (Dynamic Copy from Admin) -->
+            <transition
+              enter-active-class="transition duration-500 ease-out"
+              enter-from-class="opacity-0 -translate-y-1"
+              enter-to-class="opacity-100 translate-y-0"
+              leave-active-class="transition duration-200 ease-in"
+              leave-from-class="opacity-100"
+              leave-to-class="opacity-0"
+              mode="out-in"
+            >
+              <p
+                :key="currentSlideIndex + '-sub'"
+                class="text-sm sm:text-base lg:text-lg text-slate-200/95 max-w-xl mt-3 sm:mt-3.5 leading-relaxed font-normal drop-shadow-xs"
+              >
+                {{ currentBanner?.subjudul || 'Temukan kos terbaik sesuai kebutuhanmu di seluruh Indonesia. Lokasi strategis, fasilitas lengkap, dan harga transparan langsung dari pemilik.' }}
+              </p>
+            </transition>
 
             <!-- Slider Indicators & Accessible Controls -->
             <div v-if="activeBanners.length > 1" class="flex items-center gap-2.5 mt-4 sm:mt-5">
@@ -84,15 +125,7 @@
               </div>
 
               <!-- Pause / Play Toggle Button -->
-              <button
-                @click="toggleAutoPlay"
-                class="w-7 h-7 rounded-full bg-slate-900/50 hover:bg-slate-900/80 backdrop-blur-md text-white/80 hover:text-white flex items-center justify-center border border-white/10 transition-colors cursor-pointer"
-                :title="isAutoPlayPaused ? 'Lanjutkan rotasi otomatis latar' : 'Jeda rotasi otomatis latar'"
-                type="button"
-              >
-                <PhPause v-if="!isAutoPlayPaused" :size="12" weight="bold" />
-                <PhPlay v-else :size="12" weight="bold" />
-              </button>
+        
             </div>
           </div>
 
@@ -494,7 +527,7 @@
               :alt="kos.nama"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
             />
-            <div class="absolute top-3 left-3 flex items-center gap-1.5">
+            <div class="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
               <span
                 v-if="kos.rating_rata_rata && Number(kos.rating_rata_rata) >= 4.5"
                 class="bg-accent text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-xs tracking-wide"
@@ -502,6 +535,12 @@
                 Top Rating
               </span>
               <GenderBadge :jenis="kos.jenis" />
+              <span
+                class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500 text-white shadow-xs backdrop-blur-xs select-none"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                Aktif
+              </span>
             </div>
             <button
               @click.stop.prevent="handleToggleFavorite(kos)"
@@ -571,7 +610,7 @@
                 </button>
                 <router-link
                   :to="`/kos/${kos.id}`"
-                  class="px-3 py-1.5 bg-surface-container-low hover:bg-surface-container text-primary text-xs font-semibold rounded-lg transition-colors"
+                  class="px-3.5 py-1.5 bg-primary hover:bg-primary-hover text-white text-xs font-bold rounded-xl transition shadow-xs active:scale-95"
                 >
                   Lihat Detail
                 </router-link>
@@ -1012,6 +1051,14 @@ const formattedTitle = computed(() => {
     return {
       part1: parts[0].trim() + ',',
       part2: parts.slice(1).join(',').trim()
+    }
+  }
+  const words = full.split(' ')
+  if (words.length > 2) {
+    const midpoint = Math.ceil(words.length / 2)
+    return {
+      part1: words.slice(0, midpoint).join(' '),
+      part2: words.slice(midpoint).join(' ')
     }
   }
   return {

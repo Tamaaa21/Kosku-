@@ -13,7 +13,7 @@
         <button
           @click="openAddModal"
           :disabled="!selectedKosId"
-          class="h-10 px-5 rounded-lg bg-primary-container text-white text-xs font-semibold flex items-center gap-2 shadow-md hover:bg-primary transition active:scale-[0.98] disabled:opacity-50"
+          class="h-10 px-5 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold flex items-center gap-2 shadow-md transition active:scale-[0.98] disabled:opacity-50 cursor-pointer"
         >
           <PhPlus :size="18" weight="bold" />
           <span>Tambah Kamar</span>
@@ -273,16 +273,16 @@
                   @click="toggleKamarStatus(kamar)"
                   title="Klik untuk ubah status cepat"
                   :class="[
-                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold transition cursor-pointer hover:shadow-sm',
+                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold transition cursor-pointer hover:shadow-xs border',
                     kamar.status === 'tersedia'
-                      ? 'bg-[#DCFCE7] text-[#15803D]'
-                      : 'bg-slate-100 text-slate-700'
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-rose-50 text-rose-700 border-rose-200'
                   ]"
                 >
                   <span
                     :class="[
                       'w-2 h-2 rounded-full',
-                      kamar.status === 'tersedia' ? 'bg-[#15803D]' : 'bg-slate-500'
+                      kamar.status === 'tersedia' ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'
                     ]"
                   ></span>
                   <span class="capitalize">{{ kamar.status }}</span>

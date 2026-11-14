@@ -71,11 +71,11 @@ const iconComponent = computed(() => {
 const badgeStyles = computed(() => {
   switch (normalized.value) {
     case 'putri':
-      return 'bg-pink-50 text-pink-700 border border-pink-200/80'
+      return 'bg-rose-50 text-rose-700 border border-rose-200/80'
     case 'putra':
-      return 'bg-sky-50 text-sky-800 border border-sky-200/80'
+      return 'bg-teal-50 text-[#017E91] border border-teal-200/80 font-bold'
     case 'campur':
-      return 'bg-violet-50 text-violet-800 border border-violet-200/80'
+      return 'bg-amber-50 text-[#E68202] border border-amber-200/80 font-bold'
     default:
       return 'bg-surface-container text-on-surface-variant border border-slate-200'
   }
