@@ -1,5 +1,5 @@
 <template>
-  <div class="w-full max-w-5xl mx-auto px-margin py-space-xl pt-20">
+  <div class="w-full max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-space-xl pt-20">
     <!-- Nav Back Top -->
     <div class="mb-space-lg">
       <router-link
@@ -25,7 +25,7 @@
     <!-- Main Booking Card Wrap (2 Columns Split) -->
     <div v-else class="bg-surface-container-lowest rounded-xl shadow-md overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-0 border border-slate-100">
       <!-- Kolom Kiri: Ringkasan Kos (Sticky Summary Card) -->
-      <aside class="lg:col-span-5 bg-surface-container-low p-space-lg flex flex-col justify-between">
+      <aside class="lg:col-span-5 bg-surface-container-low p-4 sm:p-6 lg:p-space-lg flex flex-col justify-between">
         <div class="space-y-space-md">
           <!-- Property Hero Visual -->
           <div class="relative overflow-hidden rounded-lg shadow-sm group">
@@ -89,7 +89,7 @@
       </aside>
 
       <!-- Kolom Kanan: Formulir Pemesanan -->
-      <section class="lg:col-span-7 p-space-lg lg:p-space-xl flex flex-col justify-between bg-surface-container-lowest">
+      <section class="lg:col-span-7 p-4 sm:p-6 lg:p-space-xl flex flex-col justify-between bg-surface-container-lowest">
         <div>
           <!-- Header Form -->
           <div class="mb-space-lg">
@@ -239,7 +239,7 @@
             <button
               type="submit"
               :disabled="submitting || !agreeTerms"
-              class="w-full bg-primary-container hover:bg-primary text-white py-3 rounded-lg text-xs font-bold shadow-md transition disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
+              class="w-full bg-primary-container hover:bg-primary text-white py-3 rounded-xl text-xs sm:text-sm font-bold shadow-md transition disabled:opacity-50 mt-4 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] touch-manipulation"
             >
               <PhPaperPlaneTilt :size="16" weight="bold" />
               <span>{{ submitting ? 'Mengirim Pengajuan...' : 'Kirim Pengajuan Sewa Sekarang' }}</span>
