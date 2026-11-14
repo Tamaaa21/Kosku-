@@ -364,7 +364,7 @@ const submitBooking = async () => {
       durasi_tipe: form.durasi_tipe,
       durasi_jumlah: Number(form.durasi_jumlah),
     })
-    ui.success('Permohonan pemesanan kamar berhasil diajukan! Anda dapat memantau statusnya di halaman Riwayat Pesanan.')
+    ui.success('Permohonan pemesanan kamar berhasil diajukan! Anda dapat memantau statusnya di halaman Pesanan.')
     router.push('/pesanan')
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Gagal mengajukan pemesanan kamar.'

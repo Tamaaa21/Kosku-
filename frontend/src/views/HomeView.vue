@@ -2,26 +2,28 @@
   <div class="w-full">
     <!-- Hero Section with Background Slider & Stable Visual Anchor -->
     <section
-      class="relative w-full overflow-hidden group select-none"
+      class="relative z-20 w-full group select-none"
       @mouseenter="isHovered = true"
       @mouseleave="isHovered = false"
       @touchstart="onTouchStart"
       @touchend="onTouchEnd"
     >
       <div class="relative w-full min-h-[540px] sm:min-h-[580px] lg:min-h-[640px] flex items-center justify-center">
-        <!-- Background Slider Layer (Smooth Crossfade Transitions) -->
-        <div
-          v-for="(banner, idx) in activeBanners"
-          :key="banner.id || idx"
-          class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out transform will-change-transform"
-          :class="idx === currentSlideIndex ? 'opacity-100 z-0' : 'opacity-0 -z-10 pointer-events-none'"
-          :style="{ backgroundImage: `url('${banner.gambar_url}')` }"
-        ></div>
+        <!-- Background Slider Layer (Smooth Crossfade Transitions with isolated overflow-hidden) -->
+        <div class="absolute inset-0 overflow-hidden pointer-events-none">
+          <div
+            v-for="(banner, idx) in activeBanners"
+            :key="banner.id || idx"
+            class="absolute inset-0 bg-cover bg-center transition-opacity duration-1000 ease-in-out transform will-change-transform"
+            :class="idx === currentSlideIndex ? 'opacity-100 z-0' : 'opacity-0 -z-10'"
+            :style="{ backgroundImage: `url('${banner.gambar_url}')` }"
+          ></div>
 
-        <!-- High contrast scrim gradient overlay matching UI in image.png:
-             Left is dark for crisp text legibility, top has subtle vignette so transparent navbar is crystal clear -->
-        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/50 to-slate-950/20 z-0 pointer-events-none"></div>
-        <div class="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-transparent to-slate-950/50 z-0 pointer-events-none"></div>
+          <!-- High contrast scrim gradient overlay matching UI in image.png:
+               Left is dark for crisp text legibility, top has subtle vignette so transparent navbar is crystal clear -->
+          <div class="absolute inset-0 bg-gradient-to-r from-slate-950/85 via-slate-950/50 to-slate-950/20 z-0"></div>
+          <div class="absolute inset-0 bg-gradient-to-b from-slate-950/70 via-transparent to-slate-950/50 z-0"></div>
+        </div>
 
         <!-- Manual Navigation Arrows (Desktop hover) -->
         <button
@@ -105,40 +107,18 @@
                 {{ currentBanner?.subjudul || 'Temukan kos terbaik sesuai kebutuhanmu di seluruh Indonesia. Lokasi strategis, fasilitas lengkap, dan harga transparan langsung dari pemilik.' }}
               </p>
             </transition>
-
-            <!-- Slider Indicators & Accessible Controls -->
-            <div v-if="activeBanners.length > 1" class="flex items-center gap-2.5 mt-4 sm:mt-5">
-              <div class="flex items-center gap-1.5 p-1 bg-slate-900/50 backdrop-blur-md rounded-full border border-white/10">
-                <button
-                  v-for="(b, idx) in activeBanners"
-                  :key="idx"
-                  @click="goToSlide(idx)"
-                  class="h-7 px-1 flex items-center justify-center cursor-pointer focus:outline-none"
-                  :title="`Pindah ke foto ${idx + 1}`"
-                  type="button"
-                >
-                  <span
-                    class="h-2 rounded-full transition-all duration-300 block"
-                    :class="idx === currentSlideIndex ? 'w-7 bg-amber-400' : 'w-2 bg-white/40 hover:bg-white/80'"
-                  ></span>
-                </button>
-              </div>
-
-              <!-- Pause / Play Toggle Button -->
-        
-            </div>
           </div>
 
-          <!-- Bottom: Floating Search Bar Card (Desktop Segmented Pill & Mobile 1-Line - Clean & Spacious) -->
-          <div class="w-full max-w-4xl mx-auto mt-6 sm:mt-8 -translate-y-4 sm:-translate-y-6 lg:-translate-y-8">
-            <!-- 1. Mobile 1-Line Search Bar (cukup satu baris, klik untuk pop up detail) -->
+          <!-- Bottom: Floating Search Bar Card (Desktop Segmented Pill & Mobile 1-Line - Clean Glassmorphism ala Rukita) -->
+          <div class="w-full max-w-4xl mx-auto mt-6 sm:mt-8 translate-y-1 sm:translate-y-2 lg:translate-y-3">
+            <!-- 1. Mobile 1-Line Search Bar (Glassmorphic & Clean Single Line ala Rukita) -->
             <div
               @click="openMobileSearchModal"
-              class="flex lg:hidden w-full items-center justify-between gap-3 bg-white/95 backdrop-blur-md rounded-full shadow-[0_12px_36px_rgba(0,0,0,0.18)] p-2 pl-4 pr-2 border border-white/60 cursor-pointer active:scale-[0.98] transition-all hover:bg-white"
+              class="flex lg:hidden w-full items-center justify-between gap-3 bg-white/80 hover:bg-white/95 backdrop-blur-xl rounded-full shadow-[0_16px_40px_rgba(0,0,0,0.18)] p-2 pl-3.5 pr-2 border border-white/60 ring-1 ring-black/5 cursor-pointer active:scale-[0.98] transition-all"
             >
-              <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="flex items-center gap-2.5 min-w-0 flex-1">
                 <div class="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center shrink-0">
-                  <PhMagnifyingGlass :size="18" weight="bold" />
+                  <PhMagnifyingGlass :size="16" weight="bold" />
                 </div>
                 <div class="min-w-0 flex-1 text-left">
                   <template v-if="activeSearchSummary">
@@ -146,45 +126,41 @@
                     <p class="text-[11px] text-slate-500 font-medium truncate">{{ activeSearchSummary.subtitle }}</p>
                   </template>
                   <template v-else>
-                    <p class="text-xs sm:text-sm font-semibold text-slate-700 truncate">Mau cari kos di mana?</p>
-                    <p class="text-[11px] text-slate-500 font-medium">Lokasi &bull; Tipe &bull; Budget</p>
+                    <p class="text-xs sm:text-sm font-medium text-slate-500 truncate">Cari lokasi, kota, atau kampus...</p>
                   </template>
                 </div>
               </div>
 
               <!-- Filter / Action button indicator -->
-              <div class="w-9 h-9 rounded-full bg-gradient-to-r from-primary to-[#095296] text-white flex items-center justify-center shadow-sm shrink-0">
-                <PhSlidersHorizontal :size="16" weight="bold" />
+              <div class="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center shadow-xs shrink-0">
+                <PhSlidersHorizontal :size="15" weight="bold" />
               </div>
             </div>
 
-            <!-- 2. Desktop Segmented Search Bar (Pristine, Clean & Premium) -->
+            <!-- 2. Desktop Segmented Search Bar (Clean Single-Line Glassmorphism ala Rukita) -->
             <div
               ref="searchBarContainerRef"
-              class="hidden lg:flex relative w-full bg-white rounded-full shadow-[0_14px_38px_-6px_rgba(15,23,42,0.14),0_4px_12px_-2px_rgba(15,23,42,0.06)] border border-slate-200/90 p-1.5 items-center transition-all"
+              class="hidden lg:flex relative z-30 w-full bg-white/85 hover:bg-white/95 focus-within:bg-white/95 backdrop-blur-xl rounded-full shadow-[0_20px_50px_rgba(0,0,0,0.18),0_4px_16px_rgba(0,0,0,0.06)] border border-white/60 ring-1 ring-black/5 p-1.5 items-center transition-all duration-300"
             >
-              <!-- Segment 1: Lokasi / Area -->
+              <!-- Segment 1: Lokasi / Area (Clean Single Line Input) -->
               <div
                 @click="focusLocationInput"
-                class="flex-1 flex items-center gap-3 px-4 py-2 rounded-full cursor-text transition-colors group/loc relative"
-                :class="activeDropdown === 'location' ? 'bg-slate-50' : 'hover:bg-slate-50/80'"
+                class="flex-1 flex items-center gap-3 px-4 py-2.5 rounded-full cursor-text transition-all group/loc relative"
+                :class="activeDropdown === 'location' ? 'bg-white/90 shadow-xs' : 'hover:bg-white/50'"
               >
                 <div
-                  class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
-                  :class="searchQuery ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500 group-hover/loc:text-primary'"
+                  class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors"
+                  :class="searchQuery ? 'bg-primary/10 text-primary' : 'bg-slate-100/80 text-slate-500 group-hover/loc:text-primary group-hover/loc:bg-primary/10'"
                 >
-                  <PhMapPin :size="16" weight="bold" />
+                  <PhMapPin :size="18" weight="bold" />
                 </div>
-                <div class="flex-1 flex flex-col justify-center min-w-0">
-                  <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block leading-none mb-1">
-                    Lokasi / Area
-                  </span>
+                <div class="flex-1 min-w-0">
                   <input
                     ref="locationInputRef"
                     v-model="searchQuery"
                     type="text"
-                    class="w-full bg-transparent text-sm font-semibold text-slate-800 placeholder:text-slate-400 placeholder:font-normal border-none focus:outline-none focus:ring-0 p-0 leading-tight"
-                    placeholder="Kota, area, atau kampus..."
+                    class="w-full bg-transparent text-sm font-medium text-slate-800 placeholder:text-slate-400 border-none focus:outline-none focus:ring-0 p-0 leading-normal"
+                    placeholder="Cari lokasi, kota, atau kampus..."
                     @focus="activeDropdown = 'location'"
                     @keyup.enter="handleSearch"
                   />
@@ -196,7 +172,7 @@
                   title="Hapus lokasi"
                   type="button"
                 >
-                  <PhXCircle :size="16" weight="fill" />
+                  <PhXCircle :size="17" weight="fill" />
                 </button>
 
                 <!-- Location Suggestions Popover -->
@@ -210,7 +186,7 @@
                 >
                   <div
                     v-if="activeDropdown === 'location'"
-                    class="absolute top-full left-0 mt-3 w-80 bg-white rounded-2xl shadow-xl border border-slate-100 p-4 z-40 text-left select-none"
+                    class="absolute top-full left-0 mt-3 w-80 max-h-[360px] overflow-y-auto bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/60 p-4 z-50 text-left select-none"
                     @click.stop
                   >
                     <div class="flex items-center justify-between mb-2.5">
@@ -238,41 +214,36 @@
 
               <!-- Divider 1 -->
               <div
-                class="w-px h-7 bg-slate-200/80 shrink-0 transition-opacity"
+                class="w-px h-6 bg-slate-200/80 shrink-0 transition-opacity"
                 :class="{ 'opacity-0': activeDropdown === 'location' || activeDropdown === 'jenis' }"
               ></div>
 
-              <!-- Segment 2: Tipe Hunian (Custom Clean Dropdown) -->
-              <div class="relative min-w-[160px]">
+              <!-- Segment 2: Tipe Hunian (Clean Selector ala Rukita) -->
+              <div class="relative min-w-[145px] xl:min-w-[165px]">
                 <button
                   type="button"
                   @click.stop="toggleDropdown('jenis')"
-                  class="w-full flex items-center justify-between gap-2 px-4 py-2 rounded-full text-left transition-colors cursor-pointer group/type"
-                  :class="activeDropdown === 'jenis' ? 'bg-slate-50' : 'hover:bg-slate-50/80'"
+                  class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-full text-left transition-all cursor-pointer group/type"
+                  :class="activeDropdown === 'jenis' ? 'bg-white/90 shadow-xs' : 'hover:bg-white/50'"
                 >
                   <div class="flex items-center gap-2.5 min-w-0">
                     <div
-                      class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
-                      :class="selectedJenis ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500 group-hover/type:text-primary'"
+                      class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors"
+                      :class="selectedJenis ? 'bg-primary/10 text-primary' : 'bg-slate-100/80 text-slate-500 group-hover/type:text-primary group-hover/type:bg-primary/10'"
                     >
-                      <PhBed :size="16" weight="bold" />
+                      <PhBed :size="18" weight="bold" />
                     </div>
-                    <div class="flex flex-col justify-center min-w-0">
-                      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block leading-none mb-1">
-                        Tipe Hunian
-                      </span>
-                      <span
-                        class="text-sm font-semibold truncate leading-tight"
-                        :class="selectedJenis ? 'text-primary' : 'text-slate-700'"
-                      >
-                        {{ getJenisLabel(selectedJenis) }}
-                      </span>
-                    </div>
+                    <span
+                      class="text-xs xl:text-sm font-medium whitespace-nowrap leading-tight"
+                      :class="selectedJenis ? 'text-primary font-semibold' : 'text-slate-600'"
+                    >
+                      {{ selectedJenis ? getJenisLabel(selectedJenis) : 'Semua Tipe' }}
+                    </span>
                   </div>
                   <PhCaretDown
-                    :size="12"
+                    :size="13"
                     weight="bold"
-                    class="text-slate-400 transition-transform duration-200 shrink-0"
+                    class="text-slate-400 transition-transform duration-200 shrink-0 ml-1"
                     :class="{ 'rotate-180 text-primary': activeDropdown === 'jenis' }"
                   />
                 </button>
@@ -288,7 +259,7 @@
                 >
                   <div
                     v-if="activeDropdown === 'jenis'"
-                    class="absolute top-full left-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-40 select-none"
+                    class="absolute top-full left-0 mt-3 w-64 max-h-[340px] overflow-y-auto bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/60 p-2 z-50 select-none"
                     @click.stop
                   >
                     <div class="px-3 py-1.5 mb-1 border-b border-slate-100 flex items-center justify-between">
@@ -324,46 +295,41 @@
 
               <!-- Divider 2 -->
               <div
-                class="w-px h-7 bg-slate-200/80 shrink-0 transition-opacity"
+                class="w-px h-6 bg-slate-200/80 shrink-0 transition-opacity"
                 :class="{ 'opacity-0': activeDropdown === 'jenis' || activeDropdown === 'price' }"
               ></div>
 
-              <!-- Segment 3: Rentang Budget (Custom Clean Dropdown) -->
-              <div class="relative min-w-[170px]">
+              <!-- Segment 3: Rentang Budget (Clean Selector ala Rukita) -->
+              <div class="relative min-w-[170px] xl:min-w-[195px]">
                 <button
                   type="button"
                   @click.stop="toggleDropdown('price')"
-                  class="w-full flex items-center justify-between gap-2 px-4 py-2 rounded-full text-left transition-colors cursor-pointer group/price"
-                  :class="activeDropdown === 'price' ? 'bg-slate-50' : 'hover:bg-slate-50/80'"
+                  class="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 rounded-full text-left transition-all cursor-pointer group/price"
+                  :class="activeDropdown === 'price' ? 'bg-white/90 shadow-xs' : 'hover:bg-white/50'"
                 >
                   <div class="flex items-center gap-2.5 min-w-0">
                     <div
-                      class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-colors"
-                      :class="selectedPriceRange ? 'bg-primary/10 text-primary' : 'bg-slate-100 text-slate-500 group-hover/price:text-primary'"
+                      class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 transition-colors"
+                      :class="selectedPriceRange ? 'bg-primary/10 text-primary' : 'bg-slate-100/80 text-slate-500 group-hover/price:text-primary group-hover/price:bg-primary/10'"
                     >
-                      <PhCurrencyCircleDollar :size="16" weight="bold" />
+                      <PhCurrencyCircleDollar :size="18" weight="bold" />
                     </div>
-                    <div class="flex flex-col justify-center min-w-0">
-                      <span class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block leading-none mb-1">
-                        Budget
-                      </span>
-                      <span
-                        class="text-sm font-semibold truncate leading-tight"
-                        :class="selectedPriceRange ? 'text-primary' : 'text-slate-700'"
-                      >
-                        {{ getPriceLabel(selectedPriceRange) }}
-                      </span>
-                    </div>
+                    <span
+                      class="text-xs xl:text-sm font-medium whitespace-nowrap leading-tight"
+                      :class="selectedPriceRange ? 'text-primary font-semibold' : 'text-slate-600'"
+                    >
+                      {{ selectedPriceRange ? getPriceLabel(selectedPriceRange) : 'Semua Harga' }}
+                    </span>
                   </div>
                   <PhCaretDown
-                    :size="12"
+                    :size="13"
                     weight="bold"
-                    class="text-slate-400 transition-transform duration-200 shrink-0"
+                    class="text-slate-400 transition-transform duration-200 shrink-0 ml-1"
                     :class="{ 'rotate-180 text-primary': activeDropdown === 'price' }"
                   />
                 </button>
 
-                <!-- Budget Dropdown Menu -->
+                <!-- Budget Dropdown Menu (Positioned to right-0 so it never overflows to the right) -->
                 <transition
                   enter-active-class="transition duration-150 ease-out"
                   enter-from-class="transform scale-95 opacity-0 -translate-y-1"
@@ -374,7 +340,7 @@
                 >
                   <div
                     v-if="activeDropdown === 'price'"
-                    class="absolute top-full left-0 mt-3 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-40 select-none"
+                    class="absolute top-full right-0 mt-3 w-72 max-h-[360px] overflow-y-auto bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/60 p-2.5 z-50 select-none"
                     @click.stop
                   >
                     <div class="px-3 py-1.5 mb-1 border-b border-slate-100 flex items-center justify-between">
@@ -411,7 +377,7 @@
               <!-- Search CTA Button -->
               <button
                 @click="handleSearch"
-                class="bg-primary hover:bg-[#083569] text-white px-7 py-3 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm hover:shadow-md hover:shadow-primary/20 active:scale-95 whitespace-nowrap cursor-pointer shrink-0 ml-1.5"
+                class="bg-primary hover:bg-primary-hover text-white px-7 py-2.5 rounded-full text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-md hover:shadow-lg hover:shadow-primary/25 active:scale-95 whitespace-nowrap cursor-pointer shrink-0 ml-1.5"
                 type="button"
               >
                 <PhMagnifyingGlass :size="17" weight="bold" class="select-none" />
@@ -420,7 +386,7 @@
             </div>
 
             <!-- Popular Search Quick Chips (Clean Glass Minimal) -->
-            <div class="flex items-center gap-2 mt-3 pt-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-nowrap lg:flex-wrap max-w-full pb-1 justify-start lg:justify-center">
+            <div class="flex items-center gap-2 mt-3 pt-0.5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-nowrap lg:flex-wrap max-w-full pb-1 justify-start">
               <span class="text-xs font-medium text-slate-200/90 hidden sm:inline-flex items-center gap-1.5 shrink-0 drop-shadow-xs">
                 <PhTrendUp :size="14" weight="bold" class="text-amber-400 select-none" />
                 <span>Pencarian Populer:</span>
@@ -432,10 +398,29 @@
                 class="inline-flex items-center px-3 py-1 rounded-full text-[11px] font-medium transition cursor-pointer active:scale-95 border shrink-0 whitespace-nowrap backdrop-blur-md"
                 :class="isTagActive(tag)
                   ? 'bg-amber-400 text-slate-900 border-amber-300 font-bold shadow-sm ring-1 ring-amber-400/40'
-                  : 'bg-slate-900/40 hover:bg-slate-900/65 text-slate-200 hover:text-white border-white/10 shadow-2xs'"
+                  : 'bg-black/25 hover:bg-black/40 text-white/90 hover:text-white border-white/20 shadow-2xs'"
                 type="button"
               >
                 <span>{{ tag.label }}</span>
+              </button>
+            </div>
+
+            <!-- Slider Indicators (Di Ujung Kiri di Bawah Pencarian Populer - Tetap Bulat & Warna Kuning - Digeser Lebih Kiri) -->
+            <div v-if="activeBanners.length > 1" class="flex items-center gap-2 mt-2.5 justify-start -ml-1 sm:-ml-2.5 lg:-ml-5">
+              <button
+                v-for="(b, idx) in activeBanners"
+                :key="idx"
+                @click="goToSlide(idx)"
+                class="py-1 px-1 first:pl-0 flex items-center justify-center cursor-pointer focus:outline-none transition-transform hover:scale-125 active:scale-95"
+                :title="`Pindah ke foto ${idx + 1}`"
+                type="button"
+              >
+                <span
+                  class="rounded-full transition-all duration-300 block"
+                  :class="idx === currentSlideIndex
+                    ? 'w-2.5 h-2.5 bg-amber-400 shadow-sm ring-2 ring-amber-400/50'
+                    : 'w-2 h-2 bg-amber-400/40 hover:bg-amber-400/80'"
+                ></span>
               </button>
             </div>
           </div>
@@ -443,56 +428,8 @@
       </div>
     </section>
 
-    <!-- Platform Advantages Band -->
-    <section id="tentang" class="max-w-7xl mx-auto w-full px-margin py-space-xl">
-      <div class="text-center max-w-xl mx-auto mb-space-lg">
-        <h2 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">Keunggulan Kostara</h2>
-        <p class="text-xs text-on-surface-variant mt-1">Standar layanan hunian sewa yang jernih, transparan, dan tepercaya di Indonesia</p>
-      </div>
-      <div class="bg-surface-container-lowest rounded-2xl p-space-lg sm:p-space-xl border border-slate-200/80 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-space-lg">
-        <!-- Item 1 -->
-        <div class="flex items-start gap-space-md">
-          <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
-            <PhMapPin :size="24" weight="duotone" />
-          </div>
-          <div class="space-y-1">
-            <h3 class="text-sm sm:text-base font-bold text-on-surface">Peta Lokasi Presisi</h3>
-            <p class="text-xs text-on-surface-variant leading-relaxed">
-              Titik lokasi terintegrasi Leaflet & OpenStreetMap untuk kemudahan survei rute kos tanpa tersesat.
-            </p>
-          </div>
-        </div>
-
-        <!-- Item 2 -->
-        <div class="flex items-start gap-space-md">
-          <div class="w-11 h-11 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center shrink-0">
-            <PhShieldCheck :size="24" weight="duotone" />
-          </div>
-          <div class="space-y-1">
-            <h3 class="text-sm sm:text-base font-bold text-on-surface">Fasilitas & Harga Transparan</h3>
-            <p class="text-xs text-on-surface-variant leading-relaxed">
-              Cek tipe kamar mandi, fasilitas WiFi, parkir, dan ketersediaan unit sewa secara riil tanpa biaya tersembunyi.
-            </p>
-          </div>
-        </div>
-
-        <!-- Item 3 -->
-        <div class="flex items-start gap-space-md">
-          <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
-            <PhWhatsappLogo :size="24" weight="duotone" />
-          </div>
-          <div class="space-y-1">
-            <h3 class="text-sm sm:text-base font-bold text-on-surface">Hubungi Langsung Pemilik</h3>
-            <p class="text-xs text-on-surface-variant leading-relaxed">
-              Ajukan sewa transparan atau koordinasi jadwal survei langsung via WhatsApp ke pemilik properti resmi.
-            </p>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- Popular Kos Section -->
-    <section class="max-w-7xl mx-auto w-full px-margin pb-space-xl">
+    <!-- Popular Kos Section (Directly below Hero for Instant Gratification) -->
+    <section class="max-w-7xl mx-auto w-full px-margin pt-8 pb-space-xl">
       <!-- Section Header -->
       <div class="flex items-center justify-between gap-space-md mb-space-lg">
         <div class="space-y-1">
@@ -651,23 +588,72 @@
       </div>
     </section>
 
+    <!-- Platform Advantages Band (Keunggulan Kostara - Diposisikan di Bawah) -->
+    <section id="tentang" class="max-w-7xl mx-auto w-full px-margin pb-space-xl">
+      <div class="text-center max-w-xl mx-auto mb-space-lg">
+        <h2 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">Keunggulan Kostara</h2>
+        <p class="text-xs text-on-surface-variant mt-1">Standar layanan hunian sewa yang jernih, transparan, dan tepercaya di Indonesia</p>
+      </div>
+      <div class="bg-surface-container-lowest rounded-2xl p-space-lg sm:p-space-xl border border-slate-200/80 shadow-xs grid grid-cols-1 md:grid-cols-3 gap-space-lg">
+        <!-- Item 1 -->
+        <div class="flex items-start gap-space-md">
+          <div class="w-11 h-11 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+            <PhMapPin :size="24" weight="duotone" />
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-sm sm:text-base font-bold text-on-surface">Peta Lokasi Presisi</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+              Titik lokasi terintegrasi Leaflet & OpenStreetMap untuk kemudahan survei rute kos tanpa tersesat.
+            </p>
+          </div>
+        </div>
+
+        <!-- Item 2 -->
+        <div class="flex items-start gap-space-md">
+          <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-[#E68202] flex items-center justify-center shrink-0">
+            <PhShieldCheck :size="24" weight="duotone" />
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-sm sm:text-base font-bold text-on-surface">Fasilitas & Harga Transparan</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+              Cek tipe kamar mandi, fasilitas WiFi, parkir, dan ketersediaan unit sewa secara riil tanpa biaya tersembunyi.
+            </p>
+          </div>
+        </div>
+
+        <!-- Item 3 -->
+        <div class="flex items-start gap-space-md">
+          <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
+            <PhWhatsappLogo :size="24" weight="duotone" />
+          </div>
+          <div class="space-y-1">
+            <h3 class="text-sm sm:text-base font-bold text-on-surface">Hubungi Langsung Pemilik</h3>
+            <p class="text-xs text-on-surface-variant leading-relaxed">
+              Ajukan sewa transparan atau koordinasi jadwal survei langsung via WhatsApp ke pemilik properti resmi.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Mobile Search Detail Pop-up Modal -->
-    <transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-if="isMobileSearchOpen"
-        class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-slate-950/65 backdrop-blur-xs p-0 sm:p-4 select-auto"
-        @click.self="closeMobileSearchModal"
+    <Teleport to="body">
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
       >
         <div
-          class="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-100 max-h-[88vh] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200"
+          v-if="isMobileSearchOpen"
+          class="fixed inset-0 z-[2000] flex items-end sm:items-center justify-center bg-slate-950/65 backdrop-blur-xs p-0 sm:p-4 select-auto"
+          @click.self="closeMobileSearchModal"
         >
+          <div
+            class="w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl border border-slate-100 max-h-[88vh] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200"
+          >
           <!-- Modal Header -->
           <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
             <div>
@@ -787,6 +773,7 @@
         </div>
       </div>
     </transition>
+    </Teleport>
   </div>
 </template>
 

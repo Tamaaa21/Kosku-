@@ -1,15 +1,15 @@
 <template>
   <div class="max-w-7xl mx-auto px-margin py-space-lg pt-20">
     <!-- ======================================================== -->
-    <!-- TOP STICKY TOOLBAR: SEARCH, QUICK PILLS & FILTER TRIGGER -->
+    <!-- TOP COMPACT TOOLBAR: SINGLE-ROW SEARCH & FILTER CONTROLS -->
     <!-- ======================================================== -->
-    <div class="bg-surface-container-lowest rounded-2xl shadow-sm border border-slate-100 p-space-md mb-space-md space-y-3">
-      <!-- Row 1: Search Input & Filter Modal Trigger -->
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+    <div class="bg-surface-container-lowest rounded-2xl shadow-xs border border-slate-200/80 p-2.5 sm:p-3 mb-space-md">
+      <!-- Single Row: Search Input & Action Controls (Filter & Sort) -->
+      <div class="flex items-center gap-2">
         <!-- Main Search Input with integrated Status Spinner, Clear button & Action button -->
         <div class="relative flex-1 flex items-center group">
-          <div class="absolute left-4 flex items-center pointer-events-none text-[#017E91]">
-            <PhMagnifyingGlass :size="20" weight="bold" />
+          <div class="absolute left-3.5 flex items-center pointer-events-none text-[#017E91]">
+            <PhMagnifyingGlass :size="18" weight="bold" />
           </div>
           <input
             v-model="filters.q"
@@ -17,14 +17,14 @@
             @keydown.enter="fetchKosList"
             type="text"
             placeholder="Cari kos berdasarkan nama, kota, alamat, atau kampus..."
-            class="w-full h-12 pl-11 pr-24 rounded-2xl bg-slate-50 hover:bg-slate-100/70 focus:bg-white text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 border border-slate-200/80 focus:border-[#017E91] focus:ring-2 focus:ring-[#017E91]/20 transition-all outline-none"
+            class="w-full h-10.5 pl-10 pr-20 sm:pr-22 rounded-xl bg-slate-50/80 hover:bg-slate-100/70 focus:bg-white text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 border border-slate-200/80 focus:border-[#017E91] focus:ring-2 focus:ring-[#017E91]/20 transition-all outline-none"
           />
 
           <!-- Inside input: Loading spinner, Clear (X), and Search Button -->
-          <div class="absolute right-2.5 flex items-center gap-1.5">
+          <div class="absolute right-1.5 sm:right-2 flex items-center gap-1 sm:gap-1.5">
             <PhSpinnerGap
               v-if="loading"
-              :size="18"
+              :size="16"
               weight="bold"
               class="animate-spin text-[#017E91]"
             />
@@ -35,47 +35,70 @@
               class="p-1 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 transition cursor-pointer"
               title="Hapus pencarian (Esc)"
             >
-              <PhX :size="15" weight="bold" />
+              <PhX :size="14" weight="bold" />
             </button>
             <button
               @click="fetchKosList"
               type="button"
-              class="px-3.5 py-1.5 rounded-xl bg-[#017E91] hover:bg-[#016877] text-white text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1"
+              class="px-2.5 sm:px-3 py-1 rounded-lg bg-[#017E91] hover:bg-[#016877] text-white text-xs font-bold transition shadow-xs cursor-pointer flex items-center gap-1"
             >
               <span>Cari</span>
             </button>
           </div>
         </div>
 
-        <!-- Action Controls: Pop-up Filter Button & Sort Selector -->
-        <div class="flex items-center gap-2 shrink-0">
+        <!-- Action Controls: Pop-up Filter Button & Sort Selector (Inline side-by-side) -->
+        <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
           <!-- Pop-up Filter Trigger Button (Modal Pop-Up untuk Desktop & Mobile) -->
           <button
             @click="showFilterModal = true"
             type="button"
-            class="inline-flex items-center justify-center gap-2 h-12 px-4.5 rounded-2xl text-xs font-bold transition-all border cursor-pointer select-none shadow-xs active:scale-95"
+            class="inline-flex items-center justify-center gap-1.5 h-10.5 px-3 sm:px-3.5 rounded-xl text-xs font-bold transition-all border cursor-pointer select-none shadow-xs active:scale-95"
             :class="activeFilterCount > 0
               ? 'bg-[#017E91] border-[#017E91] text-white hover:bg-[#016877]'
               : 'bg-slate-50 border-slate-200/80 text-slate-700 hover:bg-slate-100 hover:border-slate-300'"
             title="Buka Filter Lengkap (Pop-up)"
           >
-            <PhSlidersHorizontal :size="18" weight="bold" :class="activeFilterCount > 0 ? 'text-white' : 'text-[#017E91]'" />
-            <span>Filter Lengkap</span>
+            <PhSlidersHorizontal :size="16" weight="bold" :class="activeFilterCount > 0 ? 'text-white' : 'text-[#017E91]'" />
+            <span class="hidden sm:inline">Filter</span>
             <span
               v-if="activeFilterCount > 0"
-              class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-white text-[#017E91]"
+              class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white text-[#017E91] leading-none"
             >
               {{ activeFilterCount }}
             </span>
           </button>
 
-          <!-- Sort Selector Dropdown -->
-          <div class="flex items-center gap-1.5 h-12 bg-slate-50 px-3 rounded-2xl border border-slate-200/80">
-            <label class="text-[11px] text-slate-500 font-medium whitespace-nowrap hidden sm:inline">Urutan:</label>
+          <!-- Sort Selector: Responsive (Icon Panah Atas Bawah di Mobile, Full Select di Desktop) -->
+          <!-- 1. Mobile Version: Icon Tanda Panah Atas Bawah Saja -->
+          <div
+            class="sm:hidden relative flex items-center justify-center w-10.5 h-10.5 rounded-xl border transition-all shadow-xs active:scale-95 cursor-pointer shrink-0"
+            :class="filters.sort
+              ? 'bg-[#017E91]/10 border-[#017E91] text-[#017E91]'
+              : 'bg-slate-50 border-slate-200/80 text-slate-700 hover:bg-slate-100'"
+            title="Urutkan Rekomendasi / Harga"
+          >
+            <PhArrowsDownUp :size="17" weight="bold" />
             <select
               v-model="filters.sort"
               @change="fetchKosList"
-              class="text-xs bg-transparent border-none focus:ring-0 py-1 pl-1 pr-6 text-slate-800 font-bold cursor-pointer"
+              class="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-base"
+              aria-label="Urutkan Rekomendasi"
+            >
+              <option value="">Rekomendasi</option>
+              <option value="harga_asc">Harga Terendah</option>
+              <option value="harga_desc">Harga Tertinggi</option>
+            </select>
+          </div>
+
+          <!-- 2. Desktop Version: Dropdown dengan Label Urutan -->
+          <div class="hidden sm:flex items-center gap-1 h-10.5 bg-slate-50 px-2.5 rounded-xl border border-slate-200/80 shrink-0">
+            <PhArrowsDownUp :size="15" weight="bold" class="text-slate-400 shrink-0" />
+            <label class="text-[11px] text-slate-500 font-medium whitespace-nowrap hidden md:inline">Urutan:</label>
+            <select
+              v-model="filters.sort"
+              @change="fetchKosList"
+              class="text-xs bg-transparent border-none focus:ring-0 py-1 pl-1 pr-5 text-slate-800 font-bold cursor-pointer"
             >
               <option value="">Rekomendasi</option>
               <option value="harga_asc">Harga Terendah</option>
@@ -83,123 +106,6 @@
             </select>
           </div>
         </div>
-      </div>
-
-      <!-- Row 2: Quick Category Pills & Realtime Count -->
-      <div class="flex items-center justify-between gap-3 pt-1 border-t border-slate-100 flex-wrap sm:flex-nowrap">
-        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 w-full sm:w-auto">
-          <span class="text-[11px] text-slate-400 font-semibold mr-1 shrink-0 flex items-center gap-1 select-none">
-            <PhSparkle :size="13" weight="fill" class="text-[#E68202]" />
-            Kategori:
-          </span>
-          <button
-            v-for="preset in quickTypePresets"
-            :key="preset.value"
-            @click="setQuickJenis(preset.value)"
-            type="button"
-            :class="[
-              'px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer select-none',
-              filters.jenis === preset.value
-                ? 'bg-[#017E91] text-white shadow-xs font-bold'
-                : 'bg-slate-100/70 text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 border border-slate-200/40'
-            ]"
-          >
-            {{ preset.label }}
-          </button>
-
-          <!-- Quick Toggle: Kamar Tersedia -->
-          <button
-            @click="toggleQuickTersedia"
-            type="button"
-            :class="[
-              'px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer select-none flex items-center gap-1',
-              filters.tersedia
-                ? 'bg-emerald-600 text-white shadow-xs font-bold'
-                : 'bg-slate-100/70 text-slate-600 hover:bg-slate-200/70 hover:text-slate-900 border border-slate-200/40'
-            ]"
-          >
-            <PhCheckCircle :size="13" weight="bold" />
-            <span>Kamar Tersedia</span>
-          </button>
-        </div>
-
-        <!-- Realtime Result Summary -->
-        <div class="text-[11px] text-slate-500 shrink-0 hidden sm:block">
-          Ditemukan <span class="font-extrabold text-[#017E91]">{{ kosList.length }}</span> properti kos
-        </div>
-      </div>
-
-      <!-- Row 3: Active Filter Chips (Muncul jika ada filter aktif) -->
-      <div v-if="activeFilterCount > 0" class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100 text-xs">
-        <span class="text-[11px] text-slate-400 font-semibold mr-1">Filter Aktif:</span>
-
-        <!-- Chip Kata Kunci -->
-        <span
-          v-if="filters.q"
-          class="inline-flex items-center gap-1.5 bg-[#017E91]/10 text-[#017E91] border border-[#017E91]/20 px-2.5 py-1 rounded-xl text-xs font-semibold"
-        >
-          <PhMagnifyingGlass :size="12" weight="bold" />
-          <span>"{{ filters.q }}"</span>
-          <button @click="removeFilter('q')" class="hover:text-red-600 transition cursor-pointer" title="Hapus pencarian ini">
-            <PhX :size="13" weight="bold" />
-          </button>
-        </span>
-
-        <!-- Chip Jenis Kos -->
-        <span
-          v-if="filters.jenis"
-          class="inline-flex items-center gap-1.5 bg-amber-50 text-[#E68202] border border-amber-200/70 px-2.5 py-1 rounded-xl text-xs font-bold"
-        >
-          <span>{{ formatJenis(filters.jenis) }}</span>
-          <button @click="removeFilter('jenis')" class="hover:text-red-600 transition cursor-pointer" title="Hapus filter ini">
-            <PhX :size="13" weight="bold" />
-          </button>
-        </span>
-
-        <!-- Chip Rentang Harga Maks -->
-        <span
-          v-if="filters.harga_max"
-          class="inline-flex items-center gap-1.5 bg-slate-100 text-slate-700 border border-slate-200/80 px-2.5 py-1 rounded-xl text-xs font-medium"
-        >
-          <span>Maks: {{ formatRupiah(filters.harga_max) }}</span>
-          <button @click="removeFilter('harga_max')" class="hover:text-red-600 transition cursor-pointer" title="Hapus filter ini">
-            <PhX :size="13" weight="bold" />
-          </button>
-        </span>
-
-        <!-- Chips Fasilitas -->
-        <span
-          v-for="fasId in filters.fasilitas"
-          :key="fasId"
-          class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-800 border border-emerald-200/70 px-2.5 py-1 rounded-xl text-xs font-medium"
-        >
-          <PhCheck :size="12" weight="bold" class="text-emerald-600" />
-          <span>{{ getFasilitasName(fasId) }}</span>
-          <button @click="removeFilter('fasilitas', fasId)" class="hover:text-red-600 transition cursor-pointer" title="Hapus filter ini">
-            <PhX :size="13" weight="bold" />
-          </button>
-        </span>
-
-        <!-- Chip Hanya Tersedia -->
-        <span
-          v-if="filters.tersedia"
-          class="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200/70 px-2.5 py-1 rounded-xl text-xs font-medium"
-        >
-          <span>Kamar Tersedia</span>
-          <button @click="removeFilter('tersedia')" class="hover:text-red-600 transition cursor-pointer" title="Hapus filter ini">
-            <PhX :size="13" weight="bold" />
-          </button>
-        </span>
-
-        <!-- Tombol Reset Semua Filter -->
-        <button
-          @click="resetFilters"
-          type="button"
-          class="inline-flex items-center gap-1 text-[11px] text-red-600 hover:text-red-700 font-bold ml-1 hover:underline cursor-pointer"
-        >
-          <PhArrowClockwise :size="13" weight="bold" />
-          <span>Reset Semua</span>
-        </button>
       </div>
     </div>
 
@@ -371,20 +277,21 @@
     <!-- ======================================================== -->
     <!-- POP-UP FILTER MODAL DIALOG (DESKTOP & MOBILE UNIFIED)    -->
     <!-- ======================================================== -->
-    <transition
-      enter-active-class="transition duration-200 ease-out"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition duration-150 ease-in"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-if="showFilterModal"
-        class="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto"
-        @click.self="showFilterModal = false"
+    <Teleport to="body">
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition duration-150 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
       >
-        <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-100 flex flex-col max-h-[85vh] sm:max-h-[90vh] overflow-hidden animate-scale-up text-left">
+        <div
+          v-if="showFilterModal"
+          class="fixed inset-0 z-[2000] bg-slate-950/75 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 sm:py-8 overflow-y-auto"
+          @click.self="showFilterModal = false"
+        >
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-100 flex flex-col max-h-[85vh] sm:max-h-[88vh] overflow-hidden animate-scale-up text-left">
           <!-- 1. Modal Header -->
           <div class="p-4 sm:p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60 shrink-0">
             <div class="flex items-center gap-3">
@@ -590,11 +497,12 @@
         </div>
       </div>
     </transition>
+    </Teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useFavoritesStore } from '../stores/favorites'
@@ -604,6 +512,7 @@ import GenderBadge from '../components/GenderBadge.vue'
 import {
   PhMagnifyingGlass,
   PhSlidersHorizontal,
+  PhArrowsDownUp,
   PhX,
   PhStar,
   PhMapPin,
@@ -627,6 +536,19 @@ const ui = useUiStore()
 
 const loading = ref(false)
 const showFilterModal = ref(false) // Unified Pop-up modal state
+
+// Lock body scroll when modal is open
+watch(showFilterModal, (val) => {
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = val ? 'hidden' : ''
+  }
+})
+
+onUnmounted(() => {
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+})
 
 const kosList = ref([])
 const availableFasilitas = ref([])

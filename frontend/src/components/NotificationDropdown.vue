@@ -2,7 +2,7 @@
   <div class="relative" ref="dropdownRef">
     <!-- Bell Trigger Button -->
     <button
-      @click="toggleDropdown"
+      @click.stop="toggleDropdown"
       class="relative p-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors flex items-center justify-center focus:outline-none cursor-pointer"
       type="button"
       title="Notifikasi"
@@ -19,10 +19,10 @@
       </span>
     </button>
 
-    <!-- Popover Notification Menu -->
+    <!-- Popover Notification Menu (High z-index to always overlay maps and sticky controls) -->
     <div
       v-if="isOpen"
-      class="absolute right-0 mt-2 w-80 sm:w-96 bg-surface-container-lowest rounded-2xl shadow-xl border border-slate-100 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150"
+      class="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-slate-100 z-[1060] overflow-hidden animate-in fade-in zoom-in-95 duration-150"
     >
       <!-- Header -->
       <div class="p-3.5 px-4 bg-surface-container-lowest border-b border-slate-100 flex items-center justify-between">

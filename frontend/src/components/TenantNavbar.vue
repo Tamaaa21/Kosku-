@@ -1,6 +1,6 @@
 <template>
   <header
-    class="fixed top-0 left-0 right-0 z-50 h-16 transition-all duration-300 ease-in-out"
+    class="fixed top-0 left-0 right-0 z-[1050] h-16 transition-all duration-300 ease-in-out"
     :class="
       isTransparent
         ? 'bg-transparent border-b border-transparent shadow-none'
@@ -88,7 +88,7 @@
               : ($route.path.startsWith('/pesanan') ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
           "
         >
-          <span>Riwayat Pesanan</span>
+          <span>Pesanan</span>
           <span
             v-if="$route.path.startsWith('/pesanan')"
             class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
@@ -153,7 +153,7 @@
             >
               <div
                 v-if="isProfileDropdownOpen"
-                class="absolute right-0 mt-2.5 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 overflow-hidden text-left"
+                class="absolute right-0 mt-2.5 w-60 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-[1060] overflow-hidden text-left"
               >
                 <!-- Mini User Info Header -->
                 <div class="px-4 py-3 bg-gradient-to-br from-slate-50 to-blue-50/40 border-b border-slate-100 flex items-center gap-3">
@@ -185,7 +185,7 @@
                     <span>Profil Akun</span>
                   </router-link>
 
-                  <!-- 2. Riwayat Pesanan -->
+                  <!-- 2. Pesanan Saya -->
                   <router-link
                     to="/pesanan"
                     @click="isProfileDropdownOpen = false"
@@ -194,7 +194,7 @@
                     <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                       <PhReceipt :size="16" weight="bold" />
                     </div>
-                    <span>Riwayat Pesanan</span>
+                    <span>Pesanan Saya</span>
                   </router-link>
 
                   <!-- 3. Kos Favorit -->
@@ -321,29 +321,8 @@
       >
         Peta Lokasi
       </router-link>
-      <router-link
-        to="/about"
-        @click="mobileMenuOpen = false"
-        class="px-3 py-2 rounded-lg text-sm font-medium transition"
-        :class="$route.path === '/about' ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-      >
-        Tentang Kami
-      </router-link>
-      <router-link
-        to="/api-test"
-        @click="mobileMenuOpen = false"
-        class="px-3 py-2 rounded-lg text-sm font-medium transition"
-        :class="$route.path.startsWith('/api-test') ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-      >
-        API Test Playground
-      </router-link>
-      <a
-        href="#bantuan"
-        @click="mobileMenuOpen = false; scrollToSection('bantuan')"
-        class="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-100 transition cursor-pointer"
-      >
-        Bantuan
-      </a>
+     
+   
 
       <template v-if="auth.isAuthenticated">
         <router-link
@@ -352,7 +331,7 @@
           class="px-3 py-2 rounded-lg text-sm font-medium transition"
           :class="$route.path.startsWith('/pesanan') ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
         >
-          Riwayat Pesanan
+          Pesanan Saya
         </router-link>
         <router-link
           to="/favorit"
@@ -361,7 +340,6 @@
           :class="($route.path === '/favorit' || $route.path === '/tersimpan') ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
         >
           <div class="flex items-center gap-2">
-            <PhHeart :size="18" :weight="favoritesStore.count > 0 ? 'fill' : 'bold'" :class="favoritesStore.count > 0 ? 'text-rose-500' : ''" />
             <span>Kos Favorit</span>
           </div>
           <span
@@ -371,14 +349,15 @@
             {{ favoritesStore.count }}
           </span>
         </router-link>
-        <router-link
-          to="/profil"
-          @click="mobileMenuOpen = false"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition"
-          :class="$route.path === '/profil' ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-        >
-          Profil Saya
-        </router-link>
+      <router-link
+        to="/about"
+        @click="mobileMenuOpen = false"
+        class="px-3 py-2 rounded-lg text-sm font-medium transition"
+        :class="$route.path === '/about' ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
+      >
+        Tentang Kami
+      </router-link>
+       
         <button
           @click="handleLogout"
           class="text-left px-3 py-2 rounded-lg text-sm font-semibold text-rose-600 hover:bg-rose-50 transition flex items-center gap-2 cursor-pointer"

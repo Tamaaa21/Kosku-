@@ -4,12 +4,12 @@
     <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6">
       <div class="space-y-1">
         <h1 class="text-xl sm:text-2xl font-bold text-on-surface tracking-tight">
-          {{ auth.isPemilik ? 'Kelola Pemesanan Masuk' : 'Riwayat Pemesanan Saya' }}
+          {{ auth.isPemilik ? 'Kelola Pemesanan Masuk' : 'Pesanan Saya' }}
         </h1>
         <p class="text-xs sm:text-sm text-on-surface-variant max-w-2xl">
           {{ auth.isPemilik
             ? 'Pantau dan konfirmasi permohonan sewa kamar dari calon penyewa pada properti kos Anda.'
-            : 'Pantau status pengajuan sewa, detail kamar, dan riwayat hunian kos yang pernah Anda ajukan.'
+            : 'Pantau status pengajuan sewa, detail kamar, dan hunian kos yang pernah Anda pesan.'
           }}
         </p>
       </div>
@@ -22,7 +22,7 @@
         </div>
         <div class="w-px h-4 bg-outline-variant"></div>
         <div class="flex items-center gap-2">
-          <div class="w-2.5 h-2.5 rounded-full bg-tertiary"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
           <span class="text-xs text-on-surface-variant font-medium">{{ countStatus('disetujui') }} Disetujui</span>
         </div>
       </div>
@@ -92,7 +92,7 @@
           Tidak ditemukan pemesanan yang cocok dengan kriteria filter atau pencarian Anda.
         </template>
         <template v-else>
-          {{ auth.isPemilik ? 'Belum ada permohonan sewa masuk pada kategori ini.' : 'Anda belum memiliki riwayat pemesanan pada kategori ini.' }}
+          {{ auth.isPemilik ? 'Belum ada permohonan sewa masuk pada kategori ini.' : 'Anda belum memiliki pesanan pada kategori ini.' }}
         </template>
       </p>
 
