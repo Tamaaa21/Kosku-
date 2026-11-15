@@ -85,6 +85,24 @@ const routes = [
     meta: { requiresAuth: true },
   },
   {
+    path: '/profil/informasi-pribadi',
+    name: 'profil-informasi-pribadi',
+    component: UserProfileView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/profil/keamanan',
+    name: 'profil-keamanan',
+    component: UserProfileView,
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/profil/notifikasi',
+    name: 'profil-notifikasi',
+    component: UserProfileView,
+    meta: { requiresAuth: true },
+  },
+  {
     path: '/login',
     name: 'login',
     component: LoginView,

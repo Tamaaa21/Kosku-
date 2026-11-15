@@ -1,7 +1,5 @@
 <template>
   <div class="min-h-screen bg-slate-50 flex flex-col font-sans text-slate-800">
-    <TenantNavbar />
-
     <!-- Hero Section -->
     <section class="relative pt-32 pb-20 bg-gradient-to-b from-[#017E91]/10 via-slate-50 to-slate-50 overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
@@ -99,27 +97,10 @@
         </div>
       </div>
     </section>
-
-    <!-- Footer Simple -->
-    <footer class="mt-auto py-8 bg-white border-t border-slate-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
-        <p>© 2026 Kostara (KosKu) &middot; Hak Cipta Dilindungi Undang-Undang.</p>
-        <div class="flex items-center gap-6">
-          <router-link to="/" class="hover:text-primary transition">Beranda</router-link>
-          <router-link to="/kos" class="hover:text-primary transition">Cari Kos</router-link>
-          <router-link to="/peta" class="hover:text-primary transition">Peta</router-link>
-          <router-link to="/about" class="text-primary font-semibold">Tentang Kami</router-link>
-        </div>
-      </div>
-    </footer>
-
-    <BackToTop />
   </div>
 </template>
 
 <script setup>
-import TenantNavbar from '../components/TenantNavbar.vue'
-import BackToTop from '../components/BackToTop.vue'
 import {
   PhCompass,
   PhEye,

@@ -1,5 +1,5 @@
 <template>
-  <div v-if="!isHidden" class="fixed bottom-6 right-6 z-40 select-none" ref="widgetRef">
+  <div v-if="!isHidden" class="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-40 select-none" ref="widgetRef">
     <!-- Popover Card -->
     <transition
       enter-active-class="transition duration-200 ease-out"

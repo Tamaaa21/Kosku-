@@ -1,7 +1,5 @@
 <template>
   <div class="min-h-screen bg-slate-50 flex flex-col justify-between font-sans text-slate-800">
-    <TenantNavbar />
-
     <main class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-24">
       <div class="max-w-md w-full text-center">
         <!-- 403 Badge & Icon -->
@@ -36,17 +34,12 @@
         </div>
       </div>
     </main>
-
-    <footer class="py-6 text-center text-xs text-slate-400 border-t border-slate-100 bg-white">
-      © 2026 Kostara &middot; Keamanan Akun & Otorisasi Berbasis Peran (RBAC)
-    </footer>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import TenantNavbar from '../components/TenantNavbar.vue'
 import { PhShieldWarning, PhArrowLeft, PhUser } from '@phosphor-icons/vue'
 
 const router = useRouter()

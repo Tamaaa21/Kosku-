@@ -1,7 +1,5 @@
 <template>
   <div class="min-h-screen bg-slate-50 flex flex-col justify-between font-sans text-slate-800">
-    <TenantNavbar />
-
     <main class="flex-1 flex items-center justify-center px-4 sm:px-6 lg:px-8 py-24">
       <div class="max-w-md w-full text-center">
         <!-- 404 Badge & Icon -->
@@ -36,14 +34,9 @@
         </div>
       </div>
     </main>
-
-    <footer class="py-6 text-center text-xs text-slate-400 border-t border-slate-100 bg-white">
-      © 2026 Kostara &middot; Platform Pencarian & Reservasi Kos Terintegrasi
-    </footer>
   </div>
 </template>
 
 <script setup>
-import TenantNavbar from '../components/TenantNavbar.vue'
 import { PhCompass, PhHouse, PhMagnifyingGlass } from '@phosphor-icons/vue'
 </script>

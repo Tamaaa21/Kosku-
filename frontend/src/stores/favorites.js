@@ -104,6 +104,11 @@ export const useFavoritesStore = defineStore('favorites', () => {
     persist()
   }
 
+  const fetchFavorites = () => {
+    favorites.value = loadFromStorage()
+    return favorites.value
+  }
+
   return {
     favorites,
     count,
@@ -111,5 +116,6 @@ export const useFavoritesStore = defineStore('favorites', () => {
     toggleFavorite,
     removeFavorite,
     clearFavorites,
+    fetchFavorites,
   }
 })

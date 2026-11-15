@@ -2,14 +2,17 @@
   <div class="min-h-screen flex flex-col bg-background text-on-surface antialiased font-sans">
     <Navbar />
 
-    <main class="flex-grow transition-all duration-300">
+    <main
+      class="flex-grow transition-all duration-300"
+      :class="[showMobileBottomNavbar ? 'pb-20 md:pb-0' : '']"
+    >
       <router-view />
     </main>
 
-    <!-- Footer (Hidden on full-screen map view or when in owner/admin sidebar mode) -->
+    <!-- Footer (Hanya tampil di Desktop md ke atas, disembunyikan di Mobile) -->
     <footer
       v-if="$route.path !== '/peta' && !auth.isPemilik && !auth.isAdmin"
-      class="bg-surface-container-lowest border-t border-slate-200/80 py-8 text-center text-xs text-on-surface-variant mt-12"
+      class="hidden md:block bg-surface-container-lowest border-t border-slate-200/80 py-8 text-center text-xs text-on-surface-variant mt-12"
     >
       <div class="max-w-7xl mx-auto px-margin flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2">
@@ -30,6 +33,9 @@
       </div>
     </footer>
 
+    <!-- Mobile Bottom Navigation Bar (5 Menu: Beranda, Cari Kos, Peta, Pesanan, Profil) -->
+    <MobileBottomNavbar v-if="showMobileBottomNavbar" />
+
     <!-- Floating Customer Service WhatsApp Support (Disembunyikan di Panel Admin) -->
     <FloatingWhatsAppSupport v-if="showFloatingSupport" />
 
@@ -49,6 +55,7 @@
 import { onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import Navbar from './components/Navbar.vue'
+import MobileBottomNavbar from './components/MobileBottomNavbar.vue'
 import FloatingWhatsAppSupport from './components/FloatingWhatsAppSupport.vue'
 import BackToTop from './components/BackToTop.vue'
 import SessionTimeoutModal from './components/SessionTimeoutModal.vue'
@@ -63,6 +70,14 @@ const route = useRoute()
 const showFloatingSupport = computed(() => {
   if (auth.isAdmin) return false
   if (route.path.startsWith('/dashboard/admin') || route.name === 'admin-dashboard') return false
+  return true
+})
+
+const showMobileBottomNavbar = computed(() => {
+  if (auth.isAdmin || auth.isPemilik) return false
+  const authRoutes = ['login', 'register', 'forgot-password', 'reset-password']
+  if (authRoutes.includes(route.name)) return false
+  if (route.path.startsWith('/dashboard/admin') || route.path.startsWith('/dashboard/pemilik')) return false
   return true
 })
 

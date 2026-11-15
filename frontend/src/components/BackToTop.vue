@@ -11,7 +11,7 @@
       v-show="isVisible"
       :class="[
         'fixed z-40 select-none transition-all duration-300',
-        hasFloatingSupport ? 'bottom-24 right-7 sm:bottom-26 sm:right-8' : 'bottom-6 right-6'
+        hasFloatingSupport ? 'bottom-36 md:bottom-26 right-5 md:right-8' : 'bottom-20 md:bottom-6 right-5 md:right-6'
       ]"
     >
       <button

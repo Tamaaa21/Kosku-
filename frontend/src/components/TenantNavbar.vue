@@ -216,16 +216,7 @@
                   </router-link>
 
                   <!-- 4. API Test Playground -->
-                  <router-link
-                    to="/api-test"
-                    @click="isProfileDropdownOpen = false"
-                    class="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-primary transition group"
-                  >
-                    <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                      <PhCode :size="16" weight="bold" />
-                    </div>
-                    <span>API Test Playground</span>
-                  </router-link>
+                  
                 </div>
 
                 <!-- Divider -->
@@ -251,139 +242,28 @@
         </template>
 
         <template v-else>
-          <!-- Masuk / Daftar Pill Button (Desktop Only) -->
+          <!-- Masuk / Daftar Pill Button (Desktop) -->
           <router-link
             to="/login"
             class="hidden md:inline-flex items-center justify-center px-5 py-2 rounded-full bg-primary hover:bg-primary-hover text-white text-xs sm:text-sm font-semibold transition-all shadow-sm active:scale-95 whitespace-nowrap"
           >
             Masuk / Daftar
           </router-link>
-        </template>
 
-        <!-- Mobile Menu Toggle Button (HANYA INI YANG MUNCUL DI MOBILE) -->
-        <button
-          @click="mobileMenuOpen = !mobileMenuOpen"
-          class="md:hidden p-2 rounded-lg transition cursor-pointer"
-          :class="isTransparent ? 'text-white hover:bg-white/15' : 'text-slate-700 hover:bg-slate-100'"
-          type="button"
-          aria-label="Toggle Menu"
-        >
-          <PhX v-if="mobileMenuOpen" :size="24" weight="bold" />
-          <PhList v-else :size="24" weight="bold" />
-        </button>
-      </div>
-    </div>
-
-    <!-- Mobile Dropdown Menu (Always solid white for clarity) -->
-    <div
-      v-if="mobileMenuOpen"
-      class="md:hidden bg-white border-b border-slate-200 px-margin py-3 shadow-xl flex flex-col gap-2"
-    >
-      <template v-if="auth.isAuthenticated">
-        <!-- User Profile Quick Card in Mobile Menu -->
-        <router-link
-          to="/profil"
-          @click="mobileMenuOpen = false"
-          class="flex items-center gap-3 p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-100 mb-1 transition"
-        >
-          <div class="w-9 h-9 rounded-full bg-primary/10 text-primary border border-primary/20 flex items-center justify-center font-bold text-xs uppercase overflow-hidden shrink-0">
-            <img v-if="auth.user?.foto" :src="auth.user.foto" :alt="auth.user?.nama" class="w-full h-full object-cover" />
-            <PhUser v-else :size="18" weight="bold" />
-          </div>
-          <div class="min-w-0 flex-1">
-            <p class="text-xs font-bold text-slate-800 truncate">{{ auth.user?.nama }}</p>
-            <p class="text-[11px] text-slate-400 truncate">{{ auth.user?.email || 'Kelola Profil' }}</p>
-          </div>
-        </router-link>
-      </template>
-
-      <router-link
-        to="/"
-        @click="mobileMenuOpen = false"
-        class="px-3 py-2 rounded-lg text-sm font-medium transition"
-        :class="$route.path === '/' ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-      >
-        Beranda
-      </router-link>
-      <router-link
-        to="/kos"
-        @click="mobileMenuOpen = false"
-        class="px-3 py-2 rounded-lg text-sm font-medium transition"
-        :class="$route.path === '/kos' ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-      >
-        Cari Kos
-      </router-link>
-      <router-link
-        to="/peta"
-        @click="mobileMenuOpen = false"
-        class="px-3 py-2 rounded-lg text-sm font-medium transition"
-        :class="$route.path === '/peta' ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-      >
-        Peta Lokasi
-      </router-link>
-     
-   
-
-      <template v-if="auth.isAuthenticated">
-        <router-link
-          to="/pesanan"
-          @click="mobileMenuOpen = false"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition"
-          :class="$route.path.startsWith('/pesanan') ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-        >
-          Pesanan Saya
-        </router-link>
-        <router-link
-          to="/favorit"
-          @click="mobileMenuOpen = false"
-          class="px-3 py-2 rounded-lg text-sm font-medium transition flex items-center justify-between"
-          :class="($route.path === '/favorit' || $route.path === '/tersimpan') ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-        >
-          <div class="flex items-center gap-2">
-            <span>Kos Favorit</span>
-          </div>
-          <span
-            v-if="favoritesStore.count > 0"
-            class="px-2 py-0.5 text-[11px] font-bold bg-rose-500 text-white rounded-full"
-          >
-            {{ favoritesStore.count }}
-          </span>
-        </router-link>
-      <router-link
-        to="/about"
-        @click="mobileMenuOpen = false"
-        class="px-3 py-2 rounded-lg text-sm font-medium transition"
-        :class="$route.path === '/about' ? 'bg-primary text-white font-bold' : 'text-slate-700 hover:bg-slate-100'"
-      >
-        Tentang Kami
-      </router-link>
-       
-        <button
-          @click="handleLogout"
-          class="text-left px-3 py-2 rounded-lg text-sm font-semibold text-rose-600 hover:bg-rose-50 transition flex items-center gap-2 cursor-pointer"
-        >
-          <PhSignOut :size="18" weight="bold" />
-          <span>Keluar</span>
-        </button>
-      </template>
-      <template v-else>
-        <div class="pt-2 border-t border-slate-100 flex gap-2">
+          <!-- Masuk Pill Button (Mobile Only - Sleek App Header Style) -->
           <router-link
             to="/login"
-            @click="mobileMenuOpen = false"
-            class="flex-1 text-center px-4 py-2 text-sm font-semibold text-primary bg-slate-100 hover:bg-slate-200 rounded-full transition"
+            class="md:hidden inline-flex items-center justify-center px-3.5 py-1.5 rounded-full text-xs font-bold transition-all shadow-xs active:scale-95 whitespace-nowrap"
+            :class="
+              isTransparent
+                ? 'bg-white/20 text-white backdrop-blur-xs hover:bg-white/30 border border-white/30'
+                : 'bg-primary text-white hover:bg-primary-hover'
+            "
           >
             Masuk
           </router-link>
-          <router-link
-            to="/register"
-            @click="mobileMenuOpen = false"
-            class="flex-1 text-center px-4 py-2 text-sm font-semibold text-white bg-primary hover:bg-primary-hover rounded-full transition"
-          >
-            Daftar
-          </router-link>
-        </div>
-      </template>
+        </template>
+      </div>
     </div>
   </header>
 </template>
@@ -400,8 +280,6 @@ import {
   PhUser,
   PhReceipt,
   PhSignOut,
-  PhX,
-  PhList,
   PhHeart,
   PhMagnifyingGlass,
   PhCode
@@ -412,7 +290,6 @@ const favoritesStore = useFavoritesStore()
 const ui = useUiStore()
 const router = useRouter()
 const route = useRoute()
-const mobileMenuOpen = ref(false)
 
 const isProfileDropdownOpen = ref(false)
 const profileDropdownRef = ref(null)
@@ -427,7 +304,6 @@ watch(
   () => route.path,
   () => {
     isProfileDropdownOpen.value = false
-    mobileMenuOpen.value = false
   }
 )
 
@@ -478,7 +354,6 @@ const handleLogout = async () => {
   })
   if (!confirmed) return
 
-  mobileMenuOpen.value = false
   isProfileDropdownOpen.value = false
   await auth.logout()
   ui.success('Anda telah berhasil keluar.')
