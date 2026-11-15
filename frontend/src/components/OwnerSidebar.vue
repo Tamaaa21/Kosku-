@@ -169,10 +169,10 @@
       </div>
     </aside>
 
-    <!-- Top Bar Header for Pemilik matching ui-dasboard-pemilik.png -->
+    <!-- Top Bar Header for Pemilik -->
     <header class="fixed top-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 z-30 px-4 sm:px-6 lg:px-8 flex items-center justify-between shadow-xs">
-      <!-- Left side: Hamburger & Search Bar -->
-      <div class="flex items-center gap-3 sm:gap-4 flex-1 min-w-0 pr-3">
+      <!-- Left side: Hamburger Button & Title -->
+      <div class="flex items-center gap-3 sm:gap-4 min-w-0">
         <!-- Hamburger Button -->
         <button
           @click="toggleSidebar"
@@ -184,59 +184,13 @@
           <PhList :size="22" weight="bold" />
         </button>
 
-        <!-- Search Bar with Pill Style -->
-        <div class="relative w-full max-w-xs sm:max-w-sm md:max-w-md">
-          <PhMagnifyingGlass
-            :size="18"
-            weight="bold"
-            class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-          />
-          <input
-            v-model="ui.dashboardSearchQuery"
-            type="text"
-            placeholder="Cari kos, kamar, atau nama penyewa..."
-            class="w-full pl-10 pr-4 py-2 bg-slate-100/70 hover:bg-slate-100 focus:bg-white border border-slate-200/80 focus:border-blue-500 rounded-xl text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition"
-          />
-        </div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline-block">Panel Mitra Pemilik</span>
       </div>
 
       <!-- Right Header Actions -->
       <div class="flex items-center gap-2.5 sm:gap-3.5 shrink-0">
         <!-- Notification Dropdown -->
         <NotificationDropdown />
-
-        <!-- Date Range Filter Pill with Dropdown -->
-        <div class="relative hidden sm:block" ref="dateRangeRef">
-          <button
-            @click="isDateRangeOpen = !isDateRangeOpen"
-            class="flex items-center gap-2 px-3 py-1.5 bg-white border border-slate-200 hover:border-slate-300 rounded-xl text-xs font-semibold text-slate-700 shadow-xs hover:bg-slate-50 transition cursor-pointer"
-            type="button"
-          >
-            <PhCalendarBlank :size="16" weight="bold" class="text-slate-500" />
-            <span>{{ ui.selectedDateRange }}</span>
-            <PhCaretDown :size="13" weight="bold" class="text-slate-400 transition-transform" :class="{ 'rotate-180': isDateRangeOpen }" />
-          </button>
-
-          <!-- Date Range Dropdown Menu -->
-          <div
-            v-if="isDateRangeOpen"
-            class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-1.5 z-50 text-xs overflow-hidden"
-          >
-            <div class="px-3.5 py-1.5 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
-              Pilih Rentang Waktu
-            </div>
-            <button
-              v-for="range in dateRangeOptions"
-              :key="range"
-              @click="selectDateRange(range)"
-              class="w-full text-left px-3.5 py-2 hover:bg-slate-50 flex items-center justify-between font-medium text-slate-700 transition cursor-pointer"
-              :class="{ 'text-primary font-bold bg-primary/5': ui.selectedDateRange === range }"
-            >
-              <span>{{ range }}</span>
-              <PhCheck v-if="ui.selectedDateRange === range" :size="14" weight="bold" class="text-primary" />
-            </button>
-          </div>
-        </div>
 
         <!-- User Profile Avatar with Dropdown -->
         <div class="relative" ref="profileRef">
@@ -335,13 +289,9 @@ import {
   PhBuildings,
   PhBed,
   PhCalendarCheck,
-  PhCalendarBlank,
   PhUser,
   PhSignOut,
   PhList,
-  PhMagnifyingGlass,
-  PhCaretDown,
-  PhCheck,
   PhShieldCheck,
   PhLockSimple,
   PhCheckCircle
@@ -352,17 +302,8 @@ const ui = useUiStore()
 const router = useRouter()
 
 const isSidebarOpen = computed(() => ui.ownerSidebarOpen)
-const isDateRangeOpen = ref(false)
 const isProfileMenuOpen = ref(false)
-const dateRangeRef = ref(null)
 const profileRef = ref(null)
-
-const dateRangeOptions = [
-  '26 Okt 2024 - 26 Nov 2024',
-  '12 Nov 2024 - 26 Nov 2024 (14 Hari)',
-  '19 Nov 2024 - 26 Nov 2024 (7 Hari)',
-  'Bulan Ini (Okt 2024)'
-]
 
 const toggleSidebar = () => {
   ui.toggleOwnerSidebar()
@@ -372,15 +313,7 @@ const closeSidebar = () => {
   ui.closeOwnerSidebar()
 }
 
-const selectDateRange = (range) => {
-  ui.setDateRange(range)
-  isDateRangeOpen.value = false
-}
-
 const handleClickOutside = (event) => {
-  if (dateRangeRef.value && !dateRangeRef.value.contains(event.target)) {
-    isDateRangeOpen.value = false
-  }
   if (profileRef.value && !profileRef.value.contains(event.target)) {
     isProfileMenuOpen.value = false
   }

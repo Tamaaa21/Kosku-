@@ -169,7 +169,7 @@
       </div>
     </aside>
 
-    <!-- Top Bar Header for Admin (Spans full width like Owner page - matches ui-dashboard-admin.png) -->
+    <!-- Top Bar Header for Admin -->
     <header class="fixed top-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200/80 z-30 px-4 sm:px-6 lg:px-8 flex items-center justify-between shadow-2xs">
       <div class="flex items-center gap-3 sm:gap-4 min-w-0">
         <!-- Hamburger Button (Visible on both desktop & mobile) -->
@@ -183,30 +183,13 @@
           <PhList :size="22" weight="bold" />
         </button>
 
-        <!-- Search Input Pill (Matching ui-dashboard-admin.png) -->
-        <div class="relative w-56 sm:w-72 md:w-80">
-          <PhMagnifyingGlass :size="16" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 select-none pointer-events-none" />
-          <input
-            v-model="adminSearchQuery"
-            @keydown.enter="handleAdminSearch"
-            type="text"
-            placeholder="Cari pengguna, properti, atau reservasi..."
-            class="w-full pl-9 pr-4 py-2 bg-slate-50 hover:bg-slate-100/70 focus:bg-white text-xs rounded-full border border-slate-200/80 focus:border-primary focus:ring-2 focus:ring-primary/20 transition outline-none text-slate-800 placeholder:text-slate-400"
-          />
-        </div>
+        <span class="text-xs font-bold text-slate-500 uppercase tracking-wider hidden sm:inline-block">Panel Administrator</span>
       </div>
 
       <!-- Right Header Actions -->
       <div class="flex items-center gap-3 sm:gap-4 shrink-0">
         <!-- Notification Dropdown -->
         <NotificationDropdown />
-
-        <!-- Date Range Pill Dropdown -->
-        <div class="hidden sm:flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 select-none">
-          <PhCalendarBlank :size="15" class="text-slate-500" />
-          <span>{{ currentPeriodDateRange }}</span>
-          <PhCaretDown :size="12" class="text-slate-400" />
-        </div>
 
         <!-- Admin Profile Avatar Link -->
         <router-link
@@ -233,7 +216,7 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
@@ -250,9 +233,6 @@ import {
   PhSignOut,
   PhList,
   PhCertificate,
-  PhMagnifyingGlass,
-  PhCalendarBlank,
-  PhCaretDown,
   PhCode
 } from '@phosphor-icons/vue'
 
@@ -260,24 +240,6 @@ const auth = useAuthStore()
 const ui = useUiStore()
 const router = useRouter()
 const isMobileOpen = ref(false)
-const adminSearchQuery = ref('')
-
-const currentPeriodDateRange = computed(() => {
-  const now = new Date()
-  const start = new Date(now.getFullYear(), now.getMonth(), 1)
-  const formatOpts = { day: '2-digit', month: 'short', year: 'numeric' }
-  const startStr = start.toLocaleDateString('id-ID', formatOpts)
-  const endStr = now.toLocaleDateString('id-ID', formatOpts)
-  return `${startStr} - ${endStr}`
-})
-
-const handleAdminSearch = () => {
-  if (!adminSearchQuery.value.trim()) return
-  router.push({
-    path: '/dashboard/admin',
-    query: { tab: 'pengguna', q: adminSearchQuery.value.trim() },
-  })
-}
 
 const handleLogout = async () => {
   const confirmed = await ui.confirm({

@@ -327,7 +327,7 @@
               <PhReceipt :size="24" weight="duotone" />
             </div>
             <div>
-              <h3 class="text-base sm:text-lg font-bold text-on-surface">Detail Reservasi #{{ selectedBooking.id }}</h3>
+              <h3 class="text-base sm:text-lg font-bold text-on-surface">Detail Reservasi #ORD-{{ String(selectedBooking.id).padStart(4, '0') }}</h3>
               <p class="text-xs text-on-surface-variant">
                 Dibuat pada {{ formatDate(selectedBooking.created_at) }}
               </p>
@@ -574,8 +574,9 @@ const updateStatus = async (booking, newStatus) => {
     await api.patch(`/bookings/${booking.id}/status`, {
       status: newStatus
     })
-    ui.success(`Reservasi #${booking.id} berhasil diubah menjadi ${newStatus}.`)
-    successMsg.value = `Reservasi #${booking.id} berhasil diubah menjadi ${newStatus}.`
+    const ordCode = `#ORD-${String(booking.id).padStart(4, '0')}`
+    ui.success(`Reservasi ${ordCode} berhasil diubah menjadi ${newStatus}.`)
+    successMsg.value = `Reservasi ${ordCode} berhasil diubah menjadi ${newStatus}.`
     if (selectedBooking.value && selectedBooking.value.id === booking.id) {
       selectedBooking.value.status = newStatus
     }

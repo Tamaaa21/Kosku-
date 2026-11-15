@@ -56,19 +56,21 @@ export function buildInquiryTemplate({ ownerName = 'Pemilik Kos', kosName = '', 
 }
 
 export function buildTenantInquiryTemplate({ ownerName = 'Pemilik Kos', kosName = '', roomName = '', bookingId = '' }) {
+  const formattedBookingId = bookingId ? `#ORD-${String(bookingId).padStart(4, '0')}` : ''
   return [
     `Halo Bapak/Ibu ${ownerName},`,
     '',
-    `Saya ingin menanyakan perihal pengajuan sewa kos *${kosName}*${roomName ? ` (Kamar: ${roomName})` : ''}${bookingId ? ` [ID Pesanan: #KOS-${bookingId}]` : ''} di Kostara.`,
+    `Saya ingin menanyakan perihal pengajuan sewa kos *${kosName}*${roomName ? ` (Kamar: ${roomName})` : ''}${formattedBookingId ? ` [ID Pesanan: ${formattedBookingId}]` : ''} di Kostara.`,
     'Mohon informasinya, terima kasih!',
   ].join('\n')
 }
 
 export function buildOwnerContactTenantTemplate({ tenantName = 'Calon Penyewa', kosName = '', roomName = '', bookingId = '' }) {
+  const formattedBookingId = bookingId ? `#ORD-${String(bookingId).padStart(4, '0')}` : ''
   return [
     `Halo kak ${tenantName},`,
     '',
-    `Saya pengelola/pemilik dari *${kosName}*. Menindaklanjuti pengajuan sewa Anda untuk kamar *${roomName}*${bookingId ? ` (#KOS-${bookingId})` : ''} melalui Kostara.`,
+    `Saya pengelola/pemilik dari *${kosName}*. Menindaklanjuti pengajuan sewa Anda untuk kamar *${roomName}*${formattedBookingId ? ` (${formattedBookingId})` : ''} melalui Kostara.`,
     'Apakah ada hal atau informasi yang ingin ditanyakan lebih lanjut?',
   ].join('\n')
 }

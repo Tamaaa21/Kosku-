@@ -20,7 +20,10 @@ class RoomController extends Controller
     public function index(int $kosId): AnonymousResourceCollection
     {
         $kos = Kos::findOrFail($kosId);
-        $kamar = $kos->kamar()->orderBy('id', 'asc')->get();
+        $kamar = $kos->kamar()
+            ->orderByRaw("CASE WHEN status = 'tersedia' THEN 0 ELSE 1 END")
+            ->orderBy('id', 'asc')
+            ->get();
 
         return RoomResource::collection($kamar);
     }

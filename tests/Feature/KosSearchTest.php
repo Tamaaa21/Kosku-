@@ -182,4 +182,61 @@ class KosSearchTest extends TestCase
         $response->assertStatus(200);
         $this->assertDatabaseMissing('kos', ['id' => $kos->id]);
     }
+
+    public function test_kos_detail_and_rooms_list_order_available_rooms_before_occupied_rooms(): void
+    {
+        $kos = Kos::factory()->create();
+
+        // Buat kamar dengan urutan: terisi duluan, baru tersedia
+        $roomTerisi1 = Kamar::factory()->create([
+            'kos_id' => $kos->id,
+            'nama_kamar' => 'Kamar 101',
+            'status' => 'terisi',
+        ]);
+        $roomTersedia1 = Kamar::factory()->create([
+            'kos_id' => $kos->id,
+            'nama_kamar' => 'Kamar 102',
+            'status' => 'tersedia',
+        ]);
+        $roomTerisi2 = Kamar::factory()->create([
+            'kos_id' => $kos->id,
+            'nama_kamar' => 'Kamar 103',
+            'status' => 'terisi',
+        ]);
+        $roomTersedia2 = Kamar::factory()->create([
+            'kos_id' => $kos->id,
+            'nama_kamar' => 'Kamar 104',
+            'status' => 'tersedia',
+        ]);
+
+        // Verifikasi pada endpoint GET /api/v1/kos/{id}
+        $detailResponse = $this->getJson("/api/v1/kos/{$kos->id}");
+        $detailResponse->assertStatus(200);
+
+        $kamarDetail = $detailResponse->json('data.kamar');
+        $this->assertCount(4, $kamarDetail);
+        $this->assertEquals($roomTersedia1->id, $kamarDetail[0]['id']);
+        $this->assertEquals('tersedia', $kamarDetail[0]['status']);
+        $this->assertEquals($roomTersedia2->id, $kamarDetail[1]['id']);
+        $this->assertEquals('tersedia', $kamarDetail[1]['status']);
+        $this->assertEquals($roomTerisi1->id, $kamarDetail[2]['id']);
+        $this->assertEquals('terisi', $kamarDetail[2]['status']);
+        $this->assertEquals($roomTerisi2->id, $kamarDetail[3]['id']);
+        $this->assertEquals('terisi', $kamarDetail[3]['status']);
+
+        // Verifikasi pada endpoint GET /api/v1/kos/{id}/rooms
+        $roomsResponse = $this->getJson("/api/v1/kos/{$kos->id}/rooms");
+        $roomsResponse->assertStatus(200);
+
+        $roomsList = $roomsResponse->json('data');
+        $this->assertCount(4, $roomsList);
+        $this->assertEquals($roomTersedia1->id, $roomsList[0]['id']);
+        $this->assertEquals('tersedia', $roomsList[0]['status']);
+        $this->assertEquals($roomTersedia2->id, $roomsList[1]['id']);
+        $this->assertEquals('tersedia', $roomsList[1]['status']);
+        $this->assertEquals($roomTerisi1->id, $roomsList[2]['id']);
+        $this->assertEquals('terisi', $roomsList[2]['status']);
+        $this->assertEquals($roomTerisi2->id, $roomsList[3]['id']);
+        $this->assertEquals('terisi', $roomsList[3]['status']);
+    }
 }

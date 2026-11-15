@@ -797,7 +797,7 @@
                     <div>
                       <div class="font-bold text-slate-900">{{ user.nama }}</div>
                       <div class="text-[11px] text-slate-400 font-mono">
-                        {{ user.role === 'pemilik' ? '#PMK-' : '#USR-' }}{{ user.id }} &bull; {{ user.email }}
+                        <span class="font-bold text-slate-500">{{ formatUserId(user) }}</span> &bull; {{ user.email }}
                       </div>
                     </div>
                   </div>
@@ -1045,7 +1045,7 @@
                 <td class="py-3.5 px-4">
                   <div class="font-bold text-slate-900 group-hover:text-primary transition line-clamp-1">{{ kos.nama }}</div>
                   <div class="flex items-center gap-2 mt-0.5">
-                    <span class="text-[10px] font-mono text-slate-400">#KOS-{{ kos.id }}</span>
+                    <span class="text-[10px] font-mono font-bold text-slate-500 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200/60">{{ formatKosId(kos.id) }}</span>
                     <span class="text-[10px] font-extrabold text-emerald-600 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
                       {{ formatRupiah(kos.harga) }}/bln
                     </span>
@@ -1309,8 +1309,10 @@
                 :key="b.id"
                 class="hover:bg-slate-50/70 transition"
               >
-                <td class="py-3.5 px-4 text-center font-mono font-black text-slate-900">
-                  #ORD-{{ b.id }}
+                <td class="py-3.5 px-4 text-center">
+                  <span class="inline-block px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200/80 font-mono text-[11px] font-bold shadow-2xs">
+                    {{ formatOrderId(b.id) }}
+                  </span>
                 </td>
                 <td class="py-3.5 px-4">
                   <div class="flex items-center gap-2.5">
@@ -2194,7 +2196,7 @@
                 Pratinjau Listing Kos
               </h3>
               <p class="text-[11px] text-slate-400 font-mono">
-                ID: #KOS-{{ selectedKosPreview?.id }}
+                ID: {{ formatKosId(selectedKosPreview?.id) }}
               </p>
             </div>
           </div>
@@ -2353,7 +2355,7 @@
             <div>
               <div class="flex items-center gap-2">
                 <h3 class="text-base font-black text-slate-900">
-                  Audit Pemesanan #ORD-{{ selectedBookingDetail?.id }}
+                  Audit Pemesanan {{ formatOrderId(selectedBookingDetail?.id) }}
                 </h3>
                 <span
                   :class="[
@@ -2498,7 +2500,7 @@
                 </span>
               </div>
               <p class="text-xs text-slate-400 mt-0.5 font-mono">
-                ID: {{ selectedUserDetail?.role === 'pemilik' ? '#PMK-' : '#USR-' }}{{ selectedUserDetail?.id }} &bull; Bergabung: {{ formatDate(selectedUserDetail?.created_at) }}
+                ID: {{ formatUserId(selectedUserDetail) }} &bull; Bergabung: {{ formatDate(selectedUserDetail?.created_at) }}
               </p>
             </div>
           </div>
@@ -3310,6 +3312,24 @@ const formatRupiah = (val) => {
   }).format(val || 0)
 }
 
+const formatOrderId = (id) => {
+  if (!id) return '-'
+  return `#ORD-${String(id).padStart(4, '0')}`
+}
+
+const formatUserId = (user) => {
+  if (!user) return '-'
+  const id = typeof user === 'object' ? user.id : user
+  const role = typeof user === 'object' ? user.role : 'pencari'
+  const prefix = role === 'pemilik' ? '#PMK-' : '#USR-'
+  return `${prefix}${String(id).padStart(4, '0')}`
+}
+
+const formatKosId = (id) => {
+  if (!id) return '-'
+  return `#KOS-${String(id).padStart(4, '0')}`
+}
+
 let userSearchTimeout = null
 const debounceUserSearch = () => {
   clearTimeout(userSearchTimeout)
@@ -3441,7 +3461,7 @@ const deleteKosModerasi = async (kos) => {
   if (!kos) return
   const confirmDelete = await ui.confirm({
     title: 'Hapus Properti Kos (Moderasi)',
-    message: `Apakah Anda yakin ingin MENGHAPUS properti "${kos.nama}" (#KOS-${kos.id})?\n\nTindakan ini bersifat permanen dan akan menghapus seluruh data kamar, fasilitas terkait, dan riwayat pesanan kos ini.`,
+    message: `Apakah Anda yakin ingin MENGHAPUS properti "${kos.nama}" (${formatKosId(kos.id)})?\n\nTindakan ini bersifat permanen dan akan menghapus seluruh data kamar, fasilitas terkait, dan riwayat pesanan kos ini.`,
     confirmText: 'Ya, Hapus Properti',
     cancelText: 'Batal',
     confirmType: 'danger',
@@ -3472,7 +3492,7 @@ const chatKosPemilik = (kos) => {
     return
   }
 
-  const message = `Halo Bapak/Ibu Mitra Kostara ${kos.pemilik.nama},\n\nKami dari tim Moderasi & Administrator Kostara ingin berkoordinasi mengenai listing properti Anda: "${kos.nama}" (ID: #KOS-${kos.id}) yang berlokasi di ${kos.alamat}.\n\nMohon konfirmasi ketersediaan dan status operasional terbaru kos Anda.\n\nTerima kasih!`
+  const message = `Halo Bapak/Ibu Mitra Kostara ${kos.pemilik.nama},\n\nKami dari tim Moderasi & Administrator Kostara ingin berkoordinasi mengenai listing properti Anda: "${kos.nama}" (ID: ${formatKosId(kos.id)}) yang berlokasi di ${kos.alamat}.\n\nMohon konfirmasi ketersediaan dan status operasional terbaru kos Anda.\n\nTerima kasih!`
   openWhatsAppChat(phone, message)
 }
 
@@ -3532,7 +3552,7 @@ const updateBookingStatus = async (booking, newStatus) => {
   if (!booking) return
   const confirmed = await ui.confirm({
     title: 'Konfirmasi Status Pemesanan',
-    message: `Ubah status pemesanan #ORD-${booking.id} menjadi "${newStatus.toUpperCase()}"?`,
+    message: `Ubah status pemesanan ${formatOrderId(booking.id)} menjadi "${newStatus.toUpperCase()}"?`,
     confirmText: 'Ya, Ubah Status',
     cancelText: 'Batal',
     confirmType: newStatus === 'ditolak' || newStatus === 'dibatalkan' ? 'danger' : 'primary',
@@ -3544,7 +3564,7 @@ const updateBookingStatus = async (booking, newStatus) => {
   updatingBookingId.value = booking.id
   try {
     const res = await api.patch(`/bookings/${booking.id}/status`, { status: newStatus })
-    successMsg.value = res.data?.message || `Status pesanan #ORD-${booking.id} berhasil diubah menjadi ${newStatus}.`
+    successMsg.value = res.data?.message || `Status pesanan ${formatOrderId(booking.id)} berhasil diubah menjadi ${newStatus}.`
     booking.status = newStatus
     if (selectedBookingDetail.value && selectedBookingDetail.value.id === booking.id) {
       selectedBookingDetail.value.status = newStatus
@@ -3566,7 +3586,7 @@ const chatPenyewaWhatsApp = (booking) => {
     return
   }
 
-  const message = `Halo Kak ${booking.pengguna.nama},\n\nKami dari Administrator Layanan Kostara ingin mengonfirmasi pesanan sewa Anda (#ORD-${booking.id}) untuk properti "${booking.kos?.nama || 'Kos'}" (Kamar: ${booking.kamar?.nama_kamar || '-'}).\n\nStatus pesanan Anda saat ini: ${booking.status.toUpperCase()}.\n\nApakah ada pertanyaan atau kendala yang bisa kami bantu?\n\nTerima kasih!`
+  const message = `Halo Kak ${booking.pengguna.nama},\n\nKami dari Administrator Layanan Kostara ingin mengonfirmasi pesanan sewa Anda (${formatOrderId(booking.id)}) untuk properti "${booking.kos?.nama || 'Kos'}" (Kamar: ${booking.kamar?.nama_kamar || '-'}).\n\nStatus pesanan Anda saat ini: ${booking.status.toUpperCase()}.\n\nApakah ada pertanyaan atau kendala yang bisa kami bantu?\n\nTerima kasih!`
   openWhatsAppChat(phone, message)
 }
 
@@ -3588,7 +3608,7 @@ const exportBookingsToCSV = () => {
 
   const headers = ['ID Pesanan', 'Nama Penyewa', 'Email', 'Telepon', 'Nama Kos', 'Nama Kamar', 'Durasi Sewa', 'Total Biaya', 'Tanggal Masuk', 'Tanggal Selesai', 'Status', 'Tanggal Pengajuan']
   const rows = allBookings.value.map(b => [
-    `#ORD-${b.id}`,
+    formatOrderId(b.id),
     `"${(b.pengguna?.nama || '-').replace(/"/g, '""')}"`,
     `"${(b.pengguna?.email || '-').replace(/"/g, '""')}"`,
     `"${(b.pengguna?.telepon || '-').replace(/"/g, '""')}"`,

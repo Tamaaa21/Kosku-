@@ -464,13 +464,16 @@
 
             <div v-else class="space-y-2.5">
               <div
-                v-for="kamar in kos.kamar"
+                v-for="kamar in sortedKamar"
                 :key="kamar.id"
                 :class="[
-                  'p-3.5 rounded-xl border transition flex items-center justify-between cursor-pointer',
+                  'p-3.5 rounded-xl border transition flex items-center justify-between',
+                  kamar.status === 'tersedia'
+                    ? 'cursor-pointer hover:border-slate-300'
+                    : 'cursor-not-allowed opacity-60 bg-slate-50/80 border-slate-200 select-none',
                   selectedKamar?.id === kamar.id
                     ? 'border-primary bg-primary/5 ring-1 ring-primary'
-                    : 'border-slate-200 bg-white hover:border-slate-300'
+                    : (kamar.status === 'tersedia' ? 'border-slate-200 bg-white' : '')
                 ]"
                 @click="kamar.status === 'tersedia' ? selectKamar(kamar) : null"
               >
@@ -502,7 +505,7 @@
                             : 'bg-rose-50 text-rose-700 border-rose-200'
                         ]"
                       >
-                        {{ kamar.status }}
+                        {{ kamar.status === 'tersedia' ? 'Tersedia' : 'Sudah Terisi' }}
                       </span>
                     </div>
                     <div class="flex items-center gap-1.5 flex-wrap">
@@ -526,12 +529,14 @@
                 <div>
                   <button
                     v-if="kamar.status === 'tersedia'"
-                    class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition"
-                    :class="selectedKamar?.id === kamar.id ? 'bg-primary text-white' : 'bg-surface-container text-primary hover:bg-primary hover:text-white'"
+                    class="px-3.5 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer"
+                    :class="selectedKamar?.id === kamar.id ? 'bg-primary text-white shadow-xs' : 'bg-surface-container text-primary hover:bg-primary hover:text-white'"
                   >
                     {{ selectedKamar?.id === kamar.id ? 'Terpilih' : 'Pilih Kamar' }}
                   </button>
-                  <span v-else class="text-xs text-slate-400 font-medium italic">Tidak Tersedia</span>
+                  <span v-else class="text-xs text-slate-400 font-medium italic px-2.5 py-1 bg-slate-100/90 rounded-lg border border-slate-200/80">
+                    Sudah Terisi
+                  </span>
                 </div>
               </div>
             </div>
@@ -752,12 +757,27 @@ const availableRoomsCount = computed(() => {
   return kos.value.kamar.filter((k) => k.status === 'tersedia').length
 })
 
+// Urutkan kamar: kamar berstatus 'tersedia' berada di atas, kamar yang 'terisi' berada di bawah
+const sortedKamar = computed(() => {
+  if (!kos.value?.kamar || !Array.isArray(kos.value.kamar)) return []
+  return [...kos.value.kamar].sort((a, b) => {
+    const priorityA = a.status === 'tersedia' ? 0 : 1
+    const priorityB = b.status === 'tersedia' ? 0 : 1
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB
+    }
+    return (a.id || 0) - (b.id || 0)
+  })
+})
+
 const isDurationAvailable = (durasi) => {
   if (durasi === 'bulanan') return true
   if (selectedKamar.value) {
-    const durations = selectedKamar.value.durasi_sewa || ['bulanan']
-    if (durasi === 'harian') return durations.includes('harian') && Boolean(selectedKamar.value.harga_harian)
-    if (durasi === 'mingguan') return durations.includes('mingguan') && Boolean(selectedKamar.value.harga_mingguan)
+    const durations = selectedKamar.value.durasi_sewa || kos.value?.durasi_sewa || ['bulanan']
+    const hasDailyPrice = Boolean(selectedKamar.value.harga_harian || kos.value?.harga_harian)
+    const hasWeeklyPrice = Boolean(selectedKamar.value.harga_mingguan || kos.value?.harga_mingguan)
+    if (durasi === 'harian') return durations.includes('harian') && hasDailyPrice
+    if (durasi === 'mingguan') return durations.includes('mingguan') && hasWeeklyPrice
   }
   const kosDurations = kos.value?.durasi_sewa || ['bulanan']
   if (durasi === 'harian') return kosDurations.includes('harian') && Boolean(kos.value?.harga_harian)
@@ -911,7 +931,7 @@ const fetchKosDetail = async () => {
 
     // Otomatis pilih kamar pertama yang berstatus tersedia jika ada
     if (kos.value.kamar && kos.value.kamar.length > 0) {
-      const firstAvailable = kos.value.kamar.find((k) => k.status === 'tersedia')
+      const firstAvailable = sortedKamar.value.find((k) => k.status === 'tersedia')
       if (firstAvailable) {
         selectedKamar.value = firstAvailable
       }

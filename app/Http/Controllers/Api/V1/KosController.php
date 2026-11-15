@@ -214,7 +214,14 @@ class KosController extends Controller
      */
     public function show(int $id): JsonResponse
     {
-        $kos = Kos::with(['pemilik', 'fasilitas', 'kamar', 'ulasan.pengguna'])->findOrFail($id);
+        $kos = Kos::with([
+            'pemilik',
+            'fasilitas',
+            'kamar' => function ($query) {
+                $query->orderByRaw("CASE WHEN status = 'tersedia' THEN 0 ELSE 1 END")->orderBy('id', 'asc');
+            },
+            'ulasan.pengguna',
+        ])->findOrFail($id);
 
         return response()->json([
             'data' => new KosResource($kos),

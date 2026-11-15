@@ -424,6 +424,7 @@
                     type="checkbox"
                     value="mingguan"
                     v-model="formData.durasi_sewa"
+                    @change="!formData.durasi_sewa.includes('mingguan') ? formData.harga_mingguan = null : null"
                     class="rounded text-primary focus:ring-primary h-4 w-4"
                   />
                   <div>
@@ -437,6 +438,7 @@
                     type="checkbox"
                     value="harian"
                     v-model="formData.durasi_sewa"
+                    @change="!formData.durasi_sewa.includes('harian') ? formData.harga_harian = null : null"
                     class="rounded text-primary focus:ring-primary h-4 w-4"
                   />
                   <div>
@@ -450,7 +452,7 @@
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
                 <div class="flex flex-col gap-1">
                   <label class="text-[11px] font-semibold text-on-surface">
-                    Tarif Bulanan (Rp) <span class="text-rose-500">*</span>
+                    Tarif Bulanan (Rp) <span class="text-rose-500 font-bold">*</span>
                   </label>
                   <input
                     v-model.number="formData.harga"
@@ -465,8 +467,8 @@
 
                 <div class="flex flex-col gap-1">
                   <label class="text-[11px] font-semibold text-on-surface flex items-center justify-between">
-                    <span>Tarif Mingguan (Rp)</span>
-                    <span v-if="formData.durasi_sewa.includes('mingguan')" class="text-[9px] font-bold text-amber-600">Aktif</span>
+                    <span>Tarif Mingguan (Rp) <span v-if="formData.durasi_sewa.includes('mingguan')" class="text-rose-500 font-bold">*</span></span>
+                    <span v-if="formData.durasi_sewa.includes('mingguan')" class="text-[9px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">Wajib Diisi</span>
                   </label>
                   <input
                     v-model.number="formData.harga_mingguan"
@@ -474,15 +476,19 @@
                     min="25000"
                     step="25000"
                     :disabled="!formData.durasi_sewa.includes('mingguan')"
+                    :required="formData.durasi_sewa.includes('mingguan')"
                     placeholder="Contoh: 300000"
                     class="h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-slate-100 disabled:opacity-60"
                   />
+                  <span v-if="formData.durasi_sewa.includes('mingguan') && !formData.harga_mingguan" class="text-[10px] text-rose-500">
+                    Wajib diisi bila opsi mingguan aktif
+                  </span>
                 </div>
 
                 <div class="flex flex-col gap-1">
                   <label class="text-[11px] font-semibold text-on-surface flex items-center justify-between">
-                    <span>Tarif Harian (Rp)</span>
-                    <span v-if="formData.durasi_sewa.includes('harian')" class="text-[9px] font-bold text-amber-600">Aktif</span>
+                    <span>Tarif Harian (Rp) <span v-if="formData.durasi_sewa.includes('harian')" class="text-rose-500 font-bold">*</span></span>
+                    <span v-if="formData.durasi_sewa.includes('harian')" class="text-[9px] font-bold text-amber-600 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">Wajib Diisi</span>
                   </label>
                   <input
                     v-model.number="formData.harga_harian"
@@ -490,9 +496,13 @@
                     min="10000"
                     step="10000"
                     :disabled="!formData.durasi_sewa.includes('harian')"
+                    :required="formData.durasi_sewa.includes('harian')"
                     placeholder="Contoh: 75000"
                     class="h-10 px-3 bg-white border border-slate-200 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:bg-slate-100 disabled:opacity-60"
                   />
+                  <span v-if="formData.durasi_sewa.includes('harian') && !formData.harga_harian" class="text-[10px] text-rose-500">
+                    Wajib diisi bila opsi harian aktif
+                  </span>
                 </div>
               </div>
             </div>
@@ -877,6 +887,33 @@ const saveKamar = async () => {
   saving.value = true
   errorMsg.value = ''
   successMsg.value = ''
+
+  if (!formData.value.durasi_sewa || formData.value.durasi_sewa.length === 0) {
+    formData.value.durasi_sewa = ['bulanan']
+  }
+  if (!formData.value.harga || formData.value.harga <= 0) {
+    errorMsg.value = 'Tarif sewa bulanan wajib diisi dan harus lebih dari Rp 0.'
+    saving.value = false
+    return
+  }
+  if (formData.value.durasi_sewa.includes('mingguan') && (!formData.value.harga_mingguan || formData.value.harga_mingguan <= 0)) {
+    errorMsg.value = 'Tarif sewa mingguan wajib diisi karena durasi mingguan diaktifkan.'
+    saving.value = false
+    return
+  }
+  if (formData.value.durasi_sewa.includes('harian') && (!formData.value.harga_harian || formData.value.harga_harian <= 0)) {
+    errorMsg.value = 'Tarif sewa harian wajib diisi karena durasi harian diaktifkan.'
+    saving.value = false
+    return
+  }
+
+  // Bersihkan nilai harga jika opsi durasi tidak dicentang
+  if (!formData.value.durasi_sewa.includes('mingguan')) {
+    formData.value.harga_mingguan = null
+  }
+  if (!formData.value.durasi_sewa.includes('harian')) {
+    formData.value.harga_harian = null
+  }
 
   try {
     if (isEditing.value) {
