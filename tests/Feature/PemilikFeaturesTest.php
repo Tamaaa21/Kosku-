@@ -241,4 +241,90 @@ class PemilikFeaturesTest extends TestCase
                 'message' => 'Kamar tidak dapat dihapus karena sedang memiliki transaksi pemesanan aktif.',
             ]);
     }
+
+    public function test_pemilik_can_get_active_tenants_and_summary_metrics(): void
+    {
+        $pemilik = Pengguna::factory()->create([
+            'role' => 'pemilik',
+            'aktif' => true,
+        ]);
+        Sanctum::actingAs($pemilik);
+
+        $kos = Kos::factory()->create(['pemilik_id' => $pemilik->id]);
+        $kamar1 = Kamar::factory()->terisi()->create(['kos_id' => $kos->id]);
+        $kamar2 = Kamar::factory()->terisi()->create(['kos_id' => $kos->id]);
+        $pencari1 = Pengguna::factory()->create(['role' => 'pencari', 'nama' => 'Penyewa Aktif 1']);
+        $pencari2 = Pengguna::factory()->create(['role' => 'pencari', 'nama' => 'Penyewa Masuk 2']);
+
+        // Active tenant
+        Pemesanan::factory()->create([
+            'pengguna_id' => $pencari1->id,
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar1->id,
+            'status' => 'aktif',
+            'tanggal_pemesanan' => now()->subDays(10)->toDateString(),
+            'tanggal_selesai' => now()->addDays(5)->toDateString(),
+        ]);
+
+        // Incoming tenant (dp_dibayar)
+        Pemesanan::factory()->create([
+            'pengguna_id' => $pencari2->id,
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar2->id,
+            'status' => 'dp_dibayar',
+            'status_pembayaran' => 'dp_dibayar',
+            'tanggal_pemesanan' => now()->addDays(2)->toDateString(),
+            'tanggal_selesai' => now()->addMonths(1)->toDateString(),
+        ]);
+
+        $response = $this->getJson('/api/v1/pemilik/penghuni');
+
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                'success',
+                'summary' => [
+                    'total_penghuni',
+                    'total_siap_masuk',
+                    'total_jatuh_tempo',
+                    'kamar_terisi',
+                ],
+                'data',
+            ]);
+
+        $this->assertEquals(1, $response->json('summary.total_penghuni'));
+        $this->assertEquals(1, $response->json('summary.total_siap_masuk'));
+        $this->assertEquals(1, $response->json('summary.total_jatuh_tempo')); // sisa 5 hari <= 7 hari
+        $this->assertCount(2, $response->json('data'));
+    }
+
+    public function test_pemilik_can_checkout_tenant_and_free_room(): void
+    {
+        $pemilik = Pengguna::factory()->create([
+            'role' => 'pemilik',
+            'aktif' => true,
+        ]);
+        Sanctum::actingAs($pemilik);
+
+        $kos = Kos::factory()->create(['pemilik_id' => $pemilik->id]);
+        $kamar = Kamar::factory()->terisi()->create(['kos_id' => $kos->id]);
+        $pencari = Pengguna::factory()->create(['role' => 'pencari']);
+
+        $pemesanan = Pemesanan::factory()->create([
+            'pengguna_id' => $pencari->id,
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar->id,
+            'status' => 'aktif',
+        ]);
+
+        $response = $this->postJson("/api/v1/pemilik/penghuni/{$pemesanan->id}/checkout");
+
+        $response->assertStatus(200)
+            ->assertJson([
+                'success' => true,
+                'message' => 'Penghuni berhasil di-checkout dan kamar kembali tersedia.',
+            ]);
+
+        $this->assertEquals('selesai', $pemesanan->fresh()->status);
+        $this->assertEquals('tersedia', $kamar->fresh()->status);
+    }
 }

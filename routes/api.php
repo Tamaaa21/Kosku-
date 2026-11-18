@@ -2,15 +2,19 @@
 
 use App\Http\Controllers\Api\V1\AdminKosController;
 use App\Http\Controllers\Api\V1\AdminUserController;
+use App\Http\Controllers\Api\V1\AdminWithdrawalController;
 use App\Http\Controllers\Api\V1\AuthController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\FacilityController;
 use App\Http\Controllers\Api\V1\HeroBannerController;
 use App\Http\Controllers\Api\V1\KosController;
+use App\Http\Controllers\Api\V1\MidtransWebhookController;
+use App\Http\Controllers\Api\V1\PaymentController;
 use App\Http\Controllers\Api\V1\PropertyVerificationController;
 use App\Http\Controllers\Api\V1\ReviewController;
 use App\Http\Controllers\Api\V1\RoomController;
 use App\Http\Controllers\Api\V1\UploadController;
+use App\Http\Controllers\Api\V1\WalletController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->name('api.v1.')->group(function (): void {
@@ -44,6 +48,9 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
 
     // Hero Banners (Homepage Slider)
     Route::get('/hero-banners', [HeroBannerController::class, 'publicIndex'])->name('hero-banners.index');
+
+    // Midtrans Payment Webhook
+    Route::post('/webhooks/midtrans', [MidtransWebhookController::class, 'handle'])->name('webhooks.midtrans');
 
     // ------------------------------------------------------------------------
     // Authenticated Endpoints (Sanctum)
@@ -96,6 +103,36 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
         Route::get('/pemesanan/{id}', [BookingController::class, 'show']);
         Route::patch('/pemesanan/{id}/status', [BookingController::class, 'updateStatus']);
 
+        // Payment & Key Handover Flow
+        Route::post('/bookings/{id}/checkout-dp', [PaymentController::class, 'checkoutDp'])->name('bookings.checkout-dp');
+        Route::post('/bookings/{id}/checkout-pelunasan', [PaymentController::class, 'checkoutPelunasan'])->name('bookings.checkout-pelunasan');
+        Route::post('/bookings/{id}/handover-key', [PaymentController::class, 'handoverKey'])->name('bookings.handover-key');
+        Route::get('/bookings/{id}/payment-status', [PaymentController::class, 'checkStatus'])->name('bookings.payment-status');
+        Route::post('/bookings/{id}/sync-status', [PaymentController::class, 'syncStatus'])->name('bookings.sync-status');
+        // Legacy payment aliases
+        Route::post('/pemesanan/{id}/checkout-dp', [PaymentController::class, 'checkoutDp']);
+        Route::post('/pemesanan/{id}/checkout-pelunasan', [PaymentController::class, 'checkoutPelunasan']);
+        Route::post('/pemesanan/{id}/handover-key', [PaymentController::class, 'handoverKey']);
+        Route::get('/pemesanan/{id}/payment-status', [PaymentController::class, 'checkStatus']);
+        Route::post('/pemesanan/{id}/sync-status', [PaymentController::class, 'syncStatus']);
+
+        // Mitra Wallet & Balance (Pemilik)
+        Route::middleware('role:pemilik')->group(function (): void {
+            Route::get('/wallet/summary', [WalletController::class, 'summary'])->name('wallet.summary');
+            Route::get('/wallet/mutations', [WalletController::class, 'mutations'])->name('wallet.mutations');
+            Route::get('/wallet/bank-accounts', [WalletController::class, 'bankAccounts'])->name('wallet.bank-accounts');
+            Route::post('/wallet/bank-accounts', [WalletController::class, 'addBankAccount'])->name('wallet.bank-accounts.store');
+            Route::delete('/wallet/bank-accounts/{id}', [WalletController::class, 'deleteBankAccount'])->name('wallet.bank-accounts.destroy');
+            Route::get('/wallet/withdrawals', [WalletController::class, 'withdrawals'])->name('wallet.withdrawals');
+            Route::post('/wallet/withdrawals', [WalletController::class, 'requestWithdrawal'])->name('wallet.withdrawals.store');
+        });
+
+        // Manajemen Penghuni Aktif (Mitra Pemilik & Admin)
+        Route::middleware(['role:pemilik,admin'])->group(function (): void {
+            Route::get('/pemilik/penghuni', [BookingController::class, 'activeTenants'])->name('pemilik.penghuni');
+            Route::post('/pemilik/penghuni/{id}/checkout', [BookingController::class, 'checkoutTenant'])->name('pemilik.penghuni.checkout');
+        });
+
         // Reviews & Rating
         Route::get('/kos/{id}/reviews/eligibility', [ReviewController::class, 'eligibility'])->name('kos.reviews.eligibility');
         Route::post('/kos/{id}/reviews', [ReviewController::class, 'store'])->middleware('role:pencari')->name('kos.reviews.store');
@@ -132,6 +169,11 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
             // Kos Moderation
             Route::get('/admin/kos', [AdminKosController::class, 'index'])->name('admin.kos.index');
             Route::delete('/admin/kos/{id}', [AdminKosController::class, 'destroy'])->name('admin.kos.destroy');
+
+            // Withdrawals Moderation
+            Route::get('/admin/withdrawals', [AdminWithdrawalController::class, 'index'])->name('admin.withdrawals.index');
+            Route::post('/admin/withdrawals/{id}/approve', [AdminWithdrawalController::class, 'approve'])->name('admin.withdrawals.approve');
+            Route::post('/admin/withdrawals/{id}/reject', [AdminWithdrawalController::class, 'reject'])->name('admin.withdrawals.reject');
 
             // Hero Banner Slider Management
             Route::get('/admin/hero-banners', [HeroBannerController::class, 'index'])->name('admin.hero-banners.index');

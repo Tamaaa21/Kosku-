@@ -213,6 +213,14 @@ class BookingController extends Controller
 
             $totalHarga = $rate * $durasiJumlah;
 
+            $persentaseDp = (int) config('midtrans.dp_percentage', 20);
+            $nominalDp = (int) round(($totalHarga * $persentaseDp) / 100);
+            $sisaPelunasan = $totalHarga - $nominalDp;
+
+            $komisiPersen = (int) config('midtrans.commission_percentage', 5);
+            $komisiNominal = (int) round(($totalHarga * $komisiPersen) / 100);
+            $totalHakMitra = $totalHarga - $komisiNominal;
+
             return Pemesanan::create([
                 'pengguna_id' => $user->id,
                 'kos_id' => $kamar->kos_id,
@@ -222,6 +230,13 @@ class BookingController extends Controller
                 'durasi_jumlah' => $durasiJumlah,
                 'tanggal_selesai' => $endDate->format('Y-m-d'),
                 'total_harga' => $totalHarga,
+                'persentase_dp' => $persentaseDp,
+                'nominal_dp' => $nominalDp,
+                'sisa_pelunasan' => $sisaPelunasan,
+                'komisi_persen' => $komisiPersen,
+                'komisi_nominal' => $komisiNominal,
+                'total_hak_mitra' => $totalHakMitra,
+                'status_pembayaran' => 'belum_dibayar',
                 'status' => 'menunggu',
             ]);
         });
@@ -303,6 +318,187 @@ class BookingController extends Controller
         return response()->json([
             'message' => "Status pemesanan berhasil diperbarui menjadi {$newStatus}.",
             'data' => new BookingResource($pemesanan),
+        ]);
+    }
+
+    /**
+     * Get active tenants for properties owned by the authenticated owner.
+     */
+    public function activeTenants(Request $request): JsonResponse
+    {
+        $user = $request->user();
+
+        if (! in_array($user->role, ['pemilik', 'admin'], true)) {
+            return response()->json([
+                'message' => 'Hanya mitra pemilik kos dan administrator yang dapat mengakses daftar penghuni.',
+            ], 403);
+        }
+
+        $baseQuery = Pemesanan::query()->with(['pengguna', 'kos.pemilik', 'kamar'])
+            ->whereIn('status', ['dp_dibayar', 'siap_serah_terima', 'aktif', 'disetujui']);
+
+        if ($user->role === 'pemilik') {
+            $baseQuery->whereHas('kos', function ($q) use ($user): void {
+                $q->where('pemilik_id', $user->id);
+            });
+        }
+
+        // Summary counts
+        $allOwnerActiveBookings = (clone $baseQuery)->get();
+        $totalPenghuni = $allOwnerActiveBookings->where('status', 'aktif')->count();
+        $totalSiapMasuk = $allOwnerActiveBookings->whereIn('status', ['dp_dibayar', 'siap_serah_terima', 'disetujui'])->count();
+
+        $today = Carbon::today();
+        $sevenDaysLater = Carbon::today()->addDays(7);
+        $totalJatuhTempo = $allOwnerActiveBookings->filter(function ($item) use ($sevenDaysLater): bool {
+            if ($item->status !== 'aktif' || ! $item->tanggal_selesai) {
+                return false;
+            }
+            $endDate = Carbon::parse($item->tanggal_selesai);
+
+            return $endDate->lte($sevenDaysLater);
+        })->count();
+
+        $kamarTerisiQuery = Kamar::query()->where('status', 'terisi');
+        if ($user->role === 'pemilik') {
+            $kamarTerisiQuery->whereHas('kos', fn ($k) => $k->where('pemilik_id', $user->id));
+        }
+        $kamarTerisi = $kamarTerisiQuery->count();
+
+        // Apply filters
+        $query = clone $baseQuery;
+
+        $filter = $request->input('filter', 'all');
+        if ($filter === 'aktif') {
+            $query->where('status', 'aktif');
+        } elseif ($filter === 'siap_masuk') {
+            $query->whereIn('status', ['dp_dibayar', 'siap_serah_terima', 'disetujui']);
+        } elseif ($filter === 'jatuh_tempo') {
+            $query->where('status', 'aktif')
+                ->where('tanggal_selesai', '<=', $sevenDaysLater->format('Y-m-d'));
+        }
+
+        if ($request->filled('q')) {
+            $keyword = (string) $request->input('q');
+            $cleanDigits = preg_replace('/\D/', '', $keyword);
+
+            $query->where(function ($q) use ($keyword, $cleanDigits): void {
+                if (! empty($cleanDigits)) {
+                    $q->orWhere('id', (int) $cleanDigits);
+                }
+                $q->orWhereHas('pengguna', function ($u) use ($keyword): void {
+                    $u->where('nama', 'like', "%{$keyword}%")
+                        ->orWhere('email', 'like', "%{$keyword}%")
+                        ->orWhere('telepon', 'like', "%{$keyword}%");
+                })->orWhereHas('kos', function ($k) use ($keyword): void {
+                    $k->where('nama', 'like', "%{$keyword}%");
+                })->orWhereHas('kamar', function ($r) use ($keyword): void {
+                    $r->where('nama_kamar', 'like', "%{$keyword}%");
+                });
+            });
+        }
+
+        $tenants = $query->orderBy('tanggal_selesai', 'asc')->get();
+
+        $data = $tenants->map(function ($item) use ($today) {
+            $endDate = $item->tanggal_selesai ? Carbon::parse($item->tanggal_selesai) : null;
+            $sisaHari = $endDate ? (int) $today->diffInDays($endDate, false) : null;
+
+            $statusLabel = match ($item->status) {
+                'aktif' => $sisaHari !== null && $sisaHari < 0
+                    ? 'Masa Sewa Habis'
+                    : ($sisaHari !== null && $sisaHari <= 7 ? "Segera Berakhir (H-{$sisaHari})" : 'Aktif'),
+                'siap_serah_terima' => 'Lunas - Siap Serah Kunci',
+                'dp_dibayar' => 'DP Terbayar - Siap Masuk',
+                'disetujui' => 'Disetujui - Belum DP',
+                default => ucfirst((string) $item->status),
+            };
+
+            return [
+                'id' => $item->id,
+                'pengguna' => [
+                    'id' => $item->pengguna?->id,
+                    'nama' => $item->pengguna?->nama ?? 'Calon Penghuni',
+                    'email' => $item->pengguna?->email,
+                    'telepon' => $item->pengguna?->telepon,
+                    'foto' => $item->pengguna?->foto,
+                ],
+                'kos' => [
+                    'id' => $item->kos?->id,
+                    'nama' => $item->kos?->nama ?? 'Properti Kos',
+                    'alamat' => $item->kos?->alamat,
+                    'kota' => $item->kos?->kota,
+                ],
+                'kamar' => [
+                    'id' => $item->kamar?->id,
+                    'nama_kamar' => $item->kamar?->nama_kamar ?? 'Unit Kamar',
+                    'tipe_kamar' => $item->kamar?->tipe_kamar,
+                    'harga' => $item->kamar?->harga,
+                ],
+                'tanggal_pemesanan' => $item->tanggal_pemesanan,
+                'tanggal_selesai' => $item->tanggal_selesai,
+                'durasi_tipe' => $item->durasi_tipe,
+                'durasi_jumlah' => $item->durasi_jumlah,
+                'total_harga' => $item->total_harga,
+                'persentase_dp' => $item->persentase_dp,
+                'nominal_dp' => $item->nominal_dp,
+                'sisa_pelunasan' => $item->sisa_pelunasan,
+                'status_pembayaran' => $item->status_pembayaran,
+                'status' => $item->status,
+                'sisa_hari' => $sisaHari,
+                'status_label' => $statusLabel,
+                'kunci_diserahkan_at' => $item->kunci_diserahkan_at?->format('Y-m-d H:i:s'),
+                'created_at' => $item->created_at?->format('Y-m-d H:i:s'),
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'summary' => [
+                'total_penghuni' => $totalPenghuni,
+                'total_siap_masuk' => $totalSiapMasuk,
+                'total_jatuh_tempo' => $totalJatuhTempo,
+                'kamar_terisi' => $kamarTerisi,
+            ],
+            'data' => $data,
+        ]);
+    }
+
+    /**
+     * Complete rental and check-out tenant, freeing up the room.
+     */
+    public function checkoutTenant(Request $request, int $id): JsonResponse
+    {
+        $user = $request->user();
+        $pemesanan = Pemesanan::with(['kos', 'kamar'])->findOrFail($id);
+
+        $isOwner = $pemesanan->kos && (int) $pemesanan->kos->pemilik_id === (int) $user->id;
+        $isAdmin = $user->role === 'admin';
+
+        if (! $isOwner && ! $isAdmin) {
+            return response()->json([
+                'message' => 'Anda tidak berwenang melakukan check-out untuk pemesanan ini.',
+            ], 403);
+        }
+
+        if ($pemesanan->status === 'selesai') {
+            return response()->json([
+                'message' => 'Penghuni untuk pemesanan ini sudah berstatus selesai (check-out).',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($pemesanan): void {
+            $pemesanan->update(['status' => 'selesai']);
+
+            if ($pemesanan->kamar) {
+                $pemesanan->kamar->update(['status' => 'tersedia']);
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Penghuni berhasil di-checkout dan kamar kembali tersedia.',
+            'data' => new BookingResource($pemesanan->fresh(['pengguna', 'kos', 'kamar'])),
         ]);
     }
 }

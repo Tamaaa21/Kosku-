@@ -207,20 +207,44 @@
                 </div>
               </div>
 
-              <!-- Rincian Perhitungan Biaya -->
-              <div class="pt-2 border-t border-slate-200/80 space-y-1.5 text-xs text-slate-600">
+              <!-- Rincian Perhitungan Biaya Hibrida -->
+              <div class="pt-2 border-t border-slate-200/80 space-y-2 text-xs text-slate-600">
                 <div class="flex justify-between">
-                  <span>Tarif per {{ form.durasi_tipe }}:</span>
+                  <span>Tarif sewa per {{ form.durasi_tipe }}:</span>
                   <span class="font-bold text-slate-900">{{ formatRupiah(ratePerUnit) }}</span>
                 </div>
                 <div class="flex justify-between">
                   <span>Perkiraan Selesai (Check-out):</span>
                   <span class="font-bold text-slate-900">{{ estimatedEndDate }}</span>
                 </div>
-                <div class="flex justify-between pt-1 border-t border-dashed border-slate-300 text-sm font-extrabold text-primary">
-                  <span>Total Estimasi Biaya:</span>
-                  <span>{{ formatRupiah(totalEstimatedPrice) }}</span>
+                <div class="flex justify-between pt-1 border-t border-slate-200 text-xs font-semibold text-slate-700">
+                  <span>Total Nilai Sewa:</span>
+                  <span class="font-bold text-slate-900">{{ formatRupiah(totalEstimatedPrice) }}</span>
                 </div>
+
+                <!-- Highlight Box Pembayaran DP 20% & Pelunasan 80% -->
+                <div class="p-3 bg-primary/5 rounded-xl border border-primary/20 space-y-1.5">
+                  <div class="flex items-center justify-between text-xs">
+                    <span class="font-semibold text-primary">Uang Muka / DP (20%):</span>
+                    <span class="font-bold text-primary">{{ formatRupiah(dpAmount) }}</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[11px] text-slate-500">
+                    <span>Biaya Layanan Gateway:</span>
+                    <span>{{ formatRupiah(gatewayFee) }}</span>
+                  </div>
+                  <div class="flex items-center justify-between pt-1 border-t border-primary/20 text-xs font-black text-primary">
+                    <span>Total Tagihan DP Sekarang:</span>
+                    <span>{{ formatRupiah(totalDpPayable) }}</span>
+                  </div>
+                  <div class="flex items-center justify-between pt-1 text-[11px] text-slate-600">
+                    <span>Sisa Pelunasan (80% saat masuk):</span>
+                    <span class="font-bold text-slate-800">{{ formatRupiah(remainingBalance) }}</span>
+                  </div>
+                </div>
+
+                <p class="text-[11px] text-slate-500 leading-relaxed">
+                  * <strong>Sistem Hibrida Kostara:</strong> Cukup bayar DP 20% sekarang untuk mengunci kamar. Sisa pelunasan 80% dibayarkan saat serah terima kunci di lokasi kos.
+                </p>
               </div>
             </div>
 
@@ -241,8 +265,8 @@
               :disabled="submitting || !agreeTerms"
               class="w-full bg-primary-container hover:bg-primary text-white py-3 rounded-xl text-xs sm:text-sm font-bold shadow-md transition disabled:opacity-50 mt-4 flex items-center justify-center gap-2 cursor-pointer active:scale-[0.99] touch-manipulation"
             >
-              <PhPaperPlaneTilt :size="16" weight="bold" />
-              <span>{{ submitting ? 'Mengirim Pengajuan...' : 'Kirim Pengajuan Sewa Sekarang' }}</span>
+              <PhCreditCard :size="16" weight="bold" />
+              <span>{{ submitting ? 'Menyiapkan Pembayaran Midtrans...' : `Bayar DP & Kunci Kamar (${formatRupiah(totalDpPayable)})` }}</span>
             </button>
           </form>
         </div>
@@ -265,8 +289,10 @@ import {
   PhCheckCircle,
   PhShieldCheck,
   PhReceipt,
+  PhCreditCard,
   PhPaperPlaneTilt
 } from '@phosphor-icons/vue'
+import { payWithSnap } from '../utils/midtrans'
 
 const route = useRoute()
 const router = useRouter()
@@ -330,6 +356,21 @@ const totalEstimatedPrice = computed(() => {
   return ratePerUnit.value * (Number(form.durasi_jumlah) || 1)
 })
 
+const dpPercentage = 20
+const gatewayFee = 4000
+
+const dpAmount = computed(() => {
+  return Math.round((totalEstimatedPrice.value * dpPercentage) / 100)
+})
+
+const remainingBalance = computed(() => {
+  return Math.max(0, totalEstimatedPrice.value - dpAmount.value)
+})
+
+const totalDpPayable = computed(() => {
+  return dpAmount.value + gatewayFee
+})
+
 const estimatedEndDate = computed(() => {
   if (!form.tanggal_pemesanan) return '-'
   const d = new Date(form.tanggal_pemesanan)
@@ -358,16 +399,54 @@ const submitBooking = async () => {
   submitting.value = true
   errorMsg.value = null
   try {
-    await api.post('/bookings', {
+    const resBooking = await api.post('/bookings', {
       kamar_id: Number(route.params.kamarId),
       tanggal_pemesanan: form.tanggal_pemesanan,
       durasi_tipe: form.durasi_tipe,
       durasi_jumlah: Number(form.durasi_jumlah),
     })
-    ui.success('Permohonan pemesanan kamar berhasil diajukan! Anda dapat memantau statusnya di halaman Pesanan.')
-    router.push('/pesanan')
+
+    const bookingId = resBooking.data.data.id
+
+    // Request Snap DP checkout
+    ui.info('Menyiapkan gerbang pembayaran Midtrans...')
+    const resCheckout = await api.post(`/bookings/${bookingId}/checkout-dp`)
+    const snapToken = resCheckout.data.data.snap_token
+
+    if (snapToken) {
+      await payWithSnap(snapToken, {
+        onSuccess: async () => {
+          try {
+            await api.post(`/bookings/${bookingId}/sync-status`)
+          } catch (_) {}
+          ui.success('Pembayaran DP berhasil! Kamar Anda telah resmi terpesan.')
+          router.push('/pesanan')
+        },
+        onPending: async () => {
+          try {
+            await api.post(`/bookings/${bookingId}/sync-status`)
+          } catch (_) {}
+          ui.info('Menunggu penyelesaian pembayaran DP. Anda dapat memantau statusnya di menu Pesanan.')
+          router.push('/pesanan')
+        },
+        onError: () => {
+          ui.warning('Pembayaran gagal atau dibatalkan. Anda dapat mencoba kembali di halaman Pesanan.')
+          router.push('/pesanan')
+        },
+        onClose: async () => {
+          try {
+            await api.post(`/bookings/${bookingId}/sync-status`)
+          } catch (_) {}
+          ui.info('Jendela pembayaran ditutup. Anda dapat melanjutkan pembayaran kapan saja di menu Pesanan.')
+          router.push('/pesanan')
+        },
+      })
+    } else {
+      ui.success('Permohonan pemesanan kamar berhasil diajukan!')
+      router.push('/pesanan')
+    }
   } catch (err) {
-    errorMsg.value = err.response?.data?.message || 'Gagal mengajukan pemesanan kamar.'
+    errorMsg.value = err.response?.data?.message || err.message || 'Gagal memproses pemesanan kamar.'
   } finally {
     submitting.value = false
   }

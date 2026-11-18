@@ -75,7 +75,7 @@
               : 'text-on-surface-variant hover:bg-surface-container-low'
           ]"
         >
-          <span>Menunggu</span>
+          <span>Menunggu DP</span>
           <span
             :class="[
               'px-2 py-0.5 text-[10px] font-bold rounded-full',
@@ -87,22 +87,62 @@
         </button>
 
         <button
-          @click="activeStatusFilter = 'disetujui'"
+          @click="activeStatusFilter = 'dp_dibayar'"
           :class="[
             'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
-            activeStatusFilter === 'disetujui'
+            activeStatusFilter === 'dp_dibayar'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'text-on-surface-variant hover:bg-surface-container-low'
+          ]"
+        >
+          <span>DP Terbayar</span>
+          <span
+            :class="[
+              'px-2 py-0.5 text-[10px] font-bold rounded-full',
+              activeStatusFilter === 'dp_dibayar' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-800'
+            ]"
+          >
+            {{ countDpDibayar }}
+          </span>
+        </button>
+
+        <button
+          @click="activeStatusFilter = 'siap_serah_terima'"
+          :class="[
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
+            activeStatusFilter === 'siap_serah_terima'
+              ? 'bg-indigo-600 text-white shadow-sm'
+              : 'text-on-surface-variant hover:bg-surface-container-low'
+          ]"
+        >
+          <span>Siap Kunci</span>
+          <span
+            :class="[
+              'px-2 py-0.5 text-[10px] font-bold rounded-full',
+              activeStatusFilter === 'siap_serah_terima' ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-800'
+            ]"
+          >
+            {{ countSiapSerahTerima }}
+          </span>
+        </button>
+
+        <button
+          @click="activeStatusFilter = 'aktif'"
+          :class="[
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
+            activeStatusFilter === 'aktif'
               ? 'bg-emerald-600 text-white shadow-sm'
               : 'text-on-surface-variant hover:bg-surface-container-low'
           ]"
         >
-          <span>Disetujui</span>
+          <span>Aktif</span>
           <span
             :class="[
               'px-2 py-0.5 text-[10px] font-bold rounded-full',
-              activeStatusFilter === 'disetujui' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'
+              activeStatusFilter === 'aktif' ? 'bg-white/20 text-white' : 'bg-emerald-100 text-emerald-800'
             ]"
           >
-            {{ countDisetujui }}
+            {{ countAktif }}
           </span>
         </button>
 
@@ -115,7 +155,7 @@
               : 'text-on-surface-variant hover:bg-surface-container-low'
           ]"
         >
-          <span>Ditolak</span>
+          <span>Ditolak / Batal</span>
           <span
             :class="[
               'px-2 py-0.5 text-[10px] font-bold rounded-full',
@@ -247,8 +287,11 @@
               <td class="py-4 px-4 text-center">
                 <span
                   :class="[
-                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold capitalize border',
+                    'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border',
                     booking.status === 'menunggu' ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                    booking.status === 'dp_dibayar' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                    booking.status === 'siap_serah_terima' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
+                    booking.status === 'aktif' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                     (booking.status === 'disetujui' || booking.status === 'diterima') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
                     (booking.status === 'ditolak' || booking.status === 'dibatalkan') ? 'bg-rose-50 text-rose-700 border-rose-200' :
                     booking.status === 'selesai' ? 'bg-teal-50 text-teal-800 border-teal-200' :
@@ -259,12 +302,15 @@
                     :class="[
                       'w-1.5 h-1.5 rounded-full',
                       booking.status === 'menunggu' ? 'bg-amber-500' :
+                      booking.status === 'dp_dibayar' ? 'bg-blue-500' :
+                      booking.status === 'siap_serah_terima' ? 'bg-indigo-500' :
+                      booking.status === 'aktif' ? 'bg-emerald-500' :
                       (booking.status === 'disetujui' || booking.status === 'diterima') ? 'bg-emerald-500' :
                       (booking.status === 'ditolak' || booking.status === 'dibatalkan') ? 'bg-rose-500' :
                       booking.status === 'selesai' ? 'bg-teal-500' : 'bg-slate-400'
                     ]"
                   ></span>
-                  {{ booking.status }}
+                  {{ formatBookingStatus(booking.status) }}
                 </span>
               </td>
 
@@ -279,24 +325,36 @@
                     <PhEye :size="18" />
                   </button>
 
-                  <template v-if="booking.status === 'menunggu'">
-                    <button
-                      @click="updateStatus(booking, 'disetujui')"
-                      class="px-2.5 py-1 rounded-lg bg-emerald-600 text-white font-semibold text-[11px] hover:bg-emerald-700 transition flex items-center gap-1 shadow-sm"
-                      title="Setujui Permintaan Sewa"
-                    >
-                      <PhCheck :size="14" weight="bold" />
-                      <span>Setujui</span>
-                    </button>
+                  <template v-if="booking.status === 'dp_dibayar'">
+                    <span class="text-[10px] font-bold text-blue-700 bg-blue-50 border border-blue-200 px-2 py-1 rounded-md flex items-center gap-1">
+                      <PhCheckCircle :size="13" weight="fill" />
+                      <span>Instan (DP)</span>
+                    </span>
+                  </template>
 
+                  <template v-else-if="booking.status === 'siap_serah_terima'">
                     <button
-                      @click="updateStatus(booking, 'ditolak')"
-                      class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-semibold text-[11px] hover:bg-rose-100 transition flex items-center gap-1 border border-rose-200"
-                      title="Tolak Permintaan Sewa"
+                      @click="handoverKey(booking)"
+                      :disabled="actionLoading === booking.id"
+                      class="px-2.5 py-1 rounded-lg bg-primary hover:bg-primary-container text-white font-semibold text-[11px] transition flex items-center gap-1 shadow-xs disabled:opacity-50 cursor-pointer"
+                      title="Serahkan Kunci & Klaim Saldo"
                     >
-                      <PhX :size="14" weight="bold" />
-                      <span>Tolak</span>
+                      <PhKey :size="13" weight="bold" />
+                      <span>{{ actionLoading === booking.id ? '...' : 'Serah Kunci' }}</span>
                     </button>
+                  </template>
+
+                  <template v-else-if="booking.status === 'aktif'">
+                    <span class="text-[10px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-1 rounded-md flex items-center gap-1">
+                      <PhCheckCircle :size="13" weight="fill" />
+                      <span>Aktif</span>
+                    </span>
+                  </template>
+
+                  <template v-else-if="booking.status === 'menunggu'">
+                    <span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md font-medium">
+                      Menunggu DP
+                    </span>
                   </template>
                 </div>
               </td>
@@ -419,7 +477,18 @@
           >
             Tutup
           </button>
-          <template v-if="selectedBooking.status === 'menunggu'">
+          <template v-if="selectedBooking.status === 'siap_serah_terima'">
+            <button
+              type="button"
+              @click="handoverKey(selectedBooking)"
+              :disabled="actionLoading === selectedBooking.id"
+              class="h-10 px-5 rounded-lg bg-primary text-white text-xs font-semibold hover:bg-primary-container shadow-sm transition flex items-center gap-1.5"
+            >
+              <PhKey :size="15" weight="bold" />
+              <span>{{ actionLoading === selectedBooking.id ? 'Memproses...' : 'Serah Kunci & Klaim Saldo' }}</span>
+            </button>
+          </template>
+          <template v-else-if="selectedBooking.status === 'menunggu'">
             <button
               type="button"
               @click="updateStatus(selectedBooking, 'ditolak')"
@@ -457,6 +526,7 @@ import {
   PhCheck,
   PhX,
   PhReceipt,
+  PhKey,
 } from '@phosphor-icons/vue'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
@@ -465,6 +535,7 @@ import { openWhatsAppChat, buildOwnerContactTenantTemplate } from '../utils/what
 const ui = useUiStore()
 
 const loading = ref(false)
+const actionLoading = ref(null)
 const successMsg = ref('')
 const errorMsg = ref('')
 
@@ -493,8 +564,14 @@ onMounted(() => {
 const filteredBookings = computed(() => {
   return allBookings.value
     .filter((b) => {
-      const matchStatus =
-        activeStatusFilter.value === 'all' || b.status === activeStatusFilter.value
+      let matchStatus = false
+      if (activeStatusFilter.value === 'all') {
+        matchStatus = true
+      } else if (activeStatusFilter.value === 'ditolak') {
+        matchStatus = ['ditolak', 'dibatalkan'].includes(b.status)
+      } else {
+        matchStatus = b.status === activeStatusFilter.value
+      }
 
       const matchSearch =
         !searchQuery.value ||
@@ -504,11 +581,23 @@ const filteredBookings = computed(() => {
 
       return matchStatus && matchSearch
     })
-    .sort((a, b) => a.id - b.id)
+    .sort((a, b) => b.id - a.id)
 })
 
 const countMenunggu = computed(() => {
   return allBookings.value.filter((b) => b.status === 'menunggu').length
+})
+
+const countDpDibayar = computed(() => {
+  return allBookings.value.filter((b) => b.status === 'dp_dibayar').length
+})
+
+const countSiapSerahTerima = computed(() => {
+  return allBookings.value.filter((b) => b.status === 'siap_serah_terima').length
+})
+
+const countAktif = computed(() => {
+  return allBookings.value.filter((b) => b.status === 'aktif').length
 })
 
 const countDisetujui = computed(() => {
@@ -516,8 +605,49 @@ const countDisetujui = computed(() => {
 })
 
 const countDitolak = computed(() => {
-  return allBookings.value.filter((b) => b.status === 'ditolak').length
+  return allBookings.value.filter((b) => ['ditolak', 'dibatalkan'].includes(b.status)).length
 })
+
+const formatBookingStatus = (status) => {
+  switch (status) {
+    case 'dp_dibayar': return 'DP Terbayar'
+    case 'siap_serah_terima': return 'Siap Serah Kunci'
+    case 'aktif': return 'Aktif Menempati'
+    case 'menunggu': return 'Menunggu DP'
+    case 'disetujui': return 'Disetujui'
+    case 'ditolak': return 'Ditolak'
+    case 'dibatalkan': return 'Dibatalkan'
+    case 'selesai': return 'Selesai'
+    default: return status || '-'
+  }
+}
+
+const handoverKey = async (booking) => {
+  const confirmed = await ui.confirm({
+    title: 'Serah Terima Kunci Kamar?',
+    message: `Konfirmasi bahwa Anda telah menyerahkan kunci kamar ${booking.kamar?.nama_kamar || ''} (${booking.kos?.nama || ''}) kepada penyewa. Saldo pendapatan sewa bersih akan langsung masuk ke Dompet Mitra Anda.`,
+    confirmText: 'Ya, Serahkan Kunci',
+    cancelText: 'Batal',
+    confirmType: 'primary',
+  })
+  if (!confirmed) return
+
+  actionLoading.value = booking.id
+  try {
+    await api.post(`/bookings/${booking.id}/handover-key`)
+    ui.success('Kunci berhasil diserahkan! Saldo pendapatan telah masuk ke Dompet Mitra Anda.')
+    successMsg.value = 'Kunci berhasil diserahkan! Saldo sewa telah dikreditkan ke dompet Anda.'
+    if (selectedBooking.value && selectedBooking.value.id === booking.id) {
+      selectedBooking.value.status = 'aktif'
+    }
+    await fetchBookings()
+  } catch (err) {
+    ui.error(err.response?.data?.message || 'Gagal menyerahkan kunci.')
+    errorMsg.value = err.response?.data?.message || 'Gagal menyerahkan kunci.'
+  } finally {
+    actionLoading.value = null
+  }
+}
 
 const formatRupiah = (val) => {
   if (!val) return 'Rp 0'

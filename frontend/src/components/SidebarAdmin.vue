@@ -120,7 +120,18 @@
             <span class="flex-1">Audit Log Pemesanan</span>
           </router-link>
 
-          <!-- 5. Kelola Hero Slider & Banner -->
+          <!-- 5. Pencairan Dana Mitra -->
+          <router-link
+            :to="{ path: '/dashboard/admin', query: { tab: 'pencairan' } }"
+            @click="isMobileOpen = false"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="($route.path === '/dashboard/admin' && $route.query.tab === 'pencairan') ? 'bg-primary-container text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            <PhWallet :size="20" weight="bold" />
+            <span class="flex-1">Pencairan Dana Mitra</span>
+          </router-link>
+
+          <!-- 6. Kelola Hero Slider & Banner -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'banner' } }"
             @click="isMobileOpen = false"
@@ -233,6 +244,7 @@ import {
   PhSignOut,
   PhList,
   PhCertificate,
+  PhWallet,
   PhCode
 } from '@phosphor-icons/vue'
 

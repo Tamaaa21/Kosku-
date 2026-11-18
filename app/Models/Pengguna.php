@@ -5,6 +5,7 @@ namespace App\Models;
 use Database\Factories\PenggunaFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
@@ -54,5 +55,36 @@ class Pengguna extends Authenticatable
     public function ulasan(): HasMany
     {
         return $this->hasMany(Ulasan::class, 'pengguna_id');
+    }
+
+    public function rekeningBank(): HasMany
+    {
+        return $this->hasMany(RekeningBankMitra::class, 'pengguna_id');
+    }
+
+    public function rekeningBankUtama(): HasOne
+    {
+        return $this->hasOne(RekeningBankMitra::class, 'pengguna_id')
+            ->where('is_utama', true);
+    }
+
+    public function penarikanDana(): HasMany
+    {
+        return $this->hasMany(PenarikanDana::class, 'pengguna_id');
+    }
+
+    public function mutasiSaldo(): HasMany
+    {
+        return $this->hasMany(MutasiSaldoMitra::class, 'pengguna_id');
+    }
+
+    /**
+     * Get available balance for owner.
+     */
+    public function saldoTersedia(): int
+    {
+        $latest = $this->mutasiSaldo()->latest('id')->first();
+
+        return $latest ? (int) $latest->saldo_akhir : 0;
     }
 }

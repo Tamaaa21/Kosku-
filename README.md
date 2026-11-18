@@ -1,7 +1,7 @@
 # Kostara &mdash; Platform Pencarian & Sewa Kos Indonesia
 
 <p align="center">
-  <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtAMGcNImL28Wkcksd1pB136MBTXtxAeUZZdLwny2E0TfcGGRkdrMA_JR6pVnktaHUu8Ffua13FdN3HdgZd29vhkeFDWM4WJtQJFMuZndi8o1HB2GXyn8ikhIgK45eAlZmqqiEVYkjMe7_m-Cvw0nxPY6cKLGKCrWp2Ch2dtBIlIqQb5pKjNVS1WaRhbnQPFyDftN7_uvVGXkv3Z_JUnsJpPxReDktVkZYw0eJ1YRW7caBLYvFdhslDw" alt="Kostara Banner" width="100%" style="border-radius: 12px; max-height: 380px; object-fit: cover;" />
+  <img src="https://www.google.com/url?sa=t&source=web&rct=j&url=https://www.magnific.com/free-photos-vectors/nft&ved=2ahUKEwiZv93a7Y6YAxWo6jgGHYDqLHcQjRx6BAgLEBc&opi=89978449&usg=AOvVaw2fIp8gB5LKEMYsSSZpZcfz" alt="Kostara Banner" width="100%" style="border-radius: 12px; max-height: 380px; object-fit: cover;" />
 </p>
 
 <p align="center">

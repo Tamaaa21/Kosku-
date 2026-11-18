@@ -109,6 +109,18 @@
           </svg>
           Segarkan Data
         </button>
+
+        <button
+          v-if="activeTab === 'pencairan' || activeTab === 'withdrawals'"
+          @click="fetchAdminWithdrawals"
+          :disabled="loadingWithdrawals"
+          class="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold px-4 py-2 rounded-xl transition border border-slate-200 shadow-sm disabled:opacity-50"
+        >
+          <svg class="w-3.5 h-3.5" :class="{ 'animate-spin': loadingWithdrawals }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Segarkan Pencairan
+        </button>
       </div>
     </div>
 
@@ -1957,6 +1969,175 @@
     </div>
 
     <!-- ================================================================= -->
+    <!-- TAB 6: PENCAIRAN DANA MITRA PEMILIK KOS (WITHDRAWALS) -->
+    <!-- ================================================================= -->
+    <div v-else-if="activeTab === 'pencairan' || activeTab === 'withdrawals'" class="space-y-6">
+      <!-- 4 Stat Summary Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <!-- Card 1: Menunggu Tinjauan -->
+        <div
+          @click="withdrawalStatusFilter = 'menunggu'; fetchAdminWithdrawals()"
+          class="bg-white rounded-3xl border p-5 shadow-xs transition cursor-pointer hover:border-amber-400"
+          :class="withdrawalStatusFilter === 'menunggu' ? 'ring-2 ring-amber-500 border-amber-300' : 'border-slate-200/80'"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Menunggu Pencairan</span>
+            <div class="w-9 h-9 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
+              <PhHourglassHigh :size="18" weight="bold" />
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span class="text-2xl font-black text-slate-900">{{ pendingWithdrawalsCount }}</span>
+            <span v-if="pendingWithdrawalsCount > 0" class="inline-flex items-center gap-1 text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 animate-pulse">
+              Perlu Ditransfer
+            </span>
+          </div>
+        </div>
+
+        <!-- Card 2: Selesai Ditransfer -->
+        <div
+          @click="withdrawalStatusFilter = 'selesai'; fetchAdminWithdrawals()"
+          class="bg-white rounded-3xl border p-5 shadow-xs transition cursor-pointer hover:border-emerald-400"
+          :class="withdrawalStatusFilter === 'selesai' ? 'ring-2 ring-emerald-500 border-emerald-300' : 'border-slate-200/80'"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Selesai Ditransfer</span>
+            <div class="w-9 h-9 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+              <PhCheckCircle :size="18" weight="bold" />
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span class="text-2xl font-black text-slate-900">{{ completedWithdrawalsCount }}</span>
+          </div>
+        </div>
+
+        <!-- Card 3: Ditolak -->
+        <div
+          @click="withdrawalStatusFilter = 'ditolak'; fetchAdminWithdrawals()"
+          class="bg-white rounded-3xl border p-5 shadow-xs transition cursor-pointer hover:border-rose-400"
+          :class="withdrawalStatusFilter === 'ditolak' ? 'ring-2 ring-rose-500 border-rose-300' : 'border-slate-200/80'"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Ditolak</span>
+            <div class="w-9 h-9 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center font-bold">
+              <PhXCircle :size="18" weight="bold" />
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span class="text-2xl font-black text-slate-900">{{ rejectedWithdrawalsCount }}</span>
+          </div>
+        </div>
+
+        <!-- Card 4: Total Seluruh Penarikan -->
+        <div
+          @click="withdrawalStatusFilter = 'semua'; fetchAdminWithdrawals()"
+          class="bg-white rounded-3xl border p-5 shadow-xs transition cursor-pointer hover:border-blue-400"
+          :class="withdrawalStatusFilter === 'semua' ? 'ring-2 ring-primary border-primary/30' : 'border-slate-200/80'"
+        >
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Permohonan</span>
+            <div class="w-9 h-9 rounded-2xl bg-blue-50 text-primary flex items-center justify-center font-bold">
+              <PhWallet :size="18" weight="bold" />
+            </div>
+          </div>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span class="text-2xl font-black text-slate-900">{{ adminWithdrawals.length }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Table Card -->
+      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-base font-bold text-slate-900">Daftar Pengajuan Pencairan Saldo Mitra</h3>
+            <p class="text-xs text-slate-500 mt-0.5">Admin mentransfer dana ke rekening bank pemilik kos sesuai nominal yang diajukan.</p>
+          </div>
+        </div>
+
+        <div v-if="loadingWithdrawals" class="py-16 text-center text-xs text-slate-400">
+          <svg class="w-6 h-6 animate-spin mx-auto text-primary mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Memuat data pencairan dana...
+        </div>
+
+        <div v-else-if="filteredAdminWithdrawals.length === 0" class="py-16 text-center text-xs text-slate-400">
+          Tidak ada permohonan pencairan dana pada filter ini.
+        </div>
+
+        <div v-else class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-slate-50/80 text-slate-500 uppercase tracking-wider border-b border-slate-100 font-bold">
+              <tr>
+                <th class="py-3 px-5">Kode / Tanggal</th>
+                <th class="py-3 px-5">Mitra Pemilik</th>
+                <th class="py-3 px-5">Rekening Bank Tujuan</th>
+                <th class="py-3 px-5">Nominal Penarikan</th>
+                <th class="py-3 px-5">Status</th>
+                <th class="py-3 px-5 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-for="wd in filteredAdminWithdrawals" :key="wd.id" class="hover:bg-slate-50/50 transition">
+                <td class="py-4 px-5">
+                  <span class="font-bold text-slate-900">{{ wd.kode_penarikan }}</span>
+                  <span class="text-[11px] text-slate-400 block mt-0.5">{{ formatDate(wd.created_at) }}</span>
+                </td>
+                <td class="py-4 px-5">
+                  <span class="font-bold text-slate-800">{{ wd.pengguna?.nama || '-' }}</span>
+                  <span class="text-[11px] text-slate-400 block mt-0.5">{{ wd.pengguna?.email }} &bull; {{ wd.pengguna?.telepon || '-' }}</span>
+                </td>
+                <td class="py-4 px-5">
+                  <span class="font-black text-slate-900 tracking-wider">{{ wd.rekening_bank?.nama_bank }}</span>
+                  <span class="text-[11px] font-bold text-slate-800 block mt-0.5 tracking-wider">{{ wd.rekening_bank?.nomor_rekening }}</span>
+                  <span class="text-[11px] text-slate-500 block">a.n. {{ wd.rekening_bank?.nama_pemilik }}</span>
+                </td>
+                <td class="py-4 px-5">
+                  <span class="text-sm font-black text-emerald-600">{{ formatRupiah(wd.nominal) }}</span>
+                </td>
+                <td class="py-4 px-5">
+                  <span
+                    :class="[
+                      'px-2.5 py-1 rounded-full text-[10px] font-bold uppercase',
+                      wd.status === 'selesai' ? 'bg-emerald-100 text-emerald-800' :
+                      wd.status === 'ditolak' ? 'bg-rose-100 text-rose-800' :
+                      'bg-amber-100 text-amber-800'
+                    ]"
+                  >
+                    {{ wd.status }}
+                  </span>
+                  <span v-if="wd.alasan_penolakan" class="text-[10px] text-rose-600 block mt-1">
+                    {{ wd.alasan_penolakan }}
+                  </span>
+                </td>
+                <td class="py-4 px-5 text-right whitespace-nowrap">
+                  <div v-if="wd.status === 'menunggu' || wd.status === 'diproses'" class="flex items-center justify-end gap-1.5">
+                    <button
+                      @click="openApproveWithdrawalModal(wd)"
+                      class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-2xs transition cursor-pointer"
+                    >
+                      Setujui
+                    </button>
+                    <button
+                      @click="openRejectWithdrawalModal(wd)"
+                      class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-bold rounded-xl text-xs transition cursor-pointer"
+                    >
+                      Tolak
+                    </button>
+                  </div>
+                  <span v-else class="text-[11px] text-slate-400 italic">
+                    Diproses {{ formatDate(wd.diproses_pada) }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
     <!-- MODAL: TAMBAH / EDIT HERO BANNER SLIDER -->
     <!-- ================================================================= -->
     <div
@@ -2929,6 +3110,126 @@
         </div>
       </div>
     </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: SETUJUI PENCAIRAN DANA MITRA (APPROVE WITHDRAWAL) -->
+    <!-- ================================================================= -->
+    <div
+      v-if="showApproveWithdrawalModal && selectedWithdrawal"
+      class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+    >
+      <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 my-auto p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 class="text-base font-bold text-slate-900">Setujui Pencairan Dana</h3>
+          <button @click="showApproveWithdrawalModal = false" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+        </div>
+
+        <div class="p-3.5 bg-emerald-50 rounded-2xl border border-emerald-200/80 space-y-1.5 text-xs">
+          <div class="flex justify-between">
+            <span class="text-emerald-800">Nominal Transfer:</span>
+            <span class="font-black text-emerald-900 text-sm">{{ formatRupiah(selectedWithdrawal.nominal) }}</span>
+          </div>
+          <div class="flex justify-between text-[11px] text-emerald-700">
+            <span>Rekening Tujuan:</span>
+            <span class="font-bold">{{ selectedWithdrawal.rekening_bank?.nama_bank }} - {{ selectedWithdrawal.rekening_bank?.nomor_rekening }}</span>
+          </div>
+          <div class="flex justify-between text-[11px] text-emerald-700">
+            <span>Atas Nama:</span>
+            <span class="font-bold">{{ selectedWithdrawal.rekening_bank?.nama_pemilik }}</span>
+          </div>
+        </div>
+
+        <form @submit.prevent="handleApproveWithdrawalSubmit" class="space-y-3.5 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Nomor Referensi Transfer / Ref ID</label>
+            <input
+              type="text"
+              v-model="approveForm.bukti_transfer_ref"
+              placeholder="Contoh: REF-BIFAST-12345678"
+              class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-primary focus:border-primary text-xs"
+            />
+          </div>
+
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Catatan Tambahan untuk Mitra (Opsional)</label>
+            <input
+              type="text"
+              v-model="approveForm.catatan_admin"
+              placeholder="Contoh: Dana telah ditransfer via BI-FAST"
+              class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-primary focus:border-primary text-xs"
+            />
+          </div>
+
+          <div class="flex items-center gap-2 pt-2">
+            <button
+              type="button"
+              @click="showApproveWithdrawalModal = false"
+              class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              :disabled="submittingApproveWd"
+              class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-xs disabled:opacity-50"
+            >
+              {{ submittingApproveWd ? 'Memproses...' : 'Konfirmasi Selesai Ditransfer' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- MODAL: TOLAK PENCAIRAN DANA MITRA (REJECT WITHDRAWAL) -->
+    <!-- ================================================================= -->
+    <div
+      v-if="showRejectWithdrawalModal && selectedWithdrawal"
+      class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto"
+    >
+      <div class="bg-white rounded-3xl max-w-md w-full shadow-2xl border border-slate-100 my-auto p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <h3 class="text-base font-bold text-slate-900">Tolak Permohonan Pencairan</h3>
+          <button @click="showRejectWithdrawalModal = false" class="text-slate-400 hover:text-slate-600 text-lg font-bold">&times;</button>
+        </div>
+
+        <div class="p-3 bg-rose-50 rounded-2xl border border-rose-200/80 text-xs text-rose-800">
+          <p>
+            Saldo penarikan sebesar <strong>{{ formatRupiah(selectedWithdrawal.nominal) }}</strong> akan otomatis dikembalikan ke dompet mitra pemilik kos.
+          </p>
+        </div>
+
+        <form @submit.prevent="handleRejectWithdrawalSubmit" class="space-y-3.5 text-xs">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">Alasan Penolakan <span class="text-rose-500">*</span></label>
+            <textarea
+              v-model="rejectWdReason"
+              required
+              rows="3"
+              placeholder="Contoh: Nomor rekening tidak cocok dengan nama terdaftar, silakan periksa kembali."
+              class="w-full p-2.5 rounded-xl border border-slate-200 focus:ring-rose-500 focus:border-rose-500 text-xs resize-none"
+            ></textarea>
+          </div>
+
+          <div class="flex items-center gap-2 pt-2">
+            <button
+              type="button"
+              @click="showRejectWithdrawalModal = false"
+              class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition"
+            >
+              Batal
+            </button>
+            <button
+              type="submit"
+              :disabled="submittingRejectWd || !rejectWdReason.trim()"
+              class="flex-1 py-2.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-xl transition shadow-xs disabled:opacity-50"
+            >
+              {{ submittingRejectWd ? 'Memproses...' : 'Tolak & Kembalikan Saldo' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -2971,6 +3272,8 @@ import {
   PhCalendarCheck,
   PhCaretDown,
   PhFileText,
+  PhWallet,
+  PhBank,
 } from '@phosphor-icons/vue'
 import api from '../services/api'
 import { useUiStore } from '../stores/ui'
@@ -2980,12 +3283,14 @@ const route = useRoute()
 const router = useRouter()
 const ui = useUiStore()
 
-const validTabs = ['ringkasan', 'pengguna', 'verifikasi', 'kos', 'pemesanan', 'banner', 'hero-slider']
+const validTabs = ['ringkasan', 'pengguna', 'verifikasi', 'kos', 'pemesanan', 'banner', 'hero-slider', 'pencairan', 'withdrawals']
 let startTab = 'ringkasan'
 if (route.query.tab === 'pencari' || route.query.tab === 'pemilik') {
   startTab = 'pengguna'
 } else if (route.query.tab === 'banner' || route.query.tab === 'hero-slider') {
   startTab = 'banner'
+} else if (route.query.tab === 'pencairan' || route.query.tab === 'withdrawals') {
+  startTab = 'pencairan'
 } else if (validTabs.includes(route.query.tab)) {
   startTab = route.query.tab
 }
@@ -3006,8 +3311,13 @@ watch(
       fetchUsers()
     } else if (newTab === 'banner' || newTab === 'hero-slider') {
       activeTab.value = 'banner'
+    } else if (newTab === 'pencairan' || newTab === 'withdrawals') {
+      activeTab.value = 'pencairan'
+      fetchAdminWithdrawals()
     } else if (newTab && validTabs.includes(newTab)) {
       activeTab.value = newTab
+    } else if (!newTab) {
+      activeTab.value = 'ringkasan'
     }
   }
 )
@@ -3051,6 +3361,14 @@ const activeTabMeta = computed(() => {
         title: 'Audit Log Pemesanan (Audit Trail)',
         badge: `${allBookings.value.length} Transaksi`,
         description: 'Rekapitulasi dan audit transaksi reservasi sewa kos seluruh Indonesia.',
+      }
+    case 'pencairan':
+    case 'withdrawals':
+      return {
+        icon: PhWallet,
+        title: 'Pencairan Dana Mitra (Withdrawals)',
+        badge: `${pendingWithdrawalsCount.value} Menunggu`,
+        description: 'Verifikasi pengajuan transfer saldo pendapatan sewa kamar ke rekening bank pemilik kos.',
       }
     case 'banner':
     case 'hero-slider':
@@ -3991,6 +4309,100 @@ const openDocPreview = (user, tab = 'ktp') => {
   showDocPreviewModal.value = true
 }
 
+// Withdrawals State & Actions
+const adminWithdrawals = ref([])
+const loadingWithdrawals = ref(false)
+const withdrawalStatusFilter = ref('semua')
+const showApproveWithdrawalModal = ref(false)
+const showRejectWithdrawalModal = ref(false)
+const selectedWithdrawal = ref(null)
+const approveForm = reactive({
+  bukti_transfer_ref: '',
+  catatan_admin: '',
+})
+const submittingApproveWd = ref(false)
+const rejectWdReason = ref('')
+const submittingRejectWd = ref(false)
+
+const pendingWithdrawalsCount = computed(() => {
+  return adminWithdrawals.value.filter((w) => w.status === 'menunggu').length
+})
+
+const completedWithdrawalsCount = computed(() => {
+  return adminWithdrawals.value.filter((w) => w.status === 'selesai').length
+})
+
+const rejectedWithdrawalsCount = computed(() => {
+  return adminWithdrawals.value.filter((w) => w.status === 'ditolak').length
+})
+
+const filteredAdminWithdrawals = computed(() => {
+  if (withdrawalStatusFilter.value === 'semua') {
+    return adminWithdrawals.value
+  }
+  return adminWithdrawals.value.filter((w) => w.status === withdrawalStatusFilter.value)
+})
+
+const fetchAdminWithdrawals = async () => {
+  loadingWithdrawals.value = true
+  try {
+    const res = await api.get('/admin/withdrawals')
+    adminWithdrawals.value = res.data.data || []
+  } catch (err) {
+    // Abaikan
+  } finally {
+    loadingWithdrawals.value = false
+  }
+}
+
+const openApproveWithdrawalModal = (wd) => {
+  selectedWithdrawal.value = wd
+  approveForm.bukti_transfer_ref = ''
+  approveForm.catatan_admin = ''
+  showApproveWithdrawalModal.value = true
+}
+
+const handleApproveWithdrawalSubmit = async () => {
+  if (!selectedWithdrawal.value) return
+  submittingApproveWd.value = true
+  try {
+    await api.post(`/admin/withdrawals/${selectedWithdrawal.value.id}/approve`, approveForm)
+    ui.success('Pencairan dana berhasil disetujui dan ditandai selesai!')
+    showApproveWithdrawalModal.value = false
+    selectedWithdrawal.value = null
+    await fetchAdminWithdrawals()
+  } catch (err) {
+    ui.error(err.response?.data?.message || 'Gagal menyetujui pencairan dana.')
+  } finally {
+    submittingApproveWd.value = false
+  }
+}
+
+const openRejectWithdrawalModal = (wd) => {
+  selectedWithdrawal.value = wd
+  rejectWdReason.value = ''
+  showRejectWithdrawalModal.value = true
+}
+
+const handleRejectWithdrawalSubmit = async () => {
+  if (!selectedWithdrawal.value || !rejectWdReason.value.trim()) return
+  submittingRejectWd.value = true
+  try {
+    await api.post(`/admin/withdrawals/${selectedWithdrawal.value.id}/reject`, {
+      alasan_penolakan: rejectWdReason.value.trim(),
+    })
+    ui.success('Permohonan pencairan dana ditolak. Saldo telah dikembalikan ke dompet mitra.')
+    showRejectWithdrawalModal.value = false
+    selectedWithdrawal.value = null
+    rejectWdReason.value = ''
+    await fetchAdminWithdrawals()
+  } catch (err) {
+    ui.error(err.response?.data?.message || 'Gagal menolak pencairan dana.')
+  } finally {
+    submittingRejectWd.value = false
+  }
+}
+
 onMounted(() => {
   fetchStats()
   fetchUsers()
@@ -3998,6 +4410,7 @@ onMounted(() => {
   fetchKos()
   fetchAllBookings()
   fetchAdminBanners()
+  fetchAdminWithdrawals()
   startAdminPreviewSlider()
 })
 

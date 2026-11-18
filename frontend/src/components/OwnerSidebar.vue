@@ -142,7 +142,33 @@
             <PhLockSimple v-if="!auth.isVerified" :size="15" weight="bold" class="text-slate-500" />
           </router-link>
 
-          <!-- 6. Profil Pemilik -->
+          <!-- 6. Daftar Penghuni Kos -->
+          <router-link
+            :to="auth.isVerified ? '/dashboard/pemilik/penghuni' : '/dashboard/pemilik/verifikasi?locked=1'"
+            @click="closeSidebar"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="[
+              $route.path === '/dashboard/pemilik/penghuni' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white',
+              !auth.isVerified ? 'opacity-70' : ''
+            ]"
+          >
+            <PhUsers :size="20" weight="bold" />
+            <span class="flex-1">Daftar Penghuni</span>
+            <PhLockSimple v-if="!auth.isVerified" :size="15" weight="bold" class="text-slate-500" />
+          </router-link>
+
+          <!-- 7. Dompet & Saldo Mitra -->
+          <router-link
+            to="/dashboard/pemilik/dompet"
+            @click="closeSidebar"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="$route.path === '/dashboard/pemilik/dompet' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            <PhWallet :size="20" weight="bold" />
+            <span class="flex-1">Dompet & Saldo</span>
+          </router-link>
+
+          <!-- 8. Profil Pemilik -->
           <router-link
             to="/profil"
             @click="closeSidebar"
@@ -294,7 +320,9 @@ import {
   PhList,
   PhShieldCheck,
   PhLockSimple,
-  PhCheckCircle
+  PhCheckCircle,
+  PhWallet,
+  PhUsers
 } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()

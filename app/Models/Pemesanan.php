@@ -6,6 +6,7 @@ use Database\Factories\PemesananFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Pemesanan extends Model
@@ -29,6 +30,13 @@ class Pemesanan extends Model
             'tanggal_selesai' => 'date',
             'durasi_jumlah' => 'integer',
             'total_harga' => 'integer',
+            'persentase_dp' => 'integer',
+            'nominal_dp' => 'integer',
+            'sisa_pelunasan' => 'integer',
+            'komisi_persen' => 'integer',
+            'komisi_nominal' => 'integer',
+            'total_hak_mitra' => 'integer',
+            'kunci_diserahkan_at' => 'datetime',
         ];
     }
 
@@ -50,5 +58,29 @@ class Pemesanan extends Model
     public function ulasan(): HasOne
     {
         return $this->hasOne(Ulasan::class, 'pemesanan_id');
+    }
+
+    public function transaksiPembayaran(): HasMany
+    {
+        return $this->hasMany(TransaksiPembayaran::class, 'pemesanan_id');
+    }
+
+    public function transaksiDp(): HasOne
+    {
+        return $this->hasOne(TransaksiPembayaran::class, 'pemesanan_id')
+            ->where('tipe', 'dp')
+            ->latestOfMany();
+    }
+
+    public function transaksiPelunasan(): HasOne
+    {
+        return $this->hasOne(TransaksiPembayaran::class, 'pemesanan_id')
+            ->where('tipe', 'pelunasan')
+            ->latestOfMany();
+    }
+
+    public function mutasiSaldo(): HasOne
+    {
+        return $this->hasOne(MutasiSaldoMitra::class, 'pemesanan_id');
     }
 }

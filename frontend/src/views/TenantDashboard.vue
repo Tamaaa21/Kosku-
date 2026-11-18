@@ -262,9 +262,42 @@
 
             <!-- Action Buttons: 2-columns on mobile, flex on desktop -->
             <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
-              <!-- If PENCARI & status disetujui: tombol Beri Ulasan -->
+              <!-- If PENCARI: Pembayaran DP jika belum dibayar -->
+              <button
+                v-if="!auth.isPemilik && (item.status === 'menunggu' || item.status === 'menunggu_pembayaran_dp') && item.status_pembayaran !== 'dp_dibayar'"
+                @click="payDp(item.id)"
+                :disabled="actionLoading === item.id"
+                class="text-xs font-bold bg-primary-container hover:bg-primary text-white px-3.5 py-2 rounded-lg transition shadow-xs flex items-center justify-center gap-1.5 col-span-2 sm:col-span-1"
+              >
+                <PhCreditCard :size="15" weight="bold" />
+                <span>{{ actionLoading === item.id ? 'Memproses...' : `Bayar DP (${formatRupiah(item.nominal_dp || item.total_harga * 0.2)})` }}</span>
+              </button>
+
+              <!-- If PENCARI: Pembayaran Pelunasan 80% saat DP lunas -->
+              <button
+                v-if="!auth.isPemilik && item.status_pembayaran === 'dp_dibayar' && item.status !== 'siap_serah_terima' && item.status !== 'aktif'"
+                @click="payPelunasan(item.id)"
+                :disabled="actionLoading === item.id"
+                class="text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white px-3.5 py-2 rounded-lg transition shadow-xs flex items-center justify-center gap-1.5 col-span-2 sm:col-span-1"
+              >
+                <PhCreditCard :size="15" weight="bold" />
+                <span>{{ actionLoading === item.id ? 'Memproses...' : `Bayar Pelunasan (${formatRupiah(item.sisa_pelunasan)})` }}</span>
+              </button>
+
+              <!-- If PENCARI atau PEMILIK: Konfirmasi Serah Terima Kunci saat sudah Lunas -->
+              <button
+                v-if="item.status === 'siap_serah_terima'"
+                @click="confirmHandover(item.id)"
+                :disabled="actionLoading === item.id"
+                class="text-xs font-bold bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-lg transition shadow-xs flex items-center justify-center gap-1.5 col-span-2 sm:col-span-1"
+              >
+                <PhKey :size="15" weight="bold" />
+                <span>{{ actionLoading === item.id ? 'Memproses...' : (auth.isPemilik ? 'Serahkan Kunci & Klaim Saldo' : 'Konfirmasi Terima Kunci') }}</span>
+              </button>
+
+              <!-- If PENCARI & status aktif / disetujui: tombol Beri Ulasan -->
               <router-link
-                v-if="!auth.isPemilik && item.status === 'disetujui' && item.kos_id"
+                v-if="!auth.isPemilik && (item.status === 'aktif' || item.status === 'disetujui') && item.kos_id"
                 :to="{ path: `/kos/${item.kos_id}`, query: { tab: 'ulasan' } }"
                 class="text-xs font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 px-3 py-2 rounded-lg transition flex items-center justify-center gap-1 shadow-2xs"
                 title="Beri ulasan dan rating untuk kos ini"
@@ -296,12 +329,12 @@
               <!-- If PENCARI: Cancel button for pending bookings -->
               <template v-else>
                 <button
-                  v-if="item.status === 'menunggu'"
+                  v-if="item.status === 'menunggu' && item.status_pembayaran === 'belum_dibayar'"
                   @click="cancelBooking(item.id)"
                   :disabled="actionLoading === item.id"
                   class="text-xs font-semibold text-error hover:bg-error-container/40 border border-error/30 px-3 py-2 rounded-lg transition flex items-center justify-center col-span-2 sm:col-span-1"
                 >
-                  {{ actionLoading === item.id ? 'Membatalkan...' : 'Batalkan Pesanan' }}
+                  {{ actionLoading === item.id ? 'Membatalkan...' : 'Batalkan' }}
                 </button>
               </template>
 
@@ -354,11 +387,14 @@ import {
   PhDoor,
   PhStar,
   PhWhatsappLogo,
+  PhCreditCard,
+  PhKey,
   PhX,
 } from '@phosphor-icons/vue'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
+import { payWithSnap } from '../utils/midtrans'
 import { openWhatsAppChat, buildTenantInquiryTemplate, buildOwnerContactTenantTemplate } from '../utils/whatsapp'
 
 const auth = useAuthStore()
@@ -373,8 +409,9 @@ const searchFilter = ref('')
 const filterTabs = [
   { label: 'Semua', value: 'semua' },
   { label: 'Menunggu', value: 'menunggu' },
-  { label: 'Disetujui', value: 'disetujui' },
-  { label: 'Ditolak', value: 'ditolak' },
+  { label: 'DP Terbayar', value: 'dp_dibayar' },
+  { label: 'Siap Serah Kunci', value: 'siap_serah_terima' },
+  { label: 'Aktif Dihuni', value: 'aktif' },
   { label: 'Dibatalkan', value: 'dibatalkan' },
 ]
 
@@ -442,6 +479,112 @@ const cancelBooking = async (id) => {
   }
 }
 
+// Pay DP action
+const payDp = async (bookingId) => {
+  actionLoading.value = bookingId
+  try {
+    const res = await api.post(`/bookings/${bookingId}/checkout-dp`)
+    const snapToken = res.data.data.snap_token
+    if (snapToken) {
+      await payWithSnap(snapToken, {
+        onSuccess: async () => {
+          try {
+            await api.post(`/bookings/${bookingId}/sync-status`)
+          } catch (_) {}
+          ui.success('Pembayaran DP berhasil dikonfirmasi! Kamar Anda telah aman.')
+          await fetchBookings()
+        },
+        onPending: async () => {
+          try {
+            await api.post(`/bookings/${bookingId}/sync-status`)
+          } catch (_) {}
+          ui.info('Menunggu pembayaran diselesaikan.')
+          await fetchBookings()
+        },
+        onError: () => {
+          ui.error('Pembayaran gagal atau dibatalkan.')
+        },
+        onClose: async () => {
+          try {
+            await api.post(`/bookings/${bookingId}/sync-status`)
+          } catch (_) {}
+          await fetchBookings()
+        }
+      })
+    }
+  } catch (err) {
+    ui.error(err.response?.data?.message || 'Gagal memproses pembayaran DP.')
+  } finally {
+    actionLoading.value = null
+  }
+}
+
+// Pay Pelunasan (80%) action
+const payPelunasan = async (bookingId) => {
+  actionLoading.value = bookingId
+  try {
+    const res = await api.post(`/bookings/${bookingId}/checkout-pelunasan`)
+    const snapToken = res.data.data.snap_token
+    if (snapToken) {
+      await payWithSnap(snapToken, {
+        onSuccess: async () => {
+          try {
+            await api.post(`/bookings/${bookingId}/sync-status`)
+          } catch (_) {}
+          ui.success('Pelunasan sewa 80% berhasil! Anda kini siap melakukan serah terima kunci.')
+          await fetchBookings()
+        },
+        onPending: async () => {
+          try {
+            await api.post(`/bookings/${bookingId}/sync-status`)
+          } catch (_) {}
+          ui.info('Menunggu penyelesaian pembayaran pelunasan.')
+          await fetchBookings()
+        },
+        onError: () => {
+          ui.error('Pembayaran pelunasan gagal atau dibatalkan.')
+        },
+        onClose: async () => {
+          try {
+            await api.post(`/bookings/${bookingId}/sync-status`)
+          } catch (_) {}
+          await fetchBookings()
+        }
+      })
+    }
+  } catch (err) {
+    ui.error(err.response?.data?.message || 'Gagal memproses pelunasan sewa.')
+  } finally {
+    actionLoading.value = null
+  }
+}
+
+// Confirm handover key
+const confirmHandover = async (bookingId) => {
+  const isOwner = auth.isPemilik
+  const confirmed = await ui.confirm({
+    title: isOwner ? 'Serahkan Kunci Kamar?' : 'Konfirmasi Terima Kunci',
+    message: isOwner
+      ? 'Apakah kunci kamar telah diserahkan ke penyewa? Dana sewa (setelah dipotong komisi 5%) akan langsung masuk ke Saldo Dompet Anda.'
+      : 'Apakah Anda telah menerima kunci fisik kamar dan siap mulai menempati kos?',
+    confirmText: isOwner ? 'Ya, Kunci Diserahkan' : 'Ya, Kunci Diterima',
+    cancelText: 'Batal',
+    confirmType: 'primary'
+  })
+  if (!confirmed) return
+
+  actionLoading.value = bookingId
+  try {
+    await api.post(`/bookings/${bookingId}/handover-key`)
+    ui.success(isOwner ? 'Kunci berhasil diserahkan! Saldo telah masuk ke Dompet Mitra.' : 'Serah terima kunci dikonfirmasi! Selamat menempati kamar baru.')
+    await fetchBookings()
+  } catch (err) {
+    ui.error(err.response?.data?.message || 'Gagal mengonfirmasi serah terima kunci.')
+  } finally {
+    actionLoading.value = null
+  }
+}
+
 // Pemilik approve/reject action
 const updateBookingStatus = async (id, status) => {
   const label = status === 'disetujui' ? 'menyetujui' : 'menolak'
@@ -473,19 +616,31 @@ const formatJenis = (jenis) => {
 
 const formatStatus = (status) => {
   switch (status) {
-    case 'menunggu': return 'Menunggu Konfirmasi'
+    case 'menunggu':
+    case 'menunggu_pembayaran_dp': return 'Menunggu DP'
+    case 'dp_dibayar': return 'DP Terbayar (Kamar Terkunci)'
+    case 'siap_serah_terima': return 'Lunas - Siap Serah Kunci'
+    case 'aktif': return 'Aktif Dihuni'
+    case 'selesai': return 'Selesai'
     case 'disetujui': return 'Disetujui'
     case 'ditolak': return 'Ditolak'
     case 'dibatalkan': return 'Dibatalkan'
+    case 'kedaluwarsa': return 'Kedaluwarsa'
     default: return status
   }
 }
 
 const statusBadgeClass = (status) => {
   switch (status) {
-    case 'menunggu': return 'bg-amber-50 text-amber-700 border-amber-200'
+    case 'menunggu':
+    case 'menunggu_pembayaran_dp': return 'bg-amber-50 text-amber-700 border-amber-200'
+    case 'dp_dibayar': return 'bg-teal-50 text-teal-700 border-teal-200'
+    case 'siap_serah_terima': return 'bg-blue-50 text-blue-700 border-blue-200'
+    case 'aktif': return 'bg-emerald-50 text-emerald-700 border-emerald-200'
+    case 'selesai': return 'bg-slate-100 text-slate-700 border-slate-200'
     case 'disetujui': return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-    case 'ditolak': return 'bg-rose-50 text-rose-700 border-rose-200'
+    case 'ditolak':
+    case 'kedaluwarsa': return 'bg-rose-50 text-rose-700 border-rose-200'
     case 'dibatalkan': return 'bg-slate-100 text-slate-600 border-slate-200'
     default: return 'bg-slate-100 text-slate-700 border-slate-200'
   }
@@ -493,9 +648,15 @@ const statusBadgeClass = (status) => {
 
 const statusDotClass = (status) => {
   switch (status) {
-    case 'menunggu': return 'bg-amber-500 animate-pulse'
+    case 'menunggu':
+    case 'menunggu_pembayaran_dp': return 'bg-amber-500 animate-pulse'
+    case 'dp_dibayar': return 'bg-teal-500'
+    case 'siap_serah_terima': return 'bg-blue-500 animate-pulse'
+    case 'aktif': return 'bg-emerald-500'
+    case 'selesai': return 'bg-slate-400'
     case 'disetujui': return 'bg-emerald-500'
-    case 'ditolak': return 'bg-rose-500'
+    case 'ditolak':
+    case 'kedaluwarsa': return 'bg-rose-500'
     case 'dibatalkan': return 'bg-slate-400'
     default: return 'bg-slate-400'
   }

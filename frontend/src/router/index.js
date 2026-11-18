@@ -19,6 +19,8 @@ const ManageKosView = () => import('../views/ManageKosView.vue')
 const ManageRoomsView = () => import('../views/ManageRoomsView.vue')
 const BookingRequestsView = () => import('../views/BookingRequestsView.vue')
 const PropertyVerificationView = () => import('../views/PropertyVerificationView.vue')
+const OwnerWalletView = () => import('../views/OwnerWalletView.vue')
+const ManageTenantsView = () => import('../views/ManageTenantsView.vue')
 const AboutView = () => import('../views/AboutView.vue')
 const NotFoundView = () => import('../views/NotFoundView.vue')
 const ForbiddenView = () => import('../views/ForbiddenView.vue')
@@ -159,6 +161,18 @@ const routes = [
     name: 'kelola-pemesanan',
     component: BookingRequestsView,
     meta: { requiresAuth: true, roles: ['pemilik', 'admin'], requiresVerified: true },
+  },
+  {
+    path: '/dashboard/pemilik/penghuni',
+    name: 'kelola-penghuni',
+    component: ManageTenantsView,
+    meta: { requiresAuth: true, roles: ['pemilik', 'admin'], requiresVerified: true },
+  },
+  {
+    path: '/dashboard/pemilik/dompet',
+    name: 'pemilik-dompet',
+    component: OwnerWalletView,
+    meta: { requiresAuth: true, roles: ['pemilik', 'admin'] },
   },
   {
     path: '/dashboard/admin',
