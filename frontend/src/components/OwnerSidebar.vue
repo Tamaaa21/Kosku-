@@ -56,16 +56,16 @@
           </button>
         </div>
 
-        <!-- Section Label -->
-        <div class="px-5 pt-4 pb-2">
-          <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
-            Menu Pengelola
-          </span>
-        </div>
+        <!-- Navigation Links Grouped by Categories -->
+        <nav class="flex-1 px-3 space-y-1 overflow-y-auto pb-4">
+          <!-- MENU UTAMA -->
+          <div class="px-3 pt-3 pb-1">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+              Menu Utama
+            </span>
+          </div>
 
-        <!-- Navigation Links -->
-        <nav class="flex-1 px-3 space-y-1 overflow-y-auto">
-          <!-- 1. Dashboard -->
+          <!-- Dashboard -->
           <router-link
             to="/dashboard/pemilik"
             @click="closeSidebar"
@@ -76,7 +76,14 @@
             <span class="flex-1">Dashboard</span>
           </router-link>
 
-          <!-- 2. Verifikasi Kepemilikan Properti -->
+          <!-- MANAJEMEN PROPERTI -->
+          <div class="px-3 pt-4 pb-1">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+              Manajemen Properti
+            </span>
+          </div>
+
+          <!-- Verifikasi Properti -->
           <router-link
             to="/dashboard/pemilik/verifikasi"
             @click="closeSidebar"
@@ -97,7 +104,7 @@
             </span>
           </router-link>
 
-          <!-- 3. Data Kos -->
+          <!-- Data Kos -->
           <router-link
             :to="auth.isVerified ? '/dashboard/pemilik/kos' : '/dashboard/pemilik/verifikasi?locked=1'"
             @click="closeSidebar"
@@ -112,7 +119,7 @@
             <PhLockSimple v-if="!auth.isVerified" :size="15" weight="bold" class="text-slate-500" />
           </router-link>
 
-          <!-- 4. Kelola Kamar -->
+          <!-- Kelola Kamar -->
           <router-link
             :to="auth.isVerified ? '/dashboard/pemilik/kamar' : '/dashboard/pemilik/verifikasi?locked=1'"
             @click="closeSidebar"
@@ -127,7 +134,14 @@
             <PhLockSimple v-if="!auth.isVerified" :size="15" weight="bold" class="text-slate-500" />
           </router-link>
 
-          <!-- 5. Permintaan Pemesanan -->
+          <!-- OPERASIONAL -->
+          <div class="px-3 pt-4 pb-1">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+              Operasional
+            </span>
+          </div>
+
+          <!-- Pemesanan -->
           <router-link
             :to="auth.isVerified ? '/dashboard/pemilik/pemesanan' : '/dashboard/pemilik/verifikasi?locked=1'"
             @click="closeSidebar"
@@ -138,11 +152,11 @@
             ]"
           >
             <PhCalendarCheck :size="20" weight="bold" />
-            <span class="flex-1">Pemesanan Masuk</span>
+            <span class="flex-1">Pemesanan</span>
             <PhLockSimple v-if="!auth.isVerified" :size="15" weight="bold" class="text-slate-500" />
           </router-link>
 
-          <!-- 6. Daftar Penghuni Kos -->
+          <!-- Daftar Penghuni -->
           <router-link
             :to="auth.isVerified ? '/dashboard/pemilik/penghuni' : '/dashboard/pemilik/verifikasi?locked=1'"
             @click="closeSidebar"
@@ -157,7 +171,14 @@
             <PhLockSimple v-if="!auth.isVerified" :size="15" weight="bold" class="text-slate-500" />
           </router-link>
 
-          <!-- 7. Dompet & Saldo Mitra -->
+          <!-- KEUANGAN -->
+          <div class="px-3 pt-4 pb-1">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+              Keuangan
+            </span>
+          </div>
+
+          <!-- Dompet & Saldo -->
           <router-link
             to="/dashboard/pemilik/dompet"
             @click="closeSidebar"
@@ -168,7 +189,14 @@
             <span class="flex-1">Dompet & Saldo</span>
           </router-link>
 
-          <!-- 8. Profil Pemilik -->
+          <!-- LAINNYA -->
+          <div class="px-3 pt-4 pb-1">
+            <span class="text-[10px] uppercase tracking-wider text-slate-400 font-bold">
+              Lainnya
+            </span>
+          </div>
+
+          <!-- Profil Saya -->
           <router-link
             to="/profil"
             @click="closeSidebar"
@@ -179,7 +207,7 @@
             <span class="flex-1">Profil Saya</span>
           </router-link>
 
-          <!-- 9. Pusat Bantuan & FAQ -->
+          <!-- Pusat Bantuan & FAQ -->
           <router-link
             to="/faq"
             @click="closeSidebar"
@@ -336,7 +364,8 @@ import {
   PhLockSimple,
   PhCheckCircle,
   PhWallet,
-  PhUsers
+  PhUsers,
+  PhQuestion
 } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
