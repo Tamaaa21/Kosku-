@@ -31,12 +31,12 @@
       
 
       <!-- 1. Ringkasan Akun Card (Identitas Pengguna & Ringkasan Status) -->
-      <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
+      <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 shadow-xs overflow-hidden transition-colors">
         <!-- Identity Box -->
-        <div class="bg-gradient-to-br from-blue-50/90 via-slate-50/50 to-white p-6 sm:p-7 flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+        <div class="bg-gradient-to-br from-blue-50/90 via-slate-50/50 to-white dark:from-slate-800/80 dark:via-slate-900 dark:to-slate-900 p-6 sm:p-7 flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left transition-colors">
           <!-- Large Avatar with Camera Upload Trigger -->
           <div class="relative group shrink-0">
-            <div class="w-22 h-22 sm:w-24 sm:h-24 rounded-full overflow-hidden shadow-md ring-4 ring-white bg-[#1E3A8A] text-white flex items-center justify-center relative">
+            <div class="w-22 h-22 sm:w-24 sm:h-24 rounded-full overflow-hidden shadow-md ring-4 ring-white dark:ring-slate-800 bg-[#1E3A8A] text-white flex items-center justify-center relative">
               <img
                 v-if="avatarPreview || auth.user?.foto"
                 :src="avatarPreview || auth.user.foto"
@@ -80,10 +80,10 @@
           <div class="min-w-0 flex-1">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-tight">
                   {{ auth.user?.nama || 'Pengguna Kostara' }}
                 </h2>
-                <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+                <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">
                   {{ auth.user?.email || 'email@kostara.id' }}
                 </p>
               </div>
@@ -98,11 +98,11 @@
 
             <!-- Status Verified Pill & Phone -->
             <div class="mt-4 flex flex-wrap items-center justify-center sm:justify-start gap-2.5">
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200/80">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800/80">
                 <PhCheckCircle :size="15" weight="fill" class="text-emerald-500" />
                 Akun Terverifikasi
               </span>
-              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                 <PhPhone :size="14" class="text-slate-500" />
                 {{ auth.user?.no_hp || auth.user?.telepon || 'Belum ada nomor WhatsApp' }}
               </span>
@@ -112,25 +112,25 @@
       </div>
 
       <!-- 2. Menu Pengaturan Card (Berpindah ke halaman selanjutnya saat diklik) -->
-      <div class="bg-white rounded-3xl border border-slate-200/80 p-5 sm:p-6 shadow-xs">
-        <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100">
-          <h2 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Menu Pengaturan</h2>
-          <span class="text-[11px] font-medium text-slate-400">Pilih menu untuk mengelola</span>
+      <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-5 sm:p-6 shadow-xs transition-colors">
+        <div class="flex items-center justify-between mb-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+          <h2 class="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">Menu Pengaturan</h2>
+          <span class="text-[11px] font-medium text-slate-400 dark:text-slate-500">Pilih menu untuk mengelola</span>
         </div>
 
         <div class="space-y-1.5">
           <!-- 1. Informasi Pribadi -->
           <router-link
             to="/profil/informasi-pribadi"
-            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 transition group border border-transparent hover:border-slate-100"
+            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition group border border-transparent hover:border-slate-100 dark:hover:border-slate-800"
           >
             <div class="flex items-center gap-3.5 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
+              <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/60 transition-colors">
                 <PhUser :size="20" weight="bold" />
               </div>
               <div class="min-w-0 text-left">
-                <p class="text-sm font-bold text-slate-800 group-hover:text-primary transition-colors">Informasi Pribadi</p>
-                <p class="text-xs text-slate-400 truncate mt-0.5">Nama, email, WhatsApp</p>
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-primary transition-colors">Informasi Pribadi</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">Nama, email, WhatsApp</p>
               </div>
             </div>
             <PhCaretRight :size="16" class="text-slate-400 group-hover:text-primary group-hover:translate-x-1 transition-all shrink-0" />
@@ -139,49 +139,49 @@
           <!-- 2. Keamanan Akun -->
           <router-link
             to="/profil/keamanan"
-            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 transition group border border-transparent hover:border-slate-100"
+            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition group border border-transparent hover:border-slate-100 dark:hover:border-slate-800"
           >
             <div class="flex items-center gap-3.5 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 transition-colors">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:bg-emerald-100 dark:group-hover:bg-emerald-900/60 transition-colors">
                 <PhShieldCheck :size="20" weight="bold" />
               </div>
               <div class="min-w-0 text-left">
-                <p class="text-sm font-bold text-slate-800 group-hover:text-emerald-600 transition-colors">Keamanan Akun</p>
-                <p class="text-xs text-slate-400 truncate mt-0.5">Ubah password, sesi aktif</p>
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">Keamanan Akun</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">Ubah password, sesi aktif</p>
               </div>
             </div>
-            <PhCaretRight :size="16" class="text-slate-400 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all shrink-0" />
+            <PhCaretRight :size="16" class="text-slate-400 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 group-hover:translate-x-1 transition-all shrink-0" />
           </router-link>
 
           <!-- 3. Notifikasi -->
           <router-link
             to="/profil/notifikasi"
-            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 transition group border border-transparent hover:border-slate-100"
+            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition group border border-transparent hover:border-slate-100 dark:hover:border-slate-800"
           >
             <div class="flex items-center gap-3.5 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 group-hover:bg-amber-100 transition-colors">
+              <div class="w-10 h-10 rounded-xl bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 group-hover:bg-amber-100 dark:group-hover:bg-amber-900/60 transition-colors">
                 <PhBell :size="20" weight="bold" />
               </div>
               <div class="min-w-0 text-left">
-                <p class="text-sm font-bold text-slate-800 group-hover:text-amber-600 transition-colors">Notifikasi</p>
-                <p class="text-xs text-slate-400 truncate mt-0.5">Preferensi pemberitahuan</p>
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">Notifikasi</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">Preferensi pemberitahuan</p>
               </div>
             </div>
-            <PhCaretRight :size="16" class="text-slate-400 group-hover:text-amber-600 group-hover:translate-x-1 transition-all shrink-0" />
+            <PhCaretRight :size="16" class="text-slate-400 group-hover:text-amber-600 dark:group-hover:text-amber-400 group-hover:translate-x-1 transition-all shrink-0" />
           </router-link>
 
           <!-- 4. Kos Favorit -->
           <router-link
             to="/favorit"
-            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 transition group border border-transparent hover:border-slate-100"
+            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition group border border-transparent hover:border-slate-100 dark:hover:border-slate-800"
           >
             <div class="flex items-center gap-3.5 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center shrink-0 group-hover:bg-rose-100 transition-colors">
+              <div class="w-10 h-10 rounded-xl bg-rose-50 dark:bg-rose-950/50 text-rose-600 dark:text-rose-400 flex items-center justify-center shrink-0 group-hover:bg-rose-100 dark:group-hover:bg-rose-900/60 transition-colors">
                 <PhHeart :size="20" weight="fill" />
               </div>
               <div class="min-w-0 text-left">
-                <p class="text-sm font-bold text-slate-800 group-hover:text-rose-600 transition-colors">Kos Favorit</p>
-                <p class="text-xs text-slate-400 truncate mt-0.5">Daftar kos tersimpan</p>
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-rose-600 dark:group-hover:text-rose-400 transition-colors">Kos Favorit</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">Daftar kos tersimpan</p>
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
@@ -191,31 +191,48 @@
               >
                 {{ favoritesStore.count }}
               </span>
-              <PhCaretRight :size="16" class="text-slate-400 group-hover:text-rose-600 group-hover:translate-x-1 transition-all" />
+              <PhCaretRight :size="16" class="text-slate-400 group-hover:text-rose-600 dark:group-hover:text-rose-400 group-hover:translate-x-1 transition-all" />
             </div>
           </router-link>
 
           <!-- 5. Tentang Kami -->
           <router-link
             to="/about"
-            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 transition group border border-transparent hover:border-slate-100"
+            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/60 transition group border border-transparent hover:border-slate-100 dark:hover:border-slate-800"
           >
             <div class="flex items-center gap-3.5 min-w-0">
-              <div class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center shrink-0 group-hover:bg-sky-100 transition-colors">
+              <div class="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 group-hover:bg-sky-100 dark:group-hover:bg-sky-900/60 transition-colors">
                 <PhInfo :size="20" weight="bold" />
               </div>
               <div class="min-w-0 text-left">
-                <p class="text-sm font-bold text-slate-800 group-hover:text-sky-600 transition-colors">Tentang Kami</p>
-                <p class="text-xs text-slate-400 truncate mt-0.5">Informasi Kostara</p>
+                <p class="text-sm font-bold text-slate-800 dark:text-slate-200 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">Tentang Kami</p>
+                <p class="text-xs text-slate-400 dark:text-slate-500 truncate mt-0.5">Informasi Kostara</p>
               </div>
             </div>
-            <PhCaretRight :size="16" class="text-slate-400 group-hover:text-sky-600 group-hover:translate-x-1 transition-all shrink-0" />
+            <PhCaretRight :size="16" class="text-slate-400 group-hover:text-sky-600 dark:group-hover:text-sky-400 group-hover:translate-x-1 transition-all shrink-0" />
+          </router-link>
+
+          <!-- 6. Pusat Bantuan & FAQ -->
+          <router-link
+            to="/faq"
+            class="w-full flex items-center justify-between p-3.5 rounded-2xl hover:bg-slate-50 transition group border border-transparent hover:border-slate-100"
+          >
+            <div class="flex items-center gap-3.5 min-w-0">
+              <div class="w-10 h-10 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center shrink-0 group-hover:bg-violet-100 transition-colors">
+                <PhQuestion :size="20" weight="bold" />
+              </div>
+              <div class="min-w-0 text-left">
+                <p class="text-sm font-bold text-slate-800 group-hover:text-violet-600 transition-colors">Pusat Bantuan & FAQ</p>
+                <p class="text-xs text-slate-400 truncate mt-0.5">Tanya jawab & bantuan sewa</p>
+              </div>
+            </div>
+            <PhCaretRight :size="16" class="text-slate-400 group-hover:text-violet-600 group-hover:translate-x-1 transition-all shrink-0" />
           </router-link>
 
           <!-- Divider -->
           <div class="border-t border-slate-100 my-2"></div>
 
-          <!-- 6. Keluar (Logout) -->
+          <!-- 7. Keluar (Logout) -->
           <button
             type="button"
             @click="handleLogout"
@@ -826,6 +843,7 @@ import {
   PhArrowLeft,
   PhWhatsappLogo,
   PhTag,
+  PhQuestion,
 } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()

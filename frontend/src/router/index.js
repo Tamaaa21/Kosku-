@@ -22,6 +22,7 @@ const PropertyVerificationView = () => import('../views/PropertyVerificationView
 const OwnerWalletView = () => import('../views/OwnerWalletView.vue')
 const ManageTenantsView = () => import('../views/ManageTenantsView.vue')
 const AboutView = () => import('../views/AboutView.vue')
+const FaqView = () => import('../views/FaqView.vue')
 const NotFoundView = () => import('../views/NotFoundView.vue')
 const ForbiddenView = () => import('../views/ForbiddenView.vue')
 const ApiTestView = () => import('../views/ApiTestView.vue')
@@ -37,6 +38,13 @@ const routes = [
     alias: '/tentang',
     name: 'about',
     component: AboutView,
+  },
+  {
+    path: '/faq',
+    alias: ['/pusat-bantuan', '/bantuan'],
+    name: 'faq',
+    component: FaqView,
+    meta: { title: 'Pusat Bantuan & FAQ' },
   },
   {
     path: '/api-test',

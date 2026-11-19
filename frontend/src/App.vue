@@ -12,23 +12,23 @@
     <!-- Footer (Hanya tampil di Desktop md ke atas, disembunyikan di Mobile) -->
     <footer
       v-if="$route.path !== '/peta' && !auth.isPemilik && !auth.isAdmin"
-      class="hidden md:block bg-surface-container-lowest border-t border-slate-200/80 py-8 text-center text-xs text-on-surface-variant mt-12"
+      class="hidden md:block bg-surface-container-lowest dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 py-8 text-center text-xs text-on-surface-variant dark:text-slate-400 mt-12 transition-colors"
     >
       <div class="max-w-7xl mx-auto px-margin flex flex-col sm:flex-row items-center justify-between gap-4">
         <div class="flex items-center gap-2">
           <img :src="logoUrl" alt="Kostara Logo" class="w-6 h-6 object-contain" />
           <span class="font-bold text-sm">
             <span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span>
-            <span class="text-on-surface font-semibold ml-1">Indonesia</span>
+            <span class="text-on-surface dark:text-slate-100 font-semibold ml-1">Indonesia</span>
           </span>
-          <span>&mdash; Platform Pencarian & Sewa Kos Terpercaya di Seluruh Indonesia</span>
+          <span class="text-slate-500 dark:text-slate-400">&mdash; Platform Pencarian & Sewa Kos Terpercaya di Seluruh Indonesia</span>
         </div>
-        <div class="flex items-center gap-4 text-[11px] text-secondary">
+        <div class="flex items-center gap-4 text-[11px] text-secondary dark:text-slate-400">
           <span>&copy; {{ new Date().getFullYear() }} <span class="font-bold"><span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span></span></span>
           <span>&bull;</span>
-          <span>Privasi & Keamanan</span>
+          <router-link to="/faq" class="hover:text-primary transition underline-offset-2 hover:underline">Pusat Bantuan & FAQ</router-link>
           <span>&bull;</span>
-          <span>Syarat & Ketentuan</span>
+          <router-link to="/about" class="hover:text-primary transition underline-offset-2 hover:underline">Tentang Kami</router-link>
         </div>
       </div>
     </footer>
@@ -66,8 +66,10 @@ import ToastContainer from './components/ToastContainer.vue'
 import ConfirmModal from './components/ConfirmModal.vue'
 import logoUrl from './assets/logo.png'
 import { useAuthStore } from './stores/auth'
+import { useThemeStore } from './stores/theme'
 
 const auth = useAuthStore()
+const themeStore = useThemeStore()
 const route = useRoute()
 const router = useRouter()
 
@@ -86,6 +88,8 @@ const showMobileBottomNavbar = computed(() => {
 })
 
 onMounted(async () => {
+  themeStore.initTheme()
+
   if (auth.token) {
     await auth.fetchMe()
   }

@@ -95,12 +95,29 @@
             :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
           ></span>
         </router-link>
+
+        <router-link
+          to="/faq"
+          class="relative py-1 text-sm font-medium transition-colors"
+          :class="
+            isTransparent
+              ? ($route.path === '/faq' ? 'text-white font-bold' : 'text-white/85 hover:text-white')
+              : ($route.path === '/faq' ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
+          "
+        >
+          <span>Bantuan (FAQ)</span>
+          <span
+            v-if="$route.path === '/faq'"
+            class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
+            :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
+          ></span>
+        </router-link>
       </nav>
 
       <!-- Right Action / User Profile -->
-      <div class="flex items-center gap-2 md:gap-3">
-        <!-- Search Icon Button (Desktop Only) -->
-      
+      <div class="flex items-center gap-1.5 md:gap-2.5">
+        <!-- Dark Mode Toggle Button -->
+        <DarkModeToggle :is-transparent="isTransparent" />
 
         <template v-if="auth.isAuthenticated">
           <!-- Notification Dropdown -->
@@ -215,8 +232,17 @@
                     </span>
                   </router-link>
 
-                  <!-- 4. API Test Playground -->
-                  
+                  <!-- 4. Pusat Bantuan & FAQ -->
+                  <router-link
+                    to="/faq"
+                    @click="isProfileDropdownOpen = false"
+                    class="flex items-center gap-3 px-4 py-2.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 hover:text-primary transition group"
+                  >
+                    <div class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                      <PhQuestion :size="16" weight="bold" />
+                    </div>
+                    <span>Pusat Bantuan (FAQ)</span>
+                  </router-link>
                 </div>
 
                 <!-- Divider -->
@@ -275,6 +301,7 @@ import { useAuthStore } from '../stores/auth'
 import { useFavoritesStore } from '../stores/favorites'
 import { useUiStore } from '../stores/ui'
 import NotificationDropdown from './NotificationDropdown.vue'
+import DarkModeToggle from './DarkModeToggle.vue'
 import logoUrl from '../assets/logo.png'
 import {
   PhUser,
@@ -282,7 +309,8 @@ import {
   PhSignOut,
   PhHeart,
   PhMagnifyingGlass,
-  PhCode
+  PhCode,
+  PhQuestion
 } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
