@@ -11,43 +11,6 @@
         </p>
       </div>
 
-      <!-- Google Sign-In 1-Click Button -->
-      <div class="mb-5">
-        <GoogleSignInButton label="Masuk dengan Google" default-role="pencari" />
-      </div>
-
-      <!-- Divider "ATAU" -->
-      <div class="relative flex items-center justify-center mb-5">
-        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
-        <span class="bg-surface-container-lowest dark:bg-slate-900 px-3 text-[11px] uppercase tracking-wider font-bold text-slate-400 shrink-0">
-          atau via email
-        </span>
-        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
-      </div>
-
-      <!-- Quick Test Login Buttons (Pencari & Pemilik) -->
-      <div class="mb-5 bg-surface-container-low dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-3">
-        <span class="text-[10px] font-bold text-secondary dark:text-slate-400 uppercase tracking-wider block mb-2">
-          Uji Coba Cepat (Akun Demo):
-        </span>
-        <div class="grid grid-cols-2 gap-2">
-          <button
-            type="button"
-            @click="quickFill('pencari@kos.test', 'password')"
-            class="text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-primary py-2 rounded-xl text-on-surface dark:text-slate-200 transition cursor-pointer"
-          >
-            Pencari Kos
-          </button>
-          <button
-            type="button"
-            @click="quickFill('pemilik@kos.test', 'password')"
-            class="text-xs font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 hover:border-primary py-2 rounded-xl text-on-surface dark:text-slate-200 transition cursor-pointer"
-          >
-            Mitra Pemilik
-          </button>
-        </div>
-      </div>
-
       <!-- Error Alert with Admin Redirect Hint -->
       <div
         v-if="auth.error"
@@ -65,6 +28,7 @@
         </div>
       </div>
 
+      <!-- Form Login Manual (Email & Password) -->
       <form @submit.prevent="handleLogin" class="space-y-4">
         <div>
           <label class="block text-xs font-semibold text-on-surface dark:text-slate-200 mb-1">Email</label>
@@ -108,6 +72,20 @@
         </button>
       </form>
 
+      <!-- Divider "ATAU" -->
+      <div class="relative flex items-center justify-center my-6">
+        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+        <span class="bg-surface-container-lowest dark:bg-slate-900 px-3 text-[11px] uppercase tracking-wider font-bold text-slate-400 shrink-0">
+          atau masuk dengan
+        </span>
+        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+      </div>
+
+      <!-- Google Sign-In Button (Di Bawah Form) -->
+      <div class="mb-2">
+        <GoogleSignInButton label="Masuk dengan Google" default-role="pencari" />
+      </div>
+
       <p class="text-center text-xs text-on-surface-variant dark:text-slate-400 mt-6">
         Belum memiliki akun?
         <router-link to="/register" class="text-primary font-bold hover:underline">
@@ -145,12 +123,6 @@ const form = reactive({
   email: '',
   password: '',
 })
-
-const quickFill = (email, pass) => {
-  form.email = email
-  form.password = pass
-  auth.error = null
-}
 
 const handleLogin = async () => {
   try {

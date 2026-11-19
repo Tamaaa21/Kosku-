@@ -61,22 +61,6 @@
           </div>
         </div>
 
-        <!-- Quick Demo Quickfill Button -->
-        <div class="mb-5 bg-slate-950/80 border border-slate-800/80 rounded-xl p-3">
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Akun Demo Administrator:</span>
-            <span class="text-[9px] text-slate-500 font-mono">Development Mode</span>
-          </div>
-          <button
-            type="button"
-            @click="quickFillAdmin"
-            class="w-full text-xs font-bold py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700/80 text-primary-container hover:text-white border border-slate-700 transition flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <PhShield :size="15" weight="bold" />
-            <span>Isi Otomatis Kredensial Admin Demo</span>
-          </button>
-        </div>
-
         <!-- Form Login -->
         <form @submit.prevent="handleAdminLogin" class="space-y-4">
           <div>
@@ -161,7 +145,6 @@ import {
   PhArrowLeft,
   PhShieldCheck,
   PhLockKey,
-  PhShield,
   PhSignIn,
   PhCircleNotch,
   PhEye,
@@ -181,12 +164,6 @@ const form = reactive({
   email: '',
   password: '',
 })
-
-const quickFillAdmin = () => {
-  form.email = 'admin@kos.test'
-  form.password = 'password'
-  errorMessage.value = ''
-}
 
 const handleAdminLogin = async () => {
   errorMessage.value = ''

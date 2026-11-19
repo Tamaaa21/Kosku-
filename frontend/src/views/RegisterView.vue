@@ -9,20 +9,6 @@
         <p class="text-xs text-on-surface-variant dark:text-slate-400 mt-1">Bergabunglah sebagai pencari kos atau pemilik kos.</p>
       </div>
 
-      <!-- Google Sign-In 1-Click Button -->
-      <div class="mb-5">
-        <GoogleSignInButton label="Daftar Cepat dengan Google" :default-role="form.role" />
-      </div>
-
-      <!-- Divider "ATAU" -->
-      <div class="relative flex items-center justify-center mb-5">
-        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
-        <span class="bg-surface-container-lowest dark:bg-slate-900 px-3 text-[11px] uppercase tracking-wider font-bold text-slate-400 shrink-0">
-          atau daftar manual
-        </span>
-        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
-      </div>
-
       <div v-if="errorMsg" class="mb-5 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800/80">
         {{ errorMsg }}
       </div>
@@ -124,14 +110,28 @@
         <button
           type="submit"
           :disabled="auth.loading"
-          class="w-full bg-primary-container hover:bg-primary text-white font-bold py-2.5 rounded-lg transition text-xs shadow-md disabled:opacity-50 mt-4 flex items-center justify-center gap-1.5"
+          class="w-full bg-primary hover:bg-primary-hover text-white font-bold py-3 rounded-xl transition text-xs shadow-md disabled:opacity-50 mt-4 flex items-center justify-center gap-1.5 cursor-pointer"
         >
           <PhUserPlus :size="16" weight="bold" />
           <span>{{ auth.loading ? 'Mendaftarkan Akun...' : 'Daftar Sekarang' }}</span>
         </button>
       </form>
 
-      <p class="text-center text-xs text-on-surface-variant mt-6">
+      <!-- Divider "ATAU" -->
+      <div class="relative flex items-center justify-center my-6">
+        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+        <span class="bg-surface-container-lowest dark:bg-slate-900 px-3 text-[11px] uppercase tracking-wider font-bold text-slate-400 shrink-0">
+          atau daftar dengan
+        </span>
+        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+      </div>
+
+      <!-- Google Sign-In Button (Di Bawah Form) -->
+      <div class="mb-2">
+        <GoogleSignInButton label="Daftar Cepat dengan Google" :default-role="form.role" />
+      </div>
+
+      <p class="text-center text-xs text-on-surface-variant dark:text-slate-400 mt-6">
         Sudah memiliki akun?
         <router-link to="/login" class="text-primary font-bold hover:underline">
           Masuk di Sini

@@ -150,33 +150,8 @@
             </div>
           </div>
 
-          <!-- Quick Demo Buttons (Uji Coba Pengembang) -->
-          <div class="mb-4 pt-3 border-t border-slate-100 dark:border-slate-800">
-            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-2">
-              Uji Coba Cepat (Akun Google Demo):
-            </span>
-            <div class="grid grid-cols-2 gap-2">
-              <button
-                type="button"
-                @click="handleDemoGoogle('budi.pencari@gmail.com', 'Budi Santoso (Google)', 'pencari')"
-                :disabled="loading"
-                class="px-2.5 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[11px] font-semibold text-slate-700 dark:text-slate-200 text-center transition cursor-pointer"
-              >
-                Google: Pencari
-              </button>
-              <button
-                type="button"
-                @click="handleDemoGoogle('juragan.pemilik@gmail.com', 'Haji Mahmud (Google)', 'pemilik')"
-                :disabled="loading"
-                class="px-2.5 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-[11px] font-semibold text-slate-700 dark:text-slate-200 text-center transition cursor-pointer"
-              >
-                Google: Pemilik
-              </button>
-            </div>
-          </div>
-
           <!-- Action Button -->
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-2 pt-2">
             <button
               type="button"
               @click="handleRealGoogleLogin"
