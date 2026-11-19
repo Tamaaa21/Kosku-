@@ -5,7 +5,7 @@
       type="button"
       @click="openModal"
       :disabled="auth.loading"
-      class="w-full flex items-center justify-center gap-3 py-2.5 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-100 font-semibold text-xs sm:text-sm shadow-2xs transition active:scale-[0.99] cursor-pointer disabled:opacity-50"
+      class="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700/80 text-slate-700 dark:text-slate-100 font-semibold text-xs sm:text-sm shadow-2xs transition active:scale-[0.99] cursor-pointer disabled:opacity-50"
     >
       <!-- Google SVG Icon -->
       <svg class="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -85,12 +85,13 @@
             </div>
           </div>
 
-          <!-- Error Alert -->
+          <!-- Error Alert / Config Warning -->
           <div
             v-if="errorMessage"
-            class="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800"
+            class="mb-4 p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800 leading-relaxed flex items-start gap-2"
           >
-            {{ errorMessage }}
+            <PhWarningCircle :size="16" weight="bold" class="shrink-0 mt-0.5 text-rose-600 dark:text-rose-400" />
+            <span>{{ errorMessage }}</span>
           </div>
 
           <!-- Role Selector -->
@@ -150,11 +151,14 @@
             </div>
           </div>
 
-          <!-- Action Button -->
-          <div class="flex items-center gap-2 pt-2">
+          <!-- Official Google Render Button Container -->
+          <div ref="googleBtnContainer" class="w-full flex justify-center mb-3 min-h-[44px]"></div>
+
+          <!-- Action Button (Trigger) -->
+          <div class="flex items-center gap-2 pt-1">
             <button
               type="button"
-              @click="handleRealGoogleLogin"
+              @click="handleGoogleSignInClick"
               :disabled="loading"
               class="flex-1 py-2.5 px-4 rounded-xl bg-primary hover:bg-primary-hover text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50"
             >
@@ -178,11 +182,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, nextTick } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
-import { PhX, PhCheckCircle, PhInfo, PhCircleNotch } from '@phosphor-icons/vue'
+import { PhX, PhCheckCircle, PhInfo, PhCircleNotch, PhWarningCircle } from '@phosphor-icons/vue'
 
 const props = defineProps({
   label: {
@@ -204,27 +208,59 @@ const isOpen = ref(false)
 const selectedRole = ref(props.defaultRole)
 const loading = ref(false)
 const errorMessage = ref('')
+const googleBtnContainer = ref(null)
 
-const openModal = () => {
+const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
+
+const openModal = async () => {
   selectedRole.value = props.defaultRole
   errorMessage.value = ''
   isOpen.value = true
+
+  await nextTick()
+  initGoogleGsi()
 }
 
-// Simulasi login Google untuk testing & lingkungan lokal
-const handleDemoGoogle = async (email, name, role) => {
+// Inisialisasi Google Identity Services (GSI)
+const initGoogleGsi = () => {
+  if (!googleClientId) {
+    return
+  }
+
+  if (window.google?.accounts?.id && googleBtnContainer.value) {
+    try {
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: onGoogleCredentialResponse,
+      })
+
+      // Render tombol resmi Google di dalam container
+      googleBtnContainer.value.innerHTML = ''
+      window.google.accounts.id.renderButton(googleBtnContainer.value, {
+        theme: 'outline',
+        size: 'large',
+        text: 'continue_with',
+        shape: 'rectangular',
+        width: 320,
+      })
+    } catch (_) {}
+  }
+}
+
+// Callback saat user memilih akun Google dan mendapatkan ID token
+const onGoogleCredentialResponse = async (response) => {
+  if (!response?.credential) {
+    errorMessage.value = 'Tidak ada kredensial yang diterima dari Google.'
+    return
+  }
+
   loading.value = true
   errorMessage.value = ''
+
   try {
     const { user } = await auth.loginWithGoogle({
-      idToken: 'mock-google-token',
-      role: role || selectedRole.value,
-      demoUser: {
-        sub: 'google-sub-' + Math.abs(hashCode(email)),
-        email,
-        name,
-        picture: `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=017E91&color=fff`,
-      },
+      credential: response.credential,
+      role: selectedRole.value,
     })
 
     ui.success(`Selamat datang, ${user.nama}!`)
@@ -245,47 +281,23 @@ const handleDemoGoogle = async (email, name, role) => {
   }
 }
 
-// Handle login Google sungguhan (jika GSI tersedia atau fallback demo)
-const handleRealGoogleLogin = async () => {
-  loading.value = true
+const handleGoogleSignInClick = () => {
   errorMessage.value = ''
 
-  // Jika Google GSI client sudah terpasang di window
-  if (window.google?.accounts?.id) {
-    try {
-      window.google.accounts.id.prompt((notification) => {
-        if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-          // Fallback ke login demo Google jika prompt native tidak muncul
-          handleDemoGoogle(
-            `user.${selectedRole.value}@gmail.com`,
-            selectedRole.value === 'pemilik' ? 'Mitra Pemilik Google' : 'Pencari Kos Google',
-            selectedRole.value
-          )
-        }
-      })
-    } catch (_) {
-      handleDemoGoogle(
-        `user.${selectedRole.value}@gmail.com`,
-        selectedRole.value === 'pemilik' ? 'Mitra Pemilik Google' : 'Pencari Kos Google',
-        selectedRole.value
-      )
-    }
-  } else {
-    // Mode demo pengujian langsung jika Google Identity Services belum dikonfigurasi GCP client ID-nya
-    await handleDemoGoogle(
-      `user.${selectedRole.value}@gmail.com`,
-      selectedRole.value === 'pemilik' ? 'Mitra Pemilik Google' : 'Pencari Kos Google',
-      selectedRole.value
-    )
+  if (!googleClientId) {
+    errorMessage.value = 'Google OAuth Client ID belum dikonfigurasi. Silakan tambahkan VITE_GOOGLE_CLIENT_ID pada file frontend/.env dengan Client ID dari Google Cloud Console.'
+    return
   }
-}
 
-function hashCode(str) {
-  let hash = 0
-  for (let i = 0; i < str.length; i++) {
-    hash = (hash << 5) - hash + str.charCodeAt(i)
-    hash |= 0
+  if (window.google?.accounts?.id) {
+    initGoogleGsi()
+    window.google.accounts.id.prompt((notification) => {
+      if (notification.isNotDisplayed()) {
+        errorMessage.value = 'Prompt Google diblokir oleh browser. Silakan klik tombol Google yang tersedia di atas atau izinkan pop-up.'
+      }
+    })
+  } else {
+    errorMessage.value = 'SDK Google sedang dimuat atau koneksi terputus. Pastikan perangkat terhubung ke internet.'
   }
-  return hash
 }
 </script>
