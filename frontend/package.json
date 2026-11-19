@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "cap:build": "vite build && cap sync android",
     "cap:sync": "cap sync android",
-    "cap:open": "cap open android"
+    "cap:open": "cap open android",
+    "cap:run": "cap run android",
+    "cap:apk": "npm run cap:build && cd android && ./gradlew assembleDebug"
   },
   "dependencies": {
     "@capacitor/android": "^8.6.2",
