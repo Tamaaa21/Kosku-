@@ -1,15 +1,29 @@
 <template>
   <div class="min-h-[85vh] flex items-center justify-center px-4 py-12 pt-20">
-    <div class="bg-surface-container-lowest p-8 rounded-2xl border border-slate-100 shadow-md max-w-md w-full">
-      <div class="text-center mb-8">
+    <div class="bg-surface-container-lowest dark:bg-slate-900 p-8 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-md max-w-md w-full transition-colors">
+      <div class="text-center mb-6">
         <img :src="logoUrl" alt="Kostara Logo" class="w-14 h-14 object-contain mx-auto mb-3" />
-        <h2 class="text-2xl font-bold text-on-surface tracking-tight">
+        <h2 class="text-2xl font-bold text-on-surface dark:text-white tracking-tight">
           Daftar Akun <span class="text-[#017E91]">Kos</span><span class="text-[#E68202]">tara</span>
         </h2>
-        <p class="text-xs text-on-surface-variant mt-1">Bergabunglah sebagai pencari kos atau pemilik kos.</p>
+        <p class="text-xs text-on-surface-variant dark:text-slate-400 mt-1">Bergabunglah sebagai pencari kos atau pemilik kos.</p>
       </div>
 
-      <div v-if="errorMsg" class="mb-5 p-3 rounded-xl bg-error-container text-on-error-container text-xs border border-error/20">
+      <!-- Google Sign-In 1-Click Button -->
+      <div class="mb-5">
+        <GoogleSignInButton label="Daftar Cepat dengan Google" :default-role="form.role" />
+      </div>
+
+      <!-- Divider "ATAU" -->
+      <div class="relative flex items-center justify-center mb-5">
+        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+        <span class="bg-surface-container-lowest dark:bg-slate-900 px-3 text-[11px] uppercase tracking-wider font-bold text-slate-400 shrink-0">
+          atau daftar manual
+        </span>
+        <div class="border-t border-slate-200 dark:border-slate-800 w-full"></div>
+      </div>
+
+      <div v-if="errorMsg" class="mb-5 p-3.5 rounded-2xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 text-xs font-semibold border border-rose-200 dark:border-rose-800/80">
         {{ errorMsg }}
       </div>
 
@@ -132,6 +146,7 @@ import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { PhUserPlus } from '@phosphor-icons/vue'
 import { useAuthStore } from '../stores/auth'
+import GoogleSignInButton from '../components/GoogleSignInButton.vue'
 import logoUrl from '../assets/logo.png'
 
 const router = useRouter()

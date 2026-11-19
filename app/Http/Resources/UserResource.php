@@ -27,6 +27,8 @@ class UserResource extends JsonResource
             'foto' => $this->foto,
             'role' => $this->role,
             'aktif' => (bool) $this->aktif,
+            'google_id' => $this->google_id,
+            'has_google' => ! empty($this->google_id),
             'nik' => $this->nik,
             'foto_ktp' => $this->foto_ktp,
             'bukti_properti' => $this->bukti_properti,

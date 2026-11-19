@@ -11,7 +11,7 @@
 
     <!-- Footer (Hanya tampil di Desktop md ke atas, disembunyikan di Mobile) -->
     <footer
-      v-if="$route.path !== '/peta' && !auth.isPemilik && !auth.isAdmin"
+      v-if="$route.path !== '/peta' && !auth.isPemilik && !auth.isAdmin && $route.name !== 'admin-login' && !$route.path.startsWith('/admin')"
       class="hidden md:block bg-surface-container-lowest dark:bg-slate-900 border-t border-slate-200/80 dark:border-slate-800 py-8 text-center text-xs text-on-surface-variant dark:text-slate-400 mt-12 transition-colors"
     >
       <div class="max-w-7xl mx-auto px-margin flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -75,15 +75,15 @@ const router = useRouter()
 
 const showFloatingSupport = computed(() => {
   if (auth.isAdmin) return false
-  if (route.path.startsWith('/dashboard/admin') || route.name === 'admin-dashboard') return false
+  if (route.path.startsWith('/dashboard/admin') || route.name === 'admin-dashboard' || route.name === 'admin-login' || route.path.startsWith('/admin')) return false
   return true
 })
 
 const showMobileBottomNavbar = computed(() => {
   if (auth.isAdmin || auth.isPemilik) return false
-  const authRoutes = ['login', 'register', 'forgot-password', 'reset-password']
+  const authRoutes = ['login', 'register', 'forgot-password', 'reset-password', 'admin-login']
   if (authRoutes.includes(route.name)) return false
-  if (route.path.startsWith('/dashboard/admin') || route.path.startsWith('/dashboard/pemilik')) return false
+  if (route.path.startsWith('/dashboard/admin') || route.path.startsWith('/dashboard/pemilik') || route.path.startsWith('/admin')) return false
   return true
 })
 

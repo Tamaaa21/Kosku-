@@ -27,7 +27,8 @@ export const useAuthStore = defineStore('auth', {
       this.loading = true
       this.error = null
       try {
-        const response = await api.post('/auth/login', credentials)
+        const payload = { ...credentials, portal: 'public' }
+        const response = await api.post('/auth/login', payload)
         const { user, token } = response.data
 
         this.user = user
@@ -38,6 +39,61 @@ export const useAuthStore = defineStore('auth', {
         return user
       } catch (err) {
         this.error = err.response?.data?.message || 'Gagal login, periksa kembali email dan kata sandi Anda.'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async loginAdmin(credentials) {
+      this.loading = true
+      this.error = null
+      try {
+        const payload = { ...credentials, portal: 'admin' }
+        const response = await api.post('/auth/login', payload)
+        const { user, token } = response.data
+
+        if (user.role !== 'admin') {
+          throw new Error('Akses ditolak. Akun Anda bukan Administrator.')
+        }
+
+        this.user = user
+        this.token = token
+        localStorage.setItem('user', JSON.stringify(user))
+        localStorage.setItem('token', token)
+
+        return user
+      } catch (err) {
+        this.error = err.response?.data?.message || err.message || 'Gagal login ke portal administrator.'
+        throw err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    async loginWithGoogle({ idToken, credential, role = 'pencari', demoUser = null }) {
+      this.loading = true
+      this.error = null
+      try {
+        const payload = {
+          id_token: idToken || credential,
+          role,
+        }
+        if (demoUser) {
+          payload.demo_user = demoUser
+        }
+
+        const response = await api.post('/auth/google', payload)
+        const { user, token, is_new_user } = response.data
+
+        this.user = user
+        this.token = token
+        localStorage.setItem('user', JSON.stringify(user))
+        localStorage.setItem('token', token)
+
+        return { user, token, is_new_user }
+      } catch (err) {
+        this.error = err.response?.data?.message || 'Gagal masuk dengan akun Google.'
         throw err
       } finally {
         this.loading = false

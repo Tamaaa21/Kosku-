@@ -23,6 +23,7 @@ const OwnerWalletView = () => import('../views/OwnerWalletView.vue')
 const ManageTenantsView = () => import('../views/ManageTenantsView.vue')
 const AboutView = () => import('../views/AboutView.vue')
 const FaqView = () => import('../views/FaqView.vue')
+const AdminLoginView = () => import('../views/AdminLoginView.vue')
 const NotFoundView = () => import('../views/NotFoundView.vue')
 const ForbiddenView = () => import('../views/ForbiddenView.vue')
 const ApiTestView = () => import('../views/ApiTestView.vue')
@@ -119,6 +120,12 @@ const routes = [
     meta: { guestOnly: true },
   },
   {
+    path: '/admin/login',
+    name: 'admin-login',
+    component: AdminLoginView,
+    meta: { guestOnlyAdmin: true, title: 'Portal Login Administrator' },
+  },
+  {
     path: '/register',
     name: 'register',
     component: RegisterView,
@@ -211,14 +218,26 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore()
 
+  // 1. Rute khusus tamu umum (/login, /register, dll)
   if (to.meta.guestOnly && authStore.isAuthenticated) {
     if (authStore.isAdmin) return next({ name: 'admin-dashboard' })
     if (authStore.isPemilik) return next({ name: 'pemilik-dashboard' })
     return next({ name: 'riwayat-pemesanan' })
   }
 
+  // 2. Rute khusus portal tamu admin (/admin/login)
+  if (to.meta.guestOnlyAdmin && authStore.isAuthenticated) {
+    if (authStore.isAdmin) return next({ name: 'admin-dashboard' })
+    return next({ name: 'forbidden' })
+  }
+
+  // 3. Rute yang membutuhkan otentikasi
   if (to.meta.requiresAuth) {
     if (!authStore.isAuthenticated) {
+      // Jika mencoba mengakses panel administrator, arahkan ke portal admin login
+      if (to.path.startsWith('/dashboard/admin') || (to.meta.roles && to.meta.roles.includes('admin') && to.meta.roles.length === 1)) {
+        return next({ name: 'admin-login', query: { redirect: to.fullPath } })
+      }
       return next({ name: 'login', query: { redirect: to.fullPath } })
     }
 

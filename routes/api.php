@@ -24,12 +24,14 @@ Route::prefix('v1')->name('api.v1.')->group(function (): void {
     Route::prefix('auth')->name('auth.')->group(function (): void {
         Route::post('/register', [AuthController::class, 'register'])->name('register');
         Route::post('/login', [AuthController::class, 'login'])->name('login');
+        Route::post('/google', [AuthController::class, 'googleLogin'])->name('google');
         Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.email');
         Route::post('/reset-password', [AuthController::class, 'resetPassword'])->name('password.reset');
     });
     // Legacy aliases
     Route::post('/register', [AuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/google', [AuthController::class, 'googleLogin']);
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::post('/reset-password', [AuthController::class, 'resetPassword']);
 

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\ForgotPasswordRequest;
+use App\Http\Requests\Auth\GoogleLoginRequest;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Requests\Auth\ResetPasswordRequest;
@@ -12,8 +13,10 @@ use App\Models\Pengguna;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
@@ -64,12 +67,139 @@ class AuthController extends Controller
             ], 403);
         }
 
+        // Validasi Pemisahan Portal Login Admin vs Publik
+        $portal = $request->input('portal');
+        if ($portal === 'admin' || $request->boolean('is_admin_portal')) {
+            if ($pengguna->role !== 'admin') {
+                return response()->json([
+                    'message' => 'Akses ditolak. Portal ini khusus untuk Administrator sistem.',
+                ], 403);
+            }
+        } elseif ($portal === 'public' || $request->boolean('is_public_portal')) {
+            if ($pengguna->role === 'admin') {
+                return response()->json([
+                    'message' => 'Akun Administrator wajib masuk melalui Portal Administrator Khusus (/admin/login).',
+                    'redirect_to_admin' => true,
+                ], 403);
+            }
+        }
+
         $token = $pengguna->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Login berhasil.',
             'user' => new UserResource($pengguna),
             'token' => $token,
+        ]);
+    }
+
+    /**
+     * Authenticate or register user via Google Sign-In.
+     */
+    public function googleLogin(GoogleLoginRequest $request): JsonResponse
+    {
+        $token = $request->getToken();
+        $requestedRole = $request->input('role', 'pencari');
+        $demoUser = $request->input('demo_user');
+
+        $googleId = null;
+        $email = null;
+        $name = 'Pengguna Google';
+        $avatar = null;
+
+        // Mendukung mode demo / testing otomatis
+        if (($token === 'mock-google-token' || str_starts_with((string) $token, 'demo-')) || ! empty($demoUser)) {
+            $googleId = $demoUser['sub'] ?? 'google-demo-'.substr(md5($demoUser['email'] ?? 'demo'), 0, 16);
+            $email = $demoUser['email'] ?? 'google.user@example.com';
+            $name = $demoUser['name'] ?? 'Pengguna Google';
+            $avatar = $demoUser['picture'] ?? null;
+        } else {
+            if (empty($token)) {
+                return response()->json([
+                    'message' => 'Token Google ID tidak ditemukan.',
+                ], 422);
+            }
+
+            try {
+                $response = Http::timeout(10)->get('https://oauth2.googleapis.com/tokeninfo', [
+                    'id_token' => $token,
+                ]);
+            } catch (\Throwable $e) {
+                return response()->json([
+                    'message' => 'Gagal menghubungi server verifikasi Google.',
+                ], 502);
+            }
+
+            if (! $response->successful()) {
+                return response()->json([
+                    'message' => 'Token Google tidak valid atau telah kadaluarsa.',
+                ], 401);
+            }
+
+            $payload = $response->json();
+            $googleId = $payload['sub'] ?? null;
+            $email = $payload['email'] ?? null;
+            $name = $payload['name'] ?? ($payload['given_name'] ?? 'Pengguna Google');
+            $avatar = $payload['picture'] ?? null;
+        }
+
+        if (empty($email)) {
+            return response()->json([
+                'message' => 'Alamat email tidak ditemukan dari profil Google.',
+            ], 422);
+        }
+
+        // Cari pengguna berdasarkan google_id atau email
+        $user = Pengguna::where('google_id', $googleId)
+            ->orWhere('email', $email)
+            ->first();
+
+        if ($user) {
+            // Blokir akses login publik jika akun terdaftar adalah administrator
+            if ($user->role === 'admin') {
+                return response()->json([
+                    'message' => 'Akun Administrator tidak dapat menggunakan Google Sign-In publik. Silakan gunakan Portal Administrator.',
+                ], 403);
+            }
+
+            if (! $user->aktif) {
+                return response()->json([
+                    'message' => 'Akun Anda dinonaktifkan oleh administrator.',
+                ], 403);
+            }
+
+            // Tautkan google_id jika belum ada
+            if (empty($user->google_id)) {
+                $user->google_id = $googleId;
+            }
+
+            // Perbarui foto jika belum memiliki foto kustom
+            if (empty($user->foto) && ! empty($avatar)) {
+                $user->foto = $avatar;
+            }
+
+            $user->save();
+        } else {
+            // Buat akun baru dengan role yang dipilih
+            $user = Pengguna::create([
+                'nama' => $name,
+                'email' => $email,
+                'google_id' => $googleId,
+                'foto' => $avatar,
+                'password' => Hash::make(Str::random(32)),
+                'role' => $requestedRole === 'pemilik' ? 'pemilik' : 'pencari',
+                'aktif' => true,
+                'status_verifikasi' => 'unverified',
+            ]);
+        }
+
+        $authToken = $user->createToken('auth_token')->plainTextToken;
+
+        return response()->json([
+            'message' => 'Login dengan Google berhasil.',
+            'user' => new UserResource($user),
+            'token' => $authToken,
+            'is_new_user' => $user->wasRecentlyCreated,
         ]);
     }
 
