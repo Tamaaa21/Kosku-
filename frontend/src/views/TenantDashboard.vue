@@ -164,7 +164,7 @@
                   <span class="truncate">{{ item.kos?.alamat || '-' }}</span>
                 </div>
 
-                <div class="pt-0.5">
+                <div class="pt-0.5 flex items-center gap-1.5 flex-wrap">
                   <span
                     :class="[
                       'inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border',
@@ -172,7 +172,13 @@
                     ]"
                   >
                     <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(item.status)"></span>
-                    {{ formatStatus(item.status) }}
+                    {{ formatStatus(item.status, item.metode_transaksi) }}
+                  </span>
+                  <span
+                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded border"
+                    :class="item.metode_transaksi === 'midtrans' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                  >
+                    {{ item.metode_transaksi === 'midtrans' ? 'Midtrans' : 'Langsung' }}
                   </span>
                 </div>
               </div>
@@ -192,15 +198,23 @@
                 <span v-else class="text-base font-bold text-slate-400">Kos Tidak Tersedia</span>
 
                 <!-- Tablet status badge -->
-                <span
-                  :class="[
-                    'inline-flex lg:hidden items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border',
-                    statusBadgeClass(item.status)
-                  ]"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(item.status)"></span>
-                  {{ formatStatus(item.status) }}
-                </span>
+                <div class="inline-flex lg:hidden items-center gap-1.5 flex-wrap">
+                  <span
+                    :class="[
+                      'inline-flex items-center gap-1 text-[10px] font-semibold px-2.5 py-0.5 rounded-full border',
+                      statusBadgeClass(item.status)
+                    ]"
+                  >
+                    <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(item.status)"></span>
+                    {{ formatStatus(item.status, item.metode_transaksi) }}
+                  </span>
+                  <span
+                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded border"
+                    :class="item.metode_transaksi === 'midtrans' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                  >
+                    {{ item.metode_transaksi === 'midtrans' ? 'Midtrans' : 'Langsung' }}
+                  </span>
+                </div>
               </div>
 
               <!-- Address for >= sm screens -->
@@ -239,7 +253,7 @@
           <!-- Price & Actions (Responsive) -->
           <div class="flex flex-col sm:flex-row lg:flex-col sm:items-center lg:items-end justify-between border-t lg:border-t-0 pt-3 lg:pt-0 gap-3 shrink-0">
             <!-- Large Desktop Status Badge -->
-            <div class="hidden lg:block">
+            <div class="hidden lg:flex items-center gap-1.5 flex-wrap justify-end">
               <span
                 :class="[
                   'inline-flex items-center gap-1 text-[11px] font-bold px-2.5 py-1 rounded-full border',
@@ -247,7 +261,13 @@
                 ]"
               >
                 <span class="w-1.5 h-1.5 rounded-full" :class="statusDotClass(item.status)"></span>
-                {{ formatStatus(item.status) }}
+                {{ formatStatus(item.status, item.metode_transaksi) }}
+              </span>
+              <span
+                class="text-[10px] font-semibold px-2 py-0.5 rounded border"
+                :class="item.metode_transaksi === 'midtrans' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+              >
+                {{ item.metode_transaksi === 'midtrans' ? 'Midtrans' : 'Langsung' }}
               </span>
             </div>
 
@@ -262,9 +282,9 @@
 
             <!-- Action Buttons: 2-columns on mobile, flex on desktop -->
             <div class="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto justify-start sm:justify-end">
-              <!-- If PENCARI: Pembayaran DP jika belum dibayar -->
+              <!-- If PENCARI: Pembayaran DP hanya jika metode midtrans & belum dibayar -->
               <button
-                v-if="!auth.isPemilik && (item.status === 'menunggu' || item.status === 'menunggu_pembayaran_dp') && item.status_pembayaran !== 'dp_dibayar'"
+                v-if="!auth.isPemilik && item.metode_transaksi === 'midtrans' && (item.status === 'menunggu' || item.status === 'menunggu_pembayaran_dp') && item.status_pembayaran !== 'dp_dibayar'"
                 @click="payDp(item.id)"
                 :disabled="actionLoading === item.id"
                 class="text-xs font-bold bg-primary-container hover:bg-primary text-white px-3.5 py-2 rounded-lg transition shadow-xs flex items-center justify-center gap-1.5 col-span-2 sm:col-span-1"
@@ -614,9 +634,14 @@ const formatJenis = (jenis) => {
   return jenis.charAt(0).toUpperCase() + jenis.slice(1)
 }
 
-const formatStatus = (status) => {
+const formatStatus = (status, metodeTransaksi = 'manual') => {
+  if (status === 'menunggu') {
+    return metodeTransaksi === 'midtrans' ? 'Menunggu DP Online' : 'Menunggu Persetujuan'
+  }
+  if (status === 'disetujui') {
+    return 'Disetujui Pemilik'
+  }
   switch (status) {
-    case 'menunggu':
     case 'menunggu_pembayaran_dp': return 'Menunggu DP'
     case 'dp_dibayar': return 'DP Terbayar (Kamar Terkunci)'
     case 'siap_serah_terima': return 'Lunas - Siap Serah Kunci'

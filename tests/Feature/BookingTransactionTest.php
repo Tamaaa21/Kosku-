@@ -232,4 +232,56 @@ class BookingTransactionTest extends TestCase
                 'message' => 'Tidak dapat menyetujui pemesanan karena kamar sudah terisi oleh penyewa lain.',
             ]);
     }
+
+    public function test_pencari_can_book_with_manual_transaction_method(): void
+    {
+        $pemilik = Pengguna::factory()->pemilik()->create();
+        $kos = Kos::factory()->create(['pemilik_id' => $pemilik->id]);
+        $kamar = Kamar::factory()->tersedia()->create(['kos_id' => $kos->id]);
+
+        $pencari = Pengguna::factory()->create();
+        Sanctum::actingAs($pencari);
+
+        $response = $this->postJson('/api/v1/bookings', [
+            'kamar_id' => $kamar->id,
+            'tanggal_pemesanan' => now()->addDays(2)->toDateString(),
+            'metode_transaksi' => 'manual',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.metode_transaksi', 'manual')
+            ->assertJsonPath('data.status', 'menunggu');
+
+        $this->assertDatabaseHas('pemesanan', [
+            'pengguna_id' => $pencari->id,
+            'kamar_id' => $kamar->id,
+            'metode_transaksi' => 'manual',
+        ]);
+    }
+
+    public function test_pencari_can_book_with_midtrans_transaction_method(): void
+    {
+        $pemilik = Pengguna::factory()->pemilik()->create();
+        $kos = Kos::factory()->create(['pemilik_id' => $pemilik->id]);
+        $kamar = Kamar::factory()->tersedia()->create(['kos_id' => $kos->id]);
+
+        $pencari = Pengguna::factory()->create();
+        Sanctum::actingAs($pencari);
+
+        $response = $this->postJson('/api/v1/bookings', [
+            'kamar_id' => $kamar->id,
+            'tanggal_pemesanan' => now()->addDays(4)->toDateString(),
+            'metode_transaksi' => 'midtrans',
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonPath('data.metode_transaksi', 'midtrans')
+            ->assertJsonPath('data.status', 'menunggu');
+
+        $this->assertDatabaseHas('pemesanan', [
+            'pengguna_id' => $pencari->id,
+            'kamar_id' => $kamar->id,
+            'metode_transaksi' => 'midtrans',
+        ]);
+    }
 }

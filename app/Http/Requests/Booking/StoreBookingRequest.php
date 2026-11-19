@@ -45,6 +45,7 @@ class StoreBookingRequest extends FormRequest
             'tanggal_pemesanan' => ['required', 'date', 'after_or_equal:today'],
             'durasi_tipe' => ['nullable', 'string', 'in:harian,mingguan,bulanan'],
             'durasi_jumlah' => ['nullable', 'integer', 'min:1', "max:{$maxUnits}"],
+            'metode_transaksi' => ['nullable', 'string', 'in:manual,midtrans'],
         ];
     }
 

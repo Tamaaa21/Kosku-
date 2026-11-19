@@ -75,7 +75,7 @@
               : 'text-on-surface-variant hover:bg-surface-container-low'
           ]"
         >
-          <span>Menunggu DP</span>
+          <span>Menunggu</span>
           <span
             :class="[
               'px-2 py-0.5 text-[10px] font-bold rounded-full',
@@ -276,11 +276,19 @@
                 </div>
               </td>
 
-              <!-- Total Biaya -->
+              <!-- Total Biaya & Metode Transaksi -->
               <td class="py-4 px-4">
-                <span class="font-bold text-on-surface">
-                  {{ formatRupiah(booking.total_harga) }}
-                </span>
+                <div class="flex flex-col">
+                  <span class="font-bold text-on-surface">
+                    {{ formatRupiah(booking.total_harga) }}
+                  </span>
+                  <span
+                    class="text-[9px] font-semibold px-1.5 py-0.5 rounded border inline-block w-fit mt-1"
+                    :class="booking.metode_transaksi === 'midtrans' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                  >
+                    {{ booking.metode_transaksi === 'midtrans' ? 'Midtrans' : 'Langsung (COD/TF)' }}
+                  </span>
+                </div>
               </td>
 
               <!-- Status -->
@@ -310,7 +318,7 @@
                       booking.status === 'selesai' ? 'bg-teal-500' : 'bg-slate-400'
                     ]"
                   ></span>
-                  {{ formatBookingStatus(booking.status) }}
+                  {{ formatBookingStatus(booking.status, booking.metode_transaksi) }}
                 </span>
               </td>
 
@@ -352,9 +360,27 @@
                   </template>
 
                   <template v-else-if="booking.status === 'menunggu'">
-                    <span class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md font-medium">
+                    <div v-if="booking.metode_transaksi === 'midtrans'" class="text-[10px] text-amber-700 bg-amber-50 border border-amber-200 px-2 py-1 rounded-md font-medium">
                       Menunggu DP
-                    </span>
+                    </div>
+                    <div v-else class="flex items-center gap-1">
+                      <button
+                        @click="updateStatus(booking, 'disetujui')"
+                        :disabled="actionLoading === booking.id"
+                        class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-[10px] transition shadow-xs disabled:opacity-50 cursor-pointer"
+                        title="Setujui Reservasi"
+                      >
+                        {{ actionLoading === booking.id ? '...' : 'Setujui' }}
+                      </button>
+                      <button
+                        @click="updateStatus(booking, 'ditolak')"
+                        :disabled="actionLoading === booking.id"
+                        class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-semibold text-[10px] transition disabled:opacity-50 cursor-pointer"
+                        title="Tolak Reservasi"
+                      >
+                        Tolak
+                      </button>
+                    </div>
                   </template>
                 </div>
               </td>
@@ -453,6 +479,15 @@
               <span class="text-secondary">Durasi Sewa:</span>
               <span class="font-semibold text-primary bg-primary/10 px-2.5 py-0.5 rounded-full text-[11px]">
                 {{ formatDurasi(selectedBooking) }}
+              </span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-secondary">Metode Transaksi:</span>
+              <span
+                class="font-semibold text-xs px-2 py-0.5 rounded border"
+                :class="selectedBooking.metode_transaksi === 'midtrans' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+              >
+                {{ selectedBooking.metode_transaksi === 'midtrans' ? 'Online Midtrans (DP 20%)' : 'Langsung ke Pemilik (COD/Transfer)' }}
               </span>
             </div>
             <div class="flex items-center justify-between border-t border-slate-200/60 pt-2 mt-2">
@@ -608,12 +643,14 @@ const countDitolak = computed(() => {
   return allBookings.value.filter((b) => ['ditolak', 'dibatalkan'].includes(b.status)).length
 })
 
-const formatBookingStatus = (status) => {
+const formatBookingStatus = (status, metodeTransaksi = 'manual') => {
+  if (status === 'menunggu') {
+    return metodeTransaksi === 'midtrans' ? 'Menunggu DP Online' : 'Menunggu Persetujuan'
+  }
   switch (status) {
     case 'dp_dibayar': return 'DP Terbayar'
     case 'siap_serah_terima': return 'Siap Serah Kunci'
     case 'aktif': return 'Aktif Menempati'
-    case 'menunggu': return 'Menunggu DP'
     case 'disetujui': return 'Disetujui'
     case 'ditolak': return 'Ditolak'
     case 'dibatalkan': return 'Dibatalkan'

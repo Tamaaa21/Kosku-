@@ -34,6 +34,7 @@ class BookingResource extends JsonResource
             'komisi_persen' => (int) ($this->komisi_persen ?? 5),
             'komisi_nominal' => (int) ($this->komisi_nominal ?? 0),
             'total_hak_mitra' => (int) ($this->total_hak_mitra ?? 0),
+            'metode_transaksi' => $this->metode_transaksi ?? 'manual',
             'status_pembayaran' => $this->status_pembayaran ?? 'belum_dibayar',
             'kunci_diserahkan_at' => $this->kunci_diserahkan_at?->toISOString(),
             'catatan_serah_terima' => $this->catatan_serah_terima,

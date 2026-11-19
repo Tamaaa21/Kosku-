@@ -221,6 +221,8 @@ class BookingController extends Controller
             $komisiNominal = (int) round(($totalHarga * $komisiPersen) / 100);
             $totalHakMitra = $totalHarga - $komisiNominal;
 
+            $metodeTransaksi = $validated['metode_transaksi'] ?? 'manual';
+
             return Pemesanan::create([
                 'pengguna_id' => $user->id,
                 'kos_id' => $kamar->kos_id,
@@ -236,6 +238,7 @@ class BookingController extends Controller
                 'komisi_persen' => $komisiPersen,
                 'komisi_nominal' => $komisiNominal,
                 'total_hak_mitra' => $totalHakMitra,
+                'metode_transaksi' => $metodeTransaksi,
                 'status_pembayaran' => 'belum_dibayar',
                 'status' => 'menunggu',
             ]);
