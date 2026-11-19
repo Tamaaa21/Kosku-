@@ -53,7 +53,10 @@
 
 <script setup>
 import { onMounted, computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
+import { Capacitor } from '@capacitor/core'
+import { App as CapApp } from '@capacitor/app'
+import { StatusBar, Style } from '@capacitor/status-bar'
 import Navbar from './components/Navbar.vue'
 import MobileBottomNavbar from './components/MobileBottomNavbar.vue'
 import FloatingWhatsAppSupport from './components/FloatingWhatsAppSupport.vue'
@@ -66,6 +69,7 @@ import { useAuthStore } from './stores/auth'
 
 const auth = useAuthStore()
 const route = useRoute()
+const router = useRouter()
 
 const showFloatingSupport = computed(() => {
   if (auth.isAdmin) return false
@@ -84,6 +88,27 @@ const showMobileBottomNavbar = computed(() => {
 onMounted(async () => {
   if (auth.token) {
     await auth.fetchMe()
+  }
+
+  // Integrasi Native Capacitor (Android)
+  if (Capacitor.isNativePlatform()) {
+    // 1. Pewarnaan Status Bar Android (Tema Kostara)
+    try {
+      await StatusBar.setStyle({ style: Style.Dark })
+      await StatusBar.setBackgroundColor({ color: '#017E91' })
+    } catch (_) {}
+
+    // 2. Penanganan Tombol Back Fisik Android
+    try {
+      CapApp.addListener('backButton', ({ canGoBack }) => {
+        // Jika sedang di halaman utama atau rute root dan tidak bisa mundur lagi
+        if (route.path === '/' || !canGoBack) {
+          CapApp.exitApp()
+        } else {
+          router.back()
+        }
+      })
+    } catch (_) {}
   }
 })
 </script>

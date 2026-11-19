@@ -1,0 +1,15 @@
+{
+  "appId": "com.kostara.app",
+  "appName": "Kostara",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true
+  },
+  "plugins": {
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#017E91"
+    }
+  }
+}

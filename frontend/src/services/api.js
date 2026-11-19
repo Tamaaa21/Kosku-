@@ -1,7 +1,23 @@
 import axios from 'axios'
+import { Capacitor } from '@capacitor/core'
+
+const resolveBaseUrl = () => {
+  const customUrl = localStorage.getItem('api_base_url')
+  if (customUrl) return customUrl
+
+  let envUrl = import.meta.env.VITE_API_URL
+  if (Capacitor.isNativePlatform()) {
+    // Di Android Emulator, loopback ke localhost mesin pengembang adalah 10.0.2.2
+    if (!envUrl || envUrl.includes('127.0.0.1') || envUrl.includes('localhost')) {
+      return envUrl ? envUrl.replace(/127\.0\.0\.1|localhost/, '10.0.2.2') : 'http://10.0.2.2:8000/api/v1'
+    }
+  }
+
+  return envUrl || 'http://127.0.0.1:8000/api/v1'
+}
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api/v1',
+  baseURL: resolveBaseUrl(),
   headers: {
     'Accept': 'application/json',
     'Content-Type': 'application/json',
