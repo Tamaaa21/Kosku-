@@ -64,9 +64,15 @@ class BookingController extends Controller
             });
         }
 
-        // Filter: status pemesanan
+        // Filter: status pemesanan (mendukung status spesifik maupun grup sederhana: menunggu, aktif, riwayat)
         if ($request->filled('status') && $request->input('status') !== 'all') {
-            $query->where('status', $request->input('status'));
+            $statusParam = (string) $request->input('status');
+            match ($statusParam) {
+                'menunggu' => $query->whereIn('status', ['menunggu', 'menunggu_pembayaran_dp', 'dp_dibayar']),
+                'aktif' => $query->whereIn('status', ['disetujui', 'siap_serah_terima', 'aktif']),
+                'riwayat' => $query->whereIn('status', ['selesai', 'dibatalkan', 'ditolak']),
+                default => $query->where('status', $statusParam),
+            };
         }
 
         // Filter: periode waktu tanggal pemesanan
@@ -107,7 +113,13 @@ class BookingController extends Controller
         }
 
         if ($request->filled('status') && $request->input('status') !== 'all') {
-            $query->where('status', $request->input('status'));
+            $statusParam = (string) $request->input('status');
+            match ($statusParam) {
+                'menunggu' => $query->whereIn('status', ['menunggu', 'menunggu_pembayaran_dp', 'dp_dibayar']),
+                'aktif' => $query->whereIn('status', ['disetujui', 'siap_serah_terima', 'aktif']),
+                'riwayat' => $query->whereIn('status', ['selesai', 'dibatalkan', 'ditolak']),
+                default => $query->where('status', $statusParam),
+            };
         }
 
         if ($request->filled('periode') && $request->input('periode') !== 'all') {

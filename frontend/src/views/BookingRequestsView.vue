@@ -87,46 +87,6 @@
         </button>
 
         <button
-          @click="activeStatusFilter = 'dp_dibayar'"
-          :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
-            activeStatusFilter === 'dp_dibayar'
-              ? 'bg-blue-600 text-white shadow-sm'
-              : 'text-on-surface-variant hover:bg-surface-container-low'
-          ]"
-        >
-          <span>DP Terbayar</span>
-          <span
-            :class="[
-              'px-2 py-0.5 text-[10px] font-bold rounded-full',
-              activeStatusFilter === 'dp_dibayar' ? 'bg-white/20 text-white' : 'bg-blue-100 text-blue-800'
-            ]"
-          >
-            {{ countDpDibayar }}
-          </span>
-        </button>
-
-        <button
-          @click="activeStatusFilter = 'siap_serah_terima'"
-          :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
-            activeStatusFilter === 'siap_serah_terima'
-              ? 'bg-indigo-600 text-white shadow-sm'
-              : 'text-on-surface-variant hover:bg-surface-container-low'
-          ]"
-        >
-          <span>Siap Kunci</span>
-          <span
-            :class="[
-              'px-2 py-0.5 text-[10px] font-bold rounded-full',
-              activeStatusFilter === 'siap_serah_terima' ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-800'
-            ]"
-          >
-            {{ countSiapSerahTerima }}
-          </span>
-        </button>
-
-        <button
           @click="activeStatusFilter = 'aktif'"
           :class="[
             'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
@@ -135,7 +95,7 @@
               : 'text-on-surface-variant hover:bg-surface-container-low'
           ]"
         >
-          <span>Aktif</span>
+          <span>Aktif Dihuni</span>
           <span
             :class="[
               'px-2 py-0.5 text-[10px] font-bold rounded-full',
@@ -147,22 +107,22 @@
         </button>
 
         <button
-          @click="activeStatusFilter = 'ditolak'"
+          @click="activeStatusFilter = 'riwayat'"
           :class="[
             'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
-            activeStatusFilter === 'ditolak'
-              ? 'bg-rose-600 text-white shadow-sm'
+            activeStatusFilter === 'riwayat'
+              ? 'bg-slate-700 text-white shadow-sm'
               : 'text-on-surface-variant hover:bg-surface-container-low'
           ]"
         >
-          <span>Ditolak / Batal</span>
+          <span>Riwayat</span>
           <span
             :class="[
               'px-2 py-0.5 text-[10px] font-bold rounded-full',
-              activeStatusFilter === 'ditolak' ? 'bg-white/20 text-white' : 'bg-rose-100 text-rose-800'
+              activeStatusFilter === 'riwayat' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
             ]"
           >
-            {{ countDitolak }}
+            {{ countRiwayat }}
           </span>
         </button>
       </div>
@@ -291,31 +251,25 @@
                 </div>
               </td>
 
-              <!-- Status -->
+              <!-- Status (Disederhanakan: Menunggu, Aktif, Riwayat) -->
               <td class="py-4 px-4 text-center">
                 <span
                   :class="[
                     'inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold border',
-                    booking.status === 'menunggu' ? 'bg-amber-50 text-amber-800 border-amber-200' :
-                    booking.status === 'dp_dibayar' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                    booking.status === 'siap_serah_terima' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
-                    booking.status === 'aktif' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                    (booking.status === 'disetujui' || booking.status === 'diterima') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                    (booking.status === 'ditolak' || booking.status === 'dibatalkan') ? 'bg-rose-50 text-rose-700 border-rose-200' :
-                    booking.status === 'selesai' ? 'bg-teal-50 text-teal-800 border-teal-200' :
+                    ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(booking.status) ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                    ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(booking.status) ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                    ['ditolak', 'dibatalkan'].includes(booking.status) ? 'bg-rose-50 text-rose-700 border-rose-200' :
+                    booking.status === 'selesai' ? 'bg-slate-100 text-slate-700 border-slate-200' :
                     'bg-slate-100 text-slate-700 border-slate-200'
                   ]"
                 >
                   <span
                     :class="[
                       'w-1.5 h-1.5 rounded-full',
-                      booking.status === 'menunggu' ? 'bg-amber-500' :
-                      booking.status === 'dp_dibayar' ? 'bg-blue-500' :
-                      booking.status === 'siap_serah_terima' ? 'bg-indigo-500' :
-                      booking.status === 'aktif' ? 'bg-emerald-500' :
-                      (booking.status === 'disetujui' || booking.status === 'diterima') ? 'bg-emerald-500' :
-                      (booking.status === 'ditolak' || booking.status === 'dibatalkan') ? 'bg-rose-500' :
-                      booking.status === 'selesai' ? 'bg-teal-500' : 'bg-slate-400'
+                      ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(booking.status) ? 'bg-amber-500' :
+                      ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(booking.status) ? 'bg-emerald-500' :
+                      ['ditolak', 'dibatalkan'].includes(booking.status) ? 'bg-rose-500' :
+                      booking.status === 'selesai' ? 'bg-slate-400' : 'bg-slate-400'
                     ]"
                   ></span>
                   {{ formatBookingStatus(booking.status, booking.metode_transaksi) }}
@@ -602,8 +556,12 @@ const filteredBookings = computed(() => {
       let matchStatus = false
       if (activeStatusFilter.value === 'all') {
         matchStatus = true
-      } else if (activeStatusFilter.value === 'ditolak') {
-        matchStatus = ['ditolak', 'dibatalkan'].includes(b.status)
+      } else if (activeStatusFilter.value === 'menunggu') {
+        matchStatus = ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(b.status)
+      } else if (activeStatusFilter.value === 'aktif') {
+        matchStatus = ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(b.status)
+      } else if (activeStatusFilter.value === 'riwayat') {
+        matchStatus = ['selesai', 'ditolak', 'dibatalkan', 'kedaluwarsa'].includes(b.status)
       } else {
         matchStatus = b.status === activeStatusFilter.value
       }
@@ -620,43 +578,34 @@ const filteredBookings = computed(() => {
 })
 
 const countMenunggu = computed(() => {
-  return allBookings.value.filter((b) => b.status === 'menunggu').length
-})
-
-const countDpDibayar = computed(() => {
-  return allBookings.value.filter((b) => b.status === 'dp_dibayar').length
-})
-
-const countSiapSerahTerima = computed(() => {
-  return allBookings.value.filter((b) => b.status === 'siap_serah_terima').length
+  return allBookings.value.filter((b) => ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(b.status)).length
 })
 
 const countAktif = computed(() => {
-  return allBookings.value.filter((b) => b.status === 'aktif').length
+  return allBookings.value.filter((b) => ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(b.status)).length
 })
 
-const countDisetujui = computed(() => {
-  return allBookings.value.filter((b) => b.status === 'disetujui').length
-})
-
-const countDitolak = computed(() => {
-  return allBookings.value.filter((b) => ['ditolak', 'dibatalkan'].includes(b.status)).length
+const countRiwayat = computed(() => {
+  return allBookings.value.filter((b) => ['selesai', 'ditolak', 'dibatalkan', 'kedaluwarsa'].includes(b.status)).length
 })
 
 const formatBookingStatus = (status, metodeTransaksi = 'manual') => {
-  if (status === 'menunggu') {
+  if (['menunggu', 'menunggu_pembayaran_dp'].includes(status)) {
     return metodeTransaksi === 'midtrans' ? 'Menunggu DP Online' : 'Menunggu Persetujuan'
   }
-  switch (status) {
-    case 'dp_dibayar': return 'DP Terbayar'
-    case 'siap_serah_terima': return 'Siap Serah Kunci'
-    case 'aktif': return 'Aktif Menempati'
-    case 'disetujui': return 'Disetujui'
-    case 'ditolak': return 'Ditolak'
-    case 'dibatalkan': return 'Dibatalkan'
-    case 'selesai': return 'Selesai'
-    default: return status || '-'
+  if (status === 'dp_dibayar') {
+    return 'Menunggu Kunci (DP Masuk)'
   }
+  if (['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(status)) {
+    return 'Aktif Dihuni'
+  }
+  if (status === 'selesai') {
+    return 'Selesai'
+  }
+  if (['ditolak', 'dibatalkan'].includes(status)) {
+    return status === 'ditolak' ? 'Ditolak' : 'Dibatalkan'
+  }
+  return status || '-'
 }
 
 const handoverKey = async (booking) => {

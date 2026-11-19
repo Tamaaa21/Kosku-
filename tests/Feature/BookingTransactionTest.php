@@ -284,4 +284,50 @@ class BookingTransactionTest extends TestCase
             'metode_transaksi' => 'midtrans',
         ]);
     }
+
+    public function test_booking_status_filter_supports_simplified_groups(): void
+    {
+        $pemilik = Pengguna::factory()->pemilik()->create();
+        $kos = Kos::factory()->create(['pemilik_id' => $pemilik->id]);
+        $kamar = Kamar::factory()->tersedia()->create(['kos_id' => $kos->id]);
+        $pencari = Pengguna::factory()->create();
+
+        Pemesanan::factory()->create([
+            'pengguna_id' => $pencari->id,
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar->id,
+            'status' => 'menunggu',
+        ]);
+
+        Pemesanan::factory()->create([
+            'pengguna_id' => $pencari->id,
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar->id,
+            'status' => 'disetujui',
+        ]);
+
+        Pemesanan::factory()->create([
+            'pengguna_id' => $pencari->id,
+            'kos_id' => $kos->id,
+            'kamar_id' => $kamar->id,
+            'status' => 'dibatalkan',
+        ]);
+
+        Sanctum::actingAs($pemilik);
+
+        // Group: menunggu
+        $this->getJson('/api/v1/bookings?status=menunggu')
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data');
+
+        // Group: aktif
+        $this->getJson('/api/v1/bookings?status=aktif')
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data');
+
+        // Group: riwayat
+        $this->getJson('/api/v1/bookings?status=riwayat')
+            ->assertStatus(200)
+            ->assertJsonCount(1, 'data');
+    }
 }

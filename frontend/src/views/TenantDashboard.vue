@@ -18,12 +18,12 @@
       <div class="flex items-center gap-3 bg-surface-container-low px-3.5 py-2 rounded-xl border border-slate-100 self-start sm:self-auto shrink-0 shadow-xs">
         <div class="flex items-center gap-2">
           <div class="w-2.5 h-2.5 rounded-full bg-amber-500"></div>
-          <span class="text-xs text-on-surface-variant font-medium">{{ countStatus('menunggu') }} Menunggu</span>
+          <span class="text-xs text-on-surface-variant font-medium">{{ countCategory('menunggu') }} Menunggu</span>
         </div>
         <div class="w-px h-4 bg-outline-variant"></div>
         <div class="flex items-center gap-2">
           <div class="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
-          <span class="text-xs text-on-surface-variant font-medium">{{ countStatus('disetujui') }} Disetujui</span>
+          <span class="text-xs text-on-surface-variant font-medium">{{ countCategory('aktif') }} Aktif Dihuni</span>
         </div>
       </div>
     </div>
@@ -50,7 +50,7 @@
               activeFilter === tab.value ? 'bg-white/20 text-white' : 'bg-surface-container text-on-surface-variant'
             ]"
           >
-            {{ tab.value === 'semua' ? bookings.length : countStatus(tab.value) }}
+            {{ tab.value === 'semua' ? bookings.length : countCategory(tab.value) }}
           </span>
         </button>
       </div>
@@ -429,14 +429,21 @@ const searchFilter = ref('')
 const filterTabs = [
   { label: 'Semua', value: 'semua' },
   { label: 'Menunggu', value: 'menunggu' },
-  { label: 'DP Terbayar', value: 'dp_dibayar' },
-  { label: 'Siap Serah Kunci', value: 'siap_serah_terima' },
   { label: 'Aktif Dihuni', value: 'aktif' },
-  { label: 'Dibatalkan', value: 'dibatalkan' },
+  { label: 'Riwayat', value: 'riwayat' },
 ]
 
-const countStatus = (status) => {
-  return bookings.value.filter((b) => b.status === status).length
+const countCategory = (category) => {
+  if (category === 'menunggu') {
+    return bookings.value.filter((b) => ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(b.status)).length
+  }
+  if (category === 'aktif') {
+    return bookings.value.filter((b) => ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(b.status)).length
+  }
+  if (category === 'riwayat') {
+    return bookings.value.filter((b) => ['selesai', 'dibatalkan', 'ditolak', 'kedaluwarsa'].includes(b.status)).length
+  }
+  return bookings.value.length
 }
 
 const resetFilters = () => {
@@ -446,7 +453,19 @@ const resetFilters = () => {
 
 const filteredBookings = computed(() => {
   return bookings.value.filter((b) => {
-    const matchesStatus = activeFilter.value === 'semua' || b.status === activeFilter.value
+    let matchesStatus = false
+    if (activeFilter.value === 'semua') {
+      matchesStatus = true
+    } else if (activeFilter.value === 'menunggu') {
+      matchesStatus = ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(b.status)
+    } else if (activeFilter.value === 'aktif') {
+      matchesStatus = ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(b.status)
+    } else if (activeFilter.value === 'riwayat') {
+      matchesStatus = ['selesai', 'dibatalkan', 'ditolak', 'kedaluwarsa'].includes(b.status)
+    } else {
+      matchesStatus = b.status === activeFilter.value
+    }
+
     const matchesSearch = !searchFilter.value ||
       (b.kos?.nama && b.kos.nama.toLowerCase().includes(searchFilter.value.toLowerCase())) ||
       (b.pengguna?.nama && b.pengguna.nama.toLowerCase().includes(searchFilter.value.toLowerCase()))
@@ -635,56 +654,51 @@ const formatJenis = (jenis) => {
 }
 
 const formatStatus = (status, metodeTransaksi = 'manual') => {
-  if (status === 'menunggu') {
+  if (['menunggu', 'menunggu_pembayaran_dp'].includes(status)) {
     return metodeTransaksi === 'midtrans' ? 'Menunggu DP Online' : 'Menunggu Persetujuan'
   }
-  if (status === 'disetujui') {
-    return 'Disetujui Pemilik'
+  if (status === 'dp_dibayar') {
+    return 'DP Terbayar (Siap Kunci)'
   }
-  switch (status) {
-    case 'menunggu_pembayaran_dp': return 'Menunggu DP'
-    case 'dp_dibayar': return 'DP Terbayar (Kamar Terkunci)'
-    case 'siap_serah_terima': return 'Lunas - Siap Serah Kunci'
-    case 'aktif': return 'Aktif Dihuni'
-    case 'selesai': return 'Selesai'
-    case 'disetujui': return 'Disetujui'
-    case 'ditolak': return 'Ditolak'
-    case 'dibatalkan': return 'Dibatalkan'
-    case 'kedaluwarsa': return 'Kedaluwarsa'
-    default: return status
+  if (['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(status)) {
+    return 'Aktif Dihuni'
   }
+  if (status === 'selesai') {
+    return 'Selesai'
+  }
+  if (['ditolak', 'dibatalkan'].includes(status)) {
+    return status === 'ditolak' ? 'Ditolak' : 'Dibatalkan'
+  }
+  if (status === 'kedaluwarsa') {
+    return 'Kedaluwarsa'
+  }
+  return status
 }
 
 const statusBadgeClass = (status) => {
-  switch (status) {
-    case 'menunggu':
-    case 'menunggu_pembayaran_dp': return 'bg-amber-50 text-amber-700 border-amber-200'
-    case 'dp_dibayar': return 'bg-teal-50 text-teal-700 border-teal-200'
-    case 'siap_serah_terima': return 'bg-blue-50 text-blue-700 border-blue-200'
-    case 'aktif': return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-    case 'selesai': return 'bg-slate-100 text-slate-700 border-slate-200'
-    case 'disetujui': return 'bg-emerald-50 text-emerald-700 border-emerald-200'
-    case 'ditolak':
-    case 'kedaluwarsa': return 'bg-rose-50 text-rose-700 border-rose-200'
-    case 'dibatalkan': return 'bg-slate-100 text-slate-600 border-slate-200'
-    default: return 'bg-slate-100 text-slate-700 border-slate-200'
+  if (['menunggu', 'menunggu_pembayaran_dp', 'dp_dibayar'].includes(status)) {
+    return 'bg-amber-50 text-amber-700 border-amber-200'
   }
+  if (['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(status)) {
+    return 'bg-emerald-50 text-emerald-700 border-emerald-200'
+  }
+  if (['ditolak', 'dibatalkan', 'kedaluwarsa'].includes(status)) {
+    return 'bg-rose-50 text-rose-700 border-rose-200'
+  }
+  return 'bg-slate-100 text-slate-700 border-slate-200'
 }
 
 const statusDotClass = (status) => {
-  switch (status) {
-    case 'menunggu':
-    case 'menunggu_pembayaran_dp': return 'bg-amber-500 animate-pulse'
-    case 'dp_dibayar': return 'bg-teal-500'
-    case 'siap_serah_terima': return 'bg-blue-500 animate-pulse'
-    case 'aktif': return 'bg-emerald-500'
-    case 'selesai': return 'bg-slate-400'
-    case 'disetujui': return 'bg-emerald-500'
-    case 'ditolak':
-    case 'kedaluwarsa': return 'bg-rose-500'
-    case 'dibatalkan': return 'bg-slate-400'
-    default: return 'bg-slate-400'
+  if (['menunggu', 'menunggu_pembayaran_dp', 'dp_dibayar'].includes(status)) {
+    return 'bg-amber-500'
   }
+  if (['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(status)) {
+    return 'bg-emerald-500'
+  }
+  if (['ditolak', 'dibatalkan', 'kedaluwarsa'].includes(status)) {
+    return 'bg-rose-500'
+  }
+  return 'bg-slate-400'
 }
 
 const formatRupiah = (val) => {
