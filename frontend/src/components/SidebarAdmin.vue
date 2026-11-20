@@ -65,7 +65,7 @@
             </span>
           </div>
 
-          <!-- Dashboard -->
+          <!-- 1. Ringkasan & Analitik -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'ringkasan' } }"
             @click="isMobileOpen = false"
@@ -73,10 +73,10 @@
             :class="($route.path === '/dashboard/admin' && (!$route.query.tab || $route.query.tab === 'ringkasan')) ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
             <PhSquaresFour :size="20" weight="bold" />
-            <span class="flex-1">Dashboard</span>
+            <span class="flex-1">Ringkasan & Analitik</span>
           </router-link>
 
-          <!-- Manajemen Pengguna -->
+          <!-- 2. Manajemen Pengguna (Terpadu: Mitra Pemilik & Pencari) -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'pengguna' } }"
             @click="isMobileOpen = false"
@@ -94,18 +94,18 @@
             </span>
           </div>
 
-          <!-- Verifikasi Properti -->
+          <!-- 3. Verifikasi Kepemilikan Pemilik Kos -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'verifikasi' } }"
             @click="isMobileOpen = false"
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="($route.path === '/dashboard/admin' && $route.query.tab === 'verifikasi') ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <PhShieldCheck :size="20" weight="bold" />
-            <span class="flex-1">Verifikasi Properti</span>
+            <PhCertificate :size="20" weight="bold" />
+            <span class="flex-1">Verifikasi Pemilik</span>
           </router-link>
 
-          <!-- Data Kos -->
+          <!-- 4. Data & Moderasi Kos -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'kos' } }"
             @click="isMobileOpen = false"
@@ -113,18 +113,7 @@
             :class="($route.path === '/dashboard/admin' && $route.query.tab === 'kos') ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
             <PhBuildings :size="20" weight="bold" />
-            <span class="flex-1">Data Kos</span>
-          </router-link>
-
-          <!-- Kelola Kamar -->
-          <router-link
-            to="/dashboard/pemilik/kamar"
-            @click="isMobileOpen = false"
-            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="$route.path === '/dashboard/pemilik/kamar' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            <PhBed :size="20" weight="bold" />
-            <span class="flex-1">Kelola Kamar</span>
+            <span class="flex-1">Data & Moderasi Kos</span>
           </router-link>
 
           <!-- OPERASIONAL -->
@@ -134,26 +123,15 @@
             </span>
           </div>
 
-          <!-- Pemesanan -->
+          <!-- 5. Audit Log Pemesanan -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'pemesanan' } }"
             @click="isMobileOpen = false"
             class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
             :class="($route.path === '/dashboard/admin' && $route.query.tab === 'pemesanan') ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
-            <PhCalendarCheck :size="20" weight="bold" />
-            <span class="flex-1">Pemesanan</span>
-          </router-link>
-
-          <!-- Daftar Penghuni -->
-          <router-link
-            to="/dashboard/pemilik/penghuni"
-            @click="isMobileOpen = false"
-            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="$route.path === '/dashboard/pemilik/penghuni' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            <PhUsers :size="20" weight="bold" />
-            <span class="flex-1">Daftar Penghuni</span>
+            <PhReceipt :size="20" weight="bold" />
+            <span class="flex-1">Audit Log Pemesanan</span>
           </router-link>
 
           <!-- KEUANGAN -->
@@ -163,7 +141,7 @@
             </span>
           </div>
 
-          <!-- Dompet & Saldo -->
+          <!-- 6. Pencairan Dana Mitra -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'pencairan' } }"
             @click="isMobileOpen = false"
@@ -171,7 +149,7 @@
             :class="($route.path === '/dashboard/admin' && $route.query.tab === 'pencairan') ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
           >
             <PhWallet :size="20" weight="bold" />
-            <span class="flex-1">Dompet & Saldo</span>
+            <span class="flex-1">Pencairan Dana Mitra</span>
           </router-link>
 
           <!-- LAINNYA -->
@@ -181,29 +159,7 @@
             </span>
           </div>
 
-          <!-- Profil Saya -->
-          <router-link
-            to="/profil"
-            @click="isMobileOpen = false"
-            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="$route.path === '/profil' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            <PhUser :size="20" weight="bold" />
-            <span class="flex-1">Profil Saya</span>
-          </router-link>
-
-          <!-- Pusat Bantuan & FAQ -->
-          <router-link
-            to="/faq"
-            @click="isMobileOpen = false"
-            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
-            :class="$route.path === '/faq' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
-          >
-            <PhQuestion :size="20" weight="bold" />
-            <span class="flex-1">Pusat Bantuan & FAQ</span>
-          </router-link>
-
-          <!-- Kelola Hero Slider & Banner -->
+          <!-- 7. Kelola Hero Slider & Banner -->
           <router-link
             :to="{ path: '/dashboard/admin', query: { tab: 'banner' } }"
             @click="isMobileOpen = false"
@@ -214,7 +170,18 @@
             <span class="flex-1">Banner & Hero Slider</span>
           </router-link>
 
-          <!-- API Tester Playground -->
+          <!-- 8. Profil Administrator -->
+          <router-link
+            to="/profil"
+            @click="isMobileOpen = false"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="$route.path === '/profil' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            <PhShieldCheck :size="20" weight="bold" />
+            <span class="flex-1">Profil Administrator</span>
+          </router-link>
+
+          <!-- 9. API Tester Playground -->
           <router-link
             to="/api-test"
             @click="isMobileOpen = false"
@@ -223,6 +190,17 @@
           >
             <PhCode :size="20" weight="bold" />
             <span class="flex-1">API Tester & Docs</span>
+          </router-link>
+
+          <!-- 10. Pusat Bantuan & FAQ -->
+          <router-link
+            to="/faq"
+            @click="isMobileOpen = false"
+            class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold transition"
+            :class="$route.path === '/faq' ? 'bg-primary text-white shadow-sm' : 'text-slate-300 hover:bg-slate-800 hover:text-white'"
+          >
+            <PhQuestion :size="20" weight="bold" />
+            <span class="flex-1">Pusat Bantuan & FAQ</span>
           </router-link>
         </nav>
       </div>
@@ -311,11 +289,7 @@ import {
   PhCertificate,
   PhWallet,
   PhCode,
-  PhQuestion,
-  PhBed,
-  PhCalendarCheck,
-  PhUsers,
-  PhUser
+  PhQuestion
 } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
