@@ -48,7 +48,7 @@
         <div class="flex flex-col">
           <span class="text-xs text-on-surface-variant font-medium">Total Properti Kos</span>
           <span class="text-2xl font-black text-on-surface mt-1">
-            {{ myKosList.length }} <span class="text-xs font-normal text-secondary">Unit</span>
+            {{ totalKosCount }} <span class="text-xs font-normal text-secondary">Unit</span>
           </span>
         </div>
         <div class="w-11 h-11 rounded-lg bg-surface-container-high flex items-center justify-center text-primary">
@@ -60,7 +60,7 @@
         <div class="flex flex-col">
           <span class="text-xs text-on-surface-variant font-medium">Total Kamar Terisi</span>
           <span class="text-2xl font-black text-on-surface mt-1">
-            {{ totalKamarTerisi }} <span class="text-xs font-normal text-secondary">/ {{ totalKamar }} Kamar</span>
+            {{ totalKamarTerisiCount }} <span class="text-xs font-normal text-secondary">/ {{ totalKamarCount }} Kamar</span>
           </span>
         </div>
         <div class="w-11 h-11 rounded-lg bg-surface-container-high flex items-center justify-center text-tertiary">
@@ -71,7 +71,7 @@
       <div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm border border-slate-100 flex items-center justify-between">
         <div class="flex flex-col">
           <span class="text-xs text-on-surface-variant font-medium">Rata-rata Okupansi</span>
-          <span class="text-2xl font-black text-primary mt-1">{{ occupancyRate }}%</span>
+          <span class="text-2xl font-black text-primary mt-1">{{ occupancyRateCount }}%</span>
         </div>
         <div class="w-11 h-11 rounded-lg bg-surface-container-high flex items-center justify-center text-primary-container">
           <PhChartPieSlice :size="24" weight="duotone" />
@@ -85,6 +85,7 @@
         <PhMagnifyingGlass :size="20" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" />
         <input
           v-model="searchQuery"
+          @input="debounceSearch"
           type="text"
           placeholder="Cari nama kos atau alamat..."
           class="w-full h-11 pl-10 pr-space-md bg-surface-container-low/40 rounded-lg text-xs text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary/20"
@@ -92,9 +93,10 @@
       </div>
 
       <div class="flex flex-wrap items-center gap-space-sm">
-        <div class="relative min-w-[150px] flex-1 sm:flex-initial">
+        <div class="relative min-w-[140px] flex-1 sm:flex-initial">
           <select
             v-model="selectedJenis"
+            @change="onFilterChange"
             class="w-full h-11 pl-3.5 pr-9 bg-surface-container-low/40 rounded-lg text-xs text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
           >
             <option value="">Semua Jenis</option>
@@ -105,10 +107,27 @@
           <PhCaretDown :size="18" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" />
         </div>
 
+        <div class="relative min-w-[160px] flex-1 sm:flex-initial">
+          <select
+            v-model="sortOption"
+            @change="onFilterChange"
+            class="w-full h-11 pl-3.5 pr-9 bg-surface-container-low/40 rounded-lg text-xs text-on-surface appearance-none focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer font-medium"
+          >
+            <option value="latest">Terbaru Dibuat</option>
+            <option value="oldest">Terlama Dibuat</option>
+            <option value="nama_asc">Nama (A–Z)</option>
+            <option value="nama_desc">Nama (Z–A)</option>
+            <option value="harga_asc">Harga Termurah</option>
+            <option value="harga_desc">Harga Tertinggi</option>
+            <option value="kamar_desc">Kamar Terbanyak</option>
+          </select>
+          <PhCaretDown :size="18" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-outline pointer-events-none" />
+        </div>
+
         <button
           @click="resetFilters"
           title="Reset Filter"
-          class="h-11 px-3.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface flex items-center justify-center transition"
+          class="h-11 px-3.5 rounded-lg bg-surface-container-high hover:bg-surface-container text-on-surface flex items-center justify-center transition cursor-pointer"
         >
           <PhArrowClockwise :size="20" />
         </button>
@@ -123,10 +142,32 @@
             <tr>
               <th class="py-3.5 px-space-md w-14 text-center">No</th>
               <th class="py-3.5 px-space-sm w-24">Foto</th>
-              <th class="py-3.5 px-space-md">Nama Kos</th>
+              <th
+                class="py-3.5 px-space-md cursor-pointer hover:text-primary transition"
+                @click="toggleSort('nama')"
+                title="Urutkan berdasarkan nama"
+              >
+                <div class="flex items-center gap-1.5">
+                  <span>Nama Kos</span>
+                  <PhCaretUp v-if="sortOption === 'nama_asc'" :size="12" weight="bold" class="text-primary" />
+                  <PhCaretDown v-else-if="sortOption === 'nama_desc'" :size="12" weight="bold" class="text-primary" />
+                  <PhArrowsDownUp v-else :size="12" class="opacity-40" />
+                </div>
+              </th>
               <th class="py-3.5 px-space-md">Alamat</th>
               <th class="py-3.5 px-space-md">Jenis</th>
-              <th class="py-3.5 px-space-md text-center">Kamar</th>
+              <th
+                class="py-3.5 px-space-md text-center cursor-pointer hover:text-primary transition"
+                @click="toggleSort('kamar')"
+                title="Urutkan berdasarkan jumlah kamar"
+              >
+                <div class="inline-flex items-center gap-1.5">
+                  <span>Kamar</span>
+                  <PhCaretDown v-if="sortOption === 'kamar_desc'" :size="12" weight="bold" class="text-primary" />
+                  <PhCaretUp v-else-if="sortOption === 'kamar_asc'" :size="12" weight="bold" class="text-primary" />
+                  <PhArrowsDownUp v-else :size="12" class="opacity-40" />
+                </div>
+              </th>
               <th class="py-3.5 px-space-md text-center w-52">Aksi</th>
             </tr>
           </thead>
@@ -138,7 +179,7 @@
               </td>
             </tr>
 
-            <tr v-else-if="filteredKosList.length === 0" class="text-center">
+            <tr v-else-if="myKosList.length === 0" class="text-center">
               <td colspan="7" class="py-12 text-slate-400">
                 <PhBuildings :size="36" class="text-slate-300 inline-block" />
                 <p class="mt-2 text-xs font-semibold text-slate-600">Belum ada properti kos yang sesuai.</p>
@@ -147,12 +188,12 @@
             </tr>
 
             <tr
-              v-for="(kos, index) in filteredKosList"
+              v-for="(kos, index) in myKosList"
               :key="kos.id"
               class="hover:bg-surface-container-low/40 transition group"
             >
               <td class="py-4 px-space-md text-center font-medium text-secondary">
-                {{ index + 1 }}
+                {{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}
               </td>
 
               <td class="py-4 px-space-sm">
@@ -264,21 +305,33 @@
         </table>
       </div>
 
-      <!-- Pagination / Count Footer -->
-      <div class="p-space-md bg-surface-container-lowest border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-space-md select-none">
-        <span class="text-xs text-on-surface-variant">
-          Menampilkan <span class="font-bold text-on-surface">{{ filteredKosList.length }}</span> dari
-          <span class="font-bold text-on-surface">{{ myKosList.length }}</span> properti kos
+      <!-- Base Pagination Controls -->
+      <BasePagination
+        :current-page="pagination.current_page"
+        :last-page="pagination.last_page"
+        :total="pagination.total"
+        :from="pagination.from"
+        :to="pagination.to"
+        :per-page="pagination.per_page"
+        :per-page-options="[6, 12, 24, 48]"
+        :loading="loading"
+        item-name="properti kos"
+        @change-page="handlePageChange"
+        @change-per-page="handlePerPageChange"
+      />
+
+      <!-- Quick Context Link -->
+      <div class="px-space-md py-2.5 bg-surface-container-low/40 border-t border-slate-100 flex items-center justify-between text-xs text-on-surface-variant select-none">
+        <span>
+          Kelola unit kamar masing-masing untuk setiap properti kos Anda.
         </span>
-        <div class="flex items-center gap-2">
-          <router-link
-            to="/dashboard/pemilik/kamar"
-            class="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
-          >
-            <span>Kelola unit kamar masing-masing</span>
-            <PhArrowRight :size="16" weight="bold" />
-          </router-link>
-        </div>
+        <router-link
+          to="/dashboard/pemilik/kamar"
+          class="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+        >
+          <span>Buka Kelola Kamar</span>
+          <PhArrowRight :size="15" weight="bold" />
+        </router-link>
       </div>
     </div>
 
@@ -795,7 +848,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, reactive, computed, onMounted, nextTick } from 'vue'
 import {
   PhPlus,
   PhMinus,
@@ -806,6 +859,8 @@ import {
   PhChartPieSlice,
   PhMagnifyingGlass,
   PhCaretDown,
+  PhCaretUp,
+  PhArrowsDownUp,
   PhArrowClockwise,
   PhCircleNotch,
   PhDoor,
@@ -826,6 +881,7 @@ import api from '../services/api'
 import ImageUploader from '../components/ImageUploader.vue'
 import LocationPickerMap from '../components/LocationPickerMap.vue'
 import GenderBadge from '../components/GenderBadge.vue'
+import BasePagination from '../components/BasePagination.vue'
 import { useUiStore } from '../stores/ui'
 
 const auth = useAuthStore()
@@ -841,6 +897,22 @@ const myKosList = ref([])
 const availableFasilitas = ref([])
 const searchQuery = ref('')
 const selectedJenis = ref('')
+const sortOption = ref('latest')
+
+const pagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 6,
+})
+
+const counts = ref({
+  total_kos: 0,
+  total_kamar: 0,
+  total_kamar_terisi: 0,
+})
 
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -908,19 +980,112 @@ const resolveImageUrl = (url) => {
   return `${baseBackend}${url.startsWith('/') ? '' : '/'}${url}`
 }
 
-const fetchKos = async () => {
+const fetchKos = async (page = null) => {
+  if (page) {
+    pagination.current_page = page
+  }
   loading.value = true
   try {
-    const res = await api.get('/kos', {
-      params: { pemilik_id: auth.user?.id, per_page: 50 }
-    })
+    const params = {
+      pemilik_id: auth.user?.id,
+      page: pagination.current_page,
+      per_page: pagination.per_page,
+    }
+    if (searchQuery.value) params.q = searchQuery.value
+    if (selectedJenis.value) params.jenis = selectedJenis.value
+    if (sortOption.value) params.sort = sortOption.value
+
+    const res = await api.get('/kos', { params })
     myKosList.value = res.data?.data || []
+
+    if (res.data?.counts) {
+      counts.value = res.data.counts
+    } else {
+      counts.value = {
+        total_kos: res.data?.meta?.total || myKosList.value.length,
+        total_kamar: myKosList.value.reduce((acc, k) => acc + (k.kamar?.length || 0), 0),
+        total_kamar_terisi: myKosList.value.reduce((acc, k) => acc + (k.kamar || []).filter((r) => r.status === 'terisi').length, 0),
+      }
+    }
+
+    if (res.data?.meta) {
+      pagination.current_page = res.data.meta.current_page || 1
+      pagination.last_page = res.data.meta.last_page || 1
+      pagination.total = res.data.meta.total || 0
+      pagination.from = res.data.meta.from || 0
+      pagination.to = res.data.meta.to || 0
+      pagination.per_page = res.data.meta.per_page || pagination.per_page
+
+      if (pagination.current_page > pagination.last_page && pagination.last_page >= 1) {
+        pagination.current_page = pagination.last_page
+        return await fetchKos()
+      }
+    } else {
+      pagination.total = myKosList.value.length
+      pagination.from = myKosList.value.length > 0 ? 1 : 0
+      pagination.to = myKosList.value.length
+      pagination.last_page = 1
+    }
   } catch (err) {
     errorMsg.value = 'Gagal memuat daftar kos Anda.'
   } finally {
     loading.value = false
   }
 }
+
+let searchTimer = null
+const debounceSearch = () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    pagination.current_page = 1
+    fetchKos()
+  }, 350)
+}
+
+const onFilterChange = () => {
+  pagination.current_page = 1
+  fetchKos()
+}
+
+const handlePageChange = (page) => {
+  pagination.current_page = page
+  fetchKos()
+}
+
+const handlePerPageChange = (size) => {
+  pagination.per_page = size
+  pagination.current_page = 1
+  fetchKos()
+}
+
+const toggleSort = (field) => {
+  if (field === 'nama') {
+    sortOption.value = sortOption.value === 'nama_asc' ? 'nama_desc' : 'nama_asc'
+  } else if (field === 'harga') {
+    sortOption.value = sortOption.value === 'harga_asc' ? 'harga_desc' : 'harga_asc'
+  } else if (field === 'kamar') {
+    sortOption.value = sortOption.value === 'kamar_desc' ? 'kamar_asc' : 'kamar_desc'
+  } else if (field === 'latest') {
+    sortOption.value = sortOption.value === 'latest' ? 'oldest' : 'latest'
+  }
+  onFilterChange()
+}
+
+const resetFilters = () => {
+  searchQuery.value = ''
+  selectedJenis.value = ''
+  sortOption.value = 'latest'
+  pagination.current_page = 1
+  fetchKos()
+}
+
+const totalKosCount = computed(() => counts.value.total_kos || pagination.total || myKosList.value.length)
+const totalKamarCount = computed(() => counts.value.total_kamar || myKosList.value.reduce((acc, k) => acc + (k.kamar?.length || 0), 0))
+const totalKamarTerisiCount = computed(() => counts.value.total_kamar_terisi || myKosList.value.reduce((acc, k) => acc + (k.kamar || []).filter((r) => r.status === 'terisi').length, 0))
+const occupancyRateCount = computed(() => {
+  if (totalKamarCount.value === 0) return 0
+  return Math.round((totalKamarTerisiCount.value / totalKamarCount.value) * 100)
+})
 
 const fetchFasilitas = async () => {
   try {
@@ -973,37 +1138,7 @@ onMounted(() => {
   fetchFasilitas()
 })
 
-const filteredKosList = computed(() => {
-  return myKosList.value
-    .filter((kos) => {
-      const matchSearch =
-        !searchQuery.value ||
-        kos.nama.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        kos.alamat.toLowerCase().includes(searchQuery.value.toLowerCase())
 
-      const matchJenis =
-        !selectedJenis.value || kos.jenis.toLowerCase() === selectedJenis.value.toLowerCase()
-
-      return matchSearch && matchJenis
-    })
-    .sort((a, b) => a.id - b.id)
-})
-
-const totalKamar = computed(() => {
-  return myKosList.value.reduce((acc, k) => acc + (k.kamar?.length || 0), 0)
-})
-
-const totalKamarTerisi = computed(() => {
-  return myKosList.value.reduce((acc, k) => {
-    const terisi = (k.kamar || []).filter((r) => r.status === 'terisi').length
-    return acc + terisi
-  }, 0)
-})
-
-const occupancyRate = computed(() => {
-  if (totalKamar.value === 0) return 0
-  return Math.round((totalKamarTerisi.value / totalKamar.value) * 100)
-})
 
 const getAvailableKamarCount = (kos) => {
   if (!kos.kamar) return 0
@@ -1032,11 +1167,6 @@ const getImageForKos = (kos) => {
   return placeholders[(kos.id || 0) % placeholders.length]
 }
 
-const resetFilters = () => {
-  searchQuery.value = ''
-  selectedJenis.value = ''
-  fetchKos()
-}
 
 const openAddModal = () => {
   isEditing.value = false
@@ -1178,6 +1308,9 @@ const confirmDeleteKos = async (kos) => {
     await api.delete(`/kos/${kos.id}`)
     ui.success(`Properti "${kos.nama}" berhasil dihapus.`)
     successMsg.value = `Properti "${kos.nama}" berhasil dihapus.`
+    if (myKosList.value.length === 1 && pagination.current_page > 1) {
+      pagination.current_page -= 1
+    }
     await fetchKos()
   } catch (err) {
     ui.error(err.response?.data?.message || 'Gagal menghapus properti kos.')

@@ -137,3 +137,9 @@ html.dark {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* Fix duplicate Chevron Down in select elements using custom CaretDown */
+select.appearance-none,
+select[class*="appearance-none"] {
+  background-image: none !important;
+}

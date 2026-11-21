@@ -749,17 +749,19 @@
             <!-- Sort -->
             <select
               v-model="userSort"
-              @change="fetchUsers"
+              @change="fetchUsers(1)"
               class="text-xs rounded-xl border-slate-200 py-2.5 px-3 bg-white font-medium text-slate-700"
             >
-              <option value="id_asc">No 1 / ID Terdaftar Pertama</option>
-              <option value="latest">Terbaru</option>
+              <option value="latest">Terbaru Terdaftar</option>
+              <option value="oldest">Terlama Terdaftar</option>
+              <option value="nama_asc">Nama (A - Z)</option>
+              <option value="nama_desc">Nama (Z - A)</option>
               <option value="unit_terbanyak">Properti Terbanyak</option>
-              <option value="nama_asc">Nama A-Z</option>
+              <option value="pesanan_terbanyak">Pesanan Terbanyak</option>
             </select>
 
             <button
-              @click="fetchUsers"
+              @click="fetchUsers(1)"
               class="p-2.5 text-slate-600 hover:bg-slate-100 rounded-xl border border-slate-200 transition"
               title="Segarkan Data Pengguna"
             >
@@ -876,6 +878,24 @@
             </tbody>
           </table>
         </div>
+
+        <BasePagination
+          v-if="userList.length > 0"
+          :current-page="usersPagination.current_page"
+          :last-page="usersPagination.last_page"
+          :total="usersPagination.total"
+          :total-items="usersPagination.total"
+          :per-page="usersPagination.per_page"
+          :per-page-options="[10, 25, 50, 100]"
+          :from="usersPagination.from"
+          :from-item="usersPagination.from"
+          :to="usersPagination.to"
+          :to-item="usersPagination.to"
+          item-name="pengguna"
+          :card="false"
+          @change-page="(p) => fetchUsers(p)"
+          @change-per-page="(val) => { usersPagination.per_page = val; fetchUsers(1); }"
+        />
       </div>
     </div>
 
@@ -975,15 +995,17 @@
           <!-- Filter Urutan -->
           <select
             v-model="kosSort"
-            @change="fetchKos"
+            @change="fetchKos(1)"
             class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-700 font-semibold cursor-pointer"
           >
-            <option value="id_asc">No 1 / ID Terdaftar Pertama</option>
             <option value="latest">Terbaru Didata</option>
+            <option value="oldest">Terlama Didata</option>
             <option value="harga_asc">Tarif Termurah</option>
             <option value="harga_desc">Tarif Tertinggi</option>
             <option value="kamar_banyak">Kapasitas Terbanyak</option>
+            <option value="kamar_sedikit">Kapasitas Paling Sedikit</option>
             <option value="nama_asc">Nama (A - Z)</option>
+            <option value="nama_desc">Nama (Z - A)</option>
           </select>
 
           <!-- Reset Filter -->
@@ -1134,6 +1156,24 @@
             </tbody>
           </table>
         </div>
+
+        <BasePagination
+          v-if="kosList.length > 0"
+          :current-page="kosPagination.current_page"
+          :last-page="kosPagination.last_page"
+          :total="kosPagination.total"
+          :total-items="kosPagination.total"
+          :per-page="kosPagination.per_page"
+          :per-page-options="[10, 25, 50, 100]"
+          :from="kosPagination.from"
+          :from-item="kosPagination.from"
+          :to="kosPagination.to"
+          :to-item="kosPagination.to"
+          item-name="listing kos"
+          :card="false"
+          @change-page="(p) => fetchKos(p)"
+          @change-per-page="(val) => { kosPagination.per_page = val; fetchKos(1); }"
+        />
       </div>
     </div>
 
@@ -1265,7 +1305,7 @@
 
           <select
             v-model="bookingStatusFilter"
-            @change="fetchAllBookings"
+            @change="fetchAllBookings(1)"
             class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-700 font-semibold cursor-pointer"
           >
             <option value="all">Semua Status</option>
@@ -1273,6 +1313,18 @@
             <option value="disetujui">Disetujui</option>
             <option value="ditolak">Ditolak</option>
             <option value="dibatalkan">Dibatalkan</option>
+          </select>
+
+          <select
+            v-model="bookingSort"
+            @change="fetchAllBookings(1)"
+            class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-700 font-semibold cursor-pointer"
+          >
+            <option value="latest">Terbaru</option>
+            <option value="oldest">Terlama</option>
+            <option value="total_desc">Nilai Tertinggi</option>
+            <option value="total_asc">Nilai Terendah</option>
+            <option value="checkin_asc">Check-in Terdekat</option>
           </select>
 
           <button
@@ -1381,6 +1433,24 @@
             </tbody>
           </table>
         </div>
+
+        <BasePagination
+          v-if="allBookings.length > 0"
+          :current-page="bookingsPagination.current_page"
+          :last-page="bookingsPagination.last_page"
+          :total="bookingsPagination.total"
+          :total-items="bookingsPagination.total"
+          :per-page="bookingsPagination.per_page"
+          :per-page-options="[10, 25, 50, 100]"
+          :from="bookingsPagination.from"
+          :from-item="bookingsPagination.from"
+          :to="bookingsPagination.to"
+          :to-item="bookingsPagination.to"
+          item-name="transaksi pemesanan"
+          :card="false"
+          @change-page="(p) => fetchAllBookings(p)"
+          @change-per-page="(val) => { bookingsPagination.per_page = val; fetchAllBookings(1); }"
+        />
       </div>
     </div>
 
@@ -1712,26 +1782,40 @@
           </div>
 
           <!-- Status Filter Tabs / Pills -->
-          <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0">
-            <button
-              v-for="st in [
-                { key: 'all', label: 'Semua Status' },
-                { key: 'pending', label: 'Menunggu', badge: pendingVerifCount },
-                { key: 'verified', label: 'Disetujui', badge: verifiedVerifCount },
-                { key: 'rejected', label: 'Ditolak', badge: rejectedVerifCount },
-                { key: 'unverified', label: 'Belum Ajukan' },
-              ]"
-              :key="st.key"
-              @click="verificationStatusFilter = st.key; fetchVerifications()"
-              type="button"
-              class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer"
-              :class="verificationStatusFilter === st.key ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'"
+          <div class="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0">
+            <div class="flex items-center gap-1.5 shrink-0">
+              <button
+                v-for="st in [
+                  { key: 'all', label: 'Semua Status' },
+                  { key: 'pending', label: 'Menunggu', badge: pendingVerifCount },
+                  { key: 'verified', label: 'Disetujui', badge: verifiedVerifCount },
+                  { key: 'rejected', label: 'Ditolak', badge: rejectedVerifCount },
+                  { key: 'unverified', label: 'Belum Ajukan' },
+                ]"
+                :key="st.key"
+                @click="verificationStatusFilter = st.key; fetchVerifications(1)"
+                type="button"
+                class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 cursor-pointer"
+                :class="verificationStatusFilter === st.key ? 'bg-slate-900 text-white shadow-xs' : 'bg-slate-100 hover:bg-slate-200 text-slate-600'"
+              >
+                <span>{{ st.label }}</span>
+                <span v-if="st.badge !== undefined && st.badge > 0" class="text-[10px] px-1.5 py-0.2 rounded-full" :class="st.key === 'pending' ? 'bg-amber-400 text-slate-950 font-black' : 'bg-white/20 text-white'">
+                  {{ st.badge }}
+                </span>
+              </button>
+            </div>
+
+            <select
+              v-model="verificationSort"
+              @change="fetchVerifications(1)"
+              class="px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-700 font-semibold cursor-pointer shrink-0"
             >
-              <span>{{ st.label }}</span>
-              <span v-if="st.badge !== undefined && st.badge > 0" class="text-[10px] px-1.5 py-0.2 rounded-full" :class="st.key === 'pending' ? 'bg-amber-400 text-slate-950 font-black' : 'bg-white/20 text-white'">
-                {{ st.badge }}
-              </span>
-            </button>
+              <option value="pending_first">Prioritas Perlu Ditinjau</option>
+              <option value="latest">Terbaru Diperbarui</option>
+              <option value="oldest">Terlama Diperbarui</option>
+              <option value="nama_asc">Nama Mitra (A - Z)</option>
+              <option value="nama_desc">Nama Mitra (Z - A)</option>
+            </select>
           </div>
         </div>
       </div>
@@ -1965,6 +2049,24 @@
             </tbody>
           </table>
         </div>
+
+        <BasePagination
+          v-if="verificationList.length > 0"
+          :current-page="verificationsPagination.current_page"
+          :last-page="verificationsPagination.last_page"
+          :total="verificationsPagination.total"
+          :total-items="verificationsPagination.total"
+          :per-page="verificationsPagination.per_page"
+          :per-page-options="[10, 25, 50, 100]"
+          :from="verificationsPagination.from"
+          :from-item="verificationsPagination.from"
+          :to="verificationsPagination.to"
+          :to-item="verificationsPagination.to"
+          item-name="pengajuan verifikasi"
+          :card="false"
+          @change-page="(p) => fetchVerifications(p)"
+          @change-per-page="(val) => { verificationsPagination.per_page = val; fetchVerifications(1); }"
+        />
       </div>
     </div>
 
@@ -1976,7 +2078,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card 1: Menunggu Tinjauan -->
         <div
-          @click="withdrawalStatusFilter = 'menunggu'; fetchAdminWithdrawals()"
+          @click="withdrawalStatusFilter = 'menunggu'; fetchAdminWithdrawals(1)"
           class="bg-white rounded-3xl border p-5 shadow-xs transition cursor-pointer hover:border-amber-400"
           :class="withdrawalStatusFilter === 'menunggu' ? 'ring-2 ring-amber-500 border-amber-300' : 'border-slate-200/80'"
         >
@@ -1996,7 +2098,7 @@
 
         <!-- Card 2: Selesai Ditransfer -->
         <div
-          @click="withdrawalStatusFilter = 'selesai'; fetchAdminWithdrawals()"
+          @click="withdrawalStatusFilter = 'selesai'; fetchAdminWithdrawals(1)"
           class="bg-white rounded-3xl border p-5 shadow-xs transition cursor-pointer hover:border-emerald-400"
           :class="withdrawalStatusFilter === 'selesai' ? 'ring-2 ring-emerald-500 border-emerald-300' : 'border-slate-200/80'"
         >
@@ -2013,7 +2115,7 @@
 
         <!-- Card 3: Ditolak -->
         <div
-          @click="withdrawalStatusFilter = 'ditolak'; fetchAdminWithdrawals()"
+          @click="withdrawalStatusFilter = 'ditolak'; fetchAdminWithdrawals(1)"
           class="bg-white rounded-3xl border p-5 shadow-xs transition cursor-pointer hover:border-rose-400"
           :class="withdrawalStatusFilter === 'ditolak' ? 'ring-2 ring-rose-500 border-rose-300' : 'border-slate-200/80'"
         >
@@ -2030,7 +2132,7 @@
 
         <!-- Card 4: Total Seluruh Penarikan -->
         <div
-          @click="withdrawalStatusFilter = 'semua'; fetchAdminWithdrawals()"
+          @click="withdrawalStatusFilter = 'semua'; fetchAdminWithdrawals(1)"
           class="bg-white rounded-3xl border p-5 shadow-xs transition cursor-pointer hover:border-blue-400"
           :class="withdrawalStatusFilter === 'semua' ? 'ring-2 ring-primary border-primary/30' : 'border-slate-200/80'"
         >
@@ -2041,17 +2143,45 @@
             </div>
           </div>
           <div class="flex items-baseline gap-2 mt-2">
-            <span class="text-2xl font-black text-slate-900">{{ adminWithdrawals.length }}</span>
+            <span class="text-2xl font-black text-slate-900">{{ withdrawalCounts.total }}</span>
           </div>
         </div>
       </div>
 
       <!-- Main Table Card -->
       <div class="bg-white rounded-3xl border border-slate-200/80 shadow-xs overflow-hidden">
-        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div class="p-5 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <h3 class="text-base font-bold text-slate-900">Daftar Pengajuan Pencairan Saldo Mitra</h3>
             <p class="text-xs text-slate-500 mt-0.5">Admin mentransfer dana ke rekening bank pemilik kos sesuai nominal yang diajukan.</p>
+          </div>
+
+          <div class="flex items-center gap-2.5 w-full md:w-auto">
+            <!-- Search -->
+            <div class="relative flex-1 md:w-64">
+              <input
+                v-model="withdrawalSearchQuery"
+                @input="debounceWithdrawalSearch"
+                type="text"
+                placeholder="Cari kode, mitra, no. rek..."
+                class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 hover:bg-white focus:bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 transition"
+              />
+              <svg class="w-4 h-4 text-slate-400 absolute left-3 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+
+            <!-- Sort -->
+            <select
+              v-model="withdrawalSort"
+              @change="fetchAdminWithdrawals(1)"
+              class="px-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/20 text-slate-700 font-semibold cursor-pointer shrink-0"
+            >
+              <option value="latest">Terbaru</option>
+              <option value="oldest">Terlama</option>
+              <option value="nominal_desc">Nominal Tertinggi</option>
+              <option value="nominal_asc">Nominal Terendah</option>
+            </select>
           </div>
         </div>
 
@@ -2134,6 +2264,24 @@
             </tbody>
           </table>
         </div>
+
+        <BasePagination
+          v-if="adminWithdrawals.length > 0"
+          :current-page="withdrawalsPagination.current_page"
+          :last-page="withdrawalsPagination.last_page"
+          :total="withdrawalsPagination.total"
+          :total-items="withdrawalsPagination.total"
+          :per-page="withdrawalsPagination.per_page"
+          :per-page-options="[10, 25, 50, 100]"
+          :from="withdrawalsPagination.from"
+          :from-item="withdrawalsPagination.from"
+          :to="withdrawalsPagination.to"
+          :to-item="withdrawalsPagination.to"
+          item-name="pengajuan pencairan"
+          :card="false"
+          @change-page="(p) => fetchAdminWithdrawals(p)"
+          @change-per-page="(val) => { withdrawalsPagination.per_page = val; fetchAdminWithdrawals(1); }"
+        />
       </div>
     </div>
 
@@ -3275,6 +3423,7 @@ import {
   PhWallet,
   PhBank,
 } from '@phosphor-icons/vue'
+import BasePagination from '../components/BasePagination.vue'
 import api from '../services/api'
 import { useUiStore } from '../stores/ui'
 import { openWhatsAppChat } from '../utils/whatsapp'
@@ -3393,7 +3542,15 @@ const loadingUsers = ref(false)
 const userSearchQuery = ref('')
 const userRoleFilter = ref(route.query.tab === 'pemilik' ? 'pemilik' : (route.query.tab === 'pencari' ? 'pencari' : 'all'))
 const userStatusFilter = ref('all')
-const userSort = ref('id_asc')
+const userSort = ref('latest')
+const usersPagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 10,
+})
 
 const pemilikCount = computed(() => userList.value.filter(u => u.role === 'pemilik').length)
 const pencariCount = computed(() => userList.value.filter(u => u.role === 'pencari').length)
@@ -3402,7 +3559,15 @@ const kosList = ref([])
 const loadingKos = ref(false)
 const kosSearchQuery = ref('')
 const kosJenisFilter = ref('all')
-const kosSort = ref('id_asc')
+const kosSort = ref('latest')
+const kosPagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 10,
+})
 const selectedKosPreview = ref(null)
 const showKosPreviewModal = ref(false)
 const deletingKosId = ref(null)
@@ -3436,6 +3601,15 @@ const loadingBookings = ref(false)
 const bookingSearchQuery = ref('')
 const bookingStatusFilter = ref('all')
 const bookingPeriodeFilter = ref('all')
+const bookingSort = ref('latest')
+const bookingsPagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 10,
+})
 const showBookingDetailModal = ref(false)
 const selectedBookingDetail = ref(null)
 const updatingBookingId = ref(null)
@@ -3652,25 +3826,32 @@ let userSearchTimeout = null
 const debounceUserSearch = () => {
   clearTimeout(userSearchTimeout)
   userSearchTimeout = setTimeout(() => {
-    fetchUsers()
+    fetchUsers(1)
   }, 350)
 }
 
-const fetchUsers = async () => {
+const fetchUsers = async (page = 1) => {
   loadingUsers.value = true
   try {
-    const params = {}
+    const params = {
+      page,
+      per_page: usersPagination.per_page,
+    }
     if (userRoleFilter.value !== 'all') params.role = userRoleFilter.value
     if (userSearchQuery.value) params.q = userSearchQuery.value
     if (userStatusFilter.value !== 'all') params.aktif = userStatusFilter.value
     if (userSort.value) params.sort = userSort.value
 
     const res = await api.get('/admin/users', { params })
-    let data = res.data.data || []
-    if (userSort.value === 'id_asc') {
-      data = data.sort((a, b) => a.id - b.id)
+    userList.value = res.data.data || []
+    if (res.data.meta) {
+      usersPagination.current_page = res.data.meta.current_page || page
+      usersPagination.last_page = res.data.meta.last_page || 1
+      usersPagination.total = res.data.meta.total || 0
+      usersPagination.from = res.data.meta.from || 0
+      usersPagination.to = res.data.meta.to || 0
+      usersPagination.per_page = res.data.meta.per_page || usersPagination.per_page
     }
-    userList.value = data
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Gagal memuat daftar pengguna.'
   } finally {
@@ -3731,31 +3912,38 @@ let kosSearchTimeout = null
 const debounceKosSearch = () => {
   clearTimeout(kosSearchTimeout)
   kosSearchTimeout = setTimeout(() => {
-    fetchKos()
+    fetchKos(1)
   }, 350)
 }
 
 const resetKosFilters = () => {
   kosSearchQuery.value = ''
   kosJenisFilter.value = 'all'
-  kosSort.value = 'id_asc'
-  fetchKos()
+  kosSort.value = 'latest'
+  fetchKos(1)
 }
 
-const fetchKos = async () => {
+const fetchKos = async (page = 1) => {
   loadingKos.value = true
   try {
-    const params = {}
+    const params = {
+      page,
+      per_page: kosPagination.per_page,
+    }
     if (kosSearchQuery.value) params.q = kosSearchQuery.value
     if (kosJenisFilter.value !== 'all') params.jenis = kosJenisFilter.value
     if (kosSort.value) params.sort = kosSort.value
 
     const res = await api.get('/admin/kos', { params })
-    let data = res.data.data || []
-    if (kosSort.value === 'id_asc') {
-      data = data.sort((a, b) => a.id - b.id)
+    kosList.value = res.data.data || []
+    if (res.data.meta) {
+      kosPagination.current_page = res.data.meta.current_page || page
+      kosPagination.last_page = res.data.meta.last_page || 1
+      kosPagination.total = res.data.meta.total || 0
+      kosPagination.from = res.data.meta.from || 0
+      kosPagination.to = res.data.meta.to || 0
+      kosPagination.per_page = res.data.meta.per_page || kosPagination.per_page
     }
-    kosList.value = data
 
     if (kosList.value.length > 0) {
       if (!selectedKosPreview.value || !kosList.value.some(k => k.id === selectedKosPreview.value.id)) {
@@ -3828,32 +4016,45 @@ let bookingSearchTimeout = null
 const debounceBookingSearch = () => {
   clearTimeout(bookingSearchTimeout)
   bookingSearchTimeout = setTimeout(() => {
-    fetchAllBookings()
+    fetchAllBookings(1)
   }, 350)
 }
 
 const setBookingPeriode = (periode) => {
   bookingPeriodeFilter.value = periode
-  fetchAllBookings()
+  fetchAllBookings(1)
 }
 
 const resetBookingFilters = () => {
   bookingSearchQuery.value = ''
   bookingStatusFilter.value = 'all'
   bookingPeriodeFilter.value = 'all'
-  fetchAllBookings()
+  bookingSort.value = 'latest'
+  fetchAllBookings(1)
 }
 
-const fetchAllBookings = async () => {
+const fetchAllBookings = async (page = 1) => {
   loadingBookings.value = true
   try {
-    const params = { per_page: 100 }
+    const params = {
+      page,
+      per_page: bookingsPagination.per_page,
+    }
     if (bookingSearchQuery.value) params.q = bookingSearchQuery.value
     if (bookingStatusFilter.value !== 'all') params.status = bookingStatusFilter.value
     if (bookingPeriodeFilter.value !== 'all') params.periode = bookingPeriodeFilter.value
+    if (bookingSort.value) params.sort = bookingSort.value
 
     const res = await api.get('/bookings', { params })
     allBookings.value = res.data.data || []
+    if (res.data.meta) {
+      bookingsPagination.current_page = res.data.meta.current_page || page
+      bookingsPagination.last_page = res.data.meta.last_page || 1
+      bookingsPagination.total = res.data.meta.total || 0
+      bookingsPagination.from = res.data.meta.from || 0
+      bookingsPagination.to = res.data.meta.to || 0
+      bookingsPagination.per_page = res.data.meta.per_page || bookingsPagination.per_page
+    }
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Gagal memuat log pemesanan.'
   } finally {
@@ -4208,6 +4409,22 @@ const verificationList = ref([])
 const loadingVerifications = ref(false)
 const verificationSearchQuery = ref('')
 const verificationStatusFilter = ref('all')
+const verificationSort = ref('pending_first')
+const verificationsPagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 10,
+})
+const verificationCounts = reactive({
+  pending: 0,
+  verified: 0,
+  rejected: 0,
+  unverified: 0,
+  total: 0,
+})
 const reviewingUserId = ref(null)
 
 const showRejectModal = ref(false)
@@ -4219,31 +4436,48 @@ const showDocPreviewModal = ref(false)
 const previewDocUser = ref(null)
 const previewDocTab = ref('ktp')
 
-const pendingVerifCount = computed(() => verificationList.value.filter(v => v.status_verifikasi === 'pending').length)
-const verifiedVerifCount = computed(() => verificationList.value.filter(v => v.status_verifikasi === 'verified').length)
-const rejectedVerifCount = computed(() => verificationList.value.filter(v => v.status_verifikasi === 'rejected').length)
-const unverifiedVerifCount = computed(() => verificationList.value.filter(v => v.status_verifikasi === 'unverified').length)
+const pendingVerifCount = computed(() => verificationCounts.pending)
+const verifiedVerifCount = computed(() => verificationCounts.verified)
+const rejectedVerifCount = computed(() => verificationCounts.rejected)
+const unverifiedVerifCount = computed(() => verificationCounts.unverified)
 
 let searchDebounceTimeout = null
 const handleVerificationSearchDebounced = () => {
   clearTimeout(searchDebounceTimeout)
   searchDebounceTimeout = setTimeout(() => {
-    fetchVerifications()
+    fetchVerifications(1)
   }, 350)
 }
 
-const fetchVerifications = async () => {
+const fetchVerifications = async (page = 1) => {
   loadingVerifications.value = true
   try {
-    const params = {}
+    const params = {
+      page,
+      per_page: verificationsPagination.per_page,
+    }
     if (verificationStatusFilter.value !== 'all') {
       params.status = verificationStatusFilter.value
     }
     if (verificationSearchQuery.value) {
       params.q = verificationSearchQuery.value
     }
+    if (verificationSort.value) {
+      params.sort = verificationSort.value
+    }
     const res = await api.get('/admin/verifications', { params })
     verificationList.value = res.data.data || []
+    if (res.data.counts) {
+      Object.assign(verificationCounts, res.data.counts)
+    }
+    if (res.data.meta) {
+      verificationsPagination.current_page = res.data.meta.current_page || page
+      verificationsPagination.last_page = res.data.meta.last_page || 1
+      verificationsPagination.total = res.data.meta.total || 0
+      verificationsPagination.from = res.data.meta.from || 0
+      verificationsPagination.to = res.data.meta.to || 0
+      verificationsPagination.per_page = res.data.meta.per_page || verificationsPagination.per_page
+    }
   } catch (err) {
     errorMsg.value = err.response?.data?.message || 'Gagal memuat data verifikasi pemilik.'
   } finally {
@@ -4313,6 +4547,22 @@ const openDocPreview = (user, tab = 'ktp') => {
 const adminWithdrawals = ref([])
 const loadingWithdrawals = ref(false)
 const withdrawalStatusFilter = ref('semua')
+const withdrawalSearchQuery = ref('')
+const withdrawalSort = ref('latest')
+const withdrawalsPagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 10,
+})
+const withdrawalCounts = reactive({
+  menunggu: 0,
+  selesai: 0,
+  ditolak: 0,
+  total: 0,
+})
 const showApproveWithdrawalModal = ref(false)
 const showRejectWithdrawalModal = ref(false)
 const selectedWithdrawal = ref(null)
@@ -4324,32 +4574,50 @@ const submittingApproveWd = ref(false)
 const rejectWdReason = ref('')
 const submittingRejectWd = ref(false)
 
-const pendingWithdrawalsCount = computed(() => {
-  return adminWithdrawals.value.filter((w) => w.status === 'menunggu').length
-})
+const pendingWithdrawalsCount = computed(() => withdrawalCounts.menunggu)
+const completedWithdrawalsCount = computed(() => withdrawalCounts.selesai)
+const rejectedWithdrawalsCount = computed(() => withdrawalCounts.ditolak)
+const filteredAdminWithdrawals = computed(() => adminWithdrawals.value)
 
-const completedWithdrawalsCount = computed(() => {
-  return adminWithdrawals.value.filter((w) => w.status === 'selesai').length
-})
+let withdrawalSearchTimeout = null
+const debounceWithdrawalSearch = () => {
+  clearTimeout(withdrawalSearchTimeout)
+  withdrawalSearchTimeout = setTimeout(() => {
+    fetchAdminWithdrawals(1)
+  }, 350)
+}
 
-const rejectedWithdrawalsCount = computed(() => {
-  return adminWithdrawals.value.filter((w) => w.status === 'ditolak').length
-})
-
-const filteredAdminWithdrawals = computed(() => {
-  if (withdrawalStatusFilter.value === 'semua') {
-    return adminWithdrawals.value
-  }
-  return adminWithdrawals.value.filter((w) => w.status === withdrawalStatusFilter.value)
-})
-
-const fetchAdminWithdrawals = async () => {
+const fetchAdminWithdrawals = async (page = 1) => {
   loadingWithdrawals.value = true
   try {
-    const res = await api.get('/admin/withdrawals')
+    const params = {
+      page,
+      per_page: withdrawalsPagination.per_page,
+    }
+    if (withdrawalStatusFilter.value !== 'semua') {
+      params.status = withdrawalStatusFilter.value
+    }
+    if (withdrawalSearchQuery.value) {
+      params.q = withdrawalSearchQuery.value
+    }
+    if (withdrawalSort.value) {
+      params.sort = withdrawalSort.value
+    }
+    const res = await api.get('/admin/withdrawals', { params })
     adminWithdrawals.value = res.data.data || []
+    if (res.data.counts) {
+      Object.assign(withdrawalCounts, res.data.counts)
+    }
+    if (res.data.meta) {
+      withdrawalsPagination.current_page = res.data.meta.current_page || page
+      withdrawalsPagination.last_page = res.data.meta.last_page || 1
+      withdrawalsPagination.total = res.data.meta.total || 0
+      withdrawalsPagination.from = res.data.meta.from || 0
+      withdrawalsPagination.to = res.data.meta.to || 0
+      withdrawalsPagination.per_page = res.data.meta.per_page || withdrawalsPagination.per_page
+    }
   } catch (err) {
-    // Abaikan
+    ui.error(err.response?.data?.message || 'Gagal memuat daftar pengajuan pencairan dana.')
   } finally {
     loadingWithdrawals.value = false
   }

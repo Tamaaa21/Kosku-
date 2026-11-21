@@ -9,6 +9,7 @@ use App\Http\Resources\RoomResource;
 use App\Models\Kamar;
 use App\Models\Kos;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Support\Facades\Gate;
 
@@ -17,15 +18,60 @@ class RoomController extends Controller
     /**
      * Display a listing of rooms for a specific kos.
      */
-    public function index(int $kosId): AnonymousResourceCollection
+    public function index(Request $request, int $kosId): AnonymousResourceCollection
     {
         $kos = Kos::findOrFail($kosId);
-        $kamar = $kos->kamar()
-            ->orderByRaw("CASE WHEN status = 'tersedia' THEN 0 ELSE 1 END")
-            ->orderBy('id', 'asc')
-            ->get();
+        $query = $kos->kamar();
 
-        return RoomResource::collection($kamar);
+        // Filter: pencarian nama / nomor kamar
+        if ($request->filled('q')) {
+            $keyword = (string) $request->input('q');
+            $query->where('nama_kamar', 'like', "%{$keyword}%");
+        }
+
+        // Filter: status kamar
+        if ($request->filled('status') && $request->input('status') !== 'all') {
+            $query->where('status', $request->input('status'));
+        }
+
+        // Sorting
+        match ($request->input('sort')) {
+            'nama_asc' => $query->orderBy('nama_kamar', 'asc'),
+            'nama_desc' => $query->orderBy('nama_kamar', 'desc'),
+            'harga_asc' => $query->orderBy('harga', 'asc'),
+            'harga_desc' => $query->orderBy('harga', 'desc'),
+            'status_tersedia' => $query->orderByRaw("CASE WHEN status = 'tersedia' THEN 0 ELSE 1 END")->orderBy('nama_kamar', 'asc'),
+            'status_terisi' => $query->orderByRaw("CASE WHEN status = 'terisi' THEN 0 ELSE 1 END")->orderBy('nama_kamar', 'asc'),
+            'latest' => $query->latest(),
+            'oldest' => $query->oldest(),
+            default => $query->orderByRaw("CASE WHEN status = 'tersedia' THEN 0 ELSE 1 END")->orderBy('id', 'asc'),
+        };
+
+        $countsQuery = $kos->kamar();
+        $totalAll = (clone $countsQuery)->count();
+        $totalTersedia = (clone $countsQuery)->where('status', 'tersedia')->count();
+        $totalTerisi = (clone $countsQuery)->where('status', 'terisi')->count();
+        $totalEstimasiPendapatan = (int) (clone $countsQuery)->sum('harga');
+        $totalPendapatanAktif = (int) (clone $countsQuery)->where('status', 'terisi')->sum('harga');
+
+        $additionalMeta = [
+            'counts' => [
+                'total' => $totalAll,
+                'tersedia' => $totalTersedia,
+                'terisi' => $totalTerisi,
+                'estimasi_pendapatan' => $totalEstimasiPendapatan,
+                'pendapatan_aktif' => $totalPendapatanAktif,
+            ],
+        ];
+
+        if ($request->input('per_page') === 'all') {
+            return RoomResource::collection($query->get())->additional($additionalMeta);
+        }
+
+        $perPage = min(max((int) $request->input('per_page', 20), 1), 100);
+        $kamar = $query->paginate($perPage);
+
+        return RoomResource::collection($kamar)->additional($additionalMeta);
     }
 
     /**

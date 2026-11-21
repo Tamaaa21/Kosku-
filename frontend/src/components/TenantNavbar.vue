@@ -21,98 +21,231 @@
         </div>
       </router-link>
 
-      <!-- Desktop Navigation Menu -->
-      <nav class="hidden md:flex items-center gap-8">
-        <router-link
-          to="/"
-          class="relative py-1 text-sm font-semibold transition-colors"
-          :class="
-            isTransparent
-              ? 'text-white font-bold'
-              : ($route.path === '/' ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
-          "
+      <!-- Center Area: Standard Navigation Menu OR Rukita Floating Search Bar on Scroll -->
+      <div class="flex-1 flex items-center justify-center max-w-2xl px-2">
+        <transition
+          enter-active-class="transition duration-200 ease-out"
+          enter-from-class="opacity-0 scale-95"
+          enter-to-class="opacity-100 scale-100"
+          leave-active-class="transition duration-150 ease-in"
+          leave-from-class="opacity-100 scale-100"
+          leave-to-class="opacity-0 scale-95"
+          mode="out-in"
         >
-          <span>Beranda</span>
-          <span
-            v-if="$route.path === '/'"
-            class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
-            :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
-          ></span>
-        </router-link>
+          <!-- 1. Normal Desktop Navigation Menu (Visible when not scrolled) -->
+          <nav v-if="!shouldShowNavbarSearch" class="hidden md:flex items-center gap-8">
+            <router-link
+              to="/"
+              class="relative py-1 text-sm font-semibold transition-colors"
+              :class="
+                isTransparent
+                  ? 'text-white font-bold'
+                  : ($route.path === '/' ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
+              "
+            >
+              <span>Beranda</span>
+              <span
+                v-if="$route.path === '/'"
+                class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
+                :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
+              ></span>
+            </router-link>
 
-        <router-link
-          to="/kos"
-          class="relative py-1 text-sm font-medium transition-colors"
-          :class="
-            isTransparent
-              ? ($route.path === '/kos' ? 'text-white font-bold' : 'text-white/85 hover:text-white')
-              : ($route.path === '/kos' ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
-          "
-        >
-          <span>Cari Kos</span>
-          <span
-            v-if="$route.path === '/kos'"
-            class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
-            :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
-          ></span>
-        </router-link>
+            <router-link
+              to="/kos"
+              class="relative py-1 text-sm font-medium transition-colors"
+              :class="
+                isTransparent
+                  ? ($route.path === '/kos' ? 'text-white font-bold' : 'text-white/85 hover:text-white')
+                  : ($route.path === '/kos' ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
+              "
+            >
+              <span>Cari Kos</span>
+              <span
+                v-if="$route.path === '/kos'"
+                class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
+                :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
+              ></span>
+            </router-link>
 
-        <router-link
-          to="/peta"
-          class="relative py-1 text-sm font-medium transition-colors"
-          :class="
-            isTransparent
-              ? ($route.path === '/peta' ? 'text-white font-bold' : 'text-white/85 hover:text-white')
-              : ($route.path === '/peta' ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
-          "
-        >
-          <span>Peta Lokasi</span>
-          <span
-            v-if="$route.path === '/peta'"
-            class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
-            :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
-          ></span>
-        </router-link>
+            <router-link
+              to="/peta"
+              class="relative py-1 text-sm font-medium transition-colors"
+              :class="
+                isTransparent
+                  ? ($route.path === '/peta' ? 'text-white font-bold' : 'text-white/85 hover:text-white')
+                  : ($route.path === '/peta' ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
+              "
+            >
+              <span>Peta Lokasi</span>
+              <span
+                v-if="$route.path === '/peta'"
+                class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
+                :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
+              ></span>
+            </router-link>
 
+            <router-link
+              v-if="auth.isAuthenticated"
+              to="/pesanan"
+              class="relative py-1 text-sm font-medium transition-colors"
+              :class="
+                isTransparent
+                  ? ($route.path.startsWith('/pesanan') ? 'text-white font-bold' : 'text-white/85 hover:text-white')
+                  : ($route.path.startsWith('/pesanan') ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
+              "
+            >
+              <span>Pesanan</span>
+              <span
+                v-if="$route.path.startsWith('/pesanan')"
+                class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
+                :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
+              ></span>
+            </router-link>
+          </nav>
 
+          <!-- 2. Rukita Floating Search Bar (Appears when scrolled down on / or /kos) -->
+          <div
+            v-else
+            class="flex items-center w-full max-w-xl bg-white rounded-full border border-slate-200/90 shadow-sm hover:shadow-md transition-all duration-300 p-1 pl-3"
+          >
+            <!-- Search Text Input -->
+            <div class="flex-1 flex items-center gap-2 min-w-0 pr-1 sm:pr-2">
+              <PhMagnifyingGlass :size="16" weight="bold" class="text-primary shrink-0" />
+              <input
+                v-model="navSearchQuery"
+                @keydown.enter="executeNavbarSearch"
+                type="text"
+                placeholder="Cari lokasi, nama kos, atau kampus..."
+                class="w-full text-xs font-medium text-slate-800 placeholder:text-slate-400 bg-transparent border-none outline-none focus:ring-0 p-0"
+              />
+              <button
+                v-if="navSearchQuery"
+                @click="navSearchQuery = ''; executeNavbarSearch()"
+                type="button"
+                class="p-0.5 text-slate-400 hover:text-slate-600 rounded-full cursor-pointer"
+                title="Hapus"
+              >
+                <PhX :size="12" weight="bold" />
+              </button>
+            </div>
 
-       
+            <!-- Divider -->
+            <div class="hidden sm:block w-px h-5 bg-slate-200 shrink-0"></div>
 
-        <router-link
-          v-if="auth.isAuthenticated"
-          to="/pesanan"
-          class="relative py-1 text-sm font-medium transition-colors"
-          :class="
-            isTransparent
-              ? ($route.path.startsWith('/pesanan') ? 'text-white font-bold' : 'text-white/85 hover:text-white')
-              : ($route.path.startsWith('/pesanan') ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
-          "
-        >
-          <span>Pesanan</span>
-          <span
-            v-if="$route.path.startsWith('/pesanan')"
-            class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
-            :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
-          ></span>
-        </router-link>
+            <!-- Tipe Kos Popover Dropdown -->
+            <div ref="navJenisDropdownRef" class="relative hidden sm:block">
+              <button
+                type="button"
+                @click.stop="toggleNavDropdown('jenis')"
+                class="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full hover:bg-slate-100 text-slate-700 transition cursor-pointer select-none"
+                :class="{ 'bg-primary/10 text-primary': navActiveDropdown === 'jenis' || navSelectedJenis }"
+              >
+                <span class="max-w-[85px] truncate">{{ getJenisLabel(navSelectedJenis) }}</span>
+                <PhCaretDown
+                  :size="11"
+                  weight="bold"
+                  class="text-slate-400 transition-transform duration-200 shrink-0"
+                  :class="{ 'rotate-180 text-primary': navActiveDropdown === 'jenis' }"
+                />
+              </button>
 
-        <router-link
-          to="/faq"
-          class="relative py-1 text-sm font-medium transition-colors"
-          :class="
-            isTransparent
-              ? ($route.path === '/faq' ? 'text-white font-bold' : 'text-white/85 hover:text-white')
-              : ($route.path === '/faq' ? 'text-primary font-bold' : 'text-slate-600 hover:text-slate-900')
-          "
-        >
-          <span>Bantuan (FAQ)</span>
-          <span
-            v-if="$route.path === '/faq'"
-            class="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
-            :class="isTransparent ? 'bg-amber-400' : 'bg-primary'"
-          ></span>
-        </router-link>
-      </nav>
+              <!-- Popover Menu -->
+              <transition
+                enter-active-class="transition duration-150 ease-out"
+                enter-from-class="transform scale-95 opacity-0 -translate-y-1"
+                enter-to-class="transform scale-100 opacity-100 translate-y-0"
+                leave-active-class="transition duration-100 ease-in"
+                leave-from-class="transform scale-100 opacity-100 translate-y-0"
+                leave-to-class="transform scale-95 opacity-0 -translate-y-1"
+              >
+                <div
+                  v-if="navActiveDropdown === 'jenis'"
+                  class="absolute top-full left-1/2 -translate-x-1/2 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-[1070]"
+                  @click.stop
+                >
+                  <div class="px-2.5 py-1 mb-1 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Tipe Hunian
+                  </div>
+                  <button
+                    v-for="opt in jenisOptions"
+                    :key="opt.val"
+                    type="button"
+                    @click.stop="selectNavJenis(opt.val)"
+                    class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer text-left"
+                    :class="navSelectedJenis === opt.val ? 'bg-primary/10 text-primary font-bold' : 'text-slate-700 hover:bg-slate-50'"
+                  >
+                    <span>{{ opt.val ? `Kos ${opt.label}` : 'Semua Tipe' }}</span>
+                    <PhCheck v-if="navSelectedJenis === opt.val" :size="13" weight="bold" class="text-primary shrink-0" />
+                  </button>
+                </div>
+              </transition>
+            </div>
+
+            <!-- Divider -->
+            <div class="hidden sm:block w-px h-5 bg-slate-200 shrink-0"></div>
+
+            <!-- Budget Popover Dropdown -->
+            <div ref="navPriceDropdownRef" class="relative hidden sm:block">
+              <button
+                type="button"
+                @click.stop="toggleNavDropdown('price')"
+                class="flex items-center gap-1 px-2.5 py-1 text-xs font-semibold rounded-full hover:bg-slate-100 text-slate-700 transition cursor-pointer select-none"
+                :class="{ 'bg-primary/10 text-primary': navActiveDropdown === 'price' || navSelectedPrice }"
+              >
+                <span class="max-w-[95px] truncate">{{ getPriceLabel(navSelectedPrice) }}</span>
+                <PhCaretDown
+                  :size="11"
+                  weight="bold"
+                  class="text-slate-400 transition-transform duration-200 shrink-0"
+                  :class="{ 'rotate-180 text-primary': navActiveDropdown === 'price' }"
+                />
+              </button>
+
+              <!-- Popover Menu -->
+              <transition
+                enter-active-class="transition duration-150 ease-out"
+                enter-from-class="transform scale-95 opacity-0 -translate-y-1"
+                enter-to-class="transform scale-100 opacity-100 translate-y-0"
+                leave-active-class="transition duration-100 ease-in"
+                leave-from-class="transform scale-100 opacity-100 translate-y-0"
+                leave-to-class="transform scale-95 opacity-0 -translate-y-1"
+              >
+                <div
+                  v-if="navActiveDropdown === 'price'"
+                  class="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-1.5 z-[1070]"
+                  @click.stop
+                >
+                  <div class="px-2.5 py-1 mb-1 border-b border-slate-100 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Rentang Budget
+                  </div>
+                  <button
+                    v-for="opt in priceOptions"
+                    :key="opt.val"
+                    type="button"
+                    @click.stop="selectNavPrice(opt.val)"
+                    class="w-full flex items-center justify-between px-2.5 py-1.5 rounded-xl text-xs font-semibold transition cursor-pointer text-left"
+                    :class="navSelectedPrice === opt.val ? 'bg-primary/10 text-primary font-bold' : 'text-slate-700 hover:bg-slate-50'"
+                  >
+                    <span>{{ opt.label }}</span>
+                    <PhCheck v-if="navSelectedPrice === opt.val" :size="13" weight="bold" class="text-primary shrink-0" />
+                  </button>
+                </div>
+              </transition>
+            </div>
+
+            <!-- Submit Search Button (Teal Circular ala Rukita) -->
+            <button
+              type="button"
+              @click="executeNavbarSearch"
+              class="w-8 h-8 rounded-full bg-primary hover:bg-primary-hover text-white flex items-center justify-center shrink-0 shadow-xs cursor-pointer active:scale-95 transition-all ml-1"
+              title="Cari Kos"
+            >
+              <PhMagnifyingGlass :size="14" weight="bold" />
+            </button>
+          </div>
+        </transition>
+      </div>
 
       <!-- Right Action / User Profile -->
       <div class="flex items-center gap-1.5 md:gap-2.5">
@@ -310,7 +443,12 @@ import {
   PhHeart,
   PhMagnifyingGlass,
   PhCode,
-  PhQuestion
+  PhQuestion,
+  PhDoor,
+  PhCurrencyCircleDollar,
+  PhCaretDown,
+  PhCheck,
+  PhX,
 } from '@phosphor-icons/vue'
 
 const auth = useAuthStore()
@@ -322,9 +460,117 @@ const route = useRoute()
 const isProfileDropdownOpen = ref(false)
 const profileDropdownRef = ref(null)
 
+// Rukita-style search state in navbar
+const scrollY = ref(0)
+const isScrolled = ref(false)
+const navSearchQuery = ref('')
+const navSelectedJenis = ref('')
+const navSelectedPrice = ref('')
+const navActiveDropdown = ref(null)
+const navJenisDropdownRef = ref(null)
+const navPriceDropdownRef = ref(null)
+
+const jenisOptions = [
+  { label: 'Semua Tipe', val: '' },
+  { label: 'Putri', val: 'putri' },
+  { label: 'Putra', val: 'putra' },
+  { label: 'Campur', val: 'campur' },
+]
+
+const priceOptions = [
+  { label: 'Semua Harga', val: '' },
+  { label: '< Rp 1 Juta', val: 'under1000' },
+  { label: 'Rp 1 - 2 Juta', val: '1000-2000' },
+  { label: 'Rp 2 - 3.5 Juta', val: '2000-3500' },
+  { label: '> Rp 3.5 Juta', val: 'above3500' },
+]
+
+const getJenisLabel = (val) => {
+  const found = jenisOptions.find((o) => o.val === val)
+  return found ? (found.val ? `Kos ${found.label}` : 'Semua Tipe') : 'Semua Tipe'
+}
+
+const getPriceLabel = (val) => {
+  const found = priceOptions.find((o) => o.val === val)
+  return found ? found.label : 'Semua Harga'
+}
+
+const toggleNavDropdown = (name) => {
+  navActiveDropdown.value = navActiveDropdown.value === name ? null : name
+}
+
+const selectNavJenis = (val) => {
+  navSelectedJenis.value = val
+  navActiveDropdown.value = null
+  executeNavbarSearch()
+}
+
+const selectNavPrice = (val) => {
+  navSelectedPrice.value = val
+  navActiveDropdown.value = null
+  executeNavbarSearch()
+}
+
+const shouldShowNavbarSearch = computed(() => {
+  if (route.path === '/') return scrollY.value > 360
+  if (route.path === '/kos') return scrollY.value > 120
+  return false
+})
+
+const syncFromRoute = () => {
+  navSearchQuery.value = (route.query.q || '').toString()
+  navSelectedJenis.value = (route.query.jenis || '').toString()
+
+  if (route.query.harga_max && !route.query.harga_min && Number(route.query.harga_max) <= 1000000) {
+    navSelectedPrice.value = 'under1000'
+  } else if (Number(route.query.harga_min) === 1000000 && Number(route.query.harga_max) === 2000000) {
+    navSelectedPrice.value = '1000-2000'
+  } else if (Number(route.query.harga_min) === 2000000 && Number(route.query.harga_max) === 3500000) {
+    navSelectedPrice.value = '2000-3500'
+  } else if (Number(route.query.harga_min) >= 3500000 && !route.query.harga_max) {
+    navSelectedPrice.value = 'above3500'
+  } else {
+    navSelectedPrice.value = ''
+  }
+}
+
+watch(() => route.query, syncFromRoute, { immediate: true })
+
+const executeNavbarSearch = () => {
+  navActiveDropdown.value = null
+  const query = {}
+  if (navSearchQuery.value?.trim()) query.q = navSearchQuery.value.trim()
+  if (navSelectedJenis.value) query.jenis = navSelectedJenis.value
+
+  if (navSelectedPrice.value === 'under1000') {
+    query.harga_max = 1000000
+  } else if (navSelectedPrice.value === '1000-2000') {
+    query.harga_min = 1000000
+    query.harga_max = 2000000
+  } else if (navSelectedPrice.value === '2000-3500') {
+    query.harga_min = 2000000
+    query.harga_max = 3500000
+  } else if (navSelectedPrice.value === 'above3500') {
+    query.harga_min = 3500000
+  }
+
+  if (route.path === '/kos') {
+    router.replace({ path: '/kos', query })
+  } else {
+    router.push({ path: '/kos', query })
+  }
+}
+
 const handleClickOutside = (e) => {
   if (profileDropdownRef.value && !profileDropdownRef.value.contains(e.target)) {
     isProfileDropdownOpen.value = false
+  }
+  if (navActiveDropdown.value) {
+    const isInsideJenis = navJenisDropdownRef.value && navJenisDropdownRef.value.contains(e.target)
+    const isInsidePrice = navPriceDropdownRef.value && navPriceDropdownRef.value.contains(e.target)
+    if (!isInsideJenis && !isInsidePrice) {
+      navActiveDropdown.value = null
+    }
   }
 }
 
@@ -332,13 +578,12 @@ watch(
   () => route.path,
   () => {
     isProfileDropdownOpen.value = false
+    navActiveDropdown.value = null
   }
 )
 
-// Scroll detection for transparent to solid white transition
-const isScrolled = ref(false)
-
 const handleScroll = () => {
+  scrollY.value = window.scrollY
   isScrolled.value = window.scrollY > 20
 }
 
@@ -355,7 +600,7 @@ onUnmounted(() => {
 
 // Only transparent at the top of the homepage where the dark hero background is present
 const isTransparent = computed(() => {
-  return route.path === '/' && !isScrolled.value
+  return route.path === '/' && !isScrolled.value && !shouldShowNavbarSearch.value
 })
 
 const scrollToSection = (sectionId) => {

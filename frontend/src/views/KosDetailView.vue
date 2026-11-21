@@ -211,18 +211,32 @@
                   <h3 class="text-base font-bold text-on-surface">Ulasan & Rating Penghuni</h3>
                   <p class="text-xs text-on-surface-variant">Ulasan nyata dari para penyewa yang pernah tinggal atau disetujui di kos ini.</p>
                 </div>
-                <div class="flex items-center gap-3 bg-surface-container-low px-4 py-2.5 rounded-2xl border border-slate-100 self-start sm:self-auto">
-                  <div class="text-center">
-                    <div class="text-xl font-black text-slate-900 flex items-center justify-center gap-1">
-                      <PhStar :size="22" weight="fill" class="text-amber-500" />
-                      <span>{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : '-' }}</span>
+                <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+                  <!-- Sort Reviews -->
+                  <select
+                    v-model="sortReviewOption"
+                    @change="fetchReviews(1)"
+                    class="text-xs rounded-xl border border-slate-200 py-2 px-3 bg-white font-semibold text-slate-700 shadow-2xs focus:ring-primary focus:border-primary cursor-pointer"
+                  >
+                    <option value="latest">Terbaru</option>
+                    <option value="oldest">Terlama</option>
+                    <option value="rating_desc">Bintang Tertinggi</option>
+                    <option value="rating_asc">Bintang Terendah</option>
+                  </select>
+
+                  <div class="flex items-center gap-3 bg-surface-container-low px-4 py-2.5 rounded-2xl border border-slate-100">
+                    <div class="text-center">
+                      <div class="text-xl font-black text-slate-900 flex items-center justify-center gap-1">
+                        <PhStar :size="22" weight="fill" class="text-amber-500" />
+                        <span>{{ kos.rating_rata_rata ? Number(kos.rating_rata_rata).toFixed(1) : '-' }}</span>
+                      </div>
+                      <p class="text-[10px] text-slate-400 font-medium mt-0.5">Skor dari 5.0</p>
                     </div>
-                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">Skor dari 5.0</p>
-                  </div>
-                  <div class="w-px h-8 bg-slate-200"></div>
-                  <div class="text-center">
-                    <p class="text-xl font-black text-primary">{{ kos.ulasan_count || (reviewsList || []).length }}</p>
-                    <p class="text-[10px] text-slate-400 font-medium mt-0.5">Total Ulasan</p>
+                    <div class="w-px h-8 bg-slate-200"></div>
+                    <div class="text-center">
+                      <p class="text-xl font-black text-primary">{{ kos.ulasan_count || reviewsPagination.total }}</p>
+                      <p class="text-[10px] text-slate-400 font-medium mt-0.5">Total Ulasan</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -345,6 +359,23 @@
                     {{ rev.komentar }}
                   </p>
                 </div>
+
+                <BasePagination
+                  v-if="reviewsList.length > 0"
+                  :current-page="reviewsPagination.current_page"
+                  :last-page="reviewsPagination.last_page"
+                  :total="reviewsPagination.total"
+                  :total-items="reviewsPagination.total"
+                  :per-page="reviewsPagination.per_page"
+                  :from="reviewsPagination.from"
+                  :from-item="reviewsPagination.from"
+                  :to="reviewsPagination.to"
+                  :to-item="reviewsPagination.to"
+                  item-name="ulasan"
+                  :card="true"
+                  @change-page="(p) => fetchReviews(p)"
+                  @change-per-page="(val) => { reviewsPagination.per_page = val; fetchReviews(1); }"
+                />
               </div>
             </div>
 
@@ -678,6 +709,7 @@ import {
   PhReceipt,
   PhLock
 } from '@phosphor-icons/vue'
+import BasePagination from '../components/BasePagination.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -721,6 +753,15 @@ const loadingReviews = ref(false)
 const reviewEligibility = ref(null)
 const hoverStar = ref(0)
 const submittingReview = ref(false)
+const sortReviewOption = ref('latest')
+const reviewsPagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 5,
+})
 const reviewForm = reactive({
   rating: 5,
   komentar: '',
@@ -875,11 +916,24 @@ const handleWhatsAppInquiry = () => {
   openWhatsAppChat(phone, message)
 }
 
-const fetchReviews = async () => {
+const fetchReviews = async (page = 1) => {
   loadingReviews.value = true
   try {
-    const res = await api.get(`/kos/${route.params.id}/reviews`)
+    const params = {
+      page,
+      per_page: reviewsPagination.per_page,
+      sort: sortReviewOption.value,
+    }
+    const res = await api.get(`/kos/${route.params.id}/reviews`, { params })
     reviewsList.value = res.data.data || []
+    if (res.data.meta) {
+      reviewsPagination.current_page = res.data.meta.current_page || page
+      reviewsPagination.last_page = res.data.meta.last_page || 1
+      reviewsPagination.total = res.data.meta.total || 0
+      reviewsPagination.from = res.data.meta.from || 0
+      reviewsPagination.to = res.data.meta.to || 0
+      reviewsPagination.per_page = res.data.meta.per_page || reviewsPagination.per_page
+    }
   } catch (err) {
     reviewsList.value = []
   } finally {

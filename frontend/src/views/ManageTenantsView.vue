@@ -112,7 +112,7 @@
         <button
           v-for="tab in filterTabs"
           :key="tab.id"
-          @click="activeFilter = tab.id"
+          @click="setFilter(tab.id)"
           :class="[
             'px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5',
             activeFilter === tab.id
@@ -133,22 +133,43 @@
         </button>
       </div>
 
-      <!-- Search Input -->
-      <div class="relative w-full md:w-72">
-        <PhMagnifyingGlass :size="16" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Cari penghuni, kamar, kos..."
-          class="w-full pl-9 pr-3.5 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
-        />
-        <button
-          v-if="searchQuery"
-          @click="searchQuery = ''"
-          class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold"
-        >
-          &times;
-        </button>
+      <!-- Search & Sort Controls -->
+      <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+        <!-- Sort Selector -->
+        <div class="relative min-w-[190px]">
+          <select
+            v-model="sortOption"
+            @change="onFilterChange"
+            class="w-full appearance-none pl-3.5 pr-8 py-2 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary cursor-pointer shadow-2xs"
+          >
+            <option value="sisa_hari_asc">Segera Berakhir (H-)</option>
+            <option value="sisa_hari_desc">Sisa Waktu Terbanyak</option>
+            <option value="nama_asc">Nama Penghuni (A–Z)</option>
+            <option value="nama_desc">Nama Penghuni (Z–A)</option>
+            <option value="tanggal_mulai_desc">Tgl Masuk Terbaru</option>
+            <option value="tanggal_mulai_asc">Tgl Masuk Terlama</option>
+          </select>
+          <PhCaretDown :size="13" weight="bold" class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
+        </div>
+
+        <!-- Search Input -->
+        <div class="relative min-w-[220px]">
+          <PhMagnifyingGlass :size="16" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+          <input
+            v-model="searchQuery"
+            @input="debounceSearch"
+            type="text"
+            placeholder="Cari penghuni, kamar, kos..."
+            class="w-full pl-9 pr-7 py-2 rounded-xl border border-slate-200 text-xs text-slate-800 placeholder-slate-400 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary shadow-2xs"
+          />
+          <button
+            v-if="searchQuery"
+            @click="searchQuery = ''; onFilterChange()"
+            class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 text-xs font-bold cursor-pointer"
+          >
+            &times;
+          </button>
+        </div>
       </div>
     </div>
 
@@ -162,7 +183,7 @@
 
     <!-- Empty State -->
     <div
-      v-else-if="filteredTenants.length === 0"
+      v-else-if="tenants.length === 0"
       class="py-16 text-center bg-white rounded-3xl border border-slate-100 shadow-xs p-6"
     >
       <div class="w-16 h-16 rounded-2xl bg-slate-100 text-slate-400 mx-auto flex items-center justify-center mb-4">
@@ -175,7 +196,7 @@
       <button
         v-if="searchQuery || activeFilter !== 'all'"
         @click="resetFilters"
-        class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition"
+        class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition cursor-pointer"
       >
         Reset Filter
       </button>
@@ -184,7 +205,7 @@
     <!-- Tenants Grid / List -->
     <div v-else class="space-y-4">
       <div
-        v-for="tenant in filteredTenants"
+        v-for="tenant in tenants"
         :key="tenant.id"
         class="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-xs hover:shadow-md transition duration-200 flex flex-col lg:flex-row lg:items-center justify-between gap-5"
       >
@@ -308,6 +329,24 @@
       </div>
     </div>
 
+    <!-- Base Pagination Controls -->
+    <div v-if="!loading && tenants.length > 0" class="mt-4">
+      <BasePagination
+        :current-page="pagination.current_page"
+        :last-page="pagination.last_page"
+        :total="pagination.total"
+        :from="pagination.from"
+        :to="pagination.to"
+        :per-page="pagination.per_page"
+        :per-page-options="[6, 12, 24, 48]"
+        :loading="loading"
+        :card="true"
+        item-name="penghuni"
+        @change-page="handlePageChange"
+        @change-per-page="handlePerPageChange"
+      />
+    </div>
+
     <!-- Modal Konfirmasi Check-Out -->
     <div
       v-if="showCheckoutModal && selectedTenant"
@@ -348,9 +387,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import api from '../services/api'
 import { openWhatsAppChat } from '../utils/whatsapp'
+import BasePagination from '../components/BasePagination.vue'
 import {
   PhUsers,
   PhBed,
@@ -358,6 +398,7 @@ import {
   PhHourglassLow,
   PhArrowClockwise,
   PhMagnifyingGlass,
+  PhCaretDown,
   PhCalendar,
   PhCalendarCheck,
   PhClock,
@@ -380,52 +421,67 @@ const summary = ref({
 })
 
 const activeFilter = ref('all')
+const sortOption = ref('sisa_hari_asc')
 const searchQuery = ref('')
 const toastMessage = ref('')
 const toastType = ref('success')
+
+const pagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 6,
+})
 
 const showCheckoutModal = ref(false)
 const selectedTenant = ref(null)
 
 const filterTabs = computed(() => [
-  { id: 'all', label: 'Semua', count: tenants.value.length },
+  { id: 'all', label: 'Semua', count: (summary.value.total_penghuni || 0) + (summary.value.total_siap_masuk || 0) },
   { id: 'aktif', label: 'Aktif Menempati', count: summary.value.total_penghuni },
   { id: 'siap_masuk', label: 'Siap Masuk', count: summary.value.total_siap_masuk },
   { id: 'jatuh_tempo', label: 'Jatuh Tempo (H-7)', count: summary.value.total_jatuh_tempo },
 ])
 
-const filteredTenants = computed(() => {
-  return tenants.value.filter((tenant) => {
-    // 1. Tab filter
-    if (activeFilter.value === 'aktif' && tenant.status !== 'aktif') return false
-    if (activeFilter.value === 'siap_masuk' && !['dp_dibayar', 'siap_serah_terima', 'disetujui'].includes(tenant.status)) return false
-    if (activeFilter.value === 'jatuh_tempo') {
-      if (tenant.status !== 'aktif' || tenant.sisa_hari === null || tenant.sisa_hari > 7) return false
-    }
-
-    // 2. Search query filter
-    if (searchQuery.value) {
-      const q = searchQuery.value.toLowerCase()
-      const nama = tenant.pengguna?.nama?.toLowerCase() || ''
-      const email = tenant.pengguna?.email?.toLowerCase() || ''
-      const telepon = tenant.pengguna?.telepon?.toLowerCase() || ''
-      const kos = tenant.kos?.nama?.toLowerCase() || ''
-      const kamar = tenant.kamar?.nama_kamar?.toLowerCase() || ''
-      const match = nama.includes(q) || email.includes(q) || telepon.includes(q) || kos.includes(q) || kamar.includes(q)
-      if (!match) return false
-    }
-
-    return true
-  })
-})
-
-const fetchTenants = async () => {
+const fetchTenants = async (page = null) => {
+  if (page) {
+    pagination.current_page = page
+  }
   loading.value = true
   try {
-    const res = await api.get('/pemilik/penghuni')
+    const params = {
+      page: pagination.current_page,
+      per_page: pagination.per_page,
+      filter: activeFilter.value,
+      sort: sortOption.value,
+    }
+    if (searchQuery.value) params.q = searchQuery.value
+
+    const res = await api.get('/pemilik/penghuni', { params })
     tenants.value = res.data?.data || []
     if (res.data?.summary) {
       summary.value = res.data.summary
+    }
+
+    if (res.data?.meta) {
+      pagination.current_page = res.data.meta.current_page || 1
+      pagination.last_page = res.data.meta.last_page || 1
+      pagination.total = res.data.meta.total || 0
+      pagination.from = res.data.meta.from || 0
+      pagination.to = res.data.meta.to || 0
+      pagination.per_page = res.data.meta.per_page || pagination.per_page
+
+      if (pagination.current_page > pagination.last_page && pagination.last_page >= 1) {
+        pagination.current_page = pagination.last_page
+        return await fetchTenants()
+      }
+    } else {
+      pagination.total = tenants.value.length
+      pagination.from = tenants.value.length > 0 ? 1 : 0
+      pagination.to = tenants.value.length
+      pagination.last_page = 1
     }
   } catch (err) {
     showToast(err.response?.data?.message || 'Gagal memuat data penghuni kos.', 'error')
@@ -434,9 +490,41 @@ const fetchTenants = async () => {
   }
 }
 
+let searchTimer = null
+const debounceSearch = () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    pagination.current_page = 1
+    fetchTenants()
+  }, 350)
+}
+
+const onFilterChange = () => {
+  pagination.current_page = 1
+  fetchTenants()
+}
+
+const setFilter = (tabId) => {
+  activeFilter.value = tabId
+  onFilterChange()
+}
+
+const handlePageChange = (page) => {
+  pagination.current_page = page
+  fetchTenants()
+}
+
+const handlePerPageChange = (size) => {
+  pagination.per_page = size
+  pagination.current_page = 1
+  fetchTenants()
+}
+
 const resetFilters = () => {
   activeFilter.value = 'all'
   searchQuery.value = ''
+  sortOption.value = 'sisa_hari_asc'
+  onFilterChange()
 }
 
 const showToast = (msg, type = 'success') => {
@@ -536,6 +624,9 @@ const confirmCheckout = async () => {
     showToast('Penghuni berhasil di-checkout dan kamar kembali berstatus tersedia.', 'success')
     showCheckoutModal.value = false
     selectedTenant.value = null
+    if (tenants.value.length === 1 && pagination.current_page > 1) {
+      pagination.current_page -= 1
+    }
     await fetchTenants()
   } catch (err) {
     showToast(err.response?.data?.message || 'Gagal memproses check-out.', 'error')

@@ -81,13 +81,16 @@
             <PhArrowsDownUp :size="17" weight="bold" />
             <select
               v-model="filters.sort"
-              @change="fetchKosList"
+              @change="onFilterChange"
               class="absolute inset-0 w-full h-full opacity-0 cursor-pointer text-base"
               aria-label="Urutkan Rekomendasi"
             >
               <option value="">Rekomendasi</option>
+              <option value="latest">Paling Baru Ditambahkan</option>
               <option value="harga_asc">Harga Terendah</option>
               <option value="harga_desc">Harga Tertinggi</option>
+              <option value="rating_desc">Rating Tertinggi</option>
+              <option value="nama_asc">Nama Kos (A – Z)</option>
             </select>
           </div>
 
@@ -97,12 +100,15 @@
             <label class="text-[11px] text-slate-500 font-medium whitespace-nowrap hidden md:inline">Urutan:</label>
             <select
               v-model="filters.sort"
-              @change="fetchKosList"
+              @change="onFilterChange"
               class="text-xs bg-transparent border-none focus:ring-0 py-1 pl-1 pr-5 text-slate-800 font-bold cursor-pointer"
             >
               <option value="">Rekomendasi</option>
+              <option value="latest">Paling Baru Ditambahkan</option>
               <option value="harga_asc">Harga Terendah</option>
               <option value="harga_desc">Harga Tertinggi</option>
+              <option value="rating_desc">Rating Tertinggi</option>
+              <option value="nama_asc">Nama Kos (A – Z)</option>
             </select>
           </div>
         </div>
@@ -271,6 +277,24 @@
             </div>
           </div>
         </article>
+      </div>
+
+      <!-- Pagination Controls -->
+      <div v-if="!loading && kosList.length > 0" class="mt-space-md">
+        <BasePagination
+          :current-page="pagination.current_page"
+          :last-page="pagination.last_page"
+          :total="pagination.total"
+          :from="pagination.from"
+          :to="pagination.to"
+          :per-page="pagination.per_page"
+          :per-page-options="[8, 12, 24, 36]"
+          :loading="loading"
+          :card="true"
+          item-name="properti kos"
+          @change-page="handlePageChange"
+          @change-per-page="handlePerPageChange"
+        />
       </div>
     </section>
 
@@ -509,6 +533,7 @@ import { useFavoritesStore } from '../stores/favorites'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
 import GenderBadge from '../components/GenderBadge.vue'
+import BasePagination from '../components/BasePagination.vue'
 import {
   PhMagnifyingGlass,
   PhSlidersHorizontal,
@@ -583,10 +608,33 @@ const getJenisIcon = (jenis) => {
 const filters = reactive({
   q: route.query.q || '',
   jenis: route.query.jenis || '',
+  harga_min: route.query.harga_min ? Number(route.query.harga_min) : null,
   harga_max: route.query.harga_max ? Number(route.query.harga_max) : null,
   fasilitas: [],
   tersedia: false,
   sort: '',
+})
+
+// Keep filters synchronized whenever route query changes (e.g. from Floating Navbar search)
+watch(
+  () => route.query,
+  (newQ) => {
+    filters.q = (newQ.q || '').toString()
+    filters.jenis = (newQ.jenis || '').toString()
+    filters.harga_min = newQ.harga_min ? Number(newQ.harga_min) : null
+    filters.harga_max = newQ.harga_max ? Number(newQ.harga_max) : null
+    pagination.current_page = 1
+    fetchKosList()
+  }
+)
+
+const pagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 12,
 })
 
 // Count active filters
@@ -594,7 +642,7 @@ const activeFilterCount = computed(() => {
   let count = 0
   if (filters.q) count++
   if (filters.jenis) count++
-  if (filters.harga_max) count++
+  if (filters.harga_min || filters.harga_max) count++
   if (filters.fasilitas && filters.fasilitas.length > 0) count += filters.fasilitas.length
   if (filters.tersedia) count++
   return count
@@ -605,19 +653,24 @@ const getFasilitasName = (id) => {
   return item ? item.nama : `Fasilitas #${id}`
 }
 
+const onFilterChange = () => {
+  pagination.current_page = 1
+  fetchKosList()
+}
+
 const clearSearchQuery = () => {
   filters.q = ''
-  fetchKosList()
+  onFilterChange()
 }
 
 const setQuickJenis = (val) => {
   filters.jenis = val
-  fetchKosList()
+  onFilterChange()
 }
 
 const toggleQuickTersedia = () => {
   filters.tersedia = !filters.tersedia
-  fetchKosList()
+  onFilterChange()
 }
 
 const applySuggestion = (sug) => {
@@ -627,7 +680,7 @@ const applySuggestion = (sug) => {
   else {
     filters.q = sug
   }
-  fetchKosList()
+  onFilterChange()
 }
 
 const removeFilter = (key, val = null) => {
@@ -638,7 +691,7 @@ const removeFilter = (key, val = null) => {
   else if (key === 'fasilitas' && val) {
     filters.fasilitas = filters.fasilitas.filter((id) => id !== val)
   }
-  fetchKosList()
+  onFilterChange()
 }
 
 const resetFilters = () => {
@@ -648,11 +701,11 @@ const resetFilters = () => {
   filters.fasilitas = []
   filters.tersedia = false
   filters.sort = ''
-  fetchKosList()
+  onFilterChange()
 }
 
 const applyAndCloseFilterModal = () => {
-  fetchKosList()
+  onFilterChange()
   showFilterModal.value = false
   ui.success('Filter berhasil diterapkan.')
 }
@@ -696,16 +749,20 @@ let searchTimer = null
 const debounceFetch = () => {
   clearTimeout(searchTimer)
   searchTimer = setTimeout(() => {
-    fetchKosList()
+    onFilterChange()
   }, 350)
 }
 
 const fetchKosList = async () => {
   loading.value = true
   try {
-    const params = {}
+    const params = {
+      page: pagination.current_page,
+      per_page: pagination.per_page,
+    }
     if (filters.q) params.q = filters.q
     if (filters.jenis) params.jenis = filters.jenis
+    if (filters.harga_min) params.harga_min = filters.harga_min
     if (filters.harga_max) params.harga_max = filters.harga_max
     if (filters.fasilitas && filters.fasilitas.length > 0) params.fasilitas = filters.fasilitas
     if (filters.tersedia) params.tersedia = 1
@@ -713,11 +770,37 @@ const fetchKosList = async () => {
 
     const res = await api.get('/kos', { params })
     kosList.value = res.data.data || []
+
+    if (res.data?.meta) {
+      pagination.current_page = res.data.meta.current_page || 1
+      pagination.last_page = res.data.meta.last_page || 1
+      pagination.total = res.data.meta.total || 0
+      pagination.from = res.data.meta.from || 0
+      pagination.to = res.data.meta.to || 0
+      pagination.per_page = res.data.meta.per_page || pagination.per_page
+    } else {
+      pagination.total = kosList.value.length
+      pagination.from = kosList.value.length > 0 ? 1 : 0
+      pagination.to = kosList.value.length
+      pagination.last_page = 1
+    }
   } catch (err) {
     // Abaikan
   } finally {
     loading.value = false
   }
+}
+
+const handlePageChange = (page) => {
+  pagination.current_page = page
+  fetchKosList()
+  window.scrollTo({ top: 0, behavior: 'smooth' })
+}
+
+const handlePerPageChange = (size) => {
+  pagination.per_page = size
+  pagination.current_page = 1
+  fetchKosList()
 }
 
 const fetchFasilitas = async () => {

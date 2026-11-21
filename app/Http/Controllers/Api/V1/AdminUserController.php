@@ -41,17 +41,17 @@ class AdminUserController extends Controller
             $query->where('aktif', $request->boolean('aktif'));
         }
 
-        if ($request->input('sort') === 'unit_terbanyak') {
-            $query->orderByDesc('kos_count');
-        } elseif ($request->input('sort') === 'nama_asc') {
-            $query->reorder()->orderBy('nama', 'asc');
-        } elseif ($request->input('sort') === 'latest') {
-            $query->latest();
-        } else {
-            $query->orderBy('id', 'asc');
-        }
+        match ($request->input('sort')) {
+            'unit_terbanyak' => $query->orderByDesc('kos_count'),
+            'pesanan_terbanyak' => $query->orderByDesc('pemesanan_count'),
+            'nama_asc' => $query->reorder()->orderBy('nama', 'asc'),
+            'nama_desc' => $query->reorder()->orderBy('nama', 'desc'),
+            'oldest' => $query->oldest('id'),
+            'latest' => $query->latest('id'),
+            default => $query->latest('id'),
+        };
 
-        $perPage = min(max((int) $request->input('per_page', 50), 1), 100);
+        $perPage = min(max((int) $request->input('per_page', 10), 1), 100);
         $users = $query->paginate($perPage);
 
         return UserResource::collection($users);

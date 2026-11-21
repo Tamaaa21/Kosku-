@@ -51,7 +51,7 @@
         </div>
         <div>
           <p class="text-xs text-on-surface-variant font-medium">Total Kamar</p>
-          <p class="text-xl font-bold text-on-surface">{{ kamarList.length }} Kamar</p>
+          <p class="text-xl font-bold text-on-surface">{{ countTotal }} Kamar</p>
         </div>
       </div>
 
@@ -115,7 +115,7 @@
           </div>
 
           <!-- Search Input -->
-          <div class="relative flex-1 sm:w-64 pt-5 sm:pt-0">
+          <div class="relative flex-1 sm:w-56 pt-5 sm:pt-0">
             <label class="block text-[11px] uppercase tracking-wider text-outline mb-1 font-semibold">
               Cari Unit
             </label>
@@ -123,10 +123,36 @@
               <PhMagnifyingGlass :size="18" class="absolute left-3 top-3 text-outline pointer-events-none" />
               <input
                 v-model="searchQuery"
+                @input="debounceSearch"
                 type="text"
                 placeholder="Cari nomor kamar..."
                 class="w-full h-11 pl-9 pr-3 bg-surface-container-low text-on-surface placeholder:text-outline rounded-lg text-xs focus:outline-none focus:bg-white focus:shadow-md transition"
               />
+            </div>
+          </div>
+
+          <!-- Sort Dropdown -->
+          <div class="w-full sm:w-44 pt-2 sm:pt-0">
+            <label class="block text-[11px] uppercase tracking-wider text-outline mb-1 font-semibold">
+              Urutan
+            </label>
+            <div class="relative">
+              <PhArrowsDownUp :size="16" class="absolute left-3 top-3.5 text-outline pointer-events-none" />
+              <select
+                v-model="sortOption"
+                @change="onFilterChange"
+                class="w-full h-11 pl-9 pr-8 bg-surface-container-low text-on-surface rounded-lg text-xs font-semibold focus:outline-none focus:bg-white focus:shadow-md transition cursor-pointer appearance-none"
+              >
+                <option value="">Rekomendasi</option>
+                <option value="nama_asc">No Kamar (A - Z)</option>
+                <option value="nama_desc">No Kamar (Z - A)</option>
+                <option value="harga_asc">Harga Terendah</option>
+                <option value="harga_desc">Harga Tertinggi</option>
+                <option value="status_tersedia">Tersedia Dahulu</option>
+                <option value="status_terisi">Terisi Dahulu</option>
+                <option value="latest">Baru Ditambahkan</option>
+              </select>
+              <PhCaretDown :size="14" class="absolute right-3 top-4 text-outline pointer-events-none" />
             </div>
           </div>
         </div>
@@ -134,21 +160,21 @@
         <!-- Filter Status Tabs -->
         <div class="flex items-center gap-1.5 bg-surface-container-low p-1 rounded-xl self-start lg:self-end">
           <button
-            @click="filterStatus = 'all'"
+            @click="setFilterStatus('all')"
             :class="[
-              'px-4 py-2 rounded-lg text-xs font-semibold transition',
+              'px-4 py-2 rounded-lg text-xs font-semibold transition cursor-pointer',
               filterStatus === 'all'
                 ? 'bg-surface-container-lowest text-primary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
             ]"
             type="button"
           >
-            Semua <span class="ml-1 px-1.5 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px]">{{ kamarList.length }}</span>
+            Semua <span class="ml-1 px-1.5 py-0.5 rounded-full bg-primary-fixed text-primary text-[10px]">{{ countTotal }}</span>
           </button>
           <button
-            @click="filterStatus = 'tersedia'"
+            @click="setFilterStatus('tersedia')"
             :class="[
-              'px-4 py-2 rounded-lg text-xs font-semibold transition',
+              'px-4 py-2 rounded-lg text-xs font-semibold transition cursor-pointer',
               filterStatus === 'tersedia'
                 ? 'bg-surface-container-lowest text-tertiary shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
@@ -158,9 +184,9 @@
             Tersedia <span class="ml-1 px-1.5 py-0.5 rounded-full bg-surface-variant text-tertiary text-[10px]">{{ countTersedia }}</span>
           </button>
           <button
-            @click="filterStatus = 'terisi'"
+            @click="setFilterStatus('terisi')"
             :class="[
-              'px-4 py-2 rounded-lg text-xs font-semibold transition',
+              'px-4 py-2 rounded-lg text-xs font-semibold transition cursor-pointer',
               filterStatus === 'terisi'
                 ? 'bg-surface-container-lowest text-on-surface shadow-sm'
                 : 'text-on-surface-variant hover:text-on-surface'
@@ -180,10 +206,46 @@
           <thead class="bg-surface-container-low/70 text-on-surface-variant text-[11px] uppercase tracking-wider font-semibold select-none">
             <tr>
               <th class="py-3.5 px-space-md w-16">No</th>
-              <th class="py-3.5 px-space-md">Foto & Detail Kamar</th>
+              <th class="py-3.5 px-space-md">
+                <button
+                  type="button"
+                  @click="toggleSort('nama')"
+                  class="flex items-center gap-1.5 hover:text-primary transition cursor-pointer"
+                  title="Klik untuk mengurutkan berdasarkan nama kamar"
+                >
+                  <span>Foto & Detail Kamar</span>
+                  <PhCaretUp v-if="sortOption === 'nama_asc'" :size="12" weight="bold" class="text-primary" />
+                  <PhCaretDown v-else-if="sortOption === 'nama_desc'" :size="12" weight="bold" class="text-primary" />
+                  <PhArrowsDownUp v-else :size="12" class="opacity-40" />
+                </button>
+              </th>
               <th class="py-3.5 px-space-md">Fasilitas Utama Kamar</th>
-              <th class="py-3.5 px-space-md">Harga Sewa</th>
-              <th class="py-3.5 px-space-md">Status</th>
+              <th class="py-3.5 px-space-md">
+                <button
+                  type="button"
+                  @click="toggleSort('harga')"
+                  class="flex items-center gap-1.5 hover:text-primary transition cursor-pointer"
+                  title="Klik untuk mengurutkan berdasarkan harga"
+                >
+                  <span>Harga Sewa</span>
+                  <PhCaretUp v-if="sortOption === 'harga_asc'" :size="12" weight="bold" class="text-primary" />
+                  <PhCaretDown v-else-if="sortOption === 'harga_desc'" :size="12" weight="bold" class="text-primary" />
+                  <PhArrowsDownUp v-else :size="12" class="opacity-40" />
+                </button>
+              </th>
+              <th class="py-3.5 px-space-md">
+                <button
+                  type="button"
+                  @click="toggleSort('status')"
+                  class="flex items-center gap-1.5 hover:text-primary transition cursor-pointer"
+                  title="Klik untuk mengurutkan status ketersediaan"
+                >
+                  <span>Status</span>
+                  <PhCaretUp v-if="sortOption === 'status_tersedia'" :size="12" weight="bold" class="text-primary" />
+                  <PhCaretDown v-else-if="sortOption === 'status_terisi'" :size="12" weight="bold" class="text-primary" />
+                  <PhArrowsDownUp v-else :size="12" class="opacity-40" />
+                </button>
+              </th>
               <th class="py-3.5 px-space-md text-right w-36">Aksi</th>
             </tr>
           </thead>
@@ -195,21 +257,21 @@
               </td>
             </tr>
 
-            <tr v-else-if="filteredKamarList.length === 0" class="text-center">
+            <tr v-else-if="kamarList.length === 0" class="text-center">
               <td colspan="6" class="py-12 text-slate-400">
                 <PhDoor :size="36" class="text-slate-300 inline-block" />
-                <p class="mt-2 text-xs font-semibold text-slate-600">Belum ada unit kamar di kos ini.</p>
-                <p class="text-[11px] text-slate-400 mt-0.5">Silakan tambahkan kamar baru untuk mulai mengelola unit.</p>
+                <p class="mt-2 text-xs font-semibold text-slate-600">Belum ada unit kamar yang sesuai kriteria.</p>
+                <p class="text-[11px] text-slate-400 mt-0.5">Silakan sesuaikan kata kunci pencarian atau tambahkan kamar baru.</p>
               </td>
             </tr>
 
             <tr
-              v-for="(kamar, index) in filteredKamarList"
+              v-for="(kamar, index) in kamarList"
               :key="kamar.id"
               class="hover:bg-surface-container-low/40 transition group"
             >
               <td class="py-4 px-space-md font-medium text-secondary">
-                {{ index + 1 }}
+                {{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}
               </td>
 
               <td class="py-4 px-space-md">
@@ -312,21 +374,33 @@
         </table>
       </div>
 
-      <!-- Footer Info -->
-      <div class="p-space-md bg-surface-container-lowest border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-space-md select-none">
-        <span class="text-xs text-on-surface-variant">
-          Menampilkan <span class="font-bold text-on-surface">{{ filteredKamarList.length }}</span> kamar pada
-          <strong class="text-primary">{{ currentKos?.nama || 'Properti' }}</strong>
+      <!-- Base Pagination Controls -->
+      <BasePagination
+        :current-page="pagination.current_page"
+        :last-page="pagination.last_page"
+        :total="pagination.total"
+        :from="pagination.from"
+        :to="pagination.to"
+        :per-page="pagination.per_page"
+        :per-page-options="[6, 12, 24, 48]"
+        :loading="loading"
+        item-name="unit kamar"
+        @change-page="handlePageChange"
+        @change-per-page="handlePerPageChange"
+      />
+
+      <!-- Quick Context Link -->
+      <div class="px-space-md py-2.5 bg-surface-container-low/40 border-t border-slate-100 flex items-center justify-between text-xs text-on-surface-variant select-none">
+        <span>
+          Unit kamar pada <strong class="text-primary font-semibold">{{ currentKos?.nama || 'Properti' }}</strong>
         </span>
-        <div class="flex items-center gap-2">
-          <router-link
-            to="/dashboard/pemilik/pemesanan"
-            class="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
-          >
-            <span>Lihat permintaan pemesanan masuk</span>
-            <PhArrowRight :size="16" weight="bold" />
-          </router-link>
-        </div>
+        <router-link
+          to="/dashboard/pemilik/pemesanan"
+          class="text-xs text-primary font-semibold hover:underline flex items-center gap-1"
+        >
+          <span>Lihat permintaan sewa kamar</span>
+          <PhArrowRight :size="14" weight="bold" />
+        </router-link>
       </div>
     </div>
 
@@ -613,7 +687,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import {
   PhPlus,
@@ -624,6 +698,8 @@ import {
   PhCurrencyCircleDollar,
   PhHouse,
   PhCaretDown,
+  PhCaretUp,
+  PhArrowsDownUp,
   PhMagnifyingGlass,
   PhCircleNotch,
   PhBoundingBox,
@@ -645,6 +721,7 @@ import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
 import ImageUploader from '../components/ImageUploader.vue'
+import BasePagination from '../components/BasePagination.vue'
 
 const route = useRoute()
 const auth = useAuthStore()
@@ -661,6 +738,22 @@ const kamarList = ref([])
 
 const searchQuery = ref('')
 const filterStatus = ref('all')
+const sortOption = ref('')
+
+const pagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 6,
+})
+
+const counts = ref({
+  total: 0,
+  tersedia: 0,
+  terisi: 0,
+})
 
 const showModal = ref(false)
 const isEditing = ref(false)
@@ -731,12 +824,52 @@ const fetchKosList = async () => {
   }
 }
 
-const fetchKamar = async () => {
+const fetchKamar = async (page = null) => {
   if (!selectedKosId.value) return
+  if (page) {
+    pagination.current_page = page
+  }
   loading.value = true
   try {
-    const res = await api.get(`/kos/${selectedKosId.value}/rooms`)
+    const params = {
+      page: pagination.current_page,
+      per_page: pagination.per_page,
+    }
+    if (searchQuery.value) params.q = searchQuery.value
+    if (filterStatus.value !== 'all') params.status = filterStatus.value
+    if (sortOption.value) params.sort = sortOption.value
+
+    const res = await api.get(`/kos/${selectedKosId.value}/rooms`, { params })
     kamarList.value = res.data?.data || []
+
+    if (res.data?.counts) {
+      counts.value = res.data.counts
+    } else {
+      counts.value = {
+        total: kamarList.value.length,
+        tersedia: kamarList.value.filter((k) => k.status === 'tersedia').length,
+        terisi: kamarList.value.filter((k) => k.status === 'terisi').length,
+      }
+    }
+
+    if (res.data?.meta) {
+      pagination.current_page = res.data.meta.current_page || 1
+      pagination.last_page = res.data.meta.last_page || 1
+      pagination.total = res.data.meta.total || 0
+      pagination.from = res.data.meta.from || 0
+      pagination.to = res.data.meta.to || 0
+      pagination.per_page = res.data.meta.per_page || pagination.per_page
+
+      if (pagination.current_page > pagination.last_page && pagination.last_page >= 1) {
+        pagination.current_page = pagination.last_page
+        return await fetchKamar()
+      }
+    } else {
+      pagination.total = kamarList.value.length
+      pagination.from = kamarList.value.length > 0 ? 1 : 0
+      pagination.to = kamarList.value.length
+      pagination.last_page = 1
+    }
   } catch (err) {
     errorMsg.value = 'Gagal memuat kamar kos.'
   } finally {
@@ -744,7 +877,48 @@ const fetchKamar = async () => {
   }
 }
 
+const onFilterChange = () => {
+  pagination.current_page = 1
+  fetchKamar()
+}
+
+const handlePageChange = (page) => {
+  pagination.current_page = page
+  fetchKamar()
+}
+
+const handlePerPageChange = (size) => {
+  pagination.per_page = size
+  pagination.current_page = 1
+  fetchKamar()
+}
+
+const setFilterStatus = (status) => {
+  filterStatus.value = status
+  onFilterChange()
+}
+
+const toggleSort = (field) => {
+  if (field === 'nama') {
+    sortOption.value = sortOption.value === 'nama_asc' ? 'nama_desc' : 'nama_asc'
+  } else if (field === 'harga') {
+    sortOption.value = sortOption.value === 'harga_asc' ? 'harga_desc' : 'harga_asc'
+  } else if (field === 'status') {
+    sortOption.value = sortOption.value === 'status_tersedia' ? 'status_terisi' : 'status_tersedia'
+  }
+  onFilterChange()
+}
+
+let searchTimer = null
+const debounceSearch = () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    onFilterChange()
+  }, 350)
+}
+
 const onKosChange = () => {
+  pagination.current_page = 1
   fetchKamar()
 }
 
@@ -756,30 +930,22 @@ const currentKos = computed(() => {
   return myKosList.value.find((k) => k.id === Number(selectedKosId.value)) || null
 })
 
-const filteredKamarList = computed(() => {
-  return kamarList.value
-    .filter((kamar) => {
-      const matchSearch =
-        !searchQuery.value ||
-        kamar.nama_kamar.toLowerCase().includes(searchQuery.value.toLowerCase())
-
-      const matchStatus =
-        filterStatus.value === 'all' || kamar.status === filterStatus.value
-
-      return matchSearch && matchStatus
-    })
-    .sort((a, b) => a.id - b.id)
+const countTotal = computed(() => {
+  return counts.value.total || 0
 })
 
 const countTersedia = computed(() => {
-  return kamarList.value.filter((k) => k.status === 'tersedia').length
+  return counts.value.tersedia || 0
 })
 
 const countTerisi = computed(() => {
-  return kamarList.value.filter((k) => k.status === 'terisi').length
+  return counts.value.terisi || 0
 })
 
 const estimatedRevenue = computed(() => {
+  if (counts.value.estimasi_pendapatan !== undefined && counts.value.estimasi_pendapatan !== null) {
+    return counts.value.estimasi_pendapatan
+  }
   return kamarList.value.reduce((acc, k) => acc + (k.harga || 0), 0)
 })
 
@@ -834,6 +1000,7 @@ const toggleKamarStatus = async (kamar) => {
     })
     kamar.status = newStatus
     successMsg.value = `Status ${kamar.nama_kamar} diubah menjadi ${newStatus}.`
+    await fetchKamar()
   } catch (err) {
     errorMsg.value = 'Gagal memperbarui status kamar.'
   }
@@ -843,7 +1010,7 @@ const openAddModal = () => {
   isEditing.value = false
   editKamarId.value = null
   formData.value = {
-    nama_kamar: `Kamar ${kamarList.value.length + 1}`,
+    nama_kamar: `Kamar ${(countTotal.value || 0) + 1}`,
     ukuran: '3 x 4 m',
     harga: currentKos.value?.harga || 750000,
     harga_harian: currentKos.value?.harga_harian || null,
@@ -947,6 +1114,9 @@ const confirmDeleteKamar = async (kamar) => {
     await api.delete(`/rooms/${kamar.id}`)
     ui.success(`Unit ${kamar.nama_kamar} berhasil dihapus.`)
     successMsg.value = `Unit ${kamar.nama_kamar} berhasil dihapus.`
+    if (kamarList.value.length === 1 && pagination.current_page > 1) {
+      pagination.current_page -= 1
+    }
     await fetchKamar()
   } catch (err) {
     ui.error(err.response?.data?.message || 'Gagal menghapus unit kamar.')

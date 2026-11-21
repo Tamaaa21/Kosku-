@@ -117,23 +117,40 @@ class PropertyVerificationController extends Controller
             });
         }
 
-        $query->orderByRaw("CASE 
-                WHEN status_verifikasi = 'pending' THEN 1 
-                WHEN status_verifikasi = 'unverified' THEN 2 
-                WHEN status_verifikasi = 'rejected' THEN 3 
-                ELSE 4 
-            END")
-            ->latest('updated_at');
+        match ($request->input('sort')) {
+            'nama_asc' => $query->orderBy('nama', 'asc'),
+            'nama_desc' => $query->orderBy('nama', 'desc'),
+            'oldest' => $query->oldest('updated_at'),
+            'latest' => $query->latest('updated_at'),
+            default => $query->orderByRaw("CASE 
+                    WHEN status_verifikasi = 'pending' THEN 1 
+                    WHEN status_verifikasi = 'unverified' THEN 2 
+                    WHEN status_verifikasi = 'rejected' THEN 3 
+                    ELSE 4 
+                END")->latest('updated_at'),
+        };
 
-        $users = $query->paginate(20);
+        $perPage = min(max((int) $request->input('per_page', 10), 1), 100);
+        $users = $query->paginate($perPage);
+
+        $counts = [
+            'pending' => Pengguna::where('role', 'pemilik')->where('status_verifikasi', 'pending')->count(),
+            'verified' => Pengguna::where('role', 'pemilik')->where('status_verifikasi', 'verified')->count(),
+            'rejected' => Pengguna::where('role', 'pemilik')->where('status_verifikasi', 'rejected')->count(),
+            'unverified' => Pengguna::where('role', 'pemilik')->where('status_verifikasi', 'unverified')->count(),
+            'total' => Pengguna::where('role', 'pemilik')->count(),
+        ];
 
         return response()->json([
             'data' => UserResource::collection($users->items()),
+            'counts' => $counts,
             'meta' => [
                 'current_page' => $users->currentPage(),
                 'last_page' => $users->lastPage(),
                 'per_page' => $users->perPage(),
                 'total' => $users->total(),
+                'from' => $users->firstItem(),
+                'to' => $users->lastItem(),
             ],
         ]);
     }

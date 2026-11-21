@@ -9,11 +9,11 @@ const resolveBaseUrl = () => {
   if (Capacitor.isNativePlatform()) {
     // Di Android Emulator, loopback ke localhost mesin pengembang adalah 10.0.2.2
     if (!envUrl || envUrl.includes('127.0.0.1') || envUrl.includes('localhost')) {
-      return envUrl ? envUrl.replace(/127\.0\.0\.1|localhost/, '10.0.2.2') : 'http://10.0.2.2:8000/api/v1'
+      return envUrl ? envUrl.replace(/127\.0\.0\.1|localhost/, '10.0.2.2') : 'https://kostara.web.id/api/v1'
     }
   }
 
-  return envUrl || 'http://127.0.0.1:8000/api/v1'
+  return envUrl || 'https://kostara.web.id/api/v1'
 }
 
 const api = axios.create({

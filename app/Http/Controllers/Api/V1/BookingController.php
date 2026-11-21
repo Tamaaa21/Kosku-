@@ -28,7 +28,21 @@ class BookingController extends Controller
 
         if ($request->input('sort') === 'latest') {
             $query->latest();
-        } elseif ($request->input('sort') === 'id_asc' || $user->role === 'pemilik' || $user->role === 'admin') {
+        } elseif ($request->input('sort') === 'oldest') {
+            $query->oldest();
+        } elseif ($request->input('sort') === 'id_asc') {
+            $query->orderBy('id', 'asc');
+        } elseif ($request->input('sort') === 'id_desc') {
+            $query->orderBy('id', 'desc');
+        } elseif ($request->input('sort') === 'total_desc') {
+            $query->orderBy('total_harga', 'desc');
+        } elseif ($request->input('sort') === 'total_asc') {
+            $query->orderBy('total_harga', 'asc');
+        } elseif ($request->input('sort') === 'checkin_asc') {
+            $query->orderBy('tanggal_pemesanan', 'asc');
+        } elseif ($request->input('sort') === 'checkin_desc') {
+            $query->orderBy('tanggal_pemesanan', 'desc');
+        } elseif ($user->role === 'pemilik' || $user->role === 'admin') {
             $query->orderBy('id', 'asc');
         } else {
             $query->latest();
@@ -88,7 +102,21 @@ class BookingController extends Controller
         $perPage = min(max((int) $request->input('per_page', 50), 1), 100);
         $pemesananList = $query->paginate($perPage);
 
-        return BookingResource::collection($pemesananList);
+        $baseCountsQuery = Pemesanan::query();
+        if ($user->role === 'pencari') {
+            $baseCountsQuery->where('pengguna_id', $user->id);
+        } elseif ($user->role === 'pemilik') {
+            $baseCountsQuery->whereHas('kos', fn ($q) => $q->where('pemilik_id', $user->id));
+        }
+
+        $counts = [
+            'all' => (clone $baseCountsQuery)->count(),
+            'menunggu' => (clone $baseCountsQuery)->whereIn('status', ['menunggu', 'menunggu_pembayaran_dp', 'dp_dibayar'])->count(),
+            'aktif' => (clone $baseCountsQuery)->whereIn('status', ['disetujui', 'siap_serah_terima', 'aktif'])->count(),
+            'riwayat' => (clone $baseCountsQuery)->whereIn('status', ['selesai', 'dibatalkan', 'ditolak'])->count(),
+        ];
+
+        return BookingResource::collection($pemesananList)->additional(['counts' => $counts]);
     }
 
     /**
@@ -413,7 +441,41 @@ class BookingController extends Controller
             });
         }
 
-        $tenants = $query->orderBy('tanggal_selesai', 'asc')->get();
+        match ($request->input('sort')) {
+            'sisa_hari_desc' => $query->orderBy('tanggal_selesai', 'desc'),
+            'sisa_hari_asc' => $query->orderBy('tanggal_selesai', 'asc'),
+            'nama_asc' => $query->join('pengguna', 'pemesanan.pengguna_id', '=', 'pengguna.id')->orderBy('pengguna.nama', 'asc')->select('pemesanan.*'),
+            'nama_desc' => $query->join('pengguna', 'pemesanan.pengguna_id', '=', 'pengguna.id')->orderBy('pengguna.nama', 'desc')->select('pemesanan.*'),
+            'tanggal_mulai_asc' => $query->orderBy('tanggal_pemesanan', 'asc'),
+            'tanggal_mulai_desc' => $query->orderBy('tanggal_pemesanan', 'desc'),
+            'oldest' => $query->oldest('pemesanan.id'),
+            'latest' => $query->latest('pemesanan.id'),
+            default => $query->orderBy('tanggal_selesai', 'asc'),
+        };
+
+        if ($request->input('per_page') === 'all') {
+            $tenants = $query->get();
+            $meta = [
+                'current_page' => 1,
+                'last_page' => 1,
+                'per_page' => $tenants->count(),
+                'total' => $tenants->count(),
+                'from' => $tenants->isNotEmpty() ? 1 : 0,
+                'to' => $tenants->count(),
+            ];
+        } else {
+            $perPage = min(max((int) $request->input('per_page', 6), 1), 100);
+            $paginated = $query->paginate($perPage);
+            $tenants = collect($paginated->items());
+            $meta = [
+                'current_page' => $paginated->currentPage(),
+                'last_page' => $paginated->lastPage(),
+                'per_page' => $paginated->perPage(),
+                'total' => $paginated->total(),
+                'from' => $paginated->firstItem(),
+                'to' => $paginated->lastItem(),
+            ];
+        }
 
         $data = $tenants->map(function ($item) use ($today) {
             $endDate = $item->tanggal_selesai ? Carbon::parse($item->tanggal_selesai) : null;
@@ -476,6 +538,7 @@ class BookingController extends Controller
                 'kamar_terisi' => $kamarTerisi,
             ],
             'data' => $data,
+            'meta' => $meta,
         ]);
     }
 

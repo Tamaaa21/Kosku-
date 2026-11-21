@@ -19,12 +19,18 @@ class ReviewController extends Controller
     public function index(Request $request, int $kosId): AnonymousResourceCollection
     {
         $kos = Kos::findOrFail($kosId);
-        $perPage = min(max((int) $request->input('per_page', 10), 1), 50);
+        $perPage = min(max((int) $request->input('per_page', 5), 1), 50);
 
-        $ulasanList = $kos->ulasan()
-            ->with('pengguna')
-            ->latest()
-            ->paginate($perPage);
+        $query = $kos->ulasan()->with('pengguna');
+
+        match ($request->input('sort')) {
+            'oldest' => $query->oldest(),
+            'rating_desc' => $query->orderBy('rating', 'desc')->latest(),
+            'rating_asc' => $query->orderBy('rating', 'asc')->latest(),
+            default => $query->latest(),
+        };
+
+        $ulasanList = $query->paginate($perPage);
 
         return ReviewResource::collection($ulasanList);
     }

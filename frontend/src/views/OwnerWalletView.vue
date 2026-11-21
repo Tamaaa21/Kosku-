@@ -182,6 +182,40 @@
 
         <!-- 2A. TAB PENARIKAN DANA -->
         <div v-if="activeSubTab === 'penarikan'" class="space-y-3">
+          <!-- Filter & Sort Toolbar -->
+          <div class="flex flex-wrap items-center justify-between gap-2.5 pb-1">
+            <div class="flex items-center gap-2">
+              <div class="relative">
+                <select
+                  v-model="filterWdStatus"
+                  @change="onWdFilterChange"
+                  class="appearance-none pl-3 pr-8 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-2xs"
+                >
+                  <option value="all">Semua Status</option>
+                  <option value="menunggu">Menunggu</option>
+                  <option value="diproses">Diproses</option>
+                  <option value="selesai">Selesai</option>
+                  <option value="ditolak">Ditolak</option>
+                </select>
+                <PhCaretDown :size="12" weight="bold" class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
+              </div>
+
+              <div class="relative">
+                <select
+                  v-model="sortWdOption"
+                  @change="onWdFilterChange"
+                  class="appearance-none pl-3 pr-8 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-2xs"
+                >
+                  <option value="latest">Terbaru</option>
+                  <option value="oldest">Terlama</option>
+                  <option value="nominal_desc">Nominal Terbesar</option>
+                  <option value="nominal_asc">Nominal Terkecil</option>
+                </select>
+                <PhCaretDown :size="12" weight="bold" class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
+              </div>
+            </div>
+          </div>
+
           <div v-if="loadingWithdrawals" class="space-y-2">
             <div v-for="i in 3" :key="i" class="h-16 bg-slate-50 rounded-xl animate-pulse"></div>
           </div>
@@ -226,11 +260,61 @@
                 <span class="text-[11px] text-slate-400">{{ formatDate(wd.created_at) }}</span>
               </div>
             </div>
+
+            <!-- Base Pagination Controls Penarikan -->
+            <div v-if="!loadingWithdrawals && withdrawals.length > 0" class="pt-2">
+              <BasePagination
+                :current-page="paginationWithdrawals.current_page"
+                :last-page="paginationWithdrawals.last_page"
+                :total="paginationWithdrawals.total"
+                :from="paginationWithdrawals.from"
+                :to="paginationWithdrawals.to"
+                :per-page="paginationWithdrawals.per_page"
+                :per-page-options="[6, 10, 20, 50]"
+                :loading="loadingWithdrawals"
+                :card="false"
+                item-name="penarikan dana"
+                @change-page="handleWdPageChange"
+                @change-per-page="handleWdPerPageChange"
+              />
+            </div>
           </div>
         </div>
 
         <!-- 2B. TAB MUTASI SALDO (LEDGER) -->
         <div v-else class="space-y-3">
+          <!-- Filter & Sort Toolbar -->
+          <div class="flex flex-wrap items-center justify-between gap-2.5 pb-1">
+            <div class="flex items-center gap-2">
+              <div class="relative">
+                <select
+                  v-model="filterMutTipe"
+                  @change="onMutFilterChange"
+                  class="appearance-none pl-3 pr-8 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-2xs"
+                >
+                  <option value="all">Semua Tipe</option>
+                  <option value="kredit">Pemasukan (+)</option>
+                  <option value="debit">Penarikan (-)</option>
+                </select>
+                <PhCaretDown :size="12" weight="bold" class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
+              </div>
+
+              <div class="relative">
+                <select
+                  v-model="sortMutOption"
+                  @change="onMutFilterChange"
+                  class="appearance-none pl-3 pr-8 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-700 bg-white hover:border-slate-300 focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer shadow-2xs"
+                >
+                  <option value="latest">Terbaru</option>
+                  <option value="oldest">Terlama</option>
+                  <option value="nominal_desc">Nominal Terbesar</option>
+                  <option value="nominal_asc">Nominal Terkecil</option>
+                </select>
+                <PhCaretDown :size="12" weight="bold" class="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400" />
+              </div>
+            </div>
+          </div>
+
           <div v-if="loadingMutations" class="space-y-2">
             <div v-for="i in 3" :key="i" class="h-16 bg-slate-50 rounded-xl animate-pulse"></div>
           </div>
@@ -272,6 +356,24 @@
                 </span>
                 <span class="text-[10px] text-slate-400">Saldo: {{ formatRupiah(mut.saldo_akhir) }}</span>
               </div>
+            </div>
+
+            <!-- Base Pagination Controls Mutasi -->
+            <div v-if="!loadingMutations && mutations.length > 0" class="pt-2">
+              <BasePagination
+                :current-page="paginationMutations.current_page"
+                :last-page="paginationMutations.last_page"
+                :total="paginationMutations.total"
+                :from="paginationMutations.from"
+                :to="paginationMutations.to"
+                :per-page="paginationMutations.per_page"
+                :per-page-options="[6, 10, 20, 50]"
+                :loading="loadingMutations"
+                :card="false"
+                item-name="mutasi saldo"
+                @change-page="handleMutPageChange"
+                @change-per-page="handleMutPerPageChange"
+              />
             </div>
           </div>
         </div>
@@ -417,9 +519,11 @@ import {
   PhTrash,
   PhShieldCheck,
   PhClock,
+  PhCaretDown,
 } from '@phosphor-icons/vue'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
+import BasePagination from '../components/BasePagination.vue'
 
 const ui = useUiStore()
 
@@ -433,6 +537,28 @@ const activeSubTab = ref('penarikan')
 const bankAccounts = ref([])
 const withdrawals = ref([])
 const mutations = ref([])
+
+const filterWdStatus = ref('all')
+const sortWdOption = ref('latest')
+const paginationWithdrawals = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 6,
+})
+
+const filterMutTipe = ref('all')
+const sortMutOption = ref('latest')
+const paginationMutations = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 6,
+})
 
 const loadingBanks = ref(false)
 const loadingWithdrawals = ref(false)
@@ -494,11 +620,34 @@ const fetchBankAccounts = async () => {
   }
 }
 
-const fetchWithdrawals = async () => {
+const fetchWithdrawals = async (page = null) => {
+  if (page) {
+    paginationWithdrawals.current_page = page
+  }
   loadingWithdrawals.value = true
   try {
-    const res = await api.get('/wallet/withdrawals')
+    const params = {
+      page: paginationWithdrawals.current_page,
+      per_page: paginationWithdrawals.per_page,
+    }
+    if (filterWdStatus.value !== 'all') params.status = filterWdStatus.value
+    if (sortWdOption.value) params.sort = sortWdOption.value
+
+    const res = await api.get('/wallet/withdrawals', { params })
     withdrawals.value = res.data.data || []
+    if (res.data?.meta) {
+      paginationWithdrawals.current_page = res.data.meta.current_page || 1
+      paginationWithdrawals.last_page = res.data.meta.last_page || 1
+      paginationWithdrawals.total = res.data.meta.total || 0
+      paginationWithdrawals.from = res.data.meta.from || 0
+      paginationWithdrawals.to = res.data.meta.to || 0
+      paginationWithdrawals.per_page = res.data.meta.per_page || paginationWithdrawals.per_page
+
+      if (paginationWithdrawals.current_page > paginationWithdrawals.last_page && paginationWithdrawals.last_page >= 1) {
+        paginationWithdrawals.current_page = paginationWithdrawals.last_page
+        return await fetchWithdrawals()
+      }
+    }
   } catch (err) {
     // Abaikan
   } finally {
@@ -506,16 +655,71 @@ const fetchWithdrawals = async () => {
   }
 }
 
-const fetchMutations = async () => {
+const handleWdPageChange = (page) => {
+  paginationWithdrawals.current_page = page
+  fetchWithdrawals()
+}
+
+const handleWdPerPageChange = (size) => {
+  paginationWithdrawals.per_page = size
+  paginationWithdrawals.current_page = 1
+  fetchWithdrawals()
+}
+
+const onWdFilterChange = () => {
+  paginationWithdrawals.current_page = 1
+  fetchWithdrawals()
+}
+
+const fetchMutations = async (page = null) => {
+  if (page) {
+    paginationMutations.current_page = page
+  }
   loadingMutations.value = true
   try {
-    const res = await api.get('/wallet/mutations')
+    const params = {
+      page: paginationMutations.current_page,
+      per_page: paginationMutations.per_page,
+    }
+    if (filterMutTipe.value !== 'all') params.tipe = filterMutTipe.value
+    if (sortMutOption.value) params.sort = sortMutOption.value
+
+    const res = await api.get('/wallet/mutations', { params })
     mutations.value = res.data.data || []
+    if (res.data?.meta) {
+      paginationMutations.current_page = res.data.meta.current_page || 1
+      paginationMutations.last_page = res.data.meta.last_page || 1
+      paginationMutations.total = res.data.meta.total || 0
+      paginationMutations.from = res.data.meta.from || 0
+      paginationMutations.to = res.data.meta.to || 0
+      paginationMutations.per_page = res.data.meta.per_page || paginationMutations.per_page
+
+      if (paginationMutations.current_page > paginationMutations.last_page && paginationMutations.last_page >= 1) {
+        paginationMutations.current_page = paginationMutations.last_page
+        return await fetchMutations()
+      }
+    }
   } catch (err) {
     // Abaikan
   } finally {
     loadingMutations.value = false
   }
+}
+
+const handleMutPageChange = (page) => {
+  paginationMutations.current_page = page
+  fetchMutations()
+}
+
+const handleMutPerPageChange = (size) => {
+  paginationMutations.per_page = size
+  paginationMutations.current_page = 1
+  fetchMutations()
+}
+
+const onMutFilterChange = () => {
+  paginationMutations.current_page = 1
+  fetchMutations()
 }
 
 const submitAddBank = async () => {
@@ -568,6 +772,8 @@ const submitWithdrawal = async () => {
     await api.post('/wallet/withdrawals', withdrawForm)
     ui.success('Pengajuan penarikan dana berhasil dikirim! Menunggu transfer dari admin.')
     showWithdrawModal.value = false
+    paginationWithdrawals.current_page = 1
+    paginationMutations.current_page = 1
     await Promise.all([fetchSummary(), fetchWithdrawals(), fetchMutations()])
   } catch (err) {
     ui.error(err.response?.data?.message || 'Gagal mengajukan penarikan dana.')

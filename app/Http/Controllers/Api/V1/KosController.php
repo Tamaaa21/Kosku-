@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Kos\StoreKosRequest;
 use App\Http\Requests\Kos\UpdateKosRequest;
 use App\Http\Resources\KosResource;
+use App\Models\Kamar;
 use App\Models\Kos;
 use App\Services\GeocodingService;
 use Illuminate\Http\JsonResponse;
@@ -114,6 +115,12 @@ class KosController extends Controller
                 $allResults = $allResults->sortBy('harga')->values();
             } elseif ($request->input('sort') === 'harga_desc') {
                 $allResults = $allResults->sortByDesc('harga')->values();
+            } elseif ($request->input('sort') === 'nama_asc') {
+                $allResults = $allResults->sortBy('nama')->values();
+            } elseif ($request->input('sort') === 'rating_desc') {
+                $allResults = $allResults->sortByDesc(fn (Kos $k) => $k->rating_rata_rata ?? 0)->values();
+            } elseif ($request->input('sort') === 'latest') {
+                $allResults = $allResults->sortByDesc('created_at')->values();
             }
 
             $page = max((int) $request->input('page', 1), 1);
@@ -135,14 +142,38 @@ class KosController extends Controller
         match ($request->input('sort')) {
             'harga_asc' => $query->orderBy('harga', 'asc'),
             'harga_desc' => $query->orderBy('harga', 'desc'),
+            'nama_asc' => $query->orderBy('nama', 'asc'),
+            'nama_desc' => $query->orderBy('nama', 'desc'),
+            'kamar_asc' => $query->withCount('kamar')->orderBy('kamar_count', 'asc'),
+            'kamar_desc' => $query->withCount('kamar')->orderByDesc('kamar_count'),
+            'oldest' => $query->oldest(),
+            'rating_desc' => $query->withAvg('ulasan', 'rating')->orderByDesc('ulasan_avg_rating'),
             'id_asc' => $query->orderBy('id', 'asc'),
             'latest' => $query->latest(),
-            default => $request->filled('pemilik_id') ? $query->orderBy('id', 'asc') : $query->latest(),
+            default => $query->latest(),
         };
+
+        $additionalMeta = [];
+        if ($request->filled('pemilik_id')) {
+            $pemilikId = (int) $request->input('pemilik_id');
+            $totalKos = Kos::where('pemilik_id', $pemilikId)->count();
+            $totalKamar = Kamar::whereHas('kos', fn ($q) => $q->where('pemilik_id', $pemilikId))->count();
+            $totalKamarTerisi = Kamar::whereHas('kos', fn ($q) => $q->where('pemilik_id', $pemilikId))->where('status', 'terisi')->count();
+            $additionalMeta['counts'] = [
+                'total_kos' => $totalKos,
+                'total_kamar' => $totalKamar,
+                'total_kamar_terisi' => $totalKamarTerisi,
+            ];
+        }
 
         $kosList = $query->paginate($perPage);
 
-        return KosResource::collection($kosList);
+        $resource = KosResource::collection($kosList);
+        if (! empty($additionalMeta)) {
+            $resource->additional($additionalMeta);
+        }
+
+        return $resource;
     }
 
     /**

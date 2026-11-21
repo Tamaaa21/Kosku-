@@ -23,23 +23,57 @@ class AdminWithdrawalController extends Controller
     public function index(Request $request): JsonResponse
     {
         $status = $request->query('status');
-        $query = PenarikanDana::with(['pengguna:id,nama,email,telepon', 'rekeningBank', 'admin:id,nama'])
-            ->latest('id');
+        $query = PenarikanDana::with(['pengguna:id,nama,email,telepon', 'rekeningBank', 'admin:id,nama']);
 
         if ($status && in_array($status, ['menunggu', 'diproses', 'selesai', 'ditolak'], true)) {
             $query->where('status', $status);
         }
 
-        $perPage = min((int) $request->query('per_page', 20), 100);
+        if ($request->filled('q')) {
+            $keyword = (string) $request->input('q');
+            $query->where(function ($q) use ($keyword) {
+                $q->where('kode_penarikan', 'like', "%{$keyword}%")
+                    ->orWhereHas('pengguna', function ($userQuery) use ($keyword) {
+                        $userQuery->where('nama', 'like', "%{$keyword}%")
+                            ->orWhere('email', 'like', "%{$keyword}%")
+                            ->orWhere('telepon', 'like', "%{$keyword}%");
+                    })
+                    ->orWhereHas('rekeningBank', function ($bankQuery) use ($keyword) {
+                        $bankQuery->where('nomor_rekening', 'like', "%{$keyword}%")
+                            ->orWhere('nama_pemilik', 'like', "%{$keyword}%")
+                            ->orWhere('nama_bank', 'like', "%{$keyword}%");
+                    });
+            });
+        }
+
+        match ($request->input('sort')) {
+            'oldest' => $query->oldest('id'),
+            'nominal_desc' => $query->orderBy('nominal', 'desc'),
+            'nominal_asc' => $query->orderBy('nominal', 'asc'),
+            default => $query->latest('id'),
+        };
+
+        $perPage = min(max((int) $request->query('per_page', 10), 1), 100);
         $withdrawals = $query->paginate($perPage);
+
+        $counts = [
+            'menunggu' => PenarikanDana::where('status', 'menunggu')->count(),
+            'selesai' => PenarikanDana::where('status', 'selesai')->count(),
+            'ditolak' => PenarikanDana::where('status', 'ditolak')->count(),
+            'total' => PenarikanDana::count(),
+        ];
 
         return response()->json([
             'success' => true,
             'data' => $withdrawals->items(),
+            'counts' => $counts,
             'meta' => [
                 'current_page' => $withdrawals->currentPage(),
                 'last_page' => $withdrawals->lastPage(),
+                'per_page' => $withdrawals->perPage(),
                 'total' => $withdrawals->total(),
+                'from' => $withdrawals->firstItem(),
+                'to' => $withdrawals->lastItem(),
             ],
         ]);
     }

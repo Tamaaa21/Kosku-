@@ -36,12 +36,21 @@ class WalletController extends Controller
     public function mutations(Request $request): JsonResponse
     {
         $user = $request->user();
-        $perPage = min((int) $request->query('per_page', 15), 50);
+        $query = $user->mutasiSaldo()->with(['pemesanan.kos', 'penarikanDana.rekeningBank']);
 
-        $mutations = $user->mutasiSaldo()
-            ->with(['pemesanan.kos', 'penarikanDana.rekeningBank'])
-            ->latest('id')
-            ->paginate($perPage);
+        if ($request->filled('tipe') && $request->input('tipe') !== 'all') {
+            $query->where('tipe', $request->input('tipe'));
+        }
+
+        match ($request->input('sort')) {
+            'oldest' => $query->oldest('id'),
+            'nominal_desc' => $query->orderBy('nominal', 'desc'),
+            'nominal_asc' => $query->orderBy('nominal', 'asc'),
+            default => $query->latest('id'),
+        };
+
+        $perPage = min(max((int) $request->query('per_page', 6), 1), 50);
+        $mutations = $query->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -49,7 +58,10 @@ class WalletController extends Controller
             'meta' => [
                 'current_page' => $mutations->currentPage(),
                 'last_page' => $mutations->lastPage(),
+                'per_page' => $mutations->perPage(),
                 'total' => $mutations->total(),
+                'from' => $mutations->firstItem(),
+                'to' => $mutations->lastItem(),
             ],
         ]);
     }
@@ -175,10 +187,21 @@ class WalletController extends Controller
      */
     public function withdrawals(Request $request): JsonResponse
     {
-        $withdrawals = $request->user()->penarikanDana()
-            ->with('rekeningBank')
-            ->latest('id')
-            ->paginate(15);
+        $query = $request->user()->penarikanDana()->with('rekeningBank');
+
+        if ($request->filled('status') && $request->input('status') !== 'all') {
+            $query->where('status', $request->input('status'));
+        }
+
+        match ($request->input('sort')) {
+            'oldest' => $query->oldest('id'),
+            'nominal_desc' => $query->orderBy('nominal', 'desc'),
+            'nominal_asc' => $query->orderBy('nominal', 'asc'),
+            default => $query->latest('id'),
+        };
+
+        $perPage = min(max((int) $request->query('per_page', 6), 1), 50);
+        $withdrawals = $query->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -186,7 +209,10 @@ class WalletController extends Controller
             'meta' => [
                 'current_page' => $withdrawals->currentPage(),
                 'last_page' => $withdrawals->lastPage(),
+                'per_page' => $withdrawals->perPage(),
                 'total' => $withdrawals->total(),
+                'from' => $withdrawals->firstItem(),
+                'to' => $withdrawals->lastItem(),
             ],
         ]);
     }

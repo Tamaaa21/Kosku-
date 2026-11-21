@@ -35,9 +35,9 @@
         <button
           v-for="tab in filterTabs"
           :key="tab.value"
-          @click="activeFilter = tab.value"
+          @click="activeFilter = tab.value; fetchBookings(1)"
           :class="[
-            'px-3 py-1.5 rounded-lg text-xs transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5',
+            'px-3 py-1.5 rounded-lg text-xs transition-all whitespace-nowrap shrink-0 flex items-center gap-1.5 cursor-pointer',
             activeFilter === tab.value
               ? 'bg-primary-container text-white shadow-xs font-semibold'
               : 'text-on-surface-variant hover:text-on-surface hover:bg-surface-container font-medium'
@@ -50,29 +50,46 @@
               activeFilter === tab.value ? 'bg-white/20 text-white' : 'bg-surface-container text-on-surface-variant'
             ]"
           >
-            {{ tab.value === 'semua' ? bookings.length : countCategory(tab.value) }}
+            {{ tab.value === 'semua' ? (categoryCounts.all || pagination.total) : countCategory(tab.value) }}
           </span>
         </button>
       </div>
 
-      <!-- Search Input (Fully visible on both mobile and desktop) -->
-      <div class="relative flex items-center bg-surface-container-lowest px-3 py-2 rounded-xl shadow-xs border border-slate-200 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all w-full sm:w-64 shrink-0">
-        <PhMagnifyingGlass :size="16" class="text-outline shrink-0 mr-2" />
-        <input
-          v-model="searchFilter"
-          type="text"
-          :placeholder="auth.isPemilik ? 'Cari nama penyewa / kos...' : 'Cari nama kos...'"
-          class="bg-transparent text-xs text-on-surface placeholder:text-outline focus:outline-none w-full border-none p-0 pr-5"
-        />
-        <button
-          v-if="searchFilter"
-          @click="searchFilter = ''"
-          type="button"
-          class="absolute right-2.5 text-slate-400 hover:text-slate-600 p-0.5 rounded-full transition"
-          title="Hapus pencarian"
+      <!-- Search & Sort Controls -->
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <!-- Search Input -->
+        <div class="relative flex items-center bg-surface-container-lowest px-3 py-2 rounded-xl shadow-xs border border-slate-200 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary/20 transition-all flex-1 sm:w-60">
+          <PhMagnifyingGlass :size="16" class="text-outline shrink-0 mr-2" />
+          <input
+            v-model="searchFilter"
+            @input="debounceSearch"
+            type="text"
+            :placeholder="auth.isPemilik ? 'Cari nama penyewa / kos...' : 'Cari nama kos...'"
+            class="bg-transparent text-xs text-on-surface placeholder:text-outline focus:outline-none w-full border-none p-0 pr-5"
+          />
+          <button
+            v-if="searchFilter"
+            @click="searchFilter = ''; fetchBookings(1)"
+            type="button"
+            class="absolute right-2.5 text-slate-400 hover:text-slate-600 p-0.5 rounded-full transition cursor-pointer"
+            title="Hapus pencarian"
+          >
+            <PhX :size="14" />
+          </button>
+        </div>
+
+        <!-- Sort dropdown -->
+        <select
+          v-model="sortOption"
+          @change="fetchBookings(1)"
+          class="text-xs rounded-xl border border-slate-200 py-2 px-3 bg-white font-semibold text-slate-700 shadow-xs focus:ring-primary focus:border-primary cursor-pointer shrink-0"
         >
-          <PhX :size="14" />
-        </button>
+          <option value="latest">Terbaru</option>
+          <option value="oldest">Terlama</option>
+          <option value="total_desc">Total Tertinggi</option>
+          <option value="total_asc">Total Terendah</option>
+          <option value="checkin_asc">Check-in Terdekat</option>
+        </select>
       </div>
     </div>
 
@@ -392,12 +409,30 @@
           </div>
         </div>
       </div>
+
+      <!-- Pagination -->
+      <BasePagination
+        v-if="bookings.length > 0"
+        :current-page="pagination.current_page"
+        :last-page="pagination.last_page"
+        :total="pagination.total"
+        :total-items="pagination.total"
+        :per-page="pagination.per_page"
+        :from="pagination.from"
+        :from-item="pagination.from"
+        :to="pagination.to"
+        :to-item="pagination.to"
+        item-name="pesanan"
+        :card="true"
+        @change-page="(p) => fetchBookings(p)"
+        @change-per-page="(val) => { pagination.per_page = val; fetchBookings(1); }"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import {
   PhReceipt,
   PhMagnifyingGlass,
@@ -411,6 +446,7 @@ import {
   PhKey,
   PhX,
 } from '@phosphor-icons/vue'
+import BasePagination from '../components/BasePagination.vue'
 import { useAuthStore } from '../stores/auth'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
@@ -425,6 +461,23 @@ const loading = ref(false)
 const actionLoading = ref(null)
 const activeFilter = ref('semua')
 const searchFilter = ref('')
+const sortOption = ref('latest')
+
+const pagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 5,
+})
+
+const categoryCounts = reactive({
+  all: 0,
+  menunggu: 0,
+  aktif: 0,
+  riwayat: 0,
+})
 
 const filterTabs = [
   { label: 'Semua', value: 'semua' },
@@ -434,43 +487,26 @@ const filterTabs = [
 ]
 
 const countCategory = (category) => {
-  if (category === 'menunggu') {
-    return bookings.value.filter((b) => ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(b.status)).length
-  }
-  if (category === 'aktif') {
-    return bookings.value.filter((b) => ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(b.status)).length
-  }
-  if (category === 'riwayat') {
-    return bookings.value.filter((b) => ['selesai', 'dibatalkan', 'ditolak', 'kedaluwarsa'].includes(b.status)).length
-  }
-  return bookings.value.length
+  return categoryCounts[category] || 0
+}
+
+let searchTimeout = null
+const debounceSearch = () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    fetchBookings(1)
+  }, 350)
 }
 
 const resetFilters = () => {
   activeFilter.value = 'semua'
   searchFilter.value = ''
+  sortOption.value = 'latest'
+  fetchBookings(1)
 }
 
 const filteredBookings = computed(() => {
-  return bookings.value.filter((b) => {
-    let matchesStatus = false
-    if (activeFilter.value === 'semua') {
-      matchesStatus = true
-    } else if (activeFilter.value === 'menunggu') {
-      matchesStatus = ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(b.status)
-    } else if (activeFilter.value === 'aktif') {
-      matchesStatus = ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(b.status)
-    } else if (activeFilter.value === 'riwayat') {
-      matchesStatus = ['selesai', 'dibatalkan', 'ditolak', 'kedaluwarsa'].includes(b.status)
-    } else {
-      matchesStatus = b.status === activeFilter.value
-    }
-
-    const matchesSearch = !searchFilter.value ||
-      (b.kos?.nama && b.kos.nama.toLowerCase().includes(searchFilter.value.toLowerCase())) ||
-      (b.pengguna?.nama && b.pengguna.nama.toLowerCase().includes(searchFilter.value.toLowerCase()))
-    return matchesStatus && matchesSearch
-  })
+  return bookings.value
 })
 
 const getKosImage = (item) => {
@@ -483,11 +519,36 @@ const getKosImage = (item) => {
   return 'https://lh3.googleusercontent.com/aida-public/AB6AXuCnt30LyyZlzU1QOvcSRRMGiQ3FJsh4luIKXJX7aqXOjUPxTvMhrxNQRDu2wjgg4Zpze-wPO3sbwBrOI44NhDD87XEhVTvk5o_vsvzP99EXjgB9OByNEwSGlVuxniCRLUSPZIunX09fElg0VYOLRGJNUgIQrE1_i1Zt4qVTrSIufxO97mIpXR4tQt4Mu40AZyAY0adO3qIwZwuU5OhcpZtu1tB57ewE6-lcC8hcwoE_ux6yIt44hm8NQA'
 }
 
-const fetchBookings = async () => {
+const fetchBookings = async (page = 1) => {
   loading.value = true
   try {
-    const res = await api.get('/bookings')
+    const params = {
+      page,
+      per_page: pagination.per_page,
+    }
+    if (activeFilter.value !== 'semua') {
+      params.status = activeFilter.value
+    }
+    if (searchFilter.value) {
+      params.q = searchFilter.value
+    }
+    if (sortOption.value) {
+      params.sort = sortOption.value
+    }
+
+    const res = await api.get('/bookings', { params })
     bookings.value = res.data.data || []
+    if (res.data.counts) {
+      Object.assign(categoryCounts, res.data.counts)
+    }
+    if (res.data.meta) {
+      pagination.current_page = res.data.meta.current_page || page
+      pagination.last_page = res.data.meta.last_page || 1
+      pagination.total = res.data.meta.total || 0
+      pagination.from = res.data.meta.from || 0
+      pagination.to = res.data.meta.to || 0
+      pagination.per_page = res.data.meta.per_page || pagination.per_page
+    }
   } catch (err) {
     // Abaikan
   } finally {

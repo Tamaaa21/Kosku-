@@ -47,9 +47,9 @@
     <div class="bg-surface-container-lowest rounded-xl p-space-sm shadow-sm border border-slate-100 flex flex-wrap items-center justify-between gap-space-sm mb-6">
       <div class="flex flex-wrap items-center gap-1.5">
         <button
-          @click="activeStatusFilter = 'all'"
+          @click="setStatusFilter('all')"
           :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition cursor-pointer',
             activeStatusFilter === 'all'
               ? 'bg-primary-container text-white shadow-sm'
               : 'text-on-surface-variant hover:bg-surface-container-low'
@@ -62,14 +62,14 @@
               activeStatusFilter === 'all' ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700'
             ]"
           >
-            {{ allBookings.length }}
+            {{ countAll }}
           </span>
         </button>
 
         <button
-          @click="activeStatusFilter = 'menunggu'"
+          @click="setStatusFilter('menunggu')"
           :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition cursor-pointer',
             activeStatusFilter === 'menunggu'
               ? 'bg-amber-500 text-white shadow-sm'
               : 'text-on-surface-variant hover:bg-surface-container-low'
@@ -87,9 +87,9 @@
         </button>
 
         <button
-          @click="activeStatusFilter = 'aktif'"
+          @click="setStatusFilter('aktif')"
           :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition cursor-pointer',
             activeStatusFilter === 'aktif'
               ? 'bg-emerald-600 text-white shadow-sm'
               : 'text-on-surface-variant hover:bg-surface-container-low'
@@ -107,9 +107,9 @@
         </button>
 
         <button
-          @click="activeStatusFilter = 'riwayat'"
+          @click="setStatusFilter('riwayat')"
           :class="[
-            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition',
+            'flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition cursor-pointer',
             activeStatusFilter === 'riwayat'
               ? 'bg-slate-700 text-white shadow-sm'
               : 'text-on-surface-variant hover:bg-surface-container-low'
@@ -127,14 +127,36 @@
         </button>
       </div>
 
-      <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low rounded-lg w-full sm:w-auto">
-        <PhMagnifyingGlass :size="18" class="text-outline" />
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Cari nama atau kos..."
-          class="bg-transparent text-on-surface text-xs placeholder:text-outline focus:outline-none w-44"
-        />
+      <!-- Search & Sort Controls -->
+      <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+        <!-- Search Input -->
+        <div class="flex items-center gap-2 px-3 py-1.5 bg-surface-container-low rounded-lg flex-1 sm:flex-initial">
+          <PhMagnifyingGlass :size="18" class="text-outline shrink-0" />
+          <input
+            v-model="searchQuery"
+            @input="debounceSearch"
+            type="text"
+            placeholder="Cari nama, kos, atau kamar..."
+            class="bg-transparent text-on-surface text-xs placeholder:text-outline focus:outline-none w-full sm:w-48"
+          />
+        </div>
+
+        <!-- Sort Dropdown -->
+        <div class="flex items-center gap-1.5 px-3 py-1.5 bg-surface-container-low rounded-lg shrink-0">
+          <PhArrowsDownUp :size="15" class="text-outline shrink-0" />
+          <select
+            v-model="sortOption"
+            @change="onFilterChange"
+            class="bg-transparent text-on-surface text-xs font-semibold focus:outline-none cursor-pointer"
+          >
+            <option value="latest">Terbaru Masuk</option>
+            <option value="oldest">Terlama Masuk</option>
+            <option value="checkin_asc">Check-in Terdekat</option>
+            <option value="checkin_desc">Check-in Terjauh</option>
+            <option value="total_desc">Biaya Tertinggi</option>
+            <option value="total_asc">Biaya Terendah</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -144,11 +166,47 @@
         <table class="w-full text-left">
           <thead class="bg-surface-container-low/60 text-on-surface-variant text-[11px] uppercase tracking-wider font-semibold select-none">
             <tr>
-              <th class="py-3.5 px-4 w-12 text-center">No</th>
+              <th class="py-3.5 px-4 w-14 text-center">
+                <button
+                  type="button"
+                  @click="toggleSort('id')"
+                  class="inline-flex items-center gap-1 hover:text-primary transition cursor-pointer font-bold"
+                  title="Urutkan ID transaksi"
+                >
+                  <span>No</span>
+                  <PhCaretUp v-if="sortOption === 'oldest'" :size="11" weight="bold" class="text-primary" />
+                  <PhCaretDown v-else-if="sortOption === 'latest'" :size="11" weight="bold" class="text-primary" />
+                  <PhArrowsDownUp v-else :size="11" class="opacity-40" />
+                </button>
+              </th>
               <th class="py-3.5 px-4 min-w-[200px]">Calon Penghuni</th>
               <th class="py-3.5 px-4 min-w-[190px]">Kos & Kamar</th>
-              <th class="py-3.5 px-4 min-w-[180px]">Periode Sewa</th>
-              <th class="py-3.5 px-4 min-w-[140px]">Total Biaya</th>
+              <th class="py-3.5 px-4 min-w-[180px]">
+                <button
+                  type="button"
+                  @click="toggleSort('checkin')"
+                  class="inline-flex items-center gap-1 hover:text-primary transition cursor-pointer font-bold"
+                  title="Urutkan tanggal sewa"
+                >
+                  <span>Periode Sewa</span>
+                  <PhCaretUp v-if="sortOption === 'checkin_asc'" :size="11" weight="bold" class="text-primary" />
+                  <PhCaretDown v-else-if="sortOption === 'checkin_desc'" :size="11" weight="bold" class="text-primary" />
+                  <PhArrowsDownUp v-else :size="11" class="opacity-40" />
+                </button>
+              </th>
+              <th class="py-3.5 px-4 min-w-[140px]">
+                <button
+                  type="button"
+                  @click="toggleSort('total')"
+                  class="inline-flex items-center gap-1 hover:text-primary transition cursor-pointer font-bold"
+                  title="Urutkan total biaya"
+                >
+                  <span>Total Biaya</span>
+                  <PhCaretUp v-if="sortOption === 'total_asc'" :size="11" weight="bold" class="text-primary" />
+                  <PhCaretDown v-else-if="sortOption === 'total_desc'" :size="11" weight="bold" class="text-primary" />
+                  <PhArrowsDownUp v-else :size="11" class="opacity-40" />
+                </button>
+              </th>
               <th class="py-3.5 px-4 min-w-[110px] text-center">Status</th>
               <th class="py-3.5 px-4 min-w-[160px] text-center">Aksi</th>
             </tr>
@@ -161,7 +219,7 @@
               </td>
             </tr>
 
-            <tr v-else-if="filteredBookings.length === 0" class="text-center">
+            <tr v-else-if="allBookings.length === 0" class="text-center">
               <td colspan="7" class="py-12 text-slate-400">
                 <PhTray :size="36" class="text-slate-300 inline-block" />
                 <p class="mt-2 text-xs font-semibold text-slate-600">Tidak ada permintaan pemesanan yang sesuai.</p>
@@ -170,12 +228,12 @@
             </tr>
 
             <tr
-              v-for="(booking, index) in filteredBookings"
+              v-for="(booking, index) in allBookings"
               :key="booking.id"
               class="hover:bg-surface-container-low/40 transition group"
             >
               <td class="py-4 px-4 text-center font-medium text-secondary">
-                {{ index + 1 }}
+                {{ (pagination.current_page - 1) * pagination.per_page + index + 1 }}
               </td>
 
               <!-- Calon Penghuni -->
@@ -343,13 +401,20 @@
         </table>
       </div>
 
-      <!-- Pagination / Footer Info -->
-      <div class="p-space-md bg-surface-container-lowest border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-space-md select-none">
-        <span class="text-xs text-on-surface-variant">
-          Menampilkan <span class="font-bold text-on-surface">{{ filteredBookings.length }}</span> dari
-          <span class="font-bold text-on-surface">{{ allBookings.length }}</span> total reservasi
-        </span>
-      </div>
+      <!-- Base Pagination Controls -->
+      <BasePagination
+        :current-page="pagination.current_page"
+        :last-page="pagination.last_page"
+        :total="pagination.total"
+        :from="pagination.from"
+        :to="pagination.to"
+        :per-page="pagination.per_page"
+        :per-page-options="[6, 12, 24, 48]"
+        :loading="loading"
+        item-name="pesanan"
+        @change-page="handlePageChange"
+        @change-per-page="handlePerPageChange"
+      />
     </div>
 
     <!-- Modal Detail Pemesanan -->
@@ -500,7 +565,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import {
   PhArrowClockwise,
   PhCheckCircle,
@@ -516,10 +581,14 @@ import {
   PhX,
   PhReceipt,
   PhKey,
+  PhCaretUp,
+  PhCaretDown,
+  PhArrowsDownUp,
 } from '@phosphor-icons/vue'
 import { useUiStore } from '../stores/ui'
 import api from '../services/api'
 import { openWhatsAppChat, buildOwnerContactTenantTemplate } from '../utils/whatsapp'
+import BasePagination from '../components/BasePagination.vue'
 
 const ui = useUiStore()
 
@@ -531,14 +600,71 @@ const errorMsg = ref('')
 const allBookings = ref([])
 const activeStatusFilter = ref('all')
 const searchQuery = ref('')
+const sortOption = ref('latest')
 const selectedBooking = ref(null)
 
-const fetchBookings = async () => {
+const pagination = reactive({
+  current_page: 1,
+  last_page: 1,
+  total: 0,
+  from: 0,
+  to: 0,
+  per_page: 6,
+})
+
+const counts = ref({
+  all: 0,
+  menunggu: 0,
+  aktif: 0,
+  riwayat: 0,
+})
+
+const fetchBookings = async (page = null) => {
+  if (page) {
+    pagination.current_page = page
+  }
   loading.value = true
   errorMsg.value = ''
   try {
-    const res = await api.get('/bookings')
+    const params = {
+      page: pagination.current_page,
+      per_page: pagination.per_page,
+      sort: sortOption.value,
+    }
+    if (activeStatusFilter.value !== 'all') {
+      params.status = activeStatusFilter.value
+    }
+    if (searchQuery.value) {
+      params.q = searchQuery.value
+    }
+
+    const res = await api.get('/bookings', { params })
     allBookings.value = res.data?.data || []
+
+    if (res.data?.counts) {
+      counts.value = res.data.counts
+    } else {
+      counts.value = {
+        all: allBookings.value.length,
+        menunggu: allBookings.value.filter((b) => ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(b.status)).length,
+        aktif: allBookings.value.filter((b) => ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(b.status)).length,
+        riwayat: allBookings.value.filter((b) => ['selesai', 'ditolak', 'dibatalkan', 'kedaluwarsa'].includes(b.status)).length,
+      }
+    }
+
+    if (res.data?.meta) {
+      pagination.current_page = res.data.meta.current_page || 1
+      pagination.last_page = res.data.meta.last_page || 1
+      pagination.total = res.data.meta.total || 0
+      pagination.from = res.data.meta.from || 0
+      pagination.to = res.data.meta.to || 0
+      pagination.per_page = res.data.meta.per_page || pagination.per_page
+    } else {
+      pagination.total = allBookings.value.length
+      pagination.from = allBookings.value.length > 0 ? 1 : 0
+      pagination.to = allBookings.value.length
+      pagination.last_page = 1
+    }
   } catch (err) {
     errorMsg.value = 'Gagal memuat permintaan pemesanan.'
   } finally {
@@ -546,47 +672,64 @@ const fetchBookings = async () => {
   }
 }
 
+const onFilterChange = () => {
+  pagination.current_page = 1
+  fetchBookings()
+}
+
+const handlePageChange = (page) => {
+  pagination.current_page = page
+  fetchBookings()
+}
+
+const handlePerPageChange = (size) => {
+  pagination.per_page = size
+  pagination.current_page = 1
+  fetchBookings()
+}
+
+const setStatusFilter = (status) => {
+  activeStatusFilter.value = status
+  onFilterChange()
+}
+
+const toggleSort = (field) => {
+  if (field === 'id') {
+    sortOption.value = sortOption.value === 'latest' ? 'oldest' : 'latest'
+  } else if (field === 'checkin') {
+    sortOption.value = sortOption.value === 'checkin_asc' ? 'checkin_desc' : 'checkin_asc'
+  } else if (field === 'total') {
+    sortOption.value = sortOption.value === 'total_desc' ? 'total_asc' : 'total_desc'
+  }
+  onFilterChange()
+}
+
+let searchTimer = null
+const debounceSearch = () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    onFilterChange()
+  }, 350)
+}
+
 onMounted(() => {
   fetchBookings()
 })
 
-const filteredBookings = computed(() => {
-  return allBookings.value
-    .filter((b) => {
-      let matchStatus = false
-      if (activeStatusFilter.value === 'all') {
-        matchStatus = true
-      } else if (activeStatusFilter.value === 'menunggu') {
-        matchStatus = ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(b.status)
-      } else if (activeStatusFilter.value === 'aktif') {
-        matchStatus = ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(b.status)
-      } else if (activeStatusFilter.value === 'riwayat') {
-        matchStatus = ['selesai', 'ditolak', 'dibatalkan', 'kedaluwarsa'].includes(b.status)
-      } else {
-        matchStatus = b.status === activeStatusFilter.value
-      }
-
-      const matchSearch =
-        !searchQuery.value ||
-        (b.user?.nama && b.user.nama.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
-        (b.kos?.nama && b.kos.nama.toLowerCase().includes(searchQuery.value.toLowerCase())) ||
-        (b.kamar?.nama_kamar && b.kamar.nama_kamar.toLowerCase().includes(searchQuery.value.toLowerCase()))
-
-      return matchStatus && matchSearch
-    })
-    .sort((a, b) => b.id - a.id)
+const countAll = computed(() => {
+  return counts.value.all || allBookings.value.length
 })
 
 const countMenunggu = computed(() => {
-  return allBookings.value.filter((b) => ['menunggu', 'dp_dibayar', 'menunggu_pembayaran_dp'].includes(b.status)).length
+  return counts.value.menunggu || 0
 })
 
 const countAktif = computed(() => {
-  return allBookings.value.filter((b) => ['disetujui', 'siap_serah_terima', 'aktif', 'diterima'].includes(b.status)).length
+  return counts.value.aktif || 0
 })
 
 const countRiwayat = computed(() => {
-  return allBookings.value.filter((b) => ['selesai', 'ditolak', 'dibatalkan', 'kedaluwarsa'].includes(b.status)).length
+  return counts.value.riwayat || 0
 })
 
 const formatBookingStatus = (status, metodeTransaksi = 'manual') => {

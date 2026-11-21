@@ -62,12 +62,15 @@ class AdminKosController extends Controller
             'harga_asc' => $query->orderBy('harga', 'asc'),
             'harga_desc' => $query->orderBy('harga', 'desc'),
             'kamar_banyak' => $query->orderByDesc('kamar_count'),
+            'kamar_sedikit' => $query->orderBy('kamar_count', 'asc'),
             'nama_asc' => $query->orderBy('nama', 'asc'),
+            'nama_desc' => $query->orderBy('nama', 'desc'),
+            'oldest' => $query->oldest('id'),
             'latest' => $query->latest('id'),
-            default => $query->orderBy('id', 'asc'),
+            default => $query->latest('id'),
         };
 
-        $perPage = min(max((int) $request->input('per_page', 20), 1), 100);
+        $perPage = min(max((int) $request->input('per_page', 10), 1), 100);
         $kosList = $query->paginate($perPage);
 
         return KosResource::collection($kosList);
